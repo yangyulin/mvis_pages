@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<link rel="stylesheet" href="jacob.css" type="text/css" />
+<link rel="stylesheet" href="example.css" type="text/css" />
+<title>jemdoc &ndash; example page</title>
+</head>
+<body>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-2725246-3']);
+_gaq.push(['_trackPageview']);
+(function() {
+ var ga = document.createElement('script'); ga.type =
+ 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+   : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0];
+ s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">jemdoc</div>
+<div class="menu-item"><a href="index.html">home</a></div>
+<div class="menu-item"><a href="download.html">download</a></div>
+<div class="menu-item"><a href="revision.html">version/bug&nbsp;info</a></div>
+<div class="menu-item"><a href="contact.html">contact</a></div>
+<div class="menu-category">user's guide</div>
+<div class="menu-item"><a href="using.html">running&nbsp;jemdoc</a></div>
+<div class="menu-item"><a href="example.html" class="current">example&nbsp;page</a></div>
+<div class="menu-item"><a href="cheatsheet.html">cheat&nbsp;sheet</a></div>
+<div class="menu-item"><a href="extra.html">extra&nbsp;syntax</a></div>
+<div class="menu-category">configuration</div>
+<div class="menu-item"><a href="htmlchanges.html">html&nbsp;changes</a></div>
+<div class="menu-item"><a href="menu.html">adding&nbsp;a&nbsp;menu</a></div>
+<div class="menu-item"><a href="modelines.html">modelines</a></div>
+<div class="menu-category">goodies</div>
+<div class="menu-item"><a href="stuff.html">vim,&nbsp;make</a></div>
+<div class="menu-item"><a href="latex.html">latex&nbsp;equations</a></div>
+<div class="menu-item"><a href="tables.html">tables</a></div>
+</td>
+<td id="layout-content">
+<div id="toptitle">
+<h1>jemdoc &ndash; example page</h1>
+</div>
+<div class="infoblock">
+<div class="blockcontent">
+<p>This page shows example jemdoc source and output side by side. (The spacing of
+the &lsquo;page&rsquo; on the left is consequently incorrect.)
+</p>
+</div></div>
+<h1>jemdoc &ndash; example page</h1>
+<p><a href="http://stanford.edu/~jacobm/" target=&ldquo;blank&rdquo;>Jacob Mattingley</a>
+(<a href="mailto:jacobm@stanford.edu" target=&ldquo;blank&rdquo;>jacobm@stanford.edu</a>)
+</p>
+<p>If the first line of the file starts with <tt># jemdoc</tt>, special functions like
+<a href="menu.html" target=&ldquo;blank&rdquo;>menus</a> will be used.
+</p>
+<h2>Example</h2>
+<p>Here are some <b>text</b> <i>features</i>. I could <a href="http://cvxmod.net/" target=&ldquo;blank&rdquo;>link somewhere</a> or
+insert a raw link to another page like <a href="download.html" target=&ldquo;blank&rdquo;>download.html</a>.  I could use
+<tt>monospace</tt>, too.
+</p>
+<p>I could write special characters like
+h
+(\) in front of those characters.  Or
+automatically detect an
+<a href="mailto:jacobm@stanford.edu" target=&ldquo;blank&rdquo;>email address</a>.
+</p>
+<div class="infoblock">
+<div class="blockcontent">
+<p>Save the file as <tt>index.jemdoc</tt>, say, and simply
+call <tt>jemdoc index</tt> (after <a href="download.html" target=&ldquo;blank&rdquo;>downloading jemdoc</a>, of course).
+</p>
+</div></div>
+<h2>Next bit, next heading level two</h2>
+<h3>Getting into level three now</h3>
+<p>Why not use a list
+</p>
+<ul>
+<li><p>to explain the way you do lists?
+</p>
+</li>
+<li><p>to demonstrate how a line<br />
+break might work?
+</p>
+</li>
+</ul>
+<p>Or perhaps a
+</p>
+<ol>
+<li><p>Multilevel
+</p>
+<ol>
+<li><p>Numbered list
+</p>
+</li>
+<li><p>Is more
+</p>
+</li></ol>
+</li>
+<li><p>Useful?
+</p>
+</li>
+</ol>
+<dl>
+<dt>Definition</dt>
+<dd><p>lists, especially when there are
+many definitions
+</p></dd>
+<dt>Can be useful</dt>
+<dd><p>for explaining things
+</p></dd>
+</dl>
+<h2>Finally, a few more blocks</h2>
+<p>This &lsquo;section&rsquo; features &ldquo;smart quotes&rdquo;.
+</p>
+<div class="infoblock">
+<div class="blocktitle">Simple block</div>
+<div class="blockcontent">
+<p>This is a simple text block, with a title. Notice how the previous line has only
+one set of braces ({}).
+</p>
+</div></div>
+<div class="codeblock">
+<div class="blocktitle">Interactive Python listing</div>
+<div class="blockcontent"><pre>
+<span class="pycommand">&gt;&gt;&gt; print 'Interactive Python code.'</span>
+'Interactive Python code.'
+</pre></div></div>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+Plain code block with no title.
+</pre></div></div>
+<p>You might need 2&ndash;3 different-sized dashes&#8201;&mdash;&#8201;they can be useful. Now we're done!
+</p>
+<div id="footer">
+<div id="footer-text">
+Page generated 2021-12-22 17:31:49 PST, by <a href="https://github.com/wsshin/jemdoc_mathjax" target="blank">jemdoc+MathJax</a>.
+</div>
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>

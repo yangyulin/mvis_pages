@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<link rel="stylesheet" href="jacob.css" type="text/css" />
+<title>jemdoc &ndash; cheatsheet</title>
+</head>
+<body>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-2725246-3']);
+_gaq.push(['_trackPageview']);
+(function() {
+ var ga = document.createElement('script'); ga.type =
+ 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+   : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0];
+ s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">jemdoc</div>
+<div class="menu-item"><a href="index.html">home</a></div>
+<div class="menu-item"><a href="download.html">download</a></div>
+<div class="menu-item"><a href="revision.html">version/bug&nbsp;info</a></div>
+<div class="menu-item"><a href="contact.html">contact</a></div>
+<div class="menu-category">user's guide</div>
+<div class="menu-item"><a href="using.html">running&nbsp;jemdoc</a></div>
+<div class="menu-item"><a href="example.html">example&nbsp;page</a></div>
+<div class="menu-item"><a href="cheatsheet.html" class="current">cheat&nbsp;sheet</a></div>
+<div class="menu-item"><a href="extra.html">extra&nbsp;syntax</a></div>
+<div class="menu-category">configuration</div>
+<div class="menu-item"><a href="htmlchanges.html">html&nbsp;changes</a></div>
+<div class="menu-item"><a href="menu.html">adding&nbsp;a&nbsp;menu</a></div>
+<div class="menu-item"><a href="modelines.html">modelines</a></div>
+<div class="menu-category">goodies</div>
+<div class="menu-item"><a href="stuff.html">vim,&nbsp;make</a></div>
+<div class="menu-item"><a href="latex.html">latex&nbsp;equations</a></div>
+<div class="menu-item"><a href="tables.html">tables</a></div>
+</td>
+<td id="layout-content">
+<div id="toptitle">
+<h1>jemdoc &ndash; cheatsheet</h1>
+</div>
+<h2>Basic formatting</h2>
+<ul>
+<li><p><i>/italics/</i>
+</p>
+</li>
+<li><p><b>*bold*</b>
+</p>
+</li>
+<li><p><tt>+monospace+</tt>
+</p>
+</li>
+<li><p><tt>-</tt> is a hyphen (-)
+</p>
+</li>
+<li><p><tt>--</tt> is an en-dash (&ndash;)
+</p>
+</li>
+<li><p><tt>---</tt> is an em-dash (&#8201;&mdash;&#8201;)
+</p>
+</li>
+<li><p><tt>...</tt> is an ellipsis (&hellip;)
+</p>
+</li>
+<li><p><tt>~</tt> is a non-breaking space (&nbsp;)
+</p>
+</li>
+<li><p><tt>#</tt> begins a comment, for the remainder of the line
+</p>
+</li>
+<li><p><tt>\C</tt> is &copy;
+</p>
+</li>
+<li><p><tt>\R</tt> is &reg;
+</p>
+</li>
+<li><p><tt>\M</tt> is &middot;
+</p>
+</li>
+<li><p>&lsquo;singly quoted text&rsquo; is written <tt>`singly quoted text'</tt>
+</p>
+</li>
+<li><p>&ldquo;doubly quoted text&rdquo; is written <tt>"doubly quoted text"</tt>
+</p>
+</li>
+<li><p>jemdoc's apostrophes are converted automatically from <tt>jemdoc's</tt> input
+</p>
+</li>
+<li><p>the sequence <tt>\n</tt> <br /> forces a manual line break
+</p>
+</li>
+<li><p>paragraphs are separated by blank lines
+</p>
+</li>
+<li><p><tt>$inline LaTeX equation$</tt>
+</p>
+</li>
+<li><p><tt>\( LaTeX equation on its own line \)</tt>
+</p>
+</li>
+<li><p><tt>#</tt>s (and only <tt>#</tt>s) must be quoted in URLs
+</p>
+</li>
+</ul>
+<h2>Blocks</h2>
+<div class="codeblock">
+<div class="blocktitle">Code block syntax</div>
+<div class="blockcontent"><pre>
+~~~
+{Optionally empty title}{Optionally empty highlight mode}
+Code block with monospaced text.
+~~~
+</pre></div></div>
+<div class="infoblock">
+<div class="blocktitle">Information block</div>
+<div class="blockcontent">
+<p>Omit the second pair of braces in the first line of the block (or omit the whole
+first line altogether if you don't want a title) and you will get an
+<i>information block</i>. All the usual conventions apply in here.
+</p>
+</div></div>
+<h2>Headings and lists</h2>
+<p>Headings are defined by starting a line with <tt>=</tt>.
+</p>
+<ul>
+<li><p><tt>= Heading level 1</tt>
+</p>
+</li>
+<li><p><tt>== Heading level 2</tt>, <i>etc.</i>
+</p>
+</li>
+</ul>
+<p>Lists are defined with <tt>-</tt> for bulleted lists, <tt>.</tt> for numbered lists and <tt>:</tt>
+for lists of definitions. Here is some code and the resulting list:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+- Bullet level one
+    -- Bullet level two
+
+. Number level one
+    .. Number level two
+    .. Number level two (again)
+
+: {jemdoc} light markup
+: {asciidoc} a great alternative, but more complicated
+</pre></div></div>
+<div class="infoblock">
+<div class="blockcontent">
+<ul>
+<li><p>Bullet level one
+</p>
+<ul>
+<li><p>Bullet level two
+</p>
+</li>
+</ul>
+
+</li>
+</ul>
+<ol>
+<li><p>Number level one
+</p>
+<ol>
+<li><p>Number level two
+</p>
+</li>
+<li><p>Number level two (again)
+</p>
+</li>
+</ol>
+
+</li>
+</ol>
+<dl>
+<dt>jemdoc</dt>
+<dd><p>light markup
+</p></dd>
+<dt>asciidoc</dt>
+<dd><p>a great alternative, but more complicated
+</p></dd>
+</dl>
+</div></div>
+<h2>Preventing matches</h2>
+<ul>
+<li><p>a literal backslash (\) is written <tt>\\\\</tt> 
+</p>
+</li>
+<li><p>the literal characters /, *, + and ~ and # are written <tt>\/</tt>, <tt>\*</tt>,
+<tt>\+</tt>, <tt>\~</tt> and <tt>\#</tt> to avoid the above formatting
+</p>
+</li>
+<li><p><tt>\...</tt> avoids an ellipsis
+</p>
+</li>
+<li><p><tt>-\-</tt> avoids an en-dash
+</p>
+</li>
+<li><p><tt>-\-\-</tt> avoids an em-dash
+</p>
+</li>
+<li><p><tt>\`</tt> gives a back-tick (`)
+</p>
+</li>
+<li><p><tt>\'</tt> gives an ordinary single quotation mark (')
+</p>
+</li>
+<li><p><tt>\"</tt> gives an ordinary double quotation mark (")
+</p>
+</li>
+</ul>
+<h2>Other stuff</h2>
+<ul>
+<li><p><tt>{{html text}}</tt> will insert <tt>html text</tt> directly into the output document
+without performing any substitutions. (This is for inline escaping; use
+<a href="extra.html" target=&ldquo;blank&rdquo;>raw blocks</a> for larger amounts of html.)
+</p>
+</li>
+<li><p><tt>%quoted tt%</tt> is an alias for <tt>+{{quoted tt}}+</tt>. It's not quite as
+robust, so use <tt>+{{plus signs with double brace blocks}}+</tt> if you run into
+problems with some characters.
+</p>
+</li>
+<li><p><tt>{\{text}\}</tt> <i>will</i> perform replacements and insert {{text}}.
+</p>
+</li>
+</ul>
+<p>This page is not exhaustive.
+</p>
+<div id="footer">
+<div id="footer-text">
+Page generated 2021-12-22 17:31:49 PST, by <a href="https://github.com/wsshin/jemdoc_mathjax" target="blank">jemdoc+MathJax</a>.
+</div>
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<link rel="stylesheet" href="jacob.css" type="text/css" />
+<title>jemdoc &ndash; vim, make</title>
+</head>
+<body>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-2725246-3']);
+_gaq.push(['_trackPageview']);
+(function() {
+ var ga = document.createElement('script'); ga.type =
+ 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+   : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0];
+ s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">jemdoc</div>
+<div class="menu-item"><a href="index.html">home</a></div>
+<div class="menu-item"><a href="download.html">download</a></div>
+<div class="menu-item"><a href="revision.html">version/bug&nbsp;info</a></div>
+<div class="menu-item"><a href="contact.html">contact</a></div>
+<div class="menu-category">user's guide</div>
+<div class="menu-item"><a href="using.html">running&nbsp;jemdoc</a></div>
+<div class="menu-item"><a href="example.html">example&nbsp;page</a></div>
+<div class="menu-item"><a href="cheatsheet.html">cheat&nbsp;sheet</a></div>
+<div class="menu-item"><a href="extra.html">extra&nbsp;syntax</a></div>
+<div class="menu-category">configuration</div>
+<div class="menu-item"><a href="htmlchanges.html">html&nbsp;changes</a></div>
+<div class="menu-item"><a href="menu.html">adding&nbsp;a&nbsp;menu</a></div>
+<div class="menu-item"><a href="modelines.html">modelines</a></div>
+<div class="menu-category">goodies</div>
+<div class="menu-item"><a href="stuff.html" class="current">vim,&nbsp;make</a></div>
+<div class="menu-item"><a href="latex.html">latex&nbsp;equations</a></div>
+<div class="menu-item"><a href="tables.html">tables</a></div>
+</td>
+<td id="layout-content">
+<div id="toptitle">
+<h1>jemdoc &ndash; vim, make</h1>
+</div>
+<h2>Vim syntax highlighting</h2>
+<p>Here is a vim syntax file <a href="dist/jemdoc.vim"
+onclick="javascript:urchinTracker('/downloads/jemdoc.vim');">jemdoc.vim</a>.
+You should download it to
+<tt>~/.vim/syntax/</tt>. You may also need to add the following lines in your
+<tt>~/.vimrc</tt>:
+</p>
+<div class="codeblock">
+<div class="blocktitle">Additional <tt>~/.vimrc</tt> lines</div>
+<div class="blockcontent"><pre>
+filetype plugin on
+augroup filetypedetect
+	au! BufNewFile,BufRead *.jemdoc setf jemdoc
+augroup END
+
+" Last line is for proper wrapping of jemdoc lists, etc.
+autocmd Filetype jemdoc setlocal comments=:#,fb:-,fb:.,fb:--,fb:..,fb:\:
+</pre></div></div>
+<h2>Makefile</h2>
+<p>Here's a small example of a <a href="dist/Makefile"
+onclick="javascript:urchinTracker('/downloads/Makefile');">Makefile</a>.
+A listing of it follows.
+</p>
+<p>This file would be used as follows:
+</p>
+<ul>
+<li><p>Edit <tt>index.jemdoc</tt> and <tt>otherpage.jemdoc</tt> at will.
+</p>
+</li>
+<li><p>Type <tt>make</tt> in the same directory, and files <tt>html/index.html</tt> and
+<tt>html/otherpage.html</tt> will be updated as necessary.
+</p>
+</li>
+<li><p>Type <tt>make update</tt> and your files will be copied to the server.
+</p>
+</li>
+<li><p>Type <tt>make clean</tt> and old <tt>html</tt> files in <tt>html/</tt> will be removed.
+</p>
+</li>
+</ul>
+<p>Rinse and repeat.
+</p>
+<div class="codeblock">
+<div class="blocktitle">Makefile example</div>
+<div class="blockcontent"><pre>
+DOCS=index otherpage
+
+HDOCS=$(addsuffix .html, $(DOCS))
+PHDOCS=$(addprefix html/, $(HDOCS))
+
+.PHONY : docs
+docs : $(PHDOCS)
+
+.PHONY : update
+update : $(PHDOCS)
+	@echo -n 'Copying to server...'
+	# insert code for copying to server here.
+	@echo ' done.'
+
+html/%.html : %.jemdoc MENU
+	jemdoc -o $@ $&lt;
+
+.PHONY : clean
+clean :
+	-rm -f html/*.html
+</pre></div></div>
+<div id="footer">
+<div id="footer-text">
+Page generated 2021-12-22 17:31:49 PST, by <a href="https://github.com/wsshin/jemdoc_mathjax" target="blank">jemdoc+MathJax</a>.
+</div>
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>

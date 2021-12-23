@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<link rel="stylesheet" href="jacob.css" type="text/css" />
+<link rel="stylesheet" href="table.css" type="text/css" />
+<title>jemdoc &ndash; tables</title>
+</head>
+<body>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-2725246-3']);
+_gaq.push(['_trackPageview']);
+(function() {
+ var ga = document.createElement('script'); ga.type =
+ 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+   : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0];
+ s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">jemdoc</div>
+<div class="menu-item"><a href="index.html">home</a></div>
+<div class="menu-item"><a href="download.html">download</a></div>
+<div class="menu-item"><a href="revision.html">version/bug&nbsp;info</a></div>
+<div class="menu-item"><a href="contact.html">contact</a></div>
+<div class="menu-category">user's guide</div>
+<div class="menu-item"><a href="using.html">running&nbsp;jemdoc</a></div>
+<div class="menu-item"><a href="example.html">example&nbsp;page</a></div>
+<div class="menu-item"><a href="cheatsheet.html">cheat&nbsp;sheet</a></div>
+<div class="menu-item"><a href="extra.html">extra&nbsp;syntax</a></div>
+<div class="menu-category">configuration</div>
+<div class="menu-item"><a href="htmlchanges.html">html&nbsp;changes</a></div>
+<div class="menu-item"><a href="menu.html">adding&nbsp;a&nbsp;menu</a></div>
+<div class="menu-item"><a href="modelines.html">modelines</a></div>
+<div class="menu-category">goodies</div>
+<div class="menu-item"><a href="stuff.html">vim,&nbsp;make</a></div>
+<div class="menu-item"><a href="latex.html">latex&nbsp;equations</a></div>
+<div class="menu-item"><a href="tables.html" class="current">tables</a></div>
+</td>
+<td id="layout-content">
+<div id="toptitle">
+<h1>jemdoc &ndash; tables</h1>
+</div>
+<p>jemdoc includes preliminary support for tables.
+</p>
+<div class="codeblock">
+<div class="blocktitle">Table syntax</div>
+<div class="blockcontent"><pre>
+~~~
+{}{table}{TABLENAME}
+first entry  | another entry ||
+as many rows | as you like   ||
+bottom row   | last entry
+~~~
+</pre></div></div>
+<p><tt>TABLENAME</tt> should either be replaced with a name&#8201;&mdash;&#8201;which becomes the table's
+<tt>css</tt> <tt>id</tt>&#8201;&mdash;&#8201;or be omitted.
+</p>
+<h2>Notes</h2>
+<ul>
+<li><p>There is no need to line up the <tt>|</tt> symbols. Extra whitespace is ignored.
+</p>
+</li>
+<li><p>The last row does not need a terminating <tt>||</tt>.
+</p>
+</li>
+<li><p>Individual tables can be customised by replacing <tt>TABLENAME</tt> with a unique
+name, and using custom css. For example, within
+a css file, <tt>#countries { background: gray; }</tt> will make the background of
+the <tt>countries</tt> table gray.
+</p>
+</li>
+<li><p>Rows in a table are numbered sequentially for easy formatting with css. For
+example, to make the entries in the first row of a table called <tt>countries</tt>
+bold, use <tt>#countries tr.r1 { font-weight: bold; }</tt>.
+</p>
+</li>
+</ul>
+<h2>Example</h2>
+<table id="countries">
+<tr class="r1"><td class="c1">country </td><td class="c2"> population </td><td class="c3"> people per square km </td></tr>
+<tr class="r2"><td class="c1">Canada </td><td class="c2"> 33 million </td><td class="c3"> 3.2 </td></tr>
+<tr class="r3"><td class="c1">
+<span lang="zh-Hans">中华人民共和国</span><br /> </td><td class="c2"> 1300 million </td><td class="c2"> 140 </td></tr>
+<tr class="r5"><td class="c1">Kingdom of Denmark </td><td class="c2"> 5.5 million </td><td class="c3"> 130 </td></tr>
+<tr class="r6"><td class="c1">New Zealand </td><td class="c2"> 4.3 million </td><td class="c3"> 15 </td></tr>
+<tr class="r7"><td class="c1">United States of America </td><td class="c2"> 300 million </td><td class="c3"> 31
+</td></tr></table>
+<div id="footer">
+<div id="footer-text">
+Page generated 2021-12-22 17:31:49 PST, by <a href="https://github.com/wsshin/jemdoc_mathjax" target="blank">jemdoc+MathJax</a>.
+(<a href="tables.jemdoc">source</a>)
+</div>
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>

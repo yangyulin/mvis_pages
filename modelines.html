@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<link rel="stylesheet" href="jacob.css" type="text/css" />
+<title>jemdoc &ndash; modelines</title>
+</head>
+<body>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-2725246-3']);
+_gaq.push(['_trackPageview']);
+(function() {
+ var ga = document.createElement('script'); ga.type =
+ 'text/javascript'; ga.async = true;
+ ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+   : 'http://www') + '.google-analytics.com/ga.js';
+ var s = document.getElementsByTagName('script')[0];
+ s.parentNode.insertBefore(ga, s);
+ })();
+</script>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+    var pageTracker = _gat._getTracker("UA-2725246-3");
+    pageTracker._trackPageview();
+} catch(err) {}</script>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">jemdoc</div>
+<div class="menu-item"><a href="index.html">home</a></div>
+<div class="menu-item"><a href="download.html">download</a></div>
+<div class="menu-item"><a href="revision.html">version/bug&nbsp;info</a></div>
+<div class="menu-item"><a href="contact.html">contact</a></div>
+<div class="menu-category">user's guide</div>
+<div class="menu-item"><a href="using.html">running&nbsp;jemdoc</a></div>
+<div class="menu-item"><a href="example.html">example&nbsp;page</a></div>
+<div class="menu-item"><a href="cheatsheet.html">cheat&nbsp;sheet</a></div>
+<div class="menu-item"><a href="extra.html">extra&nbsp;syntax</a></div>
+<div class="menu-category">configuration</div>
+<div class="menu-item"><a href="htmlchanges.html">html&nbsp;changes</a></div>
+<div class="menu-item"><a href="menu.html">adding&nbsp;a&nbsp;menu</a></div>
+<div class="menu-item"><a href="modelines.html" class="current">modelines</a></div>
+<div class="menu-category">goodies</div>
+<div class="menu-item"><a href="stuff.html">vim,&nbsp;make</a></div>
+<div class="menu-item"><a href="latex.html">latex&nbsp;equations</a></div>
+<div class="menu-item"><a href="tables.html">tables</a></div>
+</td>
+<td id="layout-content">
+<div id="toptitle">
+<h1>jemdoc &ndash; modelines</h1>
+</div>
+<p>jemdoc includes a mechanism for specifying options inside a source file. It is
+called a <i>modeline</i>, after the same concept in <a href="http://www.vim.org" target=&ldquo;blank&rdquo;>vim</a>.  To use
+a modeline, start your jemdoc source file (on the first line) with the exact
+string <tt>#&nbsp;jemdoc:</tt>. Follow this string with one or more <i>modeline options</i>,
+separated with commas (and any amount of white space).
+</p>
+<p>Multiple modelines can be included if they are all at the beginning of the file,
+and start with the same string. The modeline can be omitted altogether.
+</p>
+<h2>Modeline options</h2>
+<h3>General</h3>
+<ul>
+<li><p><tt>menu{MENUFILENAME}{CURRENTFILENAME}</tt><br />
+Place a <a href="menu.html" target=&ldquo;blank&rdquo;>menu</a> at the left of the page.
+</p>
+</li>
+<li><p><tt>nodefaultcss</tt><br />
+Clear the list of CSS stylesheets included by the page.
+</p>
+</li>
+<li><p><tt>addcss{CSSSHEET}</tt><br />
+Explicitly include an additional custom CSS stylesheet.
+</p>
+</li>
+<li><p><tt>addjs{scriptname}</tt><br />
+Explicitly include the javascript file <tt>scriptname.js</tt>.
+</p>
+</li>
+<li><p><tt>fwtitle</tt><br />
+Makes the page title <i>full width</i> so the menu <i>and</i> the body lie underneath
+the title.
+</p>
+</li>
+<li><p><tt>title{NEW TITLE}</tt><br />
+Manually sets the titlebar text to <tt>NEW TITLE</tt>.
+</p>
+</li>
+</ul>
+<h3>Extras</h3>
+<ul>
+<li><p><tt>analytics{ANALYTICS KEY}</tt><br />
+Adds Google Analytics support. The key is typically in the form
+<tt>UA-0000000-0</tt>. Sign up for Google Analytics
+<a href="http://www.google.com/analytics/" target=&ldquo;blank&rdquo;>here</a>.
+</p>
+</li>
+</ul>
+<h3>Footers</h3>
+<ul>
+<li><p><tt>notime</tt><br />
+Withhold the time from the &lsquo;Page generated&rsquo; footer.
+</p>
+</li>
+<li><p><tt>nodate</tt><br />
+Withhold the date and the time from the &lsquo;Page generated&rsquo; footer.
+</p>
+</li>
+<li><p><tt>showsource</tt><br />
+Include a link, in the footer, to the jemdoc source.
+</p>
+</li>
+<li><p><tt>nofooter</tt><br />
+Withhold the footer altogether (overrides the above options).
+</p>
+</li>
+</ul>
+<h3>Equations</h3>
+<ul>
+<li><p><tt>noeqs</tt><br />
+Disable LaTeX equation support.
+</p>
+</li>
+<li><p><tt>eqsize{SIZE}</tt><br />
+Adjust the size of the equations (default <tt>130</tt>).
+</p>
+</li>
+<li><p><tt>eqdir{EQDIR}</tt><br />
+Adjust the equation directory (default <tt>eqs</tt>).
+</p>
+</li>
+<li><p><tt>noeqcache</tt><br />
+Disable equation caching.
+</p>
+</li>
+<li><p><tt>addpackage{LATEX<u>PACKAGE</u>NAME}</tt><br />
+Includes support for <tt>LATEX<u>PACKAGE</u>NAME</tt> when compiling the equations.
+</p>
+</li>
+</ul>
+<h2>Examples</h2>
+<div class="codeblock">
+<div class="blocktitle">This page</div>
+<div class="blockcontent"><pre>
+# jemdoc: menu{MENU}{modelines.html}, showsource
+</pre></div></div>
+<div class="codeblock">
+<div class="blocktitle">Use a different stylesheet altogether</div>
+<div class="blockcontent"><pre>
+# jemdoc: nodefaultcss, addcss{custom.css}
+</pre></div></div>
+<div class="codeblock">
+<div class="blocktitle">Combine various options</div>
+<div class="blockcontent"><pre>
+# jemdoc: nodefaultcss, addcss{custom.css}{another.css}
+# jemdoc: showsource, addcss{yetanother.css}
+</pre></div></div>
+<div id="footer">
+<div id="footer-text">
+Page generated 2021-12-22 17:31:49 PST, by <a href="https://github.com/wsshin/jemdoc_mathjax" target="blank">jemdoc+MathJax</a>.
+(<a href="modelines.jemdoc">source</a>)
+</div>
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>
