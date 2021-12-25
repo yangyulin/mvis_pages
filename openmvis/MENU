@@ -1,5 +1,29 @@
-Additional Features
-	MathJax				[mathjax.html]
-	Underscore			[underscore.html]
-	Link				[link.html]
-	Open in New Tab		[\http://www.google.com]
+OpenMVIS
+	Home				[index.html]
+	Compilation			[Compilation.html]
+	Quick Start			[Quick_start.html]
+	Contributors		[Contributors.html]
+
+Calibration
+	OverView			[OverView.html]
+	Procedures			[Procedures.html]
+	Calib Target			[Calib_target.html]
+	Initialization			[Initialization.html]
+	Refinement			[Refinement.html]
+	Results				[Results.html]	
+	Analysis			[Analysis.html]
+
+MVIS Datasets
+	Sensors				[Sensors.html]
+	4IMUs-3Cams			[4IMUs_3Cams.html]
+	4IMUs-4Cams			[4IMUs_4Cams.html]
+
+MVIS Math	
+	Formulation			[Formulation.html]
+	Base IMU Calib			[Base_imu_calib.html]
+	Aux IMU Calib			[Aux_imu_calib.html]
+	Camera Calib			[camera_calib.html]
+	Observability			[Observablility.html]
+	Degenerate			[Degenerate.html]
+								
+# vim: et

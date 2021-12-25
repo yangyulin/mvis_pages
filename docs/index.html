@@ -5,22 +5,52 @@
 <meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <link rel="stylesheet" href="jemdoc.css" type="text/css" />
-<title>Underscore Example</title>
+<title>Open MVIS</title>
+<!-- MathJax -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<!-- End MathJax -->
 </head>
 <body>
 <table summary="Table for page layout." id="tlayout">
 <tr valign="top">
 <td id="layout-menu">
-<div class="menu-category">Additional Features</div>
-<div class="menu-item"><a href="mathjax.html">MathJax</a></div>
-<div class="menu-item"><a href="underscore.html">Underscore</a></div>
-<div class="menu-item"><a href="link.html" class="current">Link</a></div>
-<div class="menu-item"><a href="http://www.google.com" target="blank">Open&nbsp;in&nbsp;New&nbsp;Tab</a></div>
+<div class="menu-category">OpenMVIS</div>
+<div class="menu-item"><a href="index.html" class="current">Home</a></div>
+<div class="menu-item"><a href="Compilation.html">Compilation</a></div>
+<div class="menu-item"><a href="Quick_start.html">Quick&nbsp;Start</a></div>
+<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
+<div class="menu-category">Calibration</div>
+<div class="menu-item"><a href="OverView.html">OverView</a></div>
+<div class="menu-item"><a href="Procedures.html">Procedures</a></div>
+<div class="menu-item"><a href="Calib_target.html">Calib&nbsp;Target</a></div>
+<div class="menu-item"><a href="Initialization.html">Initialization</a></div>
+<div class="menu-item"><a href="Refinement.html">Refinement</a></div>
+<div class="menu-item"><a href="Results.html">Results</a></div>
+<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
+<div class="menu-category">MVIS Datasets</div>
+<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="4IMUs_3Cams.html">4IMUs-3Cams</a></div>
+<div class="menu-item"><a href="4IMUs_4Cams.html">4IMUs-4Cams</a></div>
+<div class="menu-category">MVIS Math</div>
+<div class="menu-item"><a href="Formulation.html">Formulation</a></div>
+<div class="menu-item"><a href="Base_imu_calib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Aux_imu_calib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="camera_calib.html">Camera&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Observablility.html">Observability</a></div>
+<div class="menu-item"><a href="Degenerate.html">Degenerate</a></div>
 </td>
 <td id="layout-content">
 <div id="toptitle">
-<h1>Underscore Example</h1>
+<h1>Open MVIS</h1>
 </div>
+<p>Open MVIS is designed for multi-visual-inertial sensor calibration.
+</p>
 <p>You can control the behavior of a link: by default the link opens in a new web broswer tab, but by putting a slash (<tt>/</tt>) character at the beginning of the link address you can make it open in the current web broswer tab.  
 </p>
 <p>For example, <a href="mathjax.html" target=&ldquo;blank&rdquo;>[mathjax.html]</a> opens in a new web broswer tab, but <a href="mathjax.html">[/mathjax.html]</a> opens in the current web browser tab.  The link opening in a new tab is useful for linking an external website (like <a href="http://www.google.com" target=&ldquo;blank&rdquo;>http://www.google.com</a>), whereas the link opening in the current tab is useful for liking your jemdoc page (such as the page linked as a jemdoc menu item on the left panel).
