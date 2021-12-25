@@ -7,8 +7,8 @@ OpenMVIS
 Calibration
 	OverView			[OverView.html]
 	Procedures			[Procedures.html]
-	Calib Target			[Calib_target.html]
-	Initialization			[Initialization.html]
+	Calib Target		[Calib_target.html]
+	Initialization		[Initialization.html]
 	Refinement			[Refinement.html]
 	Results				[Results.html]	
 	Analysis			[Analysis.html]
@@ -20,10 +20,10 @@ MVIS Datasets
 
 MVIS Math	
 	Formulation			[Formulation.html]
-	Base IMU Calib			[Base_imu_calib.html]
-	Aux IMU Calib			[Aux_imu_calib.html]
-	Camera Calib			[camera_calib.html]
-	Observability			[Observablility.html]
+	Base IMU Calib		[Base_imu_calib.html]
+	Aux IMU Calib		[Aux_imu_calib.html]
+	Camera Calib		[camera_calib.html]
+	Observability		[Observablility.html]
 	Degenerate			[Degenerate.html]
 								
-# vim: et
+	

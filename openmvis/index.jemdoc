@@ -1,15 +1,36 @@
 # jemdoc: menu{MENU}{index.html}, nofooter
-== Open MVIS
+
+== Multi-Visual-Inertial Sensor Calibration
 
 Open MVIS is designed for multi-visual-inertial sensor calibration.
 
+~~~
+{}{img_left}{fig/vi_rig.JPG}{VI-Rig}{300}
+Visula-Inertial (VI)-Rig (4 IMUs and 5 Cameras): \n
+- MicroStrain GX3-25
+- MicroStrain GX3-35
+- Xsens MTI-100
+- RealSense T265 IMU
+- FLIR BlackFly
+- RealSense T265 Left&Right Cameras
+- ELP Left&Right Rolling Shutter Cameras
+~~~
+
+This is designed to support the spatial-temporal and intrinsic calibration for multiple IMUs, Gyros, cameras. The main features of this repository are as following:
+
+- IMU intrinsic calibration (with kalibr and RPNG model)
+- Gyroscope intrinsic calibration (with Kalibr and RPNG model)
+- Camera intrinsic calibration refinement (with rad-tan/equi-dist model)
+- IMU-IMU spatial-temporal calibration (rotation, translation and timeoffset)
+- IMU-Gyro spatial-temporal calibration (rotation and timeoffset)
+- IMU-Cam spatial-temporal calibration (rotation, translation and timeoffset)
+- Rolling shutter readout time calibration (with first/middle/last row as image timestamp)
+- Evaluation scripts for calibration results
+- Open-sourced MVIS datasets
+- Support both [https://github.com/ethz-asl/kalibr/wiki/calibration-targets Kalibr April Board] and [https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html AuRco tags]
 
 
-
-
-
-You can control the behavior of a link: by default the link opens in a new web broswer tab, but by putting a slash (+\/+) character at the beginning of the link address you can make it open in the current web broswer tab.  
-
-For example, [mathjax.html \[mathjax.html\]] opens in a new web broswer tab, but [/mathjax.html \[\/mathjax.html\]] opens in the current web browser tab.  The link opening in a new tab is useful for linking an external website (like [http://www.google.com]), whereas the link opening in the current tab is useful for liking your jemdoc page (such as the page linked as a jemdoc menu item on the left panel).
-
-Unlike the link in the main text, a jemdoc menu item link on the left panel opens in the current tab by default, because you want to stay in the same tab while navigating menu items.  However, you can override this default behavior and make it open in a new tab by putting a backslash (+\\+) character in the beginning of the link of the menu item.  This is useful when putting an external website as a menu item.  See this usage in "Open in New Tab" menu item on the left panel, which is defined in MENU file.
+== Available resources:
+- Code:
+- Documents:
+- Datasets:
