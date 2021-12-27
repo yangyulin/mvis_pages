@@ -1,29 +1,27 @@
 OpenMVIS
 	Home				[index.html]
 	Compilation			[Compilation.html]
-	Quick Start			[Quick_start.html]
+	Quick Start			[QuickStart.html]
 	Contributors		[Contributors.html]
 
 Calibration
 	OverView			[OverView.html]
 	Procedures			[Procedures.html]
-	Calib Target		[Calib_target.html]
-	Initialization		[Initialization.html]
 	Refinement			[Refinement.html]
 	Results				[Results.html]	
-	Analysis			[Analysis.html]
 
 MVIS Datasets
 	Sensors				[Sensors.html]
-	4IMUs-3Cams			[4IMUs_3Cams.html]
-	4IMUs-4Cams			[4IMUs_4Cams.html]
+	4IMUs+3Cams			[4IMUs3Cams.html]
+	4IMUs+4Cams			[4IMUs4Cams.html]
+	Analysis			[Analysis.html]
 
 MVIS Math	
-	Formulation			[Formulation.html]
-	Base IMU Calib		[Base_imu_calib.html]
-	Aux IMU Calib		[Aux_imu_calib.html]
-	Camera Calib		[camera_calib.html]
+	Calib Graph			[CalibGraph.html]
+	Base IMU Calib		[BaseImuCalib.html]
+	Aux IMU Calib		[AuxImuCalib.html]
+	Camera Calib		[CameraCalib.html]
 	Observability		[Observablility.html]
-	Degenerate			[Degenerate.html]
+	Degeneracy			[Degeneracy.html]
 								
 	

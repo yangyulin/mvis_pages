@@ -1,0 +1,150 @@
+# jemdoc: menu{MENU}{Compilation.html}, nofooter
+
+== Dependencies
+
+~~~
+{[http://wiki.ros.org/ROS/Installation ROS Melodic/Noetic]}{}
+http://wiki.ros.org/ROS/Installation
+~~~
+
+~~~
+{[https://github.com/borglab/gtsam GTSAM 4]}{}
+https://github.com/borglab/gtsam
+~~~
+
+~~~
+{[https://github.com/opencv/opencv OpenCV 3 or 4]}{}
+https://github.com/opencv/opencv
+~~~
+
+~~~
+{[https://github.com/rpng/open_vins/tree/develop_v2.3 OpenVINS v2.3]}{}
+https://github.com/rpng/open_vins/tree/develop_v2.3
+~~~
+
+
+~~~
+{[https://github.com/rpng/apriltags-cpp apriltags-cpp] (see opencv4 branch if needed)}{}
+https://github.com/rpng/apriltags-cpp
+~~~
+
+
+
+== Installation
+
+Create your workspace
+
+~~~
+{}{}
+mkdir -p ./workspace/src
+cd workspace/src
+~~~
+
+
+OpenVINS project
+~~~
+{}{}
+git clone https://github.com/rpng/open_vins/
+cd open_vins/
+git checkout v2.3
+cd ..
+~~~
+
+OpenCV 3 or 4 from ROS.
+~~~
+{}{}
+sudo apt install ros-melodic-cv-bridge #18.04
+sudo apt install ros-noetic-cv-bridge #20.04
+~~~
+
++Optional+ OpenCV from source see [https://docs.openvins.com/gs-installing.html\#gs-install-opencv these] instructions.
+~~~
+{}{}
+git clone https://github.com/opencv/opencv/
+git clone https://github.com/opencv/opencv_contrib/
+mkdir opencv/build/
+cd opencv/build/
+cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
+make -j8
+sudo make install
+~~~
+
+AprilTag lib with ROS wrapper (see opencv4 branch if needed)
+~~~
+{}{}
+git clone https://github.com/rpng/apriltags-cpp.git
+~~~
+
+Building GTSAM Dependencies \n
+GTSAM is the only package you need to build the others (boost, eigen3) typically come on a linux-based OS.
+You can optionally install Intel TBB installed as this will allow for GTSAM multithreaded performance ([https://software.intel.com/en-us/articles/installing-intel-free-libs-and-python-apt-repo link]).
+You don't need this, but this will allow for faster optimization. \n
+
+~~~
+{}{}
+wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
+sudo sh -c 'echo deb https://apt.repos.intel.com/tbb all main > /etc/apt/sources.list.d/intel-tbb.list'
+sudo apt-get update
+sudo apt-get install intel-tbb-2020.0-088
+sudo apt-get install intel-mkl-2020.0-088
+~~~
+
+Building GTSAM \n
+Then we can [https://gtsam.org/get_started/ build] [https://gtsam.org/build/ GTSAM] as normal and install it globally on our system.
+Note that we use the system Eigen since we want to link with packages which also use that Eigen version.
+
+
+~~~
+{}{}
+sudo apt install libboost-all-dev libeigen3-dev libmetis-dev
+git clone https://github.com/borglab/gtsam
+mkdir gtsam/build/
+cd gtsam/build/
+cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF ..
+make -j6
+sudo make -j6 install
+echo 'export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' >> ~/.bashrc
+~~~
+
+
+Clone this project
+
+~~~
+{}{}
+git clone https://github.com/yangyulin/mvis.git
+~~~
+
+Build
+
+~~~
+{}{}
+catkin build
+~~~
+
+
+== Possible Errors and Solutions
+
+- Install the latest GTSAM version with the [https://github.com/rpng/vicon2gt\#building-gtsam-and-dependencies link].
+
+- If Eigen error can be solved by turning off the march=native. Which reference is [https://github.com/borglab/gtsam/issues/75\#issuecomment-502809431 here]
+  Go to the build directory
+~~
+{}{}
+ccmake ..
+GTSAM_BUILD_WITH_MARCH_NATIVE=OFF
+~~
+
+
+- Do not put the GTSAM lib within the src folder of the udel_calibration project
+
+- LZ4 error [https://github.com/ethz-asl/lidar_align/issues/16\#issuecomment-504348488 solution]
+
+- Computer freezes, build with less parallel threads:
+~~
+{}{}
+catkin build -j2
+~~
+

@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<title></title>
+<!-- MathJax -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<!-- End MathJax -->
+</head>
+<body>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">OpenMVIS</div>
+<div class="menu-item"><a href="index.html">Home</a></div>
+<div class="menu-item"><a href="Compilation.html">Compilation</a></div>
+<div class="menu-item"><a href="QuickStart.html" class="current">Quick&nbsp;Start</a></div>
+<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
+<div class="menu-category">Calibration</div>
+<div class="menu-item"><a href="OverView.html">OverView</a></div>
+<div class="menu-item"><a href="Procedures.html">Procedures</a></div>
+<div class="menu-item"><a href="Refinement.html">Refinement</a></div>
+<div class="menu-item"><a href="Results.html">Results</a></div>
+<div class="menu-category">MVIS Datasets</div>
+<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
+<div class="menu-item"><a href="4IMUs4Cams.html">4IMUs+4Cams</a></div>
+<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
+<div class="menu-category">MVIS Math</div>
+<div class="menu-item"><a href="Formulation.html">Calib&nbsp;Graph</a></div>
+<div class="menu-item"><a href="Base_imu_calib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Aux_imu_calib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="camera_calib.html">Camera&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Observablility.html">Observability</a></div>
+<div class="menu-item"><a href="Degenerate.html">Degeneracy</a></div>
+</td>
+<td id="layout-content">
+<h2>Test With Simulator</h2>
+<p>After compilation, you can quickly test the MVIS with simulation.
+</p>
+<table class="imgtable"><tr><td>
+<img src="fig/udel_calib_multi_sensor.png" alt="simulation" width="300px" />&nbsp;</td>
+<td align="left"><p>Simulation Environment <br />
+</p>
+<ul>
+<li><p>1 base IMU
+</p>
+</li>
+<li><p>2 auxiliary IMUs
+</p>
+</li>
+<li><p>1 auxiliary Gyro
+</p>
+</li>
+<li><p>2 rolling shutter cameras
+</p>
+</li>
+</ul>
+</td></tr></table>
+<p>Run the simulation with:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+source devel/setup.bash
+roslaunch mvis yulin_sim_multi_imu.launch
+</pre></div></div>
+<p>Note that you need to specify the <tt>OUTPUT_FOLDER</tt> for the results:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="dosave_state"        default="true" /&gt;
+&lt;arg name="path_state_est"      default="OUTPUT_FOLDER/state_est.txt" /&gt;
+&lt;arg name="path_state_std"      default="OUTPUT_FOLDER/state_std.txt" /&gt;
+&lt;arg name="path_state_gt"       default="OUTPUT_FOLDER/state_gt.txt" /&gt;
+&lt;arg name="dosave_calib"        default="true" /&gt;
+&lt;arg name="path_calib_est"      default="OUTPUT_FOLDER/$(arg dataset)_calib_results.txt" /&gt;
+</pre></div></div>
+<p>During the running, the rviz is recommended to check the estimated trajectory and map. Please use the display setup in:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+src/mvis/launch/display.rviz
+</pre></div></div>
+<p>Check the simulation results:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+rosrun mvis error_simulation   OUTPUT_FOLDER/state_est.txt OUTPUT_FOLDER/state_std.txt OUTPUT_FOLDER/state_gt.txt
+</pre></div></div>
+<p>You can also use the shell scripts:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+./src/mvis/paper_scripts/show_sim_single.sh
+</pre></div></div>
+<h2>Test With Real World Datasets</h2>
+<h3>1 Base IMU + 3 Auxiliary IMUs + 3 Global Shutter cameras</h3>
+<p>Download the <a href="https://drive.google.com/file/d/1ZUkDktq_DBdnaLh7aiQVUBIG_TcgvGgi/view?usp=sharing" target=&ldquo;blank&rdquo;>example dataset</a> collected using <a href="fig/vi_rig.JPG" target=&ldquo;blank&rdquo;>VI-Rig</a>.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch
+</pre></div></div>
+<p>Note that you need to specify the download dataset name and path through:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="dataset"       default="virig_4imus_3cams_april_01" /&gt;
+&lt;arg name="bag_path"      default="DATASET_PATH/$(arg dataset).bag" /&gt;
+</pre></div></div>
+<h3>1 Base IMU + 3 Auxiliary IMUs + 2 Global Shutter cameras + 2 Rolling shutter cameras</h3>
+<p>Download the <a href="https://drive.google.com/file/d/11gMv9ch3_QkINdy6aMoGMROmXcOkp0Ug/view?usp=sharing" target=&ldquo;blank&rdquo;>example dataset</a> collected using <a href="fig/vi_rig.JPG" target=&ldquo;blank&rdquo;>VI-Rig</a>.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_init_large_errors.launch
+</pre></div></div>
+<p>Note that you need to specify the download dataset name and path through:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="dataset"       default="virig_4imus_3cams_april_01" /&gt;
+&lt;arg name="bag_path"      default="DATASET_PATH/$(arg dataset).bag" /&gt;
+</pre></div></div>
+<p>You can specify the way to use an auxiliary IMU (as Full IMU or Gyro only) through:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="imus_s_mode"   default="[0, 0, 0]" /&gt; &lt;!-- 0: full imu, 1: gyro only --&gt;
+</pre></div></div>
+<p>&lsquo;&lsquo;Full IMU&rsquo;&rsquo; means both accelerometer and gyroscope of the IMU is used while &lsquo;&lsquo;Gyro only&rsquo;&rsquo; means only the gyroscope is used.</p>
+</td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<title></title>
+<!-- MathJax -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<!-- End MathJax -->
+</head>
+<body>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">OpenMVIS</div>
+<div class="menu-item"><a href="index.html">Home</a></div>
+<div class="menu-item"><a href="Compilation.html" class="current">Compilation</a></div>
+<div class="menu-item"><a href="QuickStart.html">Quick&nbsp;Start</a></div>
+<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
+<div class="menu-category">Calibration</div>
+<div class="menu-item"><a href="OverView.html">OverView</a></div>
+<div class="menu-item"><a href="Procedures.html">Procedures</a></div>
+<div class="menu-item"><a href="Refinement.html">Refinement</a></div>
+<div class="menu-item"><a href="Results.html">Results</a></div>
+<div class="menu-category">MVIS Datasets</div>
+<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
+<div class="menu-item"><a href="4IMUs4Cams.html">4IMUs+4Cams</a></div>
+<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
+<div class="menu-category">MVIS Math</div>
+<div class="menu-item"><a href="Formulation.html">Calib&nbsp;Graph</a></div>
+<div class="menu-item"><a href="Base_imu_calib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Aux_imu_calib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="camera_calib.html">Camera&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Observablility.html">Observability</a></div>
+<div class="menu-item"><a href="Degenerate.html">Degeneracy</a></div>
+</td>
+<td id="layout-content">
+<h2>Dependencies</h2>
+<div class="codeblock">
+<div class="blocktitle"><a href="http://wiki.ros.org/ROS/Installation" target=&ldquo;blank&rdquo;>ROS Melodic/Noetic</a></div>
+<div class="blockcontent"><pre>
+http://wiki.ros.org/ROS/Installation
+</pre></div></div>
+<div class="codeblock">
+<div class="blocktitle"><a href="https://github.com/borglab/gtsam" target=&ldquo;blank&rdquo;>GTSAM 4</a></div>
+<div class="blockcontent"><pre>
+https://github.com/borglab/gtsam
+</pre></div></div>
+<div class="codeblock">
+<div class="blocktitle"><a href="https://github.com/opencv/opencv" target=&ldquo;blank&rdquo;>OpenCV 3 or 4</a></div>
+<div class="blockcontent"><pre>
+https://github.com/opencv/opencv
+</pre></div></div>
+<div class="codeblock">
+<div class="blocktitle"><a href="https://github.com/rpng/open_vins/tree/develop_v2.3" target=&ldquo;blank&rdquo;>OpenVINS v2.3</a></div>
+<div class="blockcontent"><pre>
+https://github.com/rpng/open_vins/tree/develop_v2.3
+</pre></div></div>
+<div class="codeblock">
+<div class="blocktitle"><a href="https://github.com/rpng/apriltags-cpp" target=&ldquo;blank&rdquo;>apriltags-cpp</a> (see opencv4 branch if needed)</div>
+<div class="blockcontent"><pre>
+https://github.com/rpng/apriltags-cpp
+</pre></div></div>
+<h2>Installation</h2>
+<p>Create your workspace
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+mkdir -p ./workspace/src
+cd workspace/src
+</pre></div></div>
+<p>OpenVINS project
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+git clone https://github.com/rpng/open_vins/
+cd open_vins/
+git checkout v2.3
+cd ..
+</pre></div></div>
+<p>OpenCV 3 or 4 from ROS.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+sudo apt install ros-melodic-cv-bridge #18.04
+sudo apt install ros-noetic-cv-bridge #20.04
+</pre></div></div>
+<p><tt>Optional</tt> OpenCV from source see <a href="https://docs.openvins.com/gs-installing.html#gs-install-opencv" target=&ldquo;blank&rdquo;>these</a> instructions.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+git clone https://github.com/opencv/opencv/
+git clone https://github.com/opencv/opencv_contrib/
+mkdir opencv/build/
+cd opencv/build/
+cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
+make -j8
+sudo make install
+</pre></div></div>
+<p>AprilTag lib with ROS wrapper (see opencv4 branch if needed)
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+git clone https://github.com/rpng/apriltags-cpp.git
+</pre></div></div>
+<p>Building GTSAM Dependencies <br />
+GTSAM is the only package you need to build the others (boost, eigen3) typically come on a linux-based OS.
+You can optionally install Intel TBB installed as this will allow for GTSAM multithreaded performance (<a href="https://software.intel.com/en-us/articles/installing-intel-free-libs-and-python-apt-repo" target=&ldquo;blank&rdquo;>link</a>).
+You don't need this, but this will allow for faster optimization. <br />
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main &gt; /etc/apt/sources.list.d/intel-mkl.list'
+sudo sh -c 'echo deb https://apt.repos.intel.com/tbb all main &gt; /etc/apt/sources.list.d/intel-tbb.list'
+sudo apt-get update
+sudo apt-get install intel-tbb-2020.0-088
+sudo apt-get install intel-mkl-2020.0-088
+</pre></div></div>
+<p>Building GTSAM <br />
+Then we can <a href="https://gtsam.org/get_started/" target=&ldquo;blank&rdquo;>build</a> <a href="https://gtsam.org/build/" target=&ldquo;blank&rdquo;>GTSAM</a> as normal and install it globally on our system.
+Note that we use the system Eigen since we want to link with packages which also use that Eigen version.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+sudo apt install libboost-all-dev libeigen3-dev libmetis-dev
+git clone https://github.com/borglab/gtsam
+mkdir gtsam/build/
+cd gtsam/build/
+cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF ..
+make -j6
+sudo make -j6 install
+echo 'export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' &gt;&gt; ~/.bashrc
+</pre></div></div>
+<p>Clone this project
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+git clone https://github.com/yangyulin/mvis.git
+</pre></div></div>
+<p>Build
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+catkin build
+</pre></div></div>
+<h2>Possible Errors and Solutions</h2>
+<ul>
+<li><p>Install the latest GTSAM version with the <a href="https://github.com/rpng/vicon2gt#building-gtsam-and-dependencies" target=&ldquo;blank&rdquo;>link</a>.
+</p>
+</li>
+</ul>
+<ul>
+<li><p>If Eigen error can be solved by turning off the march=native. Which reference is <a href="https://github.com/borglab/gtsam/issues/75#issuecomment-502809431" target=&ldquo;blank&rdquo;>here</a>
+Go to the build directory
+</p>
+</li>
+</ul>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+ccmake ..
+GTSAM_BUILD_WITH_MARCH_NATIVE=OFF
+</pre></div></div>
+<ul>
+<li><p>Do not put the GTSAM lib within the src folder of the udel_calibration project
+</p>
+</li>
+</ul>
+<ul>
+<li><p>LZ4 error <a href="https://github.com/ethz-asl/lidar_align/issues/16#issuecomment-504348488" target=&ldquo;blank&rdquo;>solution</a>
+</p>
+</li>
+</ul>
+<ul>
+<li><p>Computer freezes, build with less parallel threads:
+</p>
+</li>
+</ul>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+catkin build -j2
+</pre></div></div>
+</td>
+</tr>
+</table>
+</body>
+</html>

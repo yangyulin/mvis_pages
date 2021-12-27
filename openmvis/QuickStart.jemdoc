@@ -1,0 +1,100 @@
+# jemdoc: menu{MENU}{QuickStart.html}, nofooter
+
+== Test With Simulator
+
+
+After compilation, you can quickly test the MVIS with simulation.
+
+
+
+~~~
+{}{img_left}{fig/udel_calib_multi_sensor.png}{simulation}{300}
+Simulation Environment \n
+- 1 base IMU
+- 2 auxiliary IMUs
+- 1 auxiliary Gyro
+- 2 rolling shutter cameras
+~~~
+
+
+
+Run the simulation with:
+~~~
+{}{}
+source devel/setup.bash
+roslaunch mvis yulin_sim_multi_imu.launch
+~~~
+Note that you need to specify the +OUTPUT_FOLDER+ for the results:
+~~~
+{}{}
+<arg name="dosave_state"        default="true" />
+<arg name="path_state_est"      default="OUTPUT_FOLDER/state_est.txt" />
+<arg name="path_state_std"      default="OUTPUT_FOLDER/state_std.txt" />
+<arg name="path_state_gt"       default="OUTPUT_FOLDER/state_gt.txt" />
+<arg name="dosave_calib"        default="true" />
+<arg name="path_calib_est"      default="OUTPUT_FOLDER/$(arg dataset)_calib_results.txt" />
+~~~
+
+During the running, the rviz is recommended to check the estimated trajectory and map. Please use the display setup in:
+~~~
+{}{}
+src/mvis/launch/display.rviz
+~~~
+Check the simulation results:
+~~~
+{}{}
+rosrun mvis error_simulation   OUTPUT_FOLDER/state_est.txt OUTPUT_FOLDER/state_std.txt OUTPUT_FOLDER/state_gt.txt
+~~~
+You can also use the shell scripts:
+~~~
+{}{}
+./src/mvis/paper_scripts/show_sim_single.sh
+~~~
+
+== Test With Real World Datasets
+
+
+=== 1 Base IMU \+ 3 Auxiliary IMUs \+ 3 Global Shutter cameras
+
+Download the [https://drive.google.com/file/d/1ZUkDktq_DBdnaLh7aiQVUBIG_TcgvGgi/view?usp=sharing example dataset] collected using [fig/vi_rig.JPG VI-Rig].
+
+~~~
+{}{}
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch
+~~~
+Note that you need to specify the download dataset name and path through:
+~~~
+{}{}
+<arg name="dataset"       default="virig_4imus_3cams_april_01" />
+<arg name="bag_path"      default="DATASET_PATH/$(arg dataset).bag" />
+~~~
+
+
+
+
+=== 1 Base IMU \+ 3 Auxiliary IMUs \+ 2 Global Shutter cameras \+ 2 Rolling shutter cameras
+
+Download the [https://drive.google.com/file/d/11gMv9ch3_QkINdy6aMoGMROmXcOkp0Ug/view?usp=sharing example dataset] collected using [fig/vi_rig.JPG VI-Rig].
+
+
+~~~
+{}{}
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_init_large_errors.launch
+~~~
+
+Note that you need to specify the download dataset name and path through:
+~~~
+{}{}
+<arg name="dataset"       default="virig_4imus_3cams_april_01" />
+<arg name="bag_path"      default="DATASET_PATH/$(arg dataset).bag" />
+~~~
+
+You can specify the way to use an auxiliary IMU (as Full IMU or Gyro only) through:
+~~~
+{}{}
+<arg name="imus_s_mode"   default="[0, 0, 0]" /> <!-- 0: full imu, 1: gyro only -->
+~~~
+
+``Full IMU'' means both accelerometer and gyroscope of the IMU is used while ``Gyro only'' means only the gyroscope is used.

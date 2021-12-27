@@ -1,0 +1,31 @@
+# jemdoc: menu{MENU}{OverView.html}, nofooter
+
+
+== 3 Major Ways of Using MVIS
+
+The MVIS can be used in 3 major ways.
+
+- *Refinement of Kalibr Results*.
+
+- *Full calibration of multi-visual-inertial sensors*.
+
+- *Partial calibration of multi-visual-inertial sensors*.
+
+
+== Full Multi-Visual-Inertial Sensor Calibration
+
+
+The major calibration procedures can be summarized as:
+
+- Create calibration target
+- Collect data with ROS
+- Setup sensor topic
+- Initialize IMU\/CAM intrinsics
+- Initialize spatial--temporal calibration
+- Sensor setup
+- Estimator setup
+- Calibration
+- Refinement
+
+
+

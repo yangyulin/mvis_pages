@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<title></title>
+<!-- MathJax -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<!-- End MathJax -->
+</head>
+<body>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">OpenMVIS</div>
+<div class="menu-item"><a href="index.html">Home</a></div>
+<div class="menu-item"><a href="Compilation.html">Compilation</a></div>
+<div class="menu-item"><a href="QuickStart.html">Quick&nbsp;Start</a></div>
+<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
+<div class="menu-category">Calibration</div>
+<div class="menu-item"><a href="OverView.html">OverView</a></div>
+<div class="menu-item"><a href="Procedures.html" class="current">Procedures</a></div>
+<div class="menu-item"><a href="Refinement.html">Refinement</a></div>
+<div class="menu-item"><a href="Results.html">Results</a></div>
+<div class="menu-category">MVIS Datasets</div>
+<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
+<div class="menu-item"><a href="4IMUs4Cams.html">4IMUs+4Cams</a></div>
+<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
+<div class="menu-category">MVIS Math</div>
+<div class="menu-item"><a href="CalibGraph.html">Calib&nbsp;Graph</a></div>
+<div class="menu-item"><a href="BaseImuCalib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="AuxImuCalib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="CameraCalib.html">Camera&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Observablility.html">Observability</a></div>
+<div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
+</td>
+<td id="layout-content">
+<h2>Procedures</h2>
+<p>The detailed steps for using MVIS.
+</p>
+<h3>Create calibration target</h3>
+<p>MVIS supports both April Tag and ArUco Tag. The <a href="https://github.com/ethz-asl/kalibr/wiki/calibration-targets" target=&ldquo;blank&rdquo;>calibration board</a> of <a href="https://github.com/ethz-asl/kalibr" target=&ldquo;blank&rdquo;>Kalibr</a> can be directly used.
+</p>
+<table class="imgtable"><tr><td>
+<img src="fig/kalibr_board.png" alt="kalibr_board" width="200px" />&nbsp;</td>
+<td align="left"><p><a href="https://github.com/ethz-asl/kalibr/wiki/calibration-targets" target=&ldquo;blank&rdquo;>Kalibr Target</a> with April Tags <br />
+(recommended)
+</p>
+</td></tr></table>
+<table class="imgtable"><tr><td>
+<img src="fig/aurco.JPG" alt="aurco_board" width="200px" />&nbsp;</td>
+<td align="left"><p><a href="https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html" target=&ldquo;blank&rdquo;>ArUco Target</a> with ArUco Tags
+</p>
+</td></tr></table>
+<h3>Collect data with ROS</h3>
+<p>MVIS is based on ROS bag data for calibration. A ROS driver collection for most commonly-used inertial sensors and cameras can be found <a href="https://github.com/yangyulin/multi_sensor_drivers" target=&ldquo;blank&rdquo;>here</a>.
+If no ROS drivers are available, you can try out ros bag creator from <a href="https://github.com/ethz-asl/kalibr/wiki/bag-format" target=&ldquo;blank&rdquo;>here</a>.
+</p>
+<p>When collecting data, make sure that the sensor motion is <b>fully-excited</b>.
+</p>
+<p>After collecting data, setup the data path in the launch file:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;!-- dataset settings --&gt;
+&lt;arg name="dataset"       default="4imus_4cams_15" /&gt;
+&lt;arg name="bag_path"      default="/home/lin/Data/dataset/virig_4imus_4cams/$(arg dataset).bag" /&gt;
+&lt;arg name="bag_start"     default="10" /&gt;
+&lt;arg name="bag_durr"      default="-1" /&gt;
+</pre></div></div>
+<h3>Setup sensor topic</h3>
+<p>Setup the ROS topics for cameras and IMUs that are needed to be calibrated in the launch file:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;!-- bag topics --&gt;
+&lt;param name="topic_imu"          type="string" value="/gx3_25/data" /&gt;
+&lt;param name="topic_imu0"         type="string" value="/gx3_35/imu/data" /&gt;
+&lt;param name="topic_imu1"         type="string" value="/imu/data" /&gt;
+&lt;param name="topic_imu2"         type="string" value="/t265/imu" /&gt;
+&lt;param name="topic_camera0"      type="string" value="/t265/fisheye1/image_raw" /&gt;
+&lt;param name="topic_camera1"      type="string" value="/t265/fisheye2/image_raw" /&gt;
+&lt;param name="topic_camera2"      type="string" value="/elp/split_sync_image_node/left/image_raw" /&gt;
+&lt;param name="topic_camera3"      type="string" value="/elp/split_sync_image_node/right/image_raw" /&gt;
+</pre></div></div>
+<p>Note that at least one IMU and one camera need to be specified to make the MVIS work.
+</p>
+<ul>
+<li><p><tt>&lsquo;&lsquo;topic_imu&rsquo;&rsquo;</tt> is base IMU
+</p>
+</li>
+<li><p><tt>&lsquo;&lsquo;topic_imuN&rsquo;&rsquo;</tt> denotes auxiliary IMU, &lsquo;&lsquo;N&rsquo;&rsquo; is the numbering for auxiliary IMU.
+</p>
+</li>
+<li><p><tt>&lsquo;&lsquo;topic_cameraN&rsquo;&rsquo;</tt> denotes camera sensor, &lsquo;&lsquo;N&rsquo;&rsquo; is the numbering for camera sensor.
+</p>
+</li>
+</ul>
+<h3>Sensor setup</h3>
+<p>For both base and auxiliary IMU sensor, we need to specify the following parameters:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="gyroscope_noise_density"      type="double"   value="1.6968e-04" /&gt; &lt;!-- base imu --&gt;
+&lt;param name="gyroscope_random_walk"        type="double"   value="1.9393e-05" /&gt; &lt;!-- base imu --&gt;
+&lt;param name="accelerometer_noise_density"  type="double"   value="3.0000e-3" /&gt; &lt;!-- base imu --&gt;
+&lt;param name="accelerometer_random_walk"    type="double"   value="3.0000e-3" /&gt; &lt;!-- base imu --&gt;
+</pre></div></div>
+<p>For auxiliary IMU, we also need to specify the IMU mode:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="imus_s_mode"   default="[0, 0, 1]" /&gt; &lt;!-- 0: full imu, 1: gyro only --&gt;
+</pre></div></div>
+<p>For camera measurement, the pixel noise is:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="cam_sigma_pix"               default="1" /&gt;
+</pre></div></div>
+<h3>Initialize IMU/CAM intrinsics</h3>
+<p>We first specify the base IMU model and base IMU intrinsics prior:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="imu_model"                    type="int"      value="1" /&gt;
+&lt;rosparam param="imu_b_intrinsics_Da"&gt;[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]&lt;/rosparam&gt;
+&lt;rosparam param="imu_b_intrinsics_Dw"&gt;[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]&lt;/rosparam&gt;
+&lt;rosparam param="imu_b_intrinsics_Tg"&gt;[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]&lt;/rosparam&gt;
+&lt;rosparam param="R_gyrotoIb"&gt;
+      [1, 0,   0,
+       0, 1,   0,
+       0, 0,   1]
+&lt;/rosparam&gt;
+&lt;rosparam param="R_acctoIb"&gt;
+       [1, 0,   0,
+        0, 1,   0,
+        0, 0,   1]
+&lt;/rosparam&gt;
+</pre></div></div>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="prior_sigma_dw"              default="0.003" /&gt;
+&lt;arg name="prior_sigma_da"              default="0.003" /&gt;
+&lt;arg name="prior_sigma_tg"              default="0.003" /&gt;
+&lt;arg name="prior_sigma_watoI"           default="0.004" /&gt;
+&lt;arg name="prior_sigma_imu_dt"          default="0.004" /&gt;
+&lt;arg name="prior_sigma_ItoIs_ori"       default="0.008" /&gt;
+&lt;arg name="prior_sigma_ItoIs_pos"       default="0.007" /&gt;
+</pre></div></div>
+<h3>Initialize spatial&ndash;temporal calibration</h3>
+<h3>Estimator setup</h3>
+<h3>Calibration</h3>
+<h3>Refinement</h3>
+</td>
+</tr>
+</table>
+</body>
+</html>

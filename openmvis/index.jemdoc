@@ -16,15 +16,17 @@ Visula-Inertial (VI)-Rig (4 IMUs and 5 Cameras): \n
 - ELP Left&Right Rolling Shutter Cameras
 ~~~
 
-This is designed to support the spatial-temporal and intrinsic calibration for multiple IMUs, Gyros, cameras. The main features of this repository are as following:
+== Main Features
+This is designed to support the spatial-temporal and intrinsic calibration for multiple IMUs, Gyros, cameras.
+The main features of this repository are as following:
 
 - IMU intrinsic calibration (with kalibr and RPNG model)
 - Gyroscope intrinsic calibration (with Kalibr and RPNG model)
-- Camera intrinsic calibration refinement (with rad-tan/equi-dist model)
+- Camera intrinsic calibration refinement (with rad-tan\/equi-dist model)
 - IMU-IMU spatial-temporal calibration (rotation, translation and timeoffset)
 - IMU-Gyro spatial-temporal calibration (rotation and timeoffset)
 - IMU-Cam spatial-temporal calibration (rotation, translation and timeoffset)
-- Rolling shutter readout time calibration (with first/middle/last row as image timestamp)
+- Rolling shutter readout time calibration (with first\/middle\/last row as image timestamp)
 - Evaluation scripts for calibration results
 - Open-sourced MVIS datasets
 - Support both [https://github.com/ethz-asl/kalibr/wiki/calibration-targets Kalibr April Board] and [https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html AuRco tags]

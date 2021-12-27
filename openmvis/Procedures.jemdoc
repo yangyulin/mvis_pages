@@ -1,0 +1,122 @@
+# jemdoc: menu{MENU}{Procedures.html}, nofooter
+
+== Procedures
+
+The detailed steps for using MVIS.
+
+=== Create calibration target
+
+MVIS supports both April Tag and ArUco Tag. The [https://github.com/ethz-asl/kalibr/wiki/calibration-targets calibration board] of [https://github.com/ethz-asl/kalibr Kalibr] can be directly used.
+
+~~~
+{}{img_left}{fig/kalibr_board.png}{kalibr_board}{200}
+[https://github.com/ethz-asl/kalibr/wiki/calibration-targets Kalibr Target] with April Tags \n
+(recommended)
+~~~
+
+~~~
+{}{img_left}{fig/aurco.JPG}{aurco_board}{200}
+[https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html ArUco Target] with ArUco Tags
+~~~
+
+=== Collect data with ROS
+
+MVIS is based on ROS bag data for calibration. A ROS driver collection for most commonly-used inertial sensors and cameras can be found [https://github.com/yangyulin/multi_sensor_drivers here].
+If no ROS drivers are available, you can try out ros bag creator from [https://github.com/ethz-asl/kalibr/wiki/bag-format here].
+
+When collecting data, make sure that the sensor motion is *fully-excited*.
+
+After collecting data, setup the data path in the launch file:
+~~~
+{}{}
+<!-- dataset settings -->
+<arg name="dataset"       default="4imus_4cams_15" />
+<arg name="bag_path"      default="/home/lin/Data/dataset/virig_4imus_4cams/$(arg dataset).bag" />
+<arg name="bag_start"     default="10" />
+<arg name="bag_durr"      default="-1" />
+~~~
+
+=== Setup sensor topic
+
+Setup the ROS topics for cameras and IMUs that are needed to be calibrated in the launch file:
+~~~
+{}{}
+<!-- bag topics -->
+<param name="topic_imu"          type="string" value="/gx3_25/data" />
+<param name="topic_imu0"         type="string" value="/gx3_35/imu/data" />
+<param name="topic_imu1"         type="string" value="/imu/data" />
+<param name="topic_imu2"         type="string" value="/t265/imu" />
+<param name="topic_camera0"      type="string" value="/t265/fisheye1/image_raw" />
+<param name="topic_camera1"      type="string" value="/t265/fisheye2/image_raw" />
+<param name="topic_camera2"      type="string" value="/elp/split_sync_image_node/left/image_raw" />
+<param name="topic_camera3"      type="string" value="/elp/split_sync_image_node/right/image_raw" />
+~~~
+Note that at least one IMU and one camera need to be specified to make the MVIS work.
+- +``topic_imu''+ is base IMU
+- +``topic_imuN''+ denotes auxiliary IMU, ``N'' is the numbering for auxiliary IMU.
+- +``topic_cameraN''+ denotes camera sensor, ``N'' is the numbering for camera sensor.
+
+=== Sensor setup
+
+For both base and auxiliary IMU sensor, we need to specify the following parameters:
+~~~
+{}{}
+<param name="gyroscope_noise_density"      type="double"   value="1.6968e-04" /> <!-- base imu -->
+<param name="gyroscope_random_walk"        type="double"   value="1.9393e-05" /> <!-- base imu -->
+<param name="accelerometer_noise_density"  type="double"   value="3.0000e-3" /> <!-- base imu -->
+<param name="accelerometer_random_walk"    type="double"   value="3.0000e-3" /> <!-- base imu -->
+~~~
+
+For auxiliary IMU, we also need to specify the IMU mode:
+~~~
+{}{}
+<arg name="imus_s_mode"   default="[0, 0, 1]" /> <!-- 0: full imu, 1: gyro only -->
+~~~
+
+For camera measurement, the pixel noise is:
+~~~
+{}{}
+<arg name="cam_sigma_pix"               default="1" />
+~~~
+
+
+=== Initialize IMU\/CAM intrinsics
+
+We first specify the base IMU model and base IMU intrinsics prior:
+~~~
+{}{}
+<param name="imu_model"                    type="int"      value="1" />
+<rosparam param="imu_b_intrinsics_Da">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
+<rosparam param="imu_b_intrinsics_Dw">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
+<rosparam param="imu_b_intrinsics_Tg">[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]</rosparam>
+<rosparam param="R_gyrotoIb">
+      [1, 0,   0,
+       0, 1,   0,
+       0, 0,   1]
+</rosparam>
+<rosparam param="R_acctoIb">
+       [1, 0,   0,
+        0, 1,   0,
+        0, 0,   1]
+</rosparam>
+~~~
+
+~~~
+{}{}
+<arg name="prior_sigma_dw"              default="0.003" />
+<arg name="prior_sigma_da"              default="0.003" />
+<arg name="prior_sigma_tg"              default="0.003" />
+<arg name="prior_sigma_watoI"           default="0.004" />
+<arg name="prior_sigma_imu_dt"          default="0.004" />
+<arg name="prior_sigma_ItoIs_ori"       default="0.008" />
+<arg name="prior_sigma_ItoIs_pos"       default="0.007" />
+~~~
+
+
+
+=== Initialize spatial--temporal calibration
+=== Estimator setup
+=== Calibration
+=== Refinement
+
+
