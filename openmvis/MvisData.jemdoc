@@ -1,0 +1,45 @@
+# jemdoc: menu{MENU}{MvisData.html}, nofooter
+
+== Overview
+
+This dataset is designed for research/calibration purpose of multiple-visual-inertial sensor rigs.
+
+- Sensors
+- Datasets ([../docs/4IMUs3Cams.html 4IMUs\+3Cams], [../docs/4IMUs4Cams.html 4IMUs\+4Cams])
+
+
+=== Sensors
+
+We use self-built VI-Rig to collect data.
+The VI-Rig contains 4 IMUs, one monocular camera and 2 pair stereo cameras.
+We treat each camera of a stereo as two monocular cameras. So, we claim we have totally 5 cameras.
+
+~~~
+{}{img_left}{fig/vi_rig.JPG}{VI-Rig}{250}
+Visula-Inertial (VI)-Rig (4 IMUs and 5 Cameras): \n
+- MicroStrain GX3-25
+- MicroStrain GX3-35
+- Xsens MTI-100
+- RealSense T265 IMU
+- FLIR BlackFly
+- RealSense T265 Left&Right Cameras
+- ELP Left&Right Rolling Shutter Cameras
+~~~
+
+The ROS drivers can be found [https://github.com/yangyulin/multi_sensor_drivers here].
+
+
+=== Datasets Info
+The datasets contain the following ros topics:
+
+~~~
+{}{table}{Sensor Info}
+ MicroStrain GX3-25 | +500hz, \/gx3\_25\/data+ ||
+ MicroStrain GX3-25 | +100hz, \/gx3\_35\/imu/data+ ||
+ Xsens MTI-100 | +400hz, \/imu\/data+ ||
+ RealSense T265 IMU | +200hz, \/t265\/imu+ ||
+ RealSense T265 Left | +30hz, \/t265\/fisheye2\/image\_raw, 848x800+ ||
+ RealSense T265 Right | +30hz, \/t265\/fisheye2\/image_\raw, 848x800+ ||
+ ELP Left Rolling Shutter | +25hz, \/elp/split\_sync\_image\_node\/left\/image\_raw, 640x480+ ||
+ ELP Right Rolling Shutter | +25hz, \/elp\/split\_sync\_image\_node\/right\/image\_raw, 640x480+
+~~~

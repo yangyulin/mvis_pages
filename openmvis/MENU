@@ -10,7 +10,7 @@ Calibration
 	Results				[Results.html]
 
 MVIS Datasets
-	Sensors				[Sensors.html]
+	MvisData			[MvisData.html]
 	4IMUs+3Cams			[4IMUs3Cams.html]
 	4IMUs+4Cams			[4IMUs4Cams.html]
 	Analysis			[Analysis.html]
