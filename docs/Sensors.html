@@ -21,7 +21,7 @@ MathJax.Hub.Config({
 <tr valign="top">
 <td id="layout-menu">
 <div class="menu-category">OpenMVIS</div>
-<div class="menu-item"><a href="index.html" class="current">Home</a></div>
+<div class="menu-item"><a href="index.html">Home</a></div>
 <div class="menu-item"><a href="Compilation.html">Compilation</a></div>
 <div class="menu-item"><a href="QuickStart.html">Quick&nbsp;Start</a></div>
 <div class="menu-item"><a href="Contributors.html">Contributors</a></div>
@@ -30,7 +30,7 @@ MathJax.Hub.Config({
 <div class="menu-item"><a href="Procedures.html">Procedures</a></div>
 <div class="menu-item"><a href="Results.html">Results</a></div>
 <div class="menu-category">MVIS Datasets</div>
-<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="Sensors.html" class="current">Sensors</a></div>
 <div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
 <div class="menu-item"><a href="4IMUs4Cams.html">4IMUs+4Cams</a></div>
 <div class="menu-item"><a href="Analysis.html">Analysis</a></div>
@@ -43,9 +43,7 @@ MathJax.Hub.Config({
 <div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
 </td>
 <td id="layout-content">
-<h2>Multi-Visual-Inertial Sensor Calibration</h2>
-<p>Open MVIS is designed for multi-visual-inertial sensor calibration.
-</p>
+<h2>Sensors for the MVIS datasets</h2>
 <table class="imgtable"><tr><td>
 <img src="fig/vi_rig.JPG" alt="VI-Rig" width="300px" />&nbsp;</td>
 <td align="left"><p>Visula-Inertial (VI)-Rig (4 IMUs and 5 Cameras): <br />
@@ -74,52 +72,29 @@ MathJax.Hub.Config({
 </li>
 </ul>
 </td></tr></table>
-<h2>Main Features</h2>
-<p>This is designed to support the spatial-temporal and intrinsic calibration for multiple IMUs, Gyros, cameras.
-The main features of this repository are as following:
-</p>
 <ul>
-<li><p>IMU intrinsic calibration (with kalibr and RPNG model)
+<li><p>MicroStrain GX3-25, &lsquo;500hz, /gx3_25/data&lsquo;
 </p>
 </li>
-<li><p>Gyroscope intrinsic calibration (with Kalibr and RPNG model)
+<li><p>MicroStrain GX3-25, &lsquo;100hz, /gx3_35/imu/data&lsquo;
 </p>
 </li>
-<li><p>Camera intrinsic calibration refinement (with rad-tan/equi-dist model)
+<li><p>Xsens MTI-100, &lsquo;400hz, /imu/data&lsquo;
 </p>
 </li>
-<li><p>IMU-IMU spatial-temporal calibration (rotation, translation and timeoffset)
+<li><p>RealSense T265 IMU, &lsquo;200hz, /t265/imu&lsquo;
 </p>
 </li>
-<li><p>IMU-Gyro spatial-temporal calibration (rotation and timeoffset)
+<li><p>RealSense T265 Left , &lsquo;30hz, /t265/fisheye2/image_raw, 848x800&lsquo;
 </p>
 </li>
-<li><p>IMU-Cam spatial-temporal calibration (rotation, translation and timeoffset)
+<li><p>RealSense T265 Right , &lsquo;30hz, /t265/fisheye2/image_raw, 848x800&lsquo;
 </p>
 </li>
-<li><p>Rolling shutter readout time calibration (with first/middle/last row as image timestamp)
+<li><p>ELP Left Rolling Shutter, &lsquo;25hz, /elp/split<u>sync</u>image<u>node/left/image</u>raw, 640x480&lsquo;
 </p>
 </li>
-<li><p>Evaluation scripts for calibration results
-</p>
-</li>
-<li><p>Open-sourced MVIS datasets
-</p>
-</li>
-<li><p>Support both <a href="https://github.com/ethz-asl/kalibr/wiki/calibration-targets" target=&ldquo;blank&rdquo;>Kalibr April Board</a> and <a href="https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html" target=&ldquo;blank&rdquo;>AuRco tags</a>
-</p>
-</li>
-</ul>
-<h2>Available resources:</h2>
-<ul>
-<li><p>Code:
-</p>
-</li>
-<li><p>Documents:
-</p>
-</li>
-<li><p>Datasets:
-</p>
+<li><p>ELP Right Rolling Shutter, &lsquo;25hz, /elp/split<u>sync</u>image<u>node/right/image</u>raw, 640x480&lsquo;</p>
 </li>
 </ul>
 </td>

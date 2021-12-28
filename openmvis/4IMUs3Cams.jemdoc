@@ -1,0 +1,57 @@
+# jemdoc: menu{MENU}{4IMUs4Cams.html}, nofooter
+
+== Sensors
+
+- MicroStrain GX3-25, `500hz, \/gx3\_25\/data`
+- MicroStrain GX3-35, `100hz, \/gx3\_35\/imu\/data`
+- Xsens MTI-100, `400hz, \/imu\/data`
+- RealSense T265 IMU, `200hz, \/t265\/imu`
+- FLIR BlackFly, `30hz, \/blackfly\/image\_raw, 720x540`
+- RealSense T265 Left , `30hz, \/t265\/fisheye2\/image\_raw, 848x800`
+- RealSense T265 Right , `30hz, \/t265\/fisheye2\/image\_raw, 848x800`
+
+== Datasets
+
+~~~
+{}{table}{4IMUs + 3Cams}
+                Datasets               |                                              Link                                              |                                         Kalibr Results                                         | MVIS Results ||
+     virig\_4imus\_3cams\_april\_01.bag    | [https://drive.google.com/file/d/1ZUkDktq_DBdnaLh7aiQVUBIG_TcgvGgi/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_02.bag    | [https://drive.google.com/file/d/1vEPKOCl0dPkRAUhqRBQyp_W5q8cq43ZF/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_03.bag    | [https://drive.google.com/file/d/1yL4EL-nmC75lDJpTvAKYJdzDdgAx-q4-/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_04.bag    | [https://drive.google.com/file/d/15vupBxsqs3IRh5-PUW4w2u4DWS50y4LR/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_05.bag    | [https://drive.google.com/file/d/1TW20N44-aKnuMRRk2aJDevLOP7by1nbq/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_06.bag    | [https://drive.google.com/file/d/1kmFfszvh7EIxrKR8U14OboK77faqInyQ/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_07.bag    | [https://drive.google.com/file/d/1N8evArpw9Y-LrHzRFZScsnJ9OT_RZXC2/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_08.bag    | [https://drive.google.com/file/d/1P_BmNN0gMe0hTB58RO3untVtou51EhDS/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_09.bag    | [https://drive.google.com/file/d/1HFbyV6cuPlDsbttFdTuIq8lPnvreB_5r/view?usp=sharing download]() | [download] | [download]() ||
+     virig\_4imus\_3cams\_april\_10.bag    | [https://drive.google.com/file/d/1D3RtEaQ9LpDUffEUeUDIIyBtjIqiHXzb/view?usp=sharing download]() | [download] | [download]() ||
+ virig\_4imus\_3cams\_april\_01\_static.bag | [https://drive.google.com/file/d/1txUgcNCr4Qxby8xMgvKN_KSCkJyf89mT/view?usp=sharing download]() | [download] |
+~~~
+
+
+
+=== Sensor Numbering for Kalibr and MVIS results
+~~~
+{}{table}{Sensor Numbering}
+ Sensors | BlackFly | T265 Left | T265 Right | GX3-25 | GX3-35 | Xsens Mti-100 | T265 IMU ||
+  Kalibr |   cam0   |    cam1   |    cam2    |  imu0  |  imu1  |      imu2     |   imu3   ||
+   MVIS  |   Cam2   |    Cam0   |    Cam1    |   Ib   |   Is0  |      Is1      |    Is2
+~~~
+=== Scripts for running Kalibr
+
+- [https://drive.google.com/file/d/1fGEGzqFO-QkFHNo-XV687Bn-9Toh1Wy4/view?usp=sharing April board]()
+- [https://drive.google.com/file/d/1bO2PiFGOVTmQUpyZpjtcNf9H42OOwlHU/view?usp=sharing ms-25 config](),
+- [https://drive.google.com/file/d/1rY3I9kqmdcy-p2X0P0PCe5cuvdZtSGGF/view?usp=sharing ms-35 config](),
+- [https://drive.google.com/file/d/1VpFKIlK_qkWTbokhU4tFAA_VemqwmoLA/view?usp=sharing xsens config](),
+- [https://drive.google.com/file/d/1VpnIhK2bvH1MV3SuEjS-ByqUsCic3XeD/view?usp=sharing t265 imu config]()
+- [https://drive.google.com/file/d/1E6D_uzcA3rF8LyAQ1_JnSsLhWYxPaZYr/view?usp=sharing camera calibration]()
+- [https://drive.google.com/file/d/1HlyXnP5Nrnc4a6vw_5ORkoP85BWvz_IN/view?usp=sharing imu-camera calibration]()
+
+=== Scripts for running MVIS
+
+~~~
+{}{}
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch
+~~~
+

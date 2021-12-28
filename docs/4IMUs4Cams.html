@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<title></title>
+<!-- MathJax -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<!-- End MathJax -->
+</head>
+<body>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">OpenMVIS</div>
+<div class="menu-item"><a href="index.html">Home</a></div>
+<div class="menu-item"><a href="Compilation.html">Compilation</a></div>
+<div class="menu-item"><a href="QuickStart.html">Quick&nbsp;Start</a></div>
+<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
+<div class="menu-category">Calibration</div>
+<div class="menu-item"><a href="OverView.html">OverView</a></div>
+<div class="menu-item"><a href="Procedures.html">Procedures</a></div>
+<div class="menu-item"><a href="Results.html">Results</a></div>
+<div class="menu-category">MVIS Datasets</div>
+<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
+<div class="menu-item"><a href="4IMUs4Cams.html" class="current">4IMUs+4Cams</a></div>
+<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
+<div class="menu-category">MVIS Math</div>
+<div class="menu-item"><a href="CalibGraph.html">Calib&nbsp;Graph</a></div>
+<div class="menu-item"><a href="BaseImuCalib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="AuxImuCalib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="CameraCalib.html">Camera&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Observability.html">Observability</a></div>
+<div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
+</td>
+<td id="layout-content">
+<h2>Sensors</h2>
+<ul>
+<li><p>MicroStrain GX3-25, &lsquo;500hz, /gx3_25/data&lsquo;
+</p>
+</li>
+<li><p>MicroStrain GX3-25, &lsquo;100hz, /gx3_35/imu/data&lsquo;
+</p>
+</li>
+<li><p>Xsens MTI-100, &lsquo;400hz, /imu/data&lsquo;
+</p>
+</li>
+<li><p>RealSense T265 IMU, &lsquo;200hz, /t265/imu&lsquo;
+</p>
+</li>
+<li><p>RealSense T265 Left , &lsquo;30hz, /t265/fisheye2/image_raw, 848x800&lsquo;
+</p>
+</li>
+<li><p>RealSense T265 Right , &lsquo;30hz, /t265/fisheye2/image_raw, 848x800&lsquo;
+</p>
+</li>
+<li><p>ELP Left Rolling Shutter, &lsquo;25hz, /elp/split_sync_image_node/left/image_raw, 640x480&lsquo;
+</p>
+</li>
+<li><p>ELP Right Rolling Shutter, &lsquo;25hz, /elp/split_sync_image_node/right/image_raw, 640x480&lsquo;
+</p>
+</li>
+</ul>
+<h3>Datasets</h3>
+<table id="4IMUs + 3Cams">
+<tr class="r1"><td class="c1">Datasets      </td><td class="c2">                                              Link                                              </td><td class="c3">                                    Kalibr Results with T265                                    </td><td class="c4">                                     Kalibr Results with ELP                                    </td><td class="c5"> MVIS Results </td></tr>
+<tr class="r2"><td class="c1">4imus_4cams_01.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/11gMv9ch3_QkINdy6aMoGMROmXcOkp0Ug/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1arO<u>hzRjBi</u>LphEhYKU70ydmnf5o2Sg9</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r3"><td class="c1">4imus_4cams_02.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1dxUzdAKtReyvkBQbsKKlgCEPGwl-zJvq/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1OJ0CtPTGC8TsLKFaomtDcHc9jkLfpong</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r4"><td class="c1">4imus_4cams_03.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1N5v0_mcwh6pAqyEiO1Inwm518VzZS-k1/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1pCSoQ05VrCm0GK8DgDDeO<u>ozy9zpUClk</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r5"><td class="c1">4imus_4cams_04.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1EvOEuNUWaVDVkDKA1F_7T_KMP1TZnWaY/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1j5iXfwkCVA7iKrkqLMVpoiIulc0UFwD</u></i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r6"><td class="c1">4imus_4cams_05.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1oK1E2iCWXmf5v1ZlLvt1HPklQ5g2MdJI/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>11oM8WPySou9FFCKHRmjKP8ncqDSvTcFq</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r7"><td class="c1">4imus_4cams_06.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1D-E6IST72rAv4J5KJsBB36zrPgKIPt64/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1HfJGuhx3qzoYGbK9Tm7lK6KMi<u>r5K8ma</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r8"><td class="c1">4imus_4cams_07.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1hjzQovMK1ETnxHDELi4TrV5MmnMftpHZ/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1GMxq-MpTMJweEKlsdgrQ</u>au-D1iADQj1</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r9"><td class="c1">4imus_4cams_08.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1gbrnPiishgWDUeMpJeZlWDhPA9z1YgQE/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1LRiclybGaH8PktV7V2aZ0vTIJdkVgW6j</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r10"><td class="c1">4imus_4cams_09.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/180ShzJXy5Epm-jB0rfmrCCOhjaKGpDZ4/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>19rVECWb8EoQT5lazU7IGFd29OnUyGCly</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r11"><td class="c1">4imus_4cams_10.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1tzL_cn40Cpn7zHFcKtw_Zlz3jSLMh5dY/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1bBfrFEYWWxWeopyKrgVqzJ6Kvv0ufAMh</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r12"><td class="c1">4imus_4cams_11.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1ei1yfEwJA5XvNauJicsHOruUlCPb-H0l/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1U1z0-vF7SuaSf49&ndash;9Ixq6GYOLvUa5VD</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r13"><td class="c1">4imus_4cams_12.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1HkQJCTzDWzpS6XjUg6ssRRE70Sc42XcI/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1gdbRppNwwozENZRbSkM73c4VOdTKmcJH</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r14"><td class="c1">4imus_4cams_13.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/13GJzK6srVFgfAFqDrfOtyDMdpa0IbN1G/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1wn2cp5GPM4B2vg8S6chl1FJ7GVfE<u>yhU</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r15"><td class="c1">4imus_4cams_14.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/1aMoAx3zvTQvgh8doJEJDgSxlD9Kv1Nd7/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1JBSlTX0085k9u9H1p</u>JUgxtLEPlJ76NS</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>() </td></tr>
+<tr class="r16"><td class="c1">4imus_4cams_15.bag </td><td class="c2"> <a href="https://drive.google.com/file/d/155Njdmzbv5HEkY30As61KtFrJRP8zgvW/view?usp=sharing" target=&ldquo;blank&rdquo;>download</a>() </td><td class="c3"> <a href="download" target=&ldquo;blank&rdquo;>download</a>(https:<i></i>drive.google.com<i>file</i>d<i>1BN6FACjbnv72FOa65Q6Dzo3x_wCUomZQ</i>view?usp=sharing) </td><td class="c4"> <a href="download" target=&ldquo;blank&rdquo;>download</a> </td><td class="c5"> <a href="download" target=&ldquo;blank&rdquo;>download</a>()
+</td></tr></table>
+<h3>Sensor Numbering for Kalibr and MVIS results</h3>
+<table id="Sensor Numbering">
+<tr class="r1"><td class="c1">Sensors     </td><td class="c2"> T265 Left </td><td class="c3"> T265 Right </td><td class="c4"> ELP Left </td><td class="c5"> ELP Right </td><td class="c6"> GX3-25 </td><td class="c7"> GX3-35 </td><td class="c8"> Xsens Mti-100 </td><td class="c9"> T265 IMU </td></tr>
+<tr class="r2"><td class="c1">Kalibr with T265 </td><td class="c2">    cam0   </td><td class="c3">    cam1    </td><td class="c4">          </td><td class="c5">           </td><td class="c6">  imu0  </td><td class="c7">  imu1  </td><td class="c8">      imu2     </td><td class="c9">   imu3   </td></tr>
+<tr class="r3"><td class="c1">Kalibr with ELP </td><td class="c2">           </td><td class="c3">            </td><td class="c4">   cam0   </td><td class="c5">    cam1   </td><td class="c6">  imu0  </td><td class="c7">  imu1  </td><td class="c8">      imu2     </td><td class="c9">   imu3   </td></tr>
+<tr class="r4"><td class="c1">MVIS       </td><td class="c2">    Cam0   </td><td class="c3">    Cam1    </td><td class="c4">   Cam2   </td><td class="c5">    Cam3   </td><td class="c6">   Ib   </td><td class="c7">   Is0  </td><td class="c8">      Is1      </td><td class="c9">    Is2
+</td></tr></table>
+<ul>
+<li><p><a href="https://drive.google.com/file/d/1fGEGzqFO-QkFHNo-XV687Bn-9Toh1Wy4/view?usp=sharing" target=&ldquo;blank&rdquo;>April board</a>()
+</p>
+</li>
+<li><p><a href="https://drive.google.com/file/d/1bO2PiFGOVTmQUpyZpjtcNf9H42OOwlHU/view?usp=sharing" target=&ldquo;blank&rdquo;>ms-25 config</a>(),
+</p>
+</li>
+<li><p><a href="https://drive.google.com/file/d/1rY3I9kqmdcy-p2X0P0PCe5cuvdZtSGGF/view?usp=sharing" target=&ldquo;blank&rdquo;>ms-35 config</a>(),
+</p>
+</li>
+<li><p><a href="https://drive.google.com/file/d/1VpFKIlK_qkWTbokhU4tFAA_VemqwmoLA/view?usp=sharing" target=&ldquo;blank&rdquo;>xsens config</a>(),
+</p>
+</li>
+<li><p><a href="https://drive.google.com/file/d/1VpnIhK2bvH1MV3SuEjS-ByqUsCic3XeD/view?usp=sharing" target=&ldquo;blank&rdquo;>t265 imu config</a>()
+</p>
+</li>
+</ul>
+<ul>
+<li><p><a href="https://drive.google.com/file/d/1ar0CDxIsVISHJWKPMr_7YfRhc6DGahdh/view?usp=sharing" target=&ldquo;blank&rdquo;>T265 camera calibration</a>()
+</p>
+</li>
+<li><p><a href="https://drive.google.com/file/d/1ww1AkwFTxNOlVlGxQkF_9wsbeioZuLdb/view?usp=sharing" target=&ldquo;blank&rdquo;>imu-t265 calibration</a>()
+</p>
+</li>
+</ul>
+<ul>
+<li><p><a href="https://drive.google.com/file/d/10a0RgeejJYKt-a-fL-jJvmt8XjWnuvPg/view?usp=sharing" target=&ldquo;blank&rdquo;>ELP camera calibration</a>()
+</p>
+</li>
+<li><p><a href="https://drive.google.com/file/d/1P9X92ehE16ct5iGwXe2BBzA87YsczdRX/view?usp=sharing" target=&ldquo;blank&rdquo;>imu-ELP calibration</a>()
+</p>
+</li>
+</ul>
+<p>When calibrating IMU and ELP cameras, the <a href="https://github.com/JzHuai0108/kalibr.git" target=&ldquo;blank&rdquo;>extension</a>() of Kalibr is used.
+</p>
+<h2>Scripts for running MVIS</h2>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_init_large_errors.launch
+</pre></div></div>
+</td>
+</tr>
+</table>
+</body>
+</html>

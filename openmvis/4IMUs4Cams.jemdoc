@@ -1,0 +1,69 @@
+# jemdoc: menu{MENU}{4IMUs4Cams.html}, nofooter
+
+== Sensors
+
+- MicroStrain GX3-25, `500hz, \/gx3\_25\/data`
+- MicroStrain GX3-25, `100hz, \/gx3_35\/imu\/data`
+- Xsens MTI-100, `400hz, \/imu\/data`
+- RealSense T265 IMU, `200hz, \/t265/imu`
+- RealSense T265 Left , `30hz, \/t265\/fisheye2\/image\_raw, 848x800`
+- RealSense T265 Right , `30hz, \/t265\/fisheye2\/image\_raw, 848x800`
+- ELP Left Rolling Shutter, `25hz, \/elp\/split\_sync\_image\_node\/left\/image\_raw, 640x480`
+- ELP Right Rolling Shutter, `25hz, \/elp\/split\_sync\_image\_node\/right\/image\_raw, 640x480`
+
+=== Datasets
+
+
+~~~
+{}{table}{4IMUs + 3Cams}
+      Datasets      |                                              Link                                              |                                    Kalibr Results with T265                                    |                                     Kalibr Results with ELP                                    | MVIS Results ||
+ 4imus\_4cams\_01.bag | [https://drive.google.com/file/d/11gMv9ch3_QkINdy6aMoGMROmXcOkp0Ug/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1arO_hzRjBi_LphEhYKU70ydmnf5o2Sg9/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_02.bag | [https://drive.google.com/file/d/1dxUzdAKtReyvkBQbsKKlgCEPGwl-zJvq/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1OJ0CtPTGC8TsLKFaomtDcHc9jkLfpong/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_03.bag | [https://drive.google.com/file/d/1N5v0_mcwh6pAqyEiO1Inwm518VzZS-k1/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1pCSoQ05VrCm0GK8DgDDeO_ozy9zpUClk/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_04.bag | [https://drive.google.com/file/d/1EvOEuNUWaVDVkDKA1F_7T_KMP1TZnWaY/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1j5iXfwkCVA7iKrkqLMVpoiIulc0UFwD_/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_05.bag | [https://drive.google.com/file/d/1oK1E2iCWXmf5v1ZlLvt1HPklQ5g2MdJI/view?usp=sharing download]() | [download](https://drive.google.com/file/d/11oM8WPySou9FFCKHRmjKP8ncqDSvTcFq/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_06.bag | [https://drive.google.com/file/d/1D-E6IST72rAv4J5KJsBB36zrPgKIPt64/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1HfJGuhx3qzoYGbK9Tm7lK6KMi_r5K8ma/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_07.bag | [https://drive.google.com/file/d/1hjzQovMK1ETnxHDELi4TrV5MmnMftpHZ/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1GMxq-MpTMJweEKlsdgrQ_au-D1iADQj1/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_08.bag | [https://drive.google.com/file/d/1gbrnPiishgWDUeMpJeZlWDhPA9z1YgQE/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1LRiclybGaH8PktV7V2aZ0vTIJdkVgW6j/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_09.bag | [https://drive.google.com/file/d/180ShzJXy5Epm-jB0rfmrCCOhjaKGpDZ4/view?usp=sharing download]() | [download](https://drive.google.com/file/d/19rVECWb8EoQT5lazU7IGFd29OnUyGCly/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_10.bag | [https://drive.google.com/file/d/1tzL_cn40Cpn7zHFcKtw_Zlz3jSLMh5dY/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1bBfrFEYWWxWeopyKrgVqzJ6Kvv0ufAMh/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_11.bag | [https://drive.google.com/file/d/1ei1yfEwJA5XvNauJicsHOruUlCPb-H0l/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1U1z0-vF7SuaSf49--9Ixq6GYOLvUa5VD/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_12.bag | [https://drive.google.com/file/d/1HkQJCTzDWzpS6XjUg6ssRRE70Sc42XcI/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1gdbRppNwwozENZRbSkM73c4VOdTKmcJH/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_13.bag | [https://drive.google.com/file/d/13GJzK6srVFgfAFqDrfOtyDMdpa0IbN1G/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1wn2cp5GPM4B2vg8S6chl1FJ7GVfE_yhU/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_14.bag | [https://drive.google.com/file/d/1aMoAx3zvTQvgh8doJEJDgSxlD9Kv1Nd7/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1JBSlTX0085k9u9H1p_JUgxtLEPlJ76NS/view?usp=sharing) | [download] | [download]() ||
+ 4imus\_4cams\_15.bag | [https://drive.google.com/file/d/155Njdmzbv5HEkY30As61KtFrJRP8zgvW/view?usp=sharing download]() | [download](https://drive.google.com/file/d/1BN6FACjbnv72FOa65Q6Dzo3x_wCUomZQ/view?usp=sharing) | [download] | [download]()
+~~~
+
+
+=== Sensor Numbering for Kalibr and MVIS results
+~~~
+{}{table}{Sensor Numbering}
+      Sensors     | T265 Left | T265 Right | ELP Left | ELP Right | GX3-25 | GX3-35 | Xsens Mti-100 | T265 IMU ||
+ Kalibr with T265 |    cam0   |    cam1    |          |           |  imu0  |  imu1  |      imu2     |   imu3   ||
+  Kalibr with ELP |           |            |   cam0   |    cam1   |  imu0  |  imu1  |      imu2     |   imu3   ||
+       MVIS       |    Cam0   |    Cam1    |   Cam2   |    Cam3   |   Ib   |   Is0  |      Is1      |    Is2
+~~~
+=== Scripts for running Kalibr
+
+- [https://drive.google.com/file/d/1fGEGzqFO-QkFHNo-XV687Bn-9Toh1Wy4/view?usp=sharing April board]()
+- [https://drive.google.com/file/d/1bO2PiFGOVTmQUpyZpjtcNf9H42OOwlHU/view?usp=sharing ms-25 config](),
+- [https://drive.google.com/file/d/1rY3I9kqmdcy-p2X0P0PCe5cuvdZtSGGF/view?usp=sharing ms-35 config](),
+- [https://drive.google.com/file/d/1VpFKIlK_qkWTbokhU4tFAA_VemqwmoLA/view?usp=sharing xsens config](),
+- [https://drive.google.com/file/d/1VpnIhK2bvH1MV3SuEjS-ByqUsCic3XeD/view?usp=sharing t265 imu config]()
+
+- [https://drive.google.com/file/d/1ar0CDxIsVISHJWKPMr_7YfRhc6DGahdh/view?usp=sharing T265 camera calibration]()
+- [https://drive.google.com/file/d/1ww1AkwFTxNOlVlGxQkF_9wsbeioZuLdb/view?usp=sharing imu-t265 calibration]()
+
+- [https://drive.google.com/file/d/10a0RgeejJYKt-a-fL-jJvmt8XjWnuvPg/view?usp=sharing ELP camera calibration]()
+- [https://drive.google.com/file/d/1P9X92ehE16ct5iGwXe2BBzA87YsczdRX/view?usp=sharing imu-ELP calibration]()
+
+
+When calibrating IMU and ELP cameras, the [https://github.com/JzHuai0108/kalibr.git extension]() of Kalibr is used.
+
+== Scripts for running MVIS
+
+~~~
+{}{}
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_init_large_errors.launch
+~~~

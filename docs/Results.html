@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" href="jemdoc.css" type="text/css" />
+<title></title>
+<!-- MathJax -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+</script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+<!-- End MathJax -->
+</head>
+<body>
+<table summary="Table for page layout." id="tlayout">
+<tr valign="top">
+<td id="layout-menu">
+<div class="menu-category">OpenMVIS</div>
+<div class="menu-item"><a href="index.html">Home</a></div>
+<div class="menu-item"><a href="Compilation.html">Compilation</a></div>
+<div class="menu-item"><a href="QuickStart.html">Quick&nbsp;Start</a></div>
+<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
+<div class="menu-category">Calibration</div>
+<div class="menu-item"><a href="OverView.html">OverView</a></div>
+<div class="menu-item"><a href="Procedures.html">Procedures</a></div>
+<div class="menu-item"><a href="Results.html" class="current">Results</a></div>
+<div class="menu-category">MVIS Datasets</div>
+<div class="menu-item"><a href="Sensors.html">Sensors</a></div>
+<div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
+<div class="menu-item"><a href="4IMUs4Cams.html">4IMUs+4Cams</a></div>
+<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
+<div class="menu-category">MVIS Math</div>
+<div class="menu-item"><a href="CalibGraph.html">Calib&nbsp;Graph</a></div>
+<div class="menu-item"><a href="BaseImuCalib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="AuxImuCalib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
+<div class="menu-item"><a href="CameraCalib.html">Camera&nbsp;Calib</a></div>
+<div class="menu-item"><a href="Observability.html">Observability</a></div>
+<div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
+</td>
+<td id="layout-content">
+<h2>Calibration Results</h2>
+<p>The calibration is output in a <tt>txt</tt> file specified in the launch file.
+</p>
+<p>It contains all the calibration results for each sensor.
+</p>
+<h3>For base IMU sensor:</h3>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+=================================================
+IMUb:
+Topic: /gx3_25/data
+Mode: full IMU
+Model: 0 - kalibr
+Dw:
+1.00147432, 0.00000000, 0.00000000,
+-0.00026774, 1.00118708, 0.00000000,
+-0.00002346, 0.00377429, 1.00154869
+Tw:
+0.99852785, 0.00000000, 0.00000000,
+0.00026703, 0.99881433, -0.00000000,
+0.00002239, -0.00376399, 0.99845370
+Da:
+1.00063313, 0.00000000, 0.00000000,
+0.00165613, 1.00249752, 0.00000000,
+0.00127088, -0.00314683, 1.00191417
+Ta:
+0.99936727, -0.00000000, 0.00000000,
+-0.00165096, 0.99750871, 0.00000000,
+-0.00127283, 0.00313300, 0.99808948
+Tg:
+0.00007738, -0.00002488, 0.00002589,
+0.00004028, -0.00001124, 0.00002642,
+0.00000955, -0.00005851, -0.00003427
+R_wtoIb:
+0.99999869, -0.00144008, -0.00073526,
+0.00144119, 0.99999782, 0.00151357,
+0.00073308, -0.00151463, 0.99999858
+R_Ibtow:
+0.99999869, 0.00144119, 0.00073308,
+-0.00144008, 0.99999782, -0.00151463,
+-0.00073526, 0.00151357, 0.99999858
+R_atoIb:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+R_Ibtoa:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+</pre></div></div>
+<h3>For camera:</h3>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+=================================================
+Cam0:
+Topic: /t265/fisheye1/image_raw
+Image size: 848 x 800
+Distortion model: equi-dist
+Camera0-imu timeoffset = -0.004847
+(t_Ib = t_C + td)
+Rolling shutter: No
+Rolling mode: 1 - rolling from middle row of image
+Camera0 readout time for the whole image = 0.000000
+camera0 cam_k (fx, fy, cx, cy) :
+287.84648160, 287.73016854, 415.47650819, 405.35420576
+camera0 cam_d (d1, d2, d3, d4) :
+-0.00924627, 0.04386239, -0.04261433, 0.00831263
+T_C0toI :
+-0.00859304, 0.02207260, -0.99971944, -0.06202145,
+-0.99974949, 0.02047300, 0.00904532, 0.19054108,
+0.02066691, 0.99954673, 0.02189114, 0.02511127,
+0.00000000, 0.00000000, 0.00000000, 1.00000000
+T_ItoC0 :
+-0.00859304, -0.99974949, 0.02066691, 0.18944142,
+0.02207260, 0.02047300, 0.99954673, -0.02763186,
+-0.99971944, 0.00904532, 0.02189114, -0.06427727,
+0.00000000, 0.00000000, 0.00000000, 1.00000000
+
+</pre></div></div>
+<h3>For auxiliary IMU:</h3>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+=================================================
+IMUs0:
+Topic: /gx3_35/imu/data
+Mode: 1 - Gyro only
+Model: 0 - kalibr
+IMUs0-IMUb timeoffset = -0.001382
+(t_Ib = t_Is + td)
+Dw:
+1.00051439, 0.00000000, 0.00000000,
+-0.00072733, 0.99987054, 0.00000000,
+0.00025814, 0.00000412, 0.99960217
+Tw:
+0.99948587, 0.00000000, 0.00000000,
+0.00072705, 1.00012948, -0.00000000,
+-0.00025812, -0.00000412, 1.00039798
+Da:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+Ta:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+Tg:
+0.00000000, 0.00000000, 0.00000000,
+0.00000000, 0.00000000, 0.00000000,
+0.00000000, 0.00000000, 0.00000000
+R_wtoIb:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+R_Ibtow:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+R_atoIb:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+R_Ibtoa:
+1.00000000, 0.00000000, 0.00000000,
+0.00000000, 1.00000000, 0.00000000,
+0.00000000, 0.00000000, 1.00000000
+T_Is0toI :
+0.99982825, 0.01818071, 0.00359692, 0.00000000,
+-0.01819062, 0.99983078, 0.00274129, 0.06000000,
+-0.00354647, -0.00280625, 0.99998977, -0.01000000,
+0.00000000, 0.00000000, 0.00000000, 1.00000000
+T_ItoIs0 :
+0.99982825, -0.01819062, -0.00354647, 0.00105597,
+0.01818071, 0.99983078, -0.00280625, -0.06001791,
+0.00359692, 0.00274129, 0.99998977, 0.00983542,
+0.00000000, 0.00000000, 0.00000000, 1.00000000
+</pre></div></div>
+</td>
+</tr>
+</table>
+</body>
+</html>

@@ -28,7 +28,6 @@ MathJax.Hub.Config({
 <div class="menu-category">Calibration</div>
 <div class="menu-item"><a href="OverView.html">OverView</a></div>
 <div class="menu-item"><a href="Procedures.html" class="current">Procedures</a></div>
-<div class="menu-item"><a href="Refinement.html">Refinement</a></div>
 <div class="menu-item"><a href="Results.html">Results</a></div>
 <div class="menu-category">MVIS Datasets</div>
 <div class="menu-item"><a href="Sensors.html">Sensors</a></div>
@@ -40,7 +39,7 @@ MathJax.Hub.Config({
 <div class="menu-item"><a href="BaseImuCalib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
 <div class="menu-item"><a href="AuxImuCalib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
 <div class="menu-item"><a href="CameraCalib.html">Camera&nbsp;Calib</a></div>
-<div class="menu-item"><a href="Observablility.html">Observability</a></div>
+<div class="menu-item"><a href="Observability.html">Observability</a></div>
 <div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
 </td>
 <td id="layout-content">
@@ -64,6 +63,8 @@ MathJax.Hub.Config({
 <h3>Collect data with ROS</h3>
 <p>MVIS is based on ROS bag data for calibration. A ROS driver collection for most commonly-used inertial sensors and cameras can be found <a href="https://github.com/yangyulin/multi_sensor_drivers" target=&ldquo;blank&rdquo;>here</a>.
 If no ROS drivers are available, you can try out ros bag creator from <a href="https://github.com/ethz-asl/kalibr/wiki/bag-format" target=&ldquo;blank&rdquo;>here</a>.
+</p>
+<p>Please <tt>stand still</tt> for a few seconds to make sure the IMU can initialize itself.
 </p>
 <p>When collecting data, make sure that the sensor motion is <b>fully-excited</b>.
 </p>
@@ -106,7 +107,7 @@ If no ROS drivers are available, you can try out ros bag creator from <a href="h
 </li>
 </ul>
 <h3>Sensor setup</h3>
-<p>For both base and auxiliary IMU sensor, we need to specify the following parameters:
+<p>For both <tt>base</tt> and <tt>auxiliary</tt> IMU sensor, we need to specify the following parameters:
 </p>
 <div class="codeblock">
 <div class="blockcontent"><pre>
@@ -115,7 +116,7 @@ If no ROS drivers are available, you can try out ros bag creator from <a href="h
 &lt;param name="accelerometer_noise_density"  type="double"   value="3.0000e-3" /&gt; &lt;!-- base imu --&gt;
 &lt;param name="accelerometer_random_walk"    type="double"   value="3.0000e-3" /&gt; &lt;!-- base imu --&gt;
 </pre></div></div>
-<p>For auxiliary IMU, we also need to specify the IMU mode:
+<p>For <tt>auxiliary</tt> IMU, we also need to specify the IMU mode:
 </p>
 <div class="codeblock">
 <div class="blockcontent"><pre>
@@ -127,8 +128,8 @@ If no ROS drivers are available, you can try out ros bag creator from <a href="h
 <div class="blockcontent"><pre>
 &lt;arg name="cam_sigma_pix"               default="1" /&gt;
 </pre></div></div>
-<h3>Initialize IMU/CAM intrinsics</h3>
-<p>We first specify the base IMU model and base IMU intrinsics prior:
+<h3>Initialize IMU intrinsics</h3>
+<p>We first specify the <tt>base</tt> IMU model and <tt>base</tt> IMU intrinsics prior:
 </p>
 <div class="codeblock">
 <div class="blockcontent"><pre>
@@ -149,18 +150,197 @@ If no ROS drivers are available, you can try out ros bag creator from <a href="h
 </pre></div></div>
 <div class="codeblock">
 <div class="blockcontent"><pre>
-&lt;arg name="prior_sigma_dw"              default="0.003" /&gt;
-&lt;arg name="prior_sigma_da"              default="0.003" /&gt;
-&lt;arg name="prior_sigma_tg"              default="0.003" /&gt;
-&lt;arg name="prior_sigma_watoI"           default="0.004" /&gt;
-&lt;arg name="prior_sigma_imu_dt"          default="0.004" /&gt;
-&lt;arg name="prior_sigma_ItoIs_ori"       default="0.008" /&gt;
-&lt;arg name="prior_sigma_ItoIs_pos"       default="0.007" /&gt;
+&lt;arg name="prior_sigma_dw"              default="0.01" /&gt;
+&lt;arg name="prior_sigma_da"              default="0.01" /&gt;
+&lt;arg name="prior_sigma_tg"              default="0.008" /&gt;
+&lt;arg name="prior_sigma_watoI"           default="0.015" /&gt;
 </pre></div></div>
-<h3>Initialize spatial&ndash;temporal calibration</h3>
+<p>We then specify the <tt>auxiliary</tt> IMU model and <tt>auxiliary</tt> IMU intrinsics priors (<tt>N</tt> is the auxiliary IMU numbering):
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="imuN_model"                     type="int"      value="0" /&gt;
+&lt;rosparam param="imu_sN_intrinsics_Da"&gt;[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]&lt;/rosparam&gt;
+&lt;rosparam param="imu_sN_intrinsics_Dw"&gt;[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]&lt;/rosparam&gt;
+&lt;rosparam param="imu_sN_intrinsics_Tg"&gt;[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]&lt;/rosparam&gt;
+&lt;rosparam param="R_gyrotoIsN"&gt;
+      [
+        1, 0,   0,
+        0, 1,   0,
+        0, 0,   1
+      ]
+&lt;/rosparam&gt;
+&lt;rosparam param="R_acctoIsN"&gt;
+      [
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+      ]
+&lt;/rosparam&gt;
+</pre></div></div>
+<p>You can also setup the <tt>auxiliary</tt> IMU mode to use <i>full IMU</i> or <i>gyro only</i>:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="imus_s_mode"   default="[0, 0, 0, 0]" /&gt; &lt;!-- 0: full imu, 1: gyro only --&gt;
+</pre></div></div>
+<h3>Initialize CAM intrinsics</h3>
+<p>For cameras, we need to first specify whether it is fisheye or not:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="camN_is_fisheye"       type="bool"     value="true" /&gt;  &lt;!-- false: rad-tan model, true: equi-dist model --&gt;
+</pre></div></div>
+<p>In order to get the camera intrinsics, we recommend the following possible ways to get the initial guess:
+</p>
+<ul>
+<li><p>Camera with normal lens: <a href="http://wiki.ros.org/camera_calibration" target=&ldquo;blank&rdquo;>ROS camera calibration</a> with <a href="https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html" target=&ldquo;blank&rdquo;>rad-tan model</a>
+</p>
+</li>
+<li><p>Camera with fisheye lens: <a href="https://github.com/ethz-asl/kalibr/wiki/multiple-camera-calibration" target=&ldquo;blank&rdquo;>Kalibr camera calibration</a> with <a href="https://docs.opencv.org/4.x/db/d58/group__calib3d__fisheye.html" target=&ldquo;blank&rdquo;>equi-dist model</a>.
+</p>
+</li>
+<li><p><a href="http://www.vision.caltech.edu/bouguetj/calib_doc/" target=&ldquo;blank&rdquo;>Matlab calibration toolbox</a>
+</p>
+</li>
+</ul>
+<p>Then put these camera intrinsics into the launch file (<tt>N</tt> is the numbering for camera sensor):
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="camN_k"        default="[288.74401121619053, 288.9183266575855, 416.1462245834943, 405.9717717814123]" /&gt; &lt;!-- fu, fv, cu, cv --&gt;
+&lt;arg name="camN_d"        default="[-0.007770279089321504, 0.04423186828124172, -0.04124982882185576, 0.007307634776387351]" /&gt;  &lt;!-- d1, d2, d3, d4 --&gt;
+</pre></div></div>
+<p>We also need to specify the priors for camera intrinsics:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="prior_sigma_cam_k"           default="3.0" /&gt;
+&lt;arg name="prior_sigma_cam_d"           default="0.025" /&gt;
+</pre></div></div>
+<h3>Initialize IMU-CAM spatial&ndash;temporal calibration</h3>
+<p>The spatial&ndash;temporal calibration between <tt>base IMU</tt> and <tt>camera0</tt> is one of the key parameters that need to be initialized carefully.
+If using the Kalibr calibration board, you can also use Kalibr to get the initial guess of the transformation.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="calib_camimu_dt0"      type="double"   value="0.01" /&gt;
+&lt;rosparam param="T_C0toI"&gt;
+     [
+      1.0, 0,  0,  -0.38,
+      0, 0,  -1.0,  0.24,
+      0, 1.0,  0,  -0.1,
+      0, 0,  0,  1.00
+     ]
+&lt;/rosparam&gt;
+</pre></div></div>
+<p>The spatial-temporal calibration between <tt>base IMU</tt> and other cameras can be relative easy. You can even start with transformation matrix as Identity matrix.
+But refinement is highly recommended.
+</p>
+<p>If the camera is rolling shutter, we need to set related parameters:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="cam0_is_rolling"       type="bool"     value="true" /&gt;
+&lt;param name="cam0_rs_readout_ms"    type="double"   value="10" /&gt;
+&lt;param name="cam0_rs_mode"          type="int"      value="0" /&gt;  &lt;!-- 0: first row, 1: middle row, 2: last row --&gt;
+</pre></div></div>
+<p>We also need to set the priors for these calibration:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="prior_sigma_camimu_dt"       default="0.012" /&gt;
+&lt;arg name="prior_sigma_cam_rs"          default="0.008" /&gt;
+&lt;arg name="prior_sigma_CtoI_pos"        default="0.015" /&gt;
+&lt;arg name="prior_sigma_CtoI_ori"        default="0.015" /&gt;
+</pre></div></div>
+<h3>Initialize IMU-IMU spatial&ndash;temporal calibration</h3>
+<p>We need to specify the time offset and rigid transformation between <tt>base IMU</tt> and each <tt>auxiliary IMU</tt>.
+You can also start with Identity matrix and refine the estimates until it converges.
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="calib_imuimu_dt0"               type="double"   value="0.01" /&gt;
+&lt;rosparam param="T_ItoIsN"&gt;
+    [
+      1.0, 0,  0,  -0.38,
+      0, 1.0,  0.0,  0.24,
+      0, 0.0,  1.0, -0.1,
+      0, 0,  0,  1.00
+    ]
+&lt;/rosparam&gt;
+</pre></div></div>
+<p>We also need to setup the priors as:
+</p>
+<div class="infoblock">
+<div class="blocktitle"></div>
+<div class="blockcontent">
+<p>&lt;arg name=&ldquo;prior<u>sigma</u>imu<u>dt&rdquo;          default=&ldquo;0.01&rdquo; <i>&gt;
+&lt;arg name=&ldquo;prior</u>sigma<u>ItoIs</u>ori&rdquo;       default=&ldquo;0.015&rdquo; </i>&gt;
+&lt;arg name=&ldquo;prior<u>sigma</u>ItoIs_pos&rdquo;       default=&ldquo;0.015&rdquo; /&gt;
+</p>
+</div></div>
 <h3>Estimator setup</h3>
+<p>For estimators, most cases the default setup is good enough.
+But you still manipulate the following settings.
+</p>
+<p>For handling the estimators:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="use_marginals"       default="false" /&gt; &lt;!-- recover state covariance --&gt;
+&lt;arg name="skip_optimize_after" default="250" /&gt;
+&lt;arg name="optimize_every_n"    default="5" /&gt;
+&lt;arg name="max_iterations"      default="1" /&gt;
+&lt;arg name="use_numerical_jacob" default="false" /&gt;
+</pre></div></div>
+<p>For handling the measurements:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="imu_s_start_time"          type="double" value="20" /&gt;
+&lt;param name="cam_start_time"            type="double" value="20" /&gt;
+&lt;param name="cam_meas_skip"             type="int"    value="3" /&gt;
+</pre></div></div>
+<p>For handling the IMU initialization:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;param name="init_window_time"          type="double" value="0.75" /&gt;
+&lt;param name="init_imu_thresh"           type="double" value="1.0" /&gt;
+</pre></div></div>
 <h3>Calibration</h3>
+<p>Check what parameters need to be calibrated:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="do_calibration_cam"              default="true" /&gt;
+&lt;arg name="do_calibration_cam_in"           default="true" /&gt;
+&lt;arg name="do_calibration_cam_t"            default="true" /&gt;
+&lt;arg name="do_calibration_rolling"          default="true" /&gt;
+&lt;arg name="do_calibration_imu_b_in"         default="true" /&gt;
+&lt;arg name="do_calibration_imus_s"           default="true" /&gt;
+&lt;arg name="do_calibration_imus_s_td"        default="true" /&gt;
+&lt;arg name="do_calibration_imus_s_in"        default="true" /&gt;
+</pre></div></div>
+<p>Then, we can run the launch file for calibration:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch
+</pre></div></div>
 <h3>Refinement</h3>
+<p>Check the output folder of the results:
+</p>
+<div class="codeblock">
+<div class="blockcontent"><pre>
+&lt;arg name="dosave_calib"    default="true" /&gt;
+&lt;arg name="path_calib_est"  default="$(find mvis)/calib_data/$(arg dataset)_calib_results.txt" /&gt;
+</pre></div></div>
+<p>If the new results are very close the initial values we input into the launch file, the calibration is done.
+</p>
+<p>If the new results are still quite different with the initial values, we use the new results and re-calibrate these parameters.</p>
 </td>
 </tr>
 </table>

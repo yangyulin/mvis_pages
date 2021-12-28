@@ -24,6 +24,8 @@ MVIS supports both April Tag and ArUco Tag. The [https://github.com/ethz-asl/kal
 MVIS is based on ROS bag data for calibration. A ROS driver collection for most commonly-used inertial sensors and cameras can be found [https://github.com/yangyulin/multi_sensor_drivers here].
 If no ROS drivers are available, you can try out ros bag creator from [https://github.com/ethz-asl/kalibr/wiki/bag-format here].
 
+Please +stand still+ for a few seconds to make sure the IMU can initialize itself.
+
 When collecting data, make sure that the sensor motion is *fully-excited*.
 
 After collecting data, setup the data path in the launch file:
@@ -58,7 +60,7 @@ Note that at least one IMU and one camera need to be specified to make the MVIS 
 
 === Sensor setup
 
-For both base and auxiliary IMU sensor, we need to specify the following parameters:
+For both +base+ and +auxiliary+ IMU sensor, we need to specify the following parameters:
 ~~~
 {}{}
 <param name="gyroscope_noise_density"      type="double"   value="1.6968e-04" /> <!-- base imu -->
@@ -67,7 +69,7 @@ For both base and auxiliary IMU sensor, we need to specify the following paramet
 <param name="accelerometer_random_walk"    type="double"   value="3.0000e-3" /> <!-- base imu -->
 ~~~
 
-For auxiliary IMU, we also need to specify the IMU mode:
+For +auxiliary+ IMU, we also need to specify the IMU mode:
 ~~~
 {}{}
 <arg name="imus_s_mode"   default="[0, 0, 1]" /> <!-- 0: full imu, 1: gyro only -->
@@ -80,9 +82,9 @@ For camera measurement, the pixel noise is:
 ~~~
 
 
-=== Initialize IMU\/CAM intrinsics
+=== Initialize IMU intrinsics
 
-We first specify the base IMU model and base IMU intrinsics prior:
+We first specify the +base+ IMU model and +base+ IMU intrinsics prior:
 ~~~
 {}{}
 <param name="imu_model"                    type="int"      value="1" />
@@ -103,20 +105,191 @@ We first specify the base IMU model and base IMU intrinsics prior:
 
 ~~~
 {}{}
-<arg name="prior_sigma_dw"              default="0.003" />
-<arg name="prior_sigma_da"              default="0.003" />
-<arg name="prior_sigma_tg"              default="0.003" />
-<arg name="prior_sigma_watoI"           default="0.004" />
-<arg name="prior_sigma_imu_dt"          default="0.004" />
-<arg name="prior_sigma_ItoIs_ori"       default="0.008" />
-<arg name="prior_sigma_ItoIs_pos"       default="0.007" />
+<arg name="prior_sigma_dw"              default="0.01" />
+<arg name="prior_sigma_da"              default="0.01" />
+<arg name="prior_sigma_tg"              default="0.008" />
+<arg name="prior_sigma_watoI"           default="0.015" />
+~~~
+
+We then specify the +auxiliary+ IMU model and +auxiliary+ IMU intrinsics priors (+N+ is the auxiliary IMU numbering):
+~~~
+{}{}
+<param name="imuN_model"                     type="int"      value="0" />
+<rosparam param="imu_sN_intrinsics_Da">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
+<rosparam param="imu_sN_intrinsics_Dw">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
+<rosparam param="imu_sN_intrinsics_Tg">[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]</rosparam>
+<rosparam param="R_gyrotoIsN">
+      [
+        1, 0,   0,
+        0, 1,   0,
+        0, 0,   1
+      ]
+</rosparam>
+<rosparam param="R_acctoIsN">
+      [
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+      ]
+</rosparam>
+~~~
+
+You can also setup the +auxiliary+ IMU mode to use /full IMU/ or /gyro only/:
+~~~
+{}{}
+<arg name="imus_s_mode"   default="[0, 0, 0, 0]" /> <!-- 0: full imu, 1: gyro only -->
 ~~~
 
 
+=== Initialize CAM intrinsics
 
-=== Initialize spatial--temporal calibration
+For cameras, we need to first specify whether it is fisheye or not:
+~~~
+{}{}
+<param name="camN_is_fisheye"       type="bool"     value="true" />  <!-- false: rad-tan model, true: equi-dist model -->
+~~~
+In order to get the camera intrinsics, we recommend the following possible ways to get the initial guess:
+- Camera with normal lens: [http://wiki.ros.org/camera_calibration ROS camera calibration] with [https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html rad-tan model]
+- Camera with fisheye lens: [https://github.com/ethz-asl/kalibr/wiki/multiple-camera-calibration Kalibr camera calibration] with [https://docs.opencv.org/4.x/db/d58/group__calib3d__fisheye.html equi-dist model].
+- [http://www.vision.caltech.edu/bouguetj/calib_doc/ Matlab calibration toolbox]
+
+Then put these camera intrinsics into the launch file (+N+ is the numbering for camera sensor):
+~~~
+{}{}
+<arg name="camN_k"        default="[288.74401121619053, 288.9183266575855, 416.1462245834943, 405.9717717814123]" /> <!-- fu, fv, cu, cv -->
+<arg name="camN_d"        default="[-0.007770279089321504, 0.04423186828124172, -0.04124982882185576, 0.007307634776387351]" />  <!-- d1, d2, d3, d4 -->
+~~~
+
+We also need to specify the priors for camera intrinsics:
+~~~
+{}{}
+<arg name="prior_sigma_cam_k"           default="3.0" />
+<arg name="prior_sigma_cam_d"           default="0.025" />
+~~~
+
+=== Initialize IMU-CAM spatial--temporal calibration
+
+The spatial--temporal calibration between +base IMU+ and +camera0+ is one of the key parameters that need to be initialized carefully.
+If using the Kalibr calibration board, you can also use Kalibr to get the initial guess of the transformation.
+~~~
+{}{}
+<param name="calib_camimu_dt0"      type="double"   value="0.01" />
+<rosparam param="T_C0toI">
+     [
+      1.0, 0,  0,  -0.38,
+      0, 0,  -1.0,  0.24,
+      0, 1.0,  0,  -0.1,
+      0, 0,  0,  1.00
+     ]
+</rosparam>
+~~~
+
+The spatial-temporal calibration between +base IMU+ and other cameras can be relative easy. You can even start with transformation matrix as Identity matrix.
+But refinement is highly recommended.
+
+If the camera is rolling shutter, we need to set related parameters:
+~~~
+{}{}
+<param name="cam0_is_rolling"       type="bool"     value="true" />
+<param name="cam0_rs_readout_ms"    type="double"   value="10" />
+<param name="cam0_rs_mode"          type="int"      value="0" />  <!-- 0: first row, 1: middle row, 2: last row -->
+~~~
+
+We also need to set the priors for these calibration:
+~~~
+{}{}
+<arg name="prior_sigma_camimu_dt"       default="0.012" />
+<arg name="prior_sigma_cam_rs"          default="0.008" />
+<arg name="prior_sigma_CtoI_pos"        default="0.015" />
+<arg name="prior_sigma_CtoI_ori"        default="0.015" />
+~~~
+
+=== Initialize IMU-IMU spatial--temporal calibration
+
+We need to specify the time offset and rigid transformation between +base IMU+ and each +auxiliary IMU+.
+You can also start with Identity matrix and refine the estimates until it converges.
+~~~
+{}{}
+<param name="calib_imuimu_dt0"               type="double"   value="0.01" />
+<rosparam param="T_ItoIsN">
+    [
+      1.0, 0,  0,  -0.38,
+      0, 1.0,  0.0,  0.24,
+      0, 0.0,  1.0, -0.1,
+      0, 0,  0,  1.00
+    ]
+</rosparam>
+~~~
+
+We also need to setup the priors as:
+~~~
+{}[}
+<arg name="prior_sigma_imu_dt"          default="0.01" />
+<arg name="prior_sigma_ItoIs_ori"       default="0.015" />
+<arg name="prior_sigma_ItoIs_pos"       default="0.015" />
+~~~
+
 === Estimator setup
+
+For estimators, most cases the default setup is good enough.
+But you still manipulate the following settings.
+
+For handling the estimators:
+~~~
+{}{}
+<arg name="use_marginals"       default="false" /> <!-- recover state covariance -->
+<arg name="skip_optimize_after" default="250" />
+<arg name="optimize_every_n"    default="5" />
+<arg name="max_iterations"      default="1" />
+<arg name="use_numerical_jacob" default="false" />
+~~~
+
+For handling the measurements:
+~~~
+{}{}
+<param name="imu_s_start_time"          type="double" value="20" />
+<param name="cam_start_time"            type="double" value="20" />
+<param name="cam_meas_skip"             type="int"    value="3" />
+~~~
+
+For handling the IMU initialization:
+~~~
+{}{}
+<param name="init_window_time"          type="double" value="0.75" />
+<param name="init_imu_thresh"           type="double" value="1.0" />
+~~~
+
 === Calibration
+
+Check what parameters need to be calibrated:
+~~~
+{}{}
+<arg name="do_calibration_cam"              default="true" />
+<arg name="do_calibration_cam_in"           default="true" />
+<arg name="do_calibration_cam_t"            default="true" />
+<arg name="do_calibration_rolling"          default="true" />
+<arg name="do_calibration_imu_b_in"         default="true" />
+<arg name="do_calibration_imus_s"           default="true" />
+<arg name="do_calibration_imus_s_td"        default="true" />
+<arg name="do_calibration_imus_s_in"        default="true" />
+~~~
+
+Then, we can run the launch file for calibration:
+~~~
+{}{}
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch
+~~~
+
 === Refinement
 
+Check the output folder of the results:
+~~~
+{}{}
+<arg name="dosave_calib"    default="true" />
+<arg name="path_calib_est"  default="$(find mvis)/calib_data/$(arg dataset)_calib_results.txt" />
+~~~
 
+If the new results are very close the initial values we input into the launch file, the calibration is done.
+
+If the new results are still quite different with the initial values, we use the new results and re-calibrate these parameters.
