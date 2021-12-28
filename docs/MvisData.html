@@ -43,7 +43,7 @@ MathJax.Hub.Config({
 <div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
 </td>
 <td id="layout-content">
-<h2>Overview</h2>
+<h2>Datasets Overview</h2>
 <p>This dataset is designed for research/calibration purpose of multiple-visual-inertial sensor rigs.
 </p>
 <ul>
@@ -87,18 +87,21 @@ We treat each camera of a stereo as two monocular cameras. So, we claim we have 
 </li>
 </ul>
 </td></tr></table>
-<p>The ROS drivers can be found <a href="https://github.com/yangyulin/multi_sensor_drivers" target=&ldquo;blank&rdquo;>here</a>. The datasets contain the following rostopics:
+<p>The ROS drivers can be found <a href="https://github.com/yangyulin/multi_sensor_drivers" target=&ldquo;blank&rdquo;>here</a>.
 </p>
 <h3>Datasets Info</h3>
+<p>The datasets contain the following ros topics:
+</p>
 <table id="Sensor Info">
-<tr class="r1"><td class="c1">MicroStrain GX3-25 </td><td class="c2"> <tt>500hz, /gx3_25/data</tt> </td></tr>
-<tr class="r2"><td class="c1">MicroStrain GX3-25 </td><td class="c2"> <tt>100hz, /gx3_35/imu<i>data</tt> </td></tr>
-<tr class="r3"><td class="c1">Xsens MTI-100 </td><td class="c2"> <tt>400hz, /imu/data</tt> </td></tr>
-<tr class="r4"><td class="c1">RealSense T265 IMU </td><td class="c2"> <tt>200hz, /t265/imu</tt> </td></tr>
-<tr class="r5"><td class="c1">RealSense T265 Left </td><td class="c2"> <tt>30hz, /t265/fisheye2/image_raw, 848x800</tt> </td></tr>
-<tr class="r6"><td class="c1">RealSense T265 Right </td><td class="c2"> <tt>30hz, /t265/fisheye2/image_raw, 848x800</tt> </td></tr>
-<tr class="r7"><td class="c1">ELP Left Rolling Shutter </td><td class="c2"> <tt>25hz, /elp</i>split_sync_image_node/left/image_raw, 640x480</tt> </td></tr>
-<tr class="r8"><td class="c1">ELP Right Rolling Shutter </td><td class="c2"> <tt>25hz, /elp/split_sync_image_node/right/image_raw, 640x480</tt>
+<tr class="r1"><td class="c1"><b>sensor</b>                    </td><td class="c2">  <b>hz</b>  </td><td class="c3">  <b>topic</b>                 </td><td class="c4"> <b>resolution</b>  </td></tr>
+<tr class="r2"><td class="c1">MicroStrain GX3-25         </td><td class="c2">  500hz </td><td class="c3"> /gx3_25/data          </td><td class="c4">               </td></tr>
+<tr class="r3"><td class="c1">MicroStrain GX3-25         </td><td class="c2">  100hz </td><td class="c3"> /gx3_35/imu<i>data      </td><td class="c4">               </td></tr>
+<tr class="r4"><td class="c1">Xsens MTI-100              </td><td class="c2">  400hz </td><td class="c3"> /imu/data              </td><td class="c4">               </td></tr>
+<tr class="r5"><td class="c1">RealSense T265 IMU         </td><td class="c2">  200hz </td><td class="c3"> /t265/imu              </td><td class="c4">               </td></tr>
+<tr class="r6"><td class="c1">RealSense T265 Left        </td><td class="c2">  30hz </td><td class="c3"> /t265/fisheye2/image_raw </td><td class="c4"> 848x800    </td></tr>
+<tr class="r7"><td class="c1">RealSense T265 Right       </td><td class="c2">  30hz </td><td class="c3"> /t265/fisheye2/image_raw </td><td class="c4"> 848x800    </td></tr>
+<tr class="r8"><td class="c1">ELP Left Rolling Shutter   </td><td class="c2">  25hz </td><td class="c3"> /elp</i>split_sync_image_node/left/image_raw </td><td class="c4"> 640x480  </td></tr>
+<tr class="r9"><td class="c1">ELP Right Rolling Shutter  </td><td class="c2">  25hz </td><td class="c3"> /elp/split_sync_image_node/right/image_raw </td><td class="c4"> 640x480
 </td></tr></table>
 </td>
 </tr>

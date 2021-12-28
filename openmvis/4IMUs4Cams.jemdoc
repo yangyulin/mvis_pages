@@ -3,18 +3,17 @@
 == 4IMUs + 4Cams
 
 ~~~
-{}{table}{Sensors}
-Sensor |     rostopic ||
-MicroStrain GX3-25 | +500hz, \/gx3\_25\/data+ ||
-MicroStrain GX3-25 | +100hz, \/gx3_35\/imu\/data+ ||
-Xsens MTI-100 | +400hz, \/imu\/data+ ||
-RealSense T265 IMU | +200hz, \/t265/imu+ ||
-RealSense T265 Left | +30hz, \/t265\/fisheye2\/image\_raw, 848x800+ ||
-RealSense T265 Right | +30hz, \/t265\/fisheye2\/image\_raw, 848x800+ ||
-ELP Left Rolling Shutter | +25hz, \/elp\/split\_sync\_image\_node\/left\/image\_raw, 640x480+ ||
-ELP Right Rolling Shutter | +25hz, \/elp\/split\_sync\_image\_node\/right\/image\_raw, 640x480+
+{}{table}{Sensor Info}
+*sensor*                    |  *hz*  |  *topic*                 | *resolution*  ||
+ MicroStrain GX3-25         |  500hz | \/gx3\_25\/data          |               ||
+ MicroStrain GX3-25         |  100hz | \/gx3\_35\/imu\/data     |               ||
+ Xsens MTI-100              |  400hz | \/imu\/data              |               ||
+ RealSense T265 IMU         |  200hz | \/t265\/imu              |               ||
+ RealSense T265 Left        |  30hz | \/t265\/fisheye2\/image\_raw | 848x800    ||
+ RealSense T265 Right       |  30hz | \/t265\/fisheye2\/image_\raw | 848x800    ||
+ ELP Left Rolling Shutter   |  25hz | \/elp/split\_sync\_image\_node\/left\/image\_raw | 640x480  ||
+ ELP Right Rolling Shutter  |  25hz | \/elp\/split\_sync\_image\_node\/right\/image\_raw | 640x480
 ~~~
-
 
 == Datasets
 

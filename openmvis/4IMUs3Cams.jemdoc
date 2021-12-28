@@ -3,14 +3,15 @@
 == 4IMUs + 3Cams
 
 ~~~
-{}{table}{Sensors}
- MicroStrain GX3-25 | +500hz, \/gx3\_25\/data+ ||
- MicroStrain GX3-35 | +100hz, \/gx3\_35\/imu\/data+ ||
- Xsens MTI-100 | +400hz, \/imu\/data+ ||
- RealSense T265 IMU | +200hz, \/t265\/imu+ ||
- FLIR BlackFly | +30hz, \/blackfly\/image\_raw, 720x540+ ||
- RealSense T265 Left | +30hz, \/t265\/fisheye2\/image\_raw, 848x800+ ||
- RealSense T265 Right | +30hz, \/t265\/fisheye2\/image\_raw, 848x800+ ||
+{}{table}{Sensor Info}
+*sensor*                    |  *hz*  |  *topic*                 | *resolution*  ||
+ MicroStrain GX3-25         |  500hz | \/gx3\_25\/data          |               ||
+ MicroStrain GX3-25         |  100hz | \/gx3\_35\/imu\/data     |               ||
+ Xsens MTI-100              |  400hz | \/imu\/data              |               ||
+ RealSense T265 IMU         |  200hz | \/t265\/imu              |               ||
+ FLIR BlackFly              |  30hz  | \/blackfly\/image\_raw   | 720x540       ||
+ RealSense T265 Left        |  30hz | \/t265\/fisheye2\/image\_raw | 848x800    ||
+ RealSense T265 Right       |  30hz | \/t265\/fisheye2\/image_\raw | 848x800
 ~~~
 
 
