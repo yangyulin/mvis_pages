@@ -32,6 +32,10 @@ where
 * `index.jemdoc` is the project jemdoc script
 	
 
+For Website statistics
+```
+<script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=7ujQYgpPqBco-N6Vt17BSUFoYlG4wDdbC7HP7Rq3_40&cl=ffffff&w=a"></script>
+```
 
 
 
