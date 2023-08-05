@@ -32,7 +32,4 @@ The main features of this repository are as following:
 - Support both [https://github.com/ethz-asl/kalibr/wiki/calibration-targets Kalibr April Board] and [https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html AuRco tags]
 
 
-== Available resources:
-- Code:
-- Documents:
-- Datasets:
+
