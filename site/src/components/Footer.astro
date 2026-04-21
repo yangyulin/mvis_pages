@@ -1,0 +1,52 @@
+---
+// Overrides Starlight's default Footer. Adds a thin, responsive row with project
+// attribution, license, "cite this benchmark" link, and a last-updated stamp.
+import Default from '@astrojs/starlight/components/Footer.astro';
+const year = new Date().getFullYear();
+---
+
+<Default><slot /></Default>
+
+<footer class="mvis-footer">
+  <div class="mvis-footer-row">
+    <div>
+      <strong>Open MVIS</strong> &middot; the benchmark for multi-visual-inertial sensor calibration.
+    </div>
+    <div class="mvis-footer-links">
+      <a href="https://github.com/rpng/mvis" target="_blank" rel="noopener">GitHub</a>
+      <span>&middot;</span>
+      <a href="/leaderboard/">Leaderboard</a>
+      <span>&middot;</span>
+      <a href="/#cite-the-benchmark">Cite</a>
+      <span>&middot;</span>
+      <span>MIT License</span>
+      <span>&middot;</span>
+      <span>&copy; {year}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .mvis-footer {
+    margin-top: 3rem;
+    padding: 1.25rem 1rem 2rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
+  }
+  .mvis-footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--sl-content-width);
+    margin: 0 auto;
+  }
+  .mvis-footer-links a {
+    color: var(--sl-color-accent);
+    text-decoration: none;
+  }
+  .mvis-footer-links a:hover { text-decoration: underline; }
+  .mvis-footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+</style>

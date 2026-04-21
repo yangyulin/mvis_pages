@@ -1,0 +1,32 @@
+---
+title: Calib Graph
+description: Main graph formulation and cost functions for the calibration.
+---
+
+## Main Graph Formulation
+
+This page will explain the main cost functions for the calibration.
+
+The MVIS factor graph jointly optimises camera intrinsics, IMU intrinsics, all
+extrinsics, time offsets, and rolling-shutter readout times in a single
+maximum-a-posteriori estimate. Schematically:
+
+$$
+\arg\min_{\boldsymbol{x}} \;
+\sum_{i,k} \rho\!\left(\| \mathbf{r}_{\text{cam}}^{i,k} \|_{\Sigma_c}^2\right) +
+\sum_{j,k} \rho\!\left(\| \mathbf{r}_{\text{imu}}^{j,k} \|_{\Sigma_i}^2\right) +
+\sum_{j,k} \rho\!\left(\| \mathbf{r}_{\text{imu-imu}}^{j,k} \|_{\Sigma_{ij}}^2\right) +
+\Pi(\boldsymbol{x}, \boldsymbol{\mu}_0)
+$$
+
+where $\boldsymbol{x}$ is the full calibration state vector, $\rho(\cdot)$ is a
+robust loss (Huber), and $\Pi$ encodes Gaussian priors on each calibration
+parameter.
+
+Detailed derivations of each residual block are documented in:
+
+- [Base IMU Calib](/math/base-imu-calib/)
+- [Aux IMU Calib](/math/aux-imu-calib/)
+- [Camera Calib](/math/camera-calib/)
+- [Observability](/math/observability/)
+- [Degeneracy](/math/degeneracy/)

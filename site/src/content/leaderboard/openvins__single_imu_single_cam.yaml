@@ -1,0 +1,31 @@
+method:
+  name: OpenVINS
+  version: "2.6"
+  family: filter_ekf
+  open_source: true
+  url_repo: https://github.com/rpng/open_vins
+  url_paper: https://ieeexplore.ieee.org/document/9196524
+sensor_config:
+  category: single_imu_single_cam
+  num_imus: 1
+  num_cams: 1
+  imus: [MicroStrain GX3-25]
+  cameras: [T265-L]
+dataset:
+  name: open_mvis_4imu3cam
+  version: v1.0
+  sequences: [virig_4imus_3cams_april_01]
+results:
+  reprojection_rmse_px:    {value: 0.61, stddev: null, n_runs: 1}
+  extrinsic_rot_err_deg:   {value: 0.18, stddev: null, n_runs: 1}
+  extrinsic_trans_err_cm:  {value: 0.34, stddev: null, n_runs: 1}
+  timeoffset_err_ms:       {value: 0.45, stddev: null, n_runs: 1}
+  runtime_s:               {value: 38,   stddev: null, n_runs: 1}
+  convergence_rate_pct:    95
+artifacts:
+  report_html: ""
+  raw_yaml: ""
+submitted:
+  by: Open MVIS team (reference baseline)
+  date: "2026-04-20"
+  hardware: online EKF, single-threaded

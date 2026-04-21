@@ -1,0 +1,31 @@
+method:
+  name: Kalibr
+  version: "1.0"
+  family: continuous_time_bspline
+  open_source: true
+  url_repo: https://github.com/ethz-asl/kalibr
+  url_paper: https://ieeexplore.ieee.org/document/6696514
+sensor_config:
+  category: single_imu_single_cam
+  num_imus: 1
+  num_cams: 1
+  imus: [MicroStrain GX3-25]
+  cameras: [T265-L]
+dataset:
+  name: open_mvis_4imu3cam
+  version: v1.0
+  sequences: [virig_4imus_3cams_april_01]
+results:
+  reprojection_rmse_px:    {value: 0.52, stddev: null, n_runs: 1}
+  extrinsic_rot_err_deg:   {value: 0.15, stddev: null, n_runs: 1}
+  extrinsic_trans_err_cm:  {value: 0.28, stddev: null, n_runs: 1}
+  timeoffset_err_ms:       {value: 0.04, stddev: null, n_runs: 1}
+  runtime_s:               {value: 420,  stddev: null, n_runs: 1}
+  convergence_rate_pct:    100
+artifacts:
+  report_html: ""
+  raw_yaml: ""
+submitted:
+  by: Open MVIS team (reference baseline)
+  date: "2026-04-20"
+  hardware: as reported by Kalibr paper

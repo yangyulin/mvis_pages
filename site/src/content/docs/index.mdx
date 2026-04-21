@@ -1,0 +1,89 @@
+---
+title: Open MVIS
+description: The benchmark for multi-visual-inertial sensor calibration — multi-IMU, multi-camera, with leaderboard.
+template: splash
+hero:
+  tagline: The benchmark for multi-visual-inertial sensor calibration. Multiple IMUs, multiple cameras, spatial-temporal and intrinsic parameters — solved together, ranked publicly.
+  image:
+    file: ../../assets/vi_rig.jpg
+    alt: VI-Rig with 4 IMUs and 5 cameras
+  actions:
+    - text: Get started
+      link: /calibration/overview/
+      icon: right-arrow
+      variant: primary
+    - text: Browse the leaderboard
+      link: /leaderboard/
+      icon: external
+    - text: View on GitHub
+      link: https://github.com/rpng/mvis
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<span class="cite-pill">v0.1 &middot; public benchmark</span>
+
+## Multi-Visual-Inertial Sensor Calibration
+
+Open MVIS is an open-source toolbox and public benchmark for the spatial-temporal
+and intrinsic calibration of multi-IMU + multi-camera rigs. Our reference rig
+(pictured above) carries **4 IMUs and 5 cameras**:
+
+- MicroStrain GX3-25
+- MicroStrain GX3-35
+- Xsens MTI-100
+- RealSense T265 IMU
+- FLIR BlackFly
+- RealSense T265 Left & Right cameras
+- ELP Left & Right rolling-shutter cameras
+
+<CardGrid>
+  <Card title="Multi-sensor calibration" icon="setting">
+    Joint intrinsic + extrinsic + temporal calibration for any combination of
+    cameras and IMUs — from a single mono camera to multi-IMU multi-camera rigs.
+  </Card>
+  <Card title="Rolling shutter aware" icon="seti:clock">
+    Per-row readout time recovered jointly with extrinsics; first / middle / last
+    row image-timestamp conventions all supported.
+  </Card>
+  <Card title="Open datasets" icon="open-book">
+    Reference MVIS sequences (4 IMU + 3 cam, 4 IMU + 4 cam) released for
+    reproducibility and benchmarking.
+  </Card>
+  <Card title="Public leaderboard" icon="rocket">
+    Filterable by sensor configuration and algorithm family. Submit your method
+    via pull request and have it cited as `Open MVIS leaderboard, vX.Y`.
+  </Card>
+</CardGrid>
+
+## Main features
+
+This is designed to support spatial-temporal and intrinsic calibration for
+multiple IMUs, gyros, and cameras. The main features:
+
+- IMU intrinsic calibration (Kalibr and RPNG models)
+- Gyroscope intrinsic calibration (Kalibr and RPNG models)
+- Camera intrinsic calibration / refinement (rad-tan and equidistant models)
+- IMU–IMU spatial-temporal calibration (rotation, translation, time offset)
+- IMU–gyro spatial-temporal calibration (rotation, time offset)
+- IMU–camera spatial-temporal calibration (rotation, translation, time offset)
+- Rolling-shutter readout-time calibration (first / middle / last row image timestamp)
+- Evaluation scripts for calibration results
+- Open-sourced MVIS datasets
+- Both [Kalibr AprilGrid](https://github.com/ethz-asl/kalibr/wiki/calibration-targets)
+  and [ArUco](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html) targets
+
+## Cite the benchmark
+
+If you use Open MVIS — the toolbox or the leaderboard — please cite:
+
+```bibtex
+@misc{openmvis,
+  title  = {{Open MVIS}: A Benchmark for Multi-Visual-Inertial Sensor Calibration},
+  author = {{Open MVIS Contributors}},
+  year   = {2026},
+  url    = {https://openmvis.github.io}
+}
+```

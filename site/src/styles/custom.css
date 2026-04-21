@@ -1,0 +1,88 @@
+/* Open MVIS — palette
+ * Light is the default (academic / benchmark norm).
+ * Dark is a slate (Tailwind slate-900 family), not pure black: cohesive with
+ * the sky-blue accent and reads more "research" than "consumer product".
+ */
+
+/* Shared layout + accent
+ * Wider content column than Starlight's 45rem default — research pages carry
+ * tables, code blocks, equations, and figures that benefit from extra horizontal
+ * room. Sidebar bumped slightly to fit the longest menu labels. */
+:root {
+  --sl-content-width: 72rem;        /* default 45rem (~720px) → ~1150px */
+  --sl-sidebar-width: 19.5rem;      /* default 18.75rem */
+  --sl-color-accent: #0284c7;
+  --sl-color-accent-low: #bae6fd;
+  --sl-color-accent-high: #0c4a6e;
+}
+
+/* Light theme: keep Starlight's clean defaults, just tweak accent */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #e0f2fe;
+  --sl-color-accent: #0284c7;
+  --sl-color-accent-high: #075985;
+}
+
+/* Dark theme: slate, not black */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #0c4a6e;
+  --sl-color-accent: #38bdf8;
+  --sl-color-accent-high: #bae6fd;
+
+  --sl-color-white: #f8fafc;          /* slate-50 */
+  --sl-color-gray-1: #e2e8f0;         /* slate-200 */
+  --sl-color-gray-2: #cbd5e1;         /* slate-300 */
+  --sl-color-gray-3: #94a3b8;         /* slate-400 */
+  --sl-color-gray-4: #64748b;         /* slate-500 */
+  --sl-color-gray-5: #334155;         /* slate-700 */
+  --sl-color-gray-6: #1e293b;         /* slate-800 — sidebars, code bg */
+  --sl-color-black: #0f172a;          /* slate-900 — page bg */
+}
+
+/* Hero polish */
+.hero {
+  padding-block: 2rem;
+}
+/* Splash-template hero: align tagline left, make image frame nicer */
+[data-has-hero] .hero .tagline {
+  text-wrap: balance;
+  max-width: 48rem;
+}
+[data-has-hero] .hero img {
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Slightly tighter results-page tables + full-width on wide columns */
+.sl-markdown-content table {
+  font-size: 0.9rem;
+  width: 100%;
+}
+.sl-markdown-content th {
+  background: var(--sl-color-gray-6);
+  font-weight: 600;
+}
+
+/* Code blocks — tighten padding, align line-height */
+.sl-markdown-content pre {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* "Research" micro-accent: heading underline in primary accent */
+.sl-markdown-content h2 {
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  padding-bottom: 0.3rem;
+}
+
+/* Cite block: pill-styled inline */
+.cite-pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-accent-high);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

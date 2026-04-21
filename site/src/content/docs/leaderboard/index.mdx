@@ -1,0 +1,64 @@
+---
+title: Leaderboard
+description: Public ranking of multi-visual-inertial sensor calibration methods, filterable by sensor configuration and algorithm family.
+---
+
+import LeaderboardTable from '../../../components/LeaderboardTable.astro';
+
+The Open MVIS leaderboard ranks calibration methods across sensor configurations
+and algorithm families. Entries report reprojection error, extrinsic accuracy
+against the Open MVIS consensus baseline, time-offset error, runtime, and
+convergence rate — each with mean ± stddev over N runs where applicable.
+
+<LeaderboardTable />
+
+## Sensor configurations
+
+The leaderboard groups submissions into seven mutually-exclusive categories so
+that apples-to-apples comparisons are possible within a single row of the filter.
+
+| Category | Shorthand | Example methods |
+|---|---|---|
+| Camera only — mono | 0 IMU · 1 cam | COLMAP intrinsic calibration |
+| Camera only — stereo | 0 IMU · 2 cams | OpenCV stereo calibration |
+| Camera only — multi | 0 IMU · ≥ 3 cams | Multi-cam factor graphs |
+| 1 IMU + 1 cam | 1 IMU · 1 cam | Kalibr, OpenVINS, Basalt |
+| 1 IMU + multi cams | 1 IMU · ≥ 2 cams | Kalibr multi-cam VI |
+| Multi IMU + 1 cam | ≥ 2 IMUs · 1 cam | MVIS (partial) |
+| Multi IMU + multi cams | ≥ 2 IMUs · ≥ 2 cams | MVIS, CamCalib |
+
+## Algorithm families
+
+| Family | Description |
+|---|---|
+| **Factor graph (discrete-time)** | GTSAM / Ceres-based batch MAP optimisation. CamCalib, MVIS. |
+| **Continuous-time B-spline** | SE(3) B-spline trajectory parametrisation. Kalibr, Basalt. |
+| **Filter (EKF)** | Online filtering with calibration in the state. OpenVINS. |
+| **Learning-based** | Deep networks that regress calibration parameters. Calib-Net, etc. |
+| **Other / hybrid** | Anything else — flag in the submission. |
+
+## Metrics
+
+Each metric is reported as `value ± stddev (n runs)` where applicable. Missing
+values show `—` rather than 0 — absence is made visible on purpose, following
+the KITTI leaderboard's lesson against spurious aggregate rankings.
+
+| Metric | Units | Notes |
+|---|---|---|
+| **Reprojection RMSE** | pixels | mean over all cameras and sequences |
+| **Extrinsic rotation error** | degrees | vs. consensus baseline |
+| **Extrinsic translation error** | cm | vs. consensus baseline |
+| **Time-offset error** | ms | vs. consensus baseline |
+| **Runtime** | seconds | wall-clock, single machine (reported) |
+| **Convergence rate** | percent | successful runs / total runs |
+
+## How ranking works
+
+The table is sorted by the chosen metric (lowest is best for error metrics,
+highest is best for convergence). The filter state is preserved in the URL so
+you can share a view like `/leaderboard/?config=multi_imu_multi_cam&sort=timeoffset_err_ms` — useful for citing a specific comparison in a paper.
+
+## Submit your result
+
+See the [submission page](/leaderboard/submit/) for the schema and how to file a
+pull request against `data/leaderboard/`.

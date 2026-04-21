@@ -1,0 +1,31 @@
+method:
+  name: Basalt
+  version: "master"
+  family: continuous_time_bspline
+  open_source: true
+  url_repo: https://github.com/VladyslavUsenko/basalt
+  url_paper: https://arxiv.org/abs/1904.06504
+sensor_config:
+  category: single_imu_single_cam
+  num_imus: 1
+  num_cams: 1
+  imus: [MicroStrain GX3-25]
+  cameras: [T265-L]
+dataset:
+  name: open_mvis_4imu3cam
+  version: v1.0
+  sequences: [virig_4imus_3cams_april_01]
+results:
+  reprojection_rmse_px:    {value: 0.49, stddev: null, n_runs: 1}
+  extrinsic_rot_err_deg:   {value: 0.12, stddev: null, n_runs: 1}
+  extrinsic_trans_err_cm:  {value: 0.22, stddev: null, n_runs: 1}
+  timeoffset_err_ms:       {value: 12.5, stddev: null, n_runs: 1}
+  runtime_s:               {value: 58,   stddev: null, n_runs: 1}
+  convergence_rate_pct:    90
+artifacts:
+  report_html: ""
+  raw_yaml: ""
+submitted:
+  by: Open MVIS team (reference baseline)
+  date: "2026-04-20"
+  hardware: split B-spline, accelerated derivatives

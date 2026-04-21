@@ -1,0 +1,179 @@
+---
+import { getCollection } from 'astro:content';
+
+const entries = (await getCollection('leaderboard')).map((e) => e.data);
+
+const CATEGORY_LABEL: Record<string, string> = {
+  cam_only_mono:         'Camera only — mono',
+  cam_only_stereo:       'Camera only — stereo',
+  cam_only_multi:        'Camera only — multi',
+  single_imu_single_cam: '1 IMU + 1 cam',
+  single_imu_multi_cam:  '1 IMU + multi cams',
+  multi_imu_single_cam:  'Multi IMU + 1 cam',
+  multi_imu_multi_cam:   'Multi IMU + multi cams',
+};
+
+const FAMILY_LABEL: Record<string, string> = {
+  discrete_factor_graph:   'Factor graph',
+  continuous_time_bspline: 'B-spline',
+  filter_ekf:              'EKF',
+  learning_based:          'Learning',
+  other:                   'Other',
+};
+
+// Helper: pull numeric value from union(stat object, number).
+function val(x: any): string {
+  if (x === undefined || x === null) return '—';
+  if (typeof x === 'number') return x.toString();
+  if (x.stddev != null) return `${x.value} ± ${x.stddev}`;
+  return `${x.value}`;
+}
+---
+
+<div class="lb-wrap">
+  <div class="lb-filters" id="lb-filters">
+    <label>
+      <span>Sensor config</span>
+      <select data-filter="category">
+        <option value="">All configurations</option>
+        {Object.entries(CATEGORY_LABEL).map(([k, v]) => (
+          <option value={k}>{v}</option>
+        ))}
+      </select>
+    </label>
+    <label>
+      <span>Algorithm family</span>
+      <select data-filter="family">
+        <option value="">All families</option>
+        {Object.entries(FAMILY_LABEL).map(([k, v]) => (
+          <option value={k}>{v}</option>
+        ))}
+      </select>
+    </label>
+    <label>
+      <span>Sort by</span>
+      <select data-sort>
+        <option value="reprojection_rmse_px">Reprojection RMSE (px) ↑</option>
+        <option value="extrinsic_rot_err_deg">Extrinsic rot err (deg) ↑</option>
+        <option value="extrinsic_trans_err_cm">Extrinsic trans err (cm) ↑</option>
+        <option value="timeoffset_err_ms">Time offset err (ms) ↑</option>
+        <option value="runtime_s">Runtime (s) ↑</option>
+      </select>
+    </label>
+    <span class="lb-count" id="lb-count">{entries.length} entries</span>
+  </div>
+
+  <div class="lb-table-wrap">
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Family</th>
+          <th>Sensor config</th>
+          <th>Dataset</th>
+          <th class="num">Reproj.<br/>(px)</th>
+          <th class="num">Rot err<br/>(deg)</th>
+          <th class="num">Trans err<br/>(cm)</th>
+          <th class="num">Time offs.<br/>(ms)</th>
+          <th class="num">Runtime<br/>(s)</th>
+          <th class="num">Conv.<br/>(%)</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+      <tbody id="lb-body">
+        {entries.map((e) => (
+          <tr
+            data-category={e.sensor_config.category}
+            data-family={e.method.family}
+            data-reprojection_rmse_px={val(e.results.reprojection_rmse_px).replace(/[^0-9.-]/g, '')}
+            data-extrinsic_rot_err_deg={val(e.results.extrinsic_rot_err_deg).replace(/[^0-9.-]/g, '')}
+            data-extrinsic_trans_err_cm={val(e.results.extrinsic_trans_err_cm).replace(/[^0-9.-]/g, '')}
+            data-timeoffset_err_ms={val(e.results.timeoffset_err_ms).replace(/[^0-9.-]/g, '')}
+            data-runtime_s={val(e.results.runtime_s).replace(/[^0-9.-]/g, '')}
+          >
+            <td><strong>{e.method.name}</strong> <span class="muted">v{e.method.version}</span></td>
+            <td>{FAMILY_LABEL[e.method.family] ?? e.method.family}</td>
+            <td>
+              {CATEGORY_LABEL[e.sensor_config.category]}
+              <br/><span class="muted">{e.sensor_config.num_imus} IMU · {e.sensor_config.num_cams} cam</span>
+            </td>
+            <td>{e.dataset.name} <span class="muted">{e.dataset.version}</span></td>
+            <td class="num">{val(e.results.reprojection_rmse_px)}</td>
+            <td class="num">{val(e.results.extrinsic_rot_err_deg)}</td>
+            <td class="num">{val(e.results.extrinsic_trans_err_cm)}</td>
+            <td class="num">{val(e.results.timeoffset_err_ms)}</td>
+            <td class="num">{val(e.results.runtime_s)}</td>
+            <td class="num">{val(e.results.convergence_rate_pct)}</td>
+            <td class="links">
+              {e.method.url_repo && <a href={e.method.url_repo} target="_blank" rel="noopener" title="Source code">💾</a>}
+              {e.method.url_paper && <a href={e.method.url_paper} target="_blank" rel="noopener" title="Paper">📄</a>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const filters = document.getElementById('lb-filters');
+    const body = document.getElementById('lb-body');
+    const countEl = document.getElementById('lb-count');
+    if (!filters || !body) return;
+    const rows = Array.from(body.querySelectorAll('tr'));
+
+    function apply() {
+      const cat = filters.querySelector('[data-filter="category"]').value;
+      const fam = filters.querySelector('[data-filter="family"]').value;
+      const sortKey = filters.querySelector('[data-sort]').value;
+      let visible = 0;
+      rows.forEach((r) => {
+        const ok = (!cat || r.dataset.category === cat) && (!fam || r.dataset.family === fam);
+        r.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+      });
+      const sorted = rows.slice().sort((a, b) => {
+        const av = parseFloat(a.dataset[sortKey]);
+        const bv = parseFloat(b.dataset[sortKey]);
+        if (isNaN(av) && isNaN(bv)) return 0;
+        if (isNaN(av)) return 1;
+        if (isNaN(bv)) return -1;
+        return av - bv;
+      });
+      sorted.forEach((r) => body.appendChild(r));
+      if (countEl) countEl.textContent = visible + ' of ' + rows.length + ' entries';
+    }
+    filters.addEventListener('change', apply);
+    apply();
+  })();
+</script>
+
+<style>
+  .lb-wrap { margin-block: 1.5rem; }
+  .lb-filters {
+    display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;
+    padding: 1rem; margin-bottom: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    background: var(--sl-color-gray-6);
+  }
+  .lb-filters label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; color: var(--sl-color-gray-2); }
+  .lb-filters select {
+    min-width: 14rem; padding: 0.4rem 0.6rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.375rem;
+    background: var(--sl-color-black); color: var(--sl-color-white);
+    font-size: 0.9rem;
+  }
+  .lb-count { margin-left: auto; color: var(--sl-color-gray-3); font-size: 0.85rem; }
+  .lb-table-wrap { overflow-x: auto; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); }
+  .lb-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .lb-table th, .lb-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--sl-color-gray-5); text-align: left; }
+  .lb-table th { background: var(--sl-color-gray-6); font-weight: 600; white-space: nowrap; }
+  .lb-table th.num, .lb-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .lb-table tr:nth-child(even) td { background: color-mix(in srgb, var(--sl-color-gray-6) 30%, transparent); }
+  .lb-table tr:hover td { background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent); }
+  .lb-table .muted { color: var(--sl-color-gray-3); font-size: 0.8rem; }
+  .lb-table .links a { font-size: 1.1rem; margin-right: 0.25rem; text-decoration: none; }
+</style>

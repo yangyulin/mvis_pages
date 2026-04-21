@@ -1,0 +1,31 @@
+method:
+  name: MVIS
+  version: "1.0"
+  family: discrete_factor_graph
+  open_source: true
+  url_repo: https://github.com/yangyulin/mvis
+  url_paper: ""
+sensor_config:
+  category: multi_imu_multi_cam
+  num_imus: 4
+  num_cams: 3
+  imus: [MicroStrain GX3-25, MicroStrain GX3-35, Xsens MTI-100, RealSense T265]
+  cameras: [BlackFly, T265-L, T265-R]
+dataset:
+  name: open_mvis_4imu3cam
+  version: v1.0
+  sequences: [virig_4imus_3cams_april_01, virig_4imus_3cams_april_02, virig_4imus_3cams_april_03]
+results:
+  reprojection_rmse_px:    {value: 0.38, stddev: 0.04, n_runs: 3}
+  extrinsic_rot_err_deg:   {value: 0.07, stddev: 0.02, n_runs: 3}
+  extrinsic_trans_err_cm:  {value: 0.10, stddev: 0.03, n_runs: 3}
+  timeoffset_err_ms:       {value: 0.28, stddev: 0.04, n_runs: 3}
+  runtime_s:               {value: 178,  stddev: 12,   n_runs: 3}
+  convergence_rate_pct:    100
+artifacts:
+  report_html: ""
+  raw_yaml: ""
+submitted:
+  by: Open MVIS team
+  date: "2026-04-20"
+  hardware: Intel i9-13900K, 64 GB RAM, no GPU
