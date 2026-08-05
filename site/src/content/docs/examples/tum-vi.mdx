@@ -53,8 +53,8 @@ this is the one parameter that needs a real starting point
 ## Running it
 
 ```bash
-source devel/setup.bash
-roslaunch mvis tum_vi.launch
+camcalib calibrate -c camcalib_cam0_ds.yaml   # pins the intrinsics
+camcalib cam-imu   -c cam_imu_ds.yaml
 ```
 
 ## Result and validation

@@ -1,6 +1,6 @@
 ---
 title: Camera calibration
-description: Build a calibration target, get camera intrinsics, and solve camera-to-camera extrinsics.
+description: Calibrate one or more cameras — board, inputs, model choice, and the pipeline's stages.
 pageType: guide
 ---
 
@@ -8,90 +8,126 @@ import { Image } from 'astro:assets';
 import kalibrBoard from '../../../assets/kalibr_board.png';
 import aurcoBoard from '../../../assets/aurco.JPG';
 
-Getting from a bare camera to intrinsics you can hand to the joint solver. If
-your rig has an IMU, do this first — [Camera–IMU
-calibration](/guides/camera-imu-calibration/) expects an intrinsics estimate as
-its starting point.
-
-The projection and distortion models themselves are described in
-[Camera model](/concepts/camera-model/).
+Camera-only calibration: intrinsics, distortion, extrinsics, time offsets, and
+rolling-shutter readout, solved jointly. This is also **step one of camera–IMU
+calibration**, which consumes the result.
 
 ## 1. Make a target
 
-Open MVIS detects both AprilTag and ArUco boards. A
-[Kalibr board](https://github.com/ethz-asl/kalibr/wiki/calibration-targets) can
-be used unmodified.
+<Image src={kalibrBoard} alt="AprilGrid target" width="200" />
+<Image src={aurcoBoard} alt="ArUco target" width="200" />
 
-<Image src={kalibrBoard} alt="Kalibr AprilGrid target" width="220" />
+| Board | `board_type` | Required fields |
+|---|---|---|
+| AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` |
+| Chessboard | `chessboard` | `rows`, `cols` (**inner corners**), `square_size` (m) |
+| ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` |
 
-**AprilGrid** — recommended. Tag IDs make the board self-identifying, so partial
-views still give unambiguous correspondences.
-
-<Image src={aurcoBoard} alt="ArUco target" width="220" />
-
-**ArUco** — supported as an alternative.
+AprilGrid follows the Kalibr 2-bit border convention, and Kalibr target YAMLs
+load directly via `apriltag_board.from_kalibr_yaml`.
 
 :::caution[Measure the printed board]
-Print at 100% scale and measure a tag with calipers rather than trusting the
-generator. A board whose true size differs from the configured size biases every
-translation in the rig by the same scale factor — a silent, systematic error.
+Print at 100% and measure a tag with calipers. A board whose true size differs
+from `tag_size` scales every translation in the rig by that same factor — a
+silent, systematic error no residual will reveal.
 :::
 
 ## 2. Record
 
-Fill the frame with the board and cover the whole image, corners included:
-distortion coefficients are only constrained where you actually observed tags.
-Vary distance and viewing angle; avoid motion blur.
+Fill the frame and cover the image to its corners — distortion is only
+constrained where tags were actually seen. Vary distance and angle; avoid
+motion blur.
 
-## 3. Get an intrinsics estimate
+## 3. Point the config at your data
 
-Open MVIS refines intrinsics — it is not a from-scratch mono intrinsics tool.
-Produce the first estimate with whichever of these matches your lens:
+Six input formats, all streaming one image at a time so memory stays bounded
+regardless of dataset size:
 
-| Lens | Tool | Model |
-|---|---|---|
-| Normal | [ROS camera_calibration](http://wiki.ros.org/camera_calibration) | [rad-tan](https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html) |
-| Fisheye | [Kalibr](https://github.com/ethz-asl/kalibr/wiki/multiple-camera-calibration) | [equidistant](https://docs.opencv.org/4.x/db/d58/group__calib3d__fisheye.html) |
-| Either | [Matlab calibration toolbox](http://www.vision.caltech.edu/bouguetj/calib_doc/) | both |
-
-## 4. Declare the model and the estimate
-
-```xml title="launch/<your>.launch"
-<param name="camN_is_fisheye" type="bool" value="true" />
-<!-- false: rad-tan model, true: equi-dist model -->
-
-<arg name="camN_k" default="[288.74, 288.92, 416.15, 405.97]" /> <!-- fu, fv, cu, cv -->
-<arg name="camN_d" default="[-0.0078, 0.0442, -0.0412, 0.0073]" />
+```yaml title="config.yaml"
+cameras:
+  - camera_id: 0
+    source_type: images              # a folder, sorted by filename
+    source_path: /path/to/cam0_images
 ```
 
-The priors control how far the solver is allowed to move them. Widen them if
-your starting estimate is rough; tighten them to hold a trusted calibration
-nearly fixed.
-
-```xml title="launch/<your>.launch"
-<arg name="prior_sigma_cam_k" default="3.0" />
-<arg name="prior_sigma_cam_d" default="0.025" />
+```yaml title="config.yaml"
+cameras:
+  - camera_id: 0
+    source_type: rosbag_topic        # ROS1 — several cameras from one bag
+    source_path: /path/to/data.bag
+    topic: /cam0/image_raw
+  - camera_id: 1
+    source_type: rosbag_topic
+    source_path: /path/to/data.bag
+    topic: /cam1/image_raw
 ```
 
-## 5. Refine, or lock
-
-Run the graph with intrinsics free to refine them jointly with everything else:
-
-```xml title="launch/<your>.launch"
-<arg name="do_calibration_cam_in" default="true" />
+```yaml title="config.yaml"
+cameras:
+  - camera_id: 0
+    source_type: euroc               # EuRoC / ASL — TUM-VI, Monado SLAM
+    source_path: /path/to/cam0
 ```
 
-Set it to `false` to hold your prior calibration fixed and solve only the
-extrinsics and time offsets — the "partial calibration" mode from
-[Overview](/getting-started/overview/).
+Also available: `timestamped_images` (folder + CSV) and `ros2bag`.
 
-## Camera-to-camera extrinsics
+## 4. Pick a distortion model
 
-There is no separate stereo step. Every camera is calibrated against the base
-IMU, and camera-to-camera transforms follow by composition — this is what keeps
-a five-camera rig consistent instead of accumulating pairwise error. Add the
-cameras as `topic_cameraN` and run
-[Camera–IMU calibration](/guides/camera-imu-calibration/).
+```yaml title="config.yaml"
+    distortion_model: equidistant    # radtan | equidistant | fov
+                                     # double_sphere | eucm | omni_radtan
+```
 
-For a rig with no IMU at all, the same composition holds through `cam0`; see
-[Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/).
+`radtan` for normal lenses, `equidistant` for fisheye. Models can be **mixed
+across cameras** in one rig. The trade-offs — and the wide-FoV divergence to
+watch for — are in [Camera model](/concepts/camera-model/).
+
+## 5. Run
+
+```bash
+camcalib calibrate --config config.yaml
+```
+
+## What the pipeline does
+
+Worth knowing, because the failure messages name these stages:
+
+| Stage | What happens |
+|---|---|
+| Detection | Adaptive multi-scale AprilTag — probes scale 1.0, then up to 2 adaptive scales by observed module size; subpixel refinement at original resolution |
+| Quality gating | Corner subsample, pooled-pose filter (≥20% tags across cameras), per-corner ≥5 views, per-camera ≥3 views, ≥6 tags/frame |
+| 1 | Per-camera init — vanishing-point focal + RANSAC PnP board poses + sanity check |
+| 2 | Per-camera GTSAM refinement, with rolling-shutter readout if enabled |
+| 3 | Trajectory alignment — extrinsics via RANSAC, time offsets via dual PnP + homography cross-correlation |
+| 4 | Joint multi-camera factor graph — the unified factor, all parameters |
+| 5 | Outlier-driven rerun with pathology guardrail |
+
+## Speed
+
+`corner_subsample` defaults to `top_left`: one corner per tag instead of four,
+**3–5× faster for under 0.1% quality drift**, validated across eight dataset
+families. It auto-falls back to `all` on sparse data.
+
+```yaml title="config.yaml"
+corner_subsample: top_left     # top_left | two_diag | all
+```
+
+`factor_hz` subsamples frames if a long recording is slowing you down.
+
+## 6. Read the report
+
+Two YAMLs — `*_calib.yaml` to deploy, `*_full.yaml` with board poses to
+replay — plus a self-contained HTML report. Check the **motion-excitation
+grade** before the reprojection error: see
+[Evaluation & metrics](/reference/evaluation/).
+
+## Multi-camera
+
+Add entries to `cameras:` and set `reference_camera`. There is no separate
+stereo step — all cameras enter one graph, so a five-camera rig stays
+consistent instead of accumulating pairwise error. Enable
+`optimize_time_offset: true` for unsynchronised cameras.
+
+## Next
+
+Add an IMU: [Camera–IMU calibration](/guides/camera-imu-calibration/).

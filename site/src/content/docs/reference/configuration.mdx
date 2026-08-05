@@ -1,154 +1,147 @@
 ---
 title: Configuration
-description: Every launch-file parameter accepted by Open MVIS — type, default, and meaning.
+description: Every key in a CamCalib YAML config — camera-only and camera–IMU.
 pageType: reference
 wide: true
 ---
 
-Every parameter the launch files accept. Grouped by role; within a group,
-ordered as they appear in the shipped launch files. For task-oriented guidance
-see [Guides](/guides/camera-imu-calibration/).
+CamCalib is config-driven: one YAML describes the board, the inputs, and the
+solve. This page documents every key. For the commands that consume them see
+the [CLI reference](/reference/cli/).
 
 :::note[Hand-written, and therefore able to drift]
-This page is maintained by hand against the launch files. Generating it from the
-parameter declarations is on the [roadmap](/about/roadmap/); until then, the
-launch files are authoritative if the two disagree.
+Generating this page from the config dataclasses is on the
+[roadmap](/about/roadmap/). Where this disagrees with the shipped
+`examples/configs/`, the examples win.
 :::
 
-## Dataset
+## Camera-only config
 
-| Parameter | Type | Default | Description |
+### `board`
+
+| Key | Type | Required for | Description |
 |---|---|---|---|
-| `dataset` | string | — | Dataset name; used to build output paths |
-| `bag_path` | string | — | Absolute path to the ROS bag |
-| `bag_start` | double | `10` | Seconds to skip from the start of the bag |
-| `bag_durr` | double | `-1` | Seconds to process; `-1` runs to the end |
+| `board_type` | `apriltag \| chessboard \| aruco` | all | Target family |
+| `rows`, `cols` | int | all | Tag rows/cols; **inner corners** for chessboard |
+| `tag_size` | float (m) | apriltag | Tag edge length |
+| `tag_spacing` | float | apriltag | Gap between tags as a fraction of `tag_size` |
+| `tag_family` | string | apriltag | e.g. `t36h11` |
+| `square_size` | float (m) | chessboard | Square edge length |
+| `marker_size` | float (m) | aruco | Marker edge length |
+| `marker_separation` | float (m) | aruco | Gap between markers |
+| `aruco_dict` | string | aruco | OpenCV dictionary name |
 
-## Topics
+### `cameras[]`
 
-| Parameter | Type | Default | Description |
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `topic_imu` | string | — | Base-IMU topic. Required — defines the reference clock |
-| `topic_imuN` | string | — | Nth auxiliary IMU topic (`imu0`, `imu1`, …) |
-| `topic_cameraN` | string | — | Nth camera topic (`camera0`, `camera1`, …) |
+| `camera_id` | int | — | Index; `reference_camera` refers to it |
+| `name` | string | — | Label used in reports |
+| `source_type` | `images \| rosbag_topic \| ros2bag \| euroc \| timestamped_images \| video` | — | Input format |
+| `source_path` | path | — | Directory, bag, or EuRoC camera folder |
+| `topic` | string | — | Image topic — bag sources only |
+| `distortion_model` | `radtan \| equidistant \| double_sphere \| eucm \| fov \| omni_radtan` | — | See [Camera model](/concepts/camera-model/) |
+| `shutter_type` | `global \| rolling` | `global` | `rolling` enables readout calibration |
+| `factor_hz` | float | `0` | Subsample to this frame rate; `0` uses every frame |
 
-At least one IMU and one camera must be declared. Sensor numbering is described
-in [Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/#sensor-numbering).
+Models may be **mixed across cameras** in one rig.
 
-## IMU noise
+### `optimizer`
 
-Applies to base and auxiliary IMUs alike; take the values from the datasheet or
-an Allan-variance run.
-
-| Parameter | Type | Default | Units | Description |
-|---|---|---|---|---|
-| `gyroscope_noise_density` | double | `1.6968e-04` | rad/s/√Hz | White noise on angular velocity |
-| `gyroscope_random_walk` | double | `1.9393e-05` | rad/s²/√Hz | Gyro bias random walk |
-| `accelerometer_noise_density` | double | `3.0000e-3` | m/s²/√Hz | White noise on specific force |
-| `accelerometer_random_walk` | double | `3.0000e-3` | m/s³/√Hz | Accel bias random walk |
-| `cam_sigma_pix` | double | `1` | px | Pixel measurement noise |
-
-## IMU model and intrinsics
-
-| Parameter | Type | Default | Description |
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `imu_model` | int | `1` | `0` = Kalibr, `1` = RPNG. See [IMU model](/concepts/imu-model/) |
-| `imu_b_intrinsics_Dw` | 9× double | identity | Base-IMU gyro scale + misalignment |
-| `imu_b_intrinsics_Da` | 9× double | identity | Base-IMU accel scale + misalignment |
-| `imu_b_intrinsics_Tg` | 9× double | zeros | Base-IMU g-sensitivity |
-| `imuN_model` | int | `0` | Model for the Nth auxiliary IMU |
-| `imu_sN_intrinsics_Dw` | 9× double | identity | Auxiliary IMU gyro scale + misalignment |
-| `imu_sN_intrinsics_Da` | 9× double | identity | Auxiliary IMU accel scale + misalignment |
-| `imu_sN_intrinsics_Tg` | 9× double | zeros | Auxiliary IMU g-sensitivity |
-| `imus_s_mode` | int list | `[0, …]` | Per auxiliary IMU: `0` = full IMU, `1` = gyro only |
+| `max_iterations` | int | `15` | LM iterations for the joint solve |
+| `max_init_frames` | int | `100` | Cap on frames used for OpenCV init; `0` = no cap |
+| `pixel_sigma` | float | `1.0` | Observation noise, pixels |
+| `huber_threshold` | float | `1.345` | Huber robust-loss threshold |
 
-## Camera model and intrinsics
+### Top-level
 
-| Parameter | Type | Default | Description |
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `camN_is_fisheye` | bool | — | `false` = rad-tan, `true` = equidistant |
-| `camN_k` | 4× double | — | `fu, fv, cu, cv` |
-| `camN_d` | 4× double | — | Distortion coefficients |
-| `camN_is_rolling` | bool | `false` | Treat camera N as rolling shutter |
-| `camN_rs_readout_ms` | double | `10` | Initial whole-frame readout time |
-| `camN_rs_mode` | int | `0` | Timestamp row: `0` first, `1` middle, `2` last |
+| `corner_subsample` | `top_left \| two_diag \| all` | `top_left` | Corners kept per AprilGrid tag. `top_left` gives 3–5× speedup for under 0.1% quality drift; auto-falls back to `all` on sparse data |
+| `rerun_outliers` | bool | `true` | Outlier-driven second pass, with a pathology guardrail |
+| `optimize_time_offset` | bool | `false` | Camera–camera time offsets; multi-camera only |
+| `rerun_visualization` | bool | `true` | Launch the Rerun 3D viewer; suppressed in batch |
+| `reference_camera` | int | `0` | Camera the extrinsics are expressed against |
+| `output_file` | path | — | Result path |
+| `output_format` | `yaml \| json` | `yaml` | Result format |
 
-The readout convention is a driver property, not a preference — see
-[Rolling shutter](/guides/rolling-shutter/#2-pick-the-timestamp-convention).
+## Camera–IMU config
 
-## Initial spatial-temporal calibration
+A different shape: `input` / `board` / `camera_input` / `solve` / `output`.
 
-| Parameter | Type | Default | Description |
+### `input`
+
+| Key | Type | Description |
+|---|---|---|
+| `format` | `ros1 \| ros2 \| euroc` | Input format |
+| `path` | path | Bag file or EuRoC `mav0` directory |
+| `bags` | list of paths | **Batch mode** — calibrate many sequences from one config, each into `bag<NN>/cam_imu.json` |
+| `imu_topics` | list | IMU topics; the first is the base IMU |
+| `imus` | list of objects | Per-IMU options, e.g. `{gyro_only: true}` |
+| `window_mode` | `manual \| …` | `manual` honours the explicit `t0`/`window` below |
+| `t0` | float (s) | Window start |
+| `window` | float (s) | Window length |
+| `cache_dir` | path | Detection cache — reused across runs |
+
+### `camera_input`
+
+Cam-IMU calibration is a **two-step** workflow: calibrate the cameras first,
+then feed that result in here.
+
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `calib_camimu_dt0` | double | `0.01` | Initial camera–IMU time offset (s) |
-| `T_C0toI` | 4×4 | — | Initial base-IMU ↔ `cam0` transform. **Needs a real guess** |
-| `calib_imuimu_dt0` | double | `0.01` | Initial IMU–IMU time offset (s) |
-| `T_ItoIsN` | 4×4 | identity | Initial base ↔ Nth auxiliary IMU transform |
+| `path` | path | — | Camera calibration produced by `camcalib calibrate` |
+| `free_intrinsics` | bool | `false` | Re-estimate intrinsics rather than pinning them |
+| `estimate_readout` | bool | `false` | Estimate rolling-shutter readout here |
 
-## Priors
+### `solve`
 
-Prior standard deviations. Widen to let the solver move a parameter further;
-tighten to hold a trusted value near-fixed.
-
-| Parameter | Type | Default | Applies to |
+| Key | Type | Default | Description |
 |---|---|---|---|
-| `prior_sigma_dw` | double | `0.01` | Gyro scale + misalignment |
-| `prior_sigma_da` | double | `0.01` | Accel scale + misalignment |
-| `prior_sigma_tg` | double | `0.008` | G-sensitivity |
-| `prior_sigma_watoI` | double | `0.015` | Gyro-to-IMU frame rotation |
-| `prior_sigma_cam_k` | double | `3.0` | Camera intrinsics |
-| `prior_sigma_cam_d` | double | `0.025` | Distortion coefficients |
-| `prior_sigma_camimu_dt` | double | `0.012` | Camera–IMU time offset |
-| `prior_sigma_cam_rs` | double | `0.008` | Rolling-shutter readout |
-| `prior_sigma_CtoI_pos` | double | `0.015` | Camera–IMU translation |
-| `prior_sigma_CtoI_ori` | double | `0.015` | Camera–IMU rotation |
-| `prior_sigma_imu_dt` | double | `0.01` | IMU–IMU time offset |
-| `prior_sigma_ItoIs_pos` | double | `0.015` | IMU–IMU translation |
-| `prior_sigma_ItoIs_ori` | double | `0.015` | IMU–IMU rotation |
+| `state_hz` | float | `30.0` | Rate of pose/velocity/bias state nodes. Matters on dynamic rigs — reproj, lever, and `td` alias at low rates and plateau near 30 Hz; flat on gentle sequences |
+| `max_iterations` | int | — | LM iterations |
+| `imu_intrinsics` | `dw_da \| …` | — | Which IMU intrinsics to solve |
+| `imu_intrinsics_model` | `kalibr \| rpng \| calyx` | — | Parameterisation. A convention, not a quality lever — all three recover identical extrinsics. See [IMU model](/concepts/imu-model/) |
+| `estimate_t_ga` | bool | `false` | Estimate the base IMU's internal gyro↔accel offset |
+| `sigma_t_ga` | float | — | Staged prior on `t_ga` |
+| `corner_subsample` | `top_left \| two_diag \| all` | `top_left` | As above |
+| `sigma_td_prior` | float | — | Prior on the camera–IMU time offset; `0.0` disables |
+| `init_kwargs` | object | — | Initialiser options, e.g. `{keyframe_hz: 2.0, scale_rel_tol: 0.3}` |
 
-## What to calibrate
+### `output`
 
-Each switch enables one class of variable. Turn off what you already trust —
-this is how partial calibration is expressed.
+| Key | Type | Description |
+|---|---|---|
+| `path` | path | Result JSON |
 
-| Parameter | Type | Default | Solves |
-|---|---|---|---|
-| `do_calibration_cam` | bool | `true` | Camera–IMU extrinsics |
-| `do_calibration_cam_in` | bool | `true` | Camera intrinsics and distortion |
-| `do_calibration_cam_t` | bool | `true` | Camera–IMU time offsets |
-| `do_calibration_rolling` | bool | `true` | Rolling-shutter readout time |
-| `do_calibration_imu_b_in` | bool | `true` | Base-IMU intrinsics |
-| `do_calibration_imus_s` | bool | `true` | Auxiliary IMU extrinsics |
-| `do_calibration_imus_s_td` | bool | `true` | Auxiliary IMU time offsets |
-| `do_calibration_imus_s_in` | bool | `true` | Auxiliary IMU intrinsics |
+## Worked example
 
-## Estimator
+```yaml title="cam_imu_ds.yaml"
+input:
+  format: ros1
+  path: /data/tum_vi/raw/dataset-calib-imu1.bag
+  imu_topics: ["/imu0"]
+  window_mode: manual
+  t0: 3.0
+  window: 45.0
+  cache_dir: /tmp/camcalib_tumvi_detcache
+board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.088, tag_spacing: 0.3, tag_family: t36h11}
+camera_input:
+  path: /tmp/tumvi_calib_ds_cam0.yaml
+  free_intrinsics: false
+  estimate_readout: false
+solve:
+  state_hz: 8.0
+  max_iterations: 40
+  imu_intrinsics: dw_da
+  corner_subsample: top_left
+  sigma_td_prior: 0.0
+  init_kwargs: {keyframe_hz: 2.0, scale_rel_tol: 0.3}
+output:
+  path: /tmp/tumvi_imu1_ds.json
+```
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `use_marginals` | bool | `false` | Compute marginal covariances (slower) |
-| `skip_optimize_after` | int | `250` | Stop re-optimising after this many keyframes |
-| `optimize_every_n` | int | `5` | Run the optimiser every N keyframes |
-| `max_iterations` | int | `1` | Optimiser iterations per invocation |
-| `use_numerical_jacob` | bool | `false` | Numerical instead of analytic Jacobians. Debugging only — much slower |
-
-## Measurement handling
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `imu_s_start_time` | double | `20` | Seconds before auxiliary IMUs enter the graph |
-| `cam_start_time` | double | `20` | Seconds before camera measurements enter the graph |
-| `cam_meas_skip` | int | `3` | Use every Nth camera frame |
-| `init_window_time` | double | `0.75` | Static-window length for IMU initialisation (s) |
-| `init_imu_thresh` | double | `1.0` | Motion threshold declaring initialisation complete |
-
-## Output
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `dosave_state` | bool | `true` | Write trajectory estimate, covariance, ground truth |
-| `path_state_est` | string | — | Trajectory estimate |
-| `path_state_std` | string | — | Estimated standard deviations |
-| `path_state_gt` | string | — | Ground truth (simulation only) |
-| `dosave_calib` | bool | `true` | Write the calibration result file |
-| `path_calib_est` | string | — | Calibration result path. Format: [Result formats](/reference/result-formats/) |
+More under `examples/configs/` in the repository — `tumvi_cam_imu/`,
+`tga_t265*/`, `looperrobotics/`, `gilabs/`.

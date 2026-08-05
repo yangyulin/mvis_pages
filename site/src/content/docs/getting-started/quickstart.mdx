@@ -1,96 +1,94 @@
 ---
 title: Quickstart
-description: Calibrate a simulated multi-IMU multi-camera rig end to end, and check the result against ground truth.
+description: Calibrate a camera from a folder of images in one config file and one command.
 pageType: tutorial
 ---
 
-import { Image } from 'astro:assets';
-import simEnv from '../../../assets/udel_calib_multi_sensor.png';
+Write one YAML file, run one command, read the HTML report. This is the whole
+loop — everything else in these docs is a variation on it.
 
-Run a full calibration on simulated data and compare it against ground truth.
-No hardware, no dataset download — this is the fastest way to confirm your build
-works and to see what a result looks like.
+You need CamCalib installed ([Installation](/getting-started/installation/)) and
+a set of images of an AprilGrid board.
 
-You need a workspace built as described in
-[Installation](/getting-started/installation/). Budget about five minutes.
+## 1. Write the config
 
-## The simulated rig
+Save this as `config.yaml`, pointing `source_path` at your images:
 
-<Image src={simEnv} alt="Simulation environment" width="400" />
+```yaml title="config.yaml"
+board:
+  board_type: apriltag          # or chessboard
+  rows: 6
+  cols: 6
+  tag_size: 0.088               # metres
+  tag_spacing: 0.3              # gap as a fraction of tag_size
+  tag_family: t36h11
 
-The shipped scenario carries 1 base IMU, 2 auxiliary IMUs, 1 auxiliary gyro, and
-2 rolling-shutter cameras — enough that every class of calibration variable is
-present in the graph.
+cameras:
+  - camera_id: 0
+    source_type: images         # or rosbag_topic, euroc, ros2bag
+    source_path: /path/to/images
+    distortion_model: radtan    # or equidistant, double_sphere, eucm, fov
+    shutter_type: global        # rolling enables readout calibration
 
-## 1. Set the output folder
+optimizer:
+  max_iterations: 15
+  pixel_sigma: 1.0
+  huber_threshold: 1.345
 
-The launch file writes the estimate, its covariance, and ground truth to paths
-you choose. Open `launch/yulin_sim_multi_imu.launch` and point them somewhere
-writable:
-
-```xml title="launch/yulin_sim_multi_imu.launch"
-<arg name="dosave_state"   default="true" />
-<arg name="path_state_est" default="OUTPUT_FOLDER/state_est.txt" />
-<arg name="path_state_std" default="OUTPUT_FOLDER/state_std.txt" />
-<arg name="path_state_gt"  default="OUTPUT_FOLDER/state_gt.txt" />
-<arg name="dosave_calib"   default="true" />
-<arg name="path_calib_est" default="OUTPUT_FOLDER/$(arg dataset)_calib_results.txt" />
+output_file: calibration_result.yaml
 ```
 
-## 2. Run the calibration
+:::caution[Measure the printed board]
+`tag_size` is in metres and must match the board you actually printed — measure
+a tag with calipers rather than trusting the generator. It sets the scale of
+every distance CamCalib reports.
+:::
+
+## 2. Run it
 
 ```bash
-source devel/setup.bash
-roslaunch mvis yulin_sim_multi_imu.launch
+camcalib calibrate --config config.yaml
 ```
 
-The optimiser prints its progress as the graph grows. When it finishes you will
-have `state_est.txt`, `state_std.txt`, `state_gt.txt`, and a
-`*_calib_results.txt` in your output folder.
+The pipeline runs seven stages — detection, quality gating, per-camera init,
+per-camera refinement, alignment, joint optimisation, and an outlier-driven
+rerun. Progress prints as it goes.
 
-To watch the trajectory and map while it runs, open RViz with the shipped
-display config:
+## 3. Read the result
 
-```bash
-rviz -d src/mvis/launch/display.rviz
+Two YAML files are written, on purpose:
+
+| File | Use |
+|---|---|
+| `*_calib.yaml` | The calibration itself — deploy this |
+| `*_full.yaml` | Adds board poses, so a run can be replayed |
+
+Alongside them is a **self-contained HTML report**: intrinsics and distortion
+tables, extrinsics with a 3D plot, per-frame and per-tag reprojection error,
+corner heatmaps, motion-excitation grades, and detection statistics — all in one
+file you can send to someone.
+
+Open it. The number to check first is not the reprojection error but the
+**motion-excitation grade**: a calibration can fit its observations tightly and
+still have parameters that the recording never constrained.
+
+## 4. Try a better model
+
+`radtan` is a safe default, not the best fit for every lens. For fisheye, start
+with `equidistant`:
+
+```yaml title="config.yaml"
+    distortion_model: equidistant
 ```
 
-## 3. Check the result against ground truth
-
-Because this is simulation, the true calibration is known — so the run can be
-scored rather than eyeballed:
-
-```bash
-rosrun mvis error_simulation \
-  OUTPUT_FOLDER/state_est.txt \
-  OUTPUT_FOLDER/state_std.txt \
-  OUTPUT_FOLDER/state_gt.txt
-```
-
-This reports per-parameter error against ground truth alongside the estimated
-standard deviation. A healthy run has errors that sit inside the reported
-3σ bounds — that consistency check is the point of running simulation at all.
-
-The same thing, plotted:
-
-```bash
-./src/mvis/paper_scripts/show_sim_single.sh
-```
-
-## 4. Read the calibration file
-
-Open `OUTPUT_FOLDER/<dataset>_calib_results.txt`. It holds one block per sensor:
-IMU intrinsics, camera intrinsics and distortion, every extrinsic transform, and
-every time offset. The block layout is documented in
-[Result formats](/reference/result-formats/).
+Six models are available, and they are not interchangeable — which to pick, and
+how to tell when one has diverged, is in
+[Camera model](/concepts/camera-model/).
 
 ## Next
 
-You have now run the toolbox end to end. From here:
-
-- **Your own bag** → [Camera–IMU calibration](/guides/camera-imu-calibration/)
-  walks through targets, topics, initialisation, and refinement.
-- **More simulation** → [Simulation & synthetic data](/guides/simulation/) covers
-  custom trajectories, Monte-Carlo runs, and NEES consistency.
-- **Public data** → [Examples](/examples/) shows complete runs on released
-  datasets with their reference calibrations.
+- **Multiple cameras** → add more entries to `cameras:`;
+  [Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/).
+- **Add an IMU** → [Camera–IMU calibration](/guides/camera-imu-calibration/).
+- **Every config key** → [Configuration](/reference/configuration/).
+- **A real run start to finish** → [Examples](/examples/).

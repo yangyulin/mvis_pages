@@ -53,6 +53,6 @@ wide: true
 ## Scripts for running MVIS
 
 ```bash
-source devel/setup.bash
-roslaunch mvis yulin_virig_for_mvis_3cams.launch
+camcalib calibrate -c virig_3cams_cam.yaml   # cameras first
+camcalib cam-imu   -c virig_3cams_cam_imu.yaml
 ```

@@ -1,81 +1,157 @@
 ---
 title: CLI
-description: Launch files, nodes, and scripts shipped with Open MVIS.
+description: Every camcalib subcommand and its flags.
 pageType: reference
 wide: true
 ---
 
-Open MVIS has no single binary — it is a set of ROS nodes driven by launch
-files. This page lists what is shipped and what each entry point does. Every
-knob those launch files accept is in
-[Configuration](/reference/configuration/).
+CamCalib installs a single entry point, `camcalib`, with seven subcommands.
+Everything is config-driven — flags select *what* to run, the YAML says *how*.
 
-:::note[Hand-written, not generated]
-The design intent is to generate this page from the nodes' own argument
-declarations so it cannot drift. That is not wired up yet — treat the source as
-authoritative where this disagrees. Tracked on the [roadmap](/about/roadmap/).
+```bash
+camcalib --help
+```
+
+| Subcommand | Purpose |
+|---|---|
+| [`calibrate`](#calibrate) | Run calibration |
+| [`cam`](#cam) | Camera-only calibration from a `CamRunConfig` YAML |
+| [`cam-imu`](#cam-imu) | Joint camera–IMU calibration |
+| [`apply-calib`](#apply-calib) | Apply a calibration to a raw bag → corrected bag |
+| [`roundtrip`](#roundtrip) | calibrate → apply-calib → recalibrate → PASS/FAIL report |
+| [`run`](#run) | Run calibration, dispatching on the config type |
+| [`analyze`](#analyze) | Analyse calibration results |
+
+:::note[Hand-written, and therefore able to drift]
+Generating this page from the parsers is on the [roadmap](/about/roadmap/).
+Until then `camcalib <subcommand> --help` is authoritative.
 :::
 
-Every command assumes a sourced workspace:
+## `calibrate`
+
+Camera calibration from a config file.
 
 ```bash
-source devel/setup.bash
+camcalib calibrate --config config.yaml
 ```
 
-## Launch files
-
-| Launch file | Purpose |
+| Flag | Description |
 |---|---|
-| `yulin_sim_multi_imu.launch` | Simulated rig — 1 base IMU, 2 aux IMUs, 1 aux gyro, 2 RS cameras |
-| `yulin_virig_for_mvis_3cams.launch` | VI-Rig, 4 IMUs + 3 global-shutter cameras |
-| `yulin_virig_for_mvis_init_large_errors.launch` | VI-Rig, 4 IMUs + 2 GS + 2 RS cameras; tolerant initialisation |
+| `--config`, `-c` | Path to the calibration config YAML |
+
+Config schema: [Configuration](/reference/configuration/).
+
+## `cam`
+
+Camera-only calibration driven by a `CamRunConfig` YAML — the run-oriented
+variant, used by the batch and regression harnesses.
 
 ```bash
-roslaunch mvis yulin_sim_multi_imu.launch
+camcalib cam --config example_cam_run.yaml
 ```
 
-Arguments are overridden inline in the usual roslaunch way:
-
-```bash
-roslaunch mvis yulin_virig_for_mvis_3cams.launch \
-  dataset:=virig_4imus_3cams_april_01 \
-  bag_path:=/data/virig_4imus_3cams_april_01.bag
-```
-
-## Nodes
-
-### `error_simulation`
-
-Scores a simulation run against ground truth: per-parameter error alongside the
-estimated standard deviation.
-
-```bash
-rosrun mvis error_simulation \
-  OUTPUT_FOLDER/state_est.txt \
-  OUTPUT_FOLDER/state_std.txt \
-  OUTPUT_FOLDER/state_gt.txt
-```
-
-| Positional argument | Meaning |
+| Flag | Description |
 |---|---|
-| 1 | State estimate (`path_state_est`) |
-| 2 | Estimated standard deviations (`path_state_std`) |
-| 3 | Ground truth (`path_state_gt`) |
+| `--config`, `-c` | Path to the `CamRunConfig` YAML |
 
-How to read the output is covered in
-[Simulation & synthetic data](/guides/simulation/#closed-loop-recovery).
+## `cam-imu`
+
+Joint camera–IMU calibration: extrinsics `T_CtoI`, time offset `td`,
+rolling-shutter readout, IMU intrinsics, and biases.
+
+```bash
+camcalib cam-imu --config cam_imu.yaml
+```
+
+| Flag | Description |
+|---|---|
+| `--config`, `-c` | Path to the cam-IMU config YAML |
+| `--bag` | Override the input bag from the config |
+
+List several sequences under `input.bags` and each is calibrated into its own
+discoverable `bag<NN>/cam_imu.json` — a whole dataset family from one config.
+See [Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+## `apply-calib`
+
+Apply a saved cam-IMU calibration back onto a raw ROS1 bag and re-record it
+calibration-corrected.
+
+```bash
+camcalib apply-calib -c recalib.yaml
+camcalib apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
+```
+
+| Flag | Description |
+|---|---|
+| `-c`, `--config` | Config bundling `calib` / `input` / `output` |
+| `--calib` | Calibration result to apply |
+| `--in` | Raw input bag |
+| `--out` | Output bag; defaults to `<bag>.corrected.bag` |
+| `--map` | Explicit topic→sensor map. Rarely needed — the calib records each sensor's source topic, so the mapping is auto-derived |
+| `--keep-bias` | Do not remove the static bias |
+| `--undistort` | Also undistort images |
+
+What it corrects and why: [Corrected-dataset
+export](/guides/corrected-datasets/).
+
+## `roundtrip`
+
+End-to-end validation: calibrate, apply the calibration to its own bag,
+recalibrate the corrected bag, and report PASS/FAIL. Exits non-zero on FAIL, so
+it works in CI.
+
+```bash
+camcalib roundtrip -c cam_imu.yaml
+```
+
+| Flag | Description |
+|---|---|
+| `-c`, `--config` | Cam-IMU config to validate |
+| `--out` | Report output path |
+| `--bag` | Override the input bag |
+| `--keep-corrected` | Keep the corrected bag (auto-deleted otherwise) |
+| `--keep-bias` | Pass through to `apply-calib` |
+
+What PASS means: [Round-trip validation](/guides/roundtrip/).
+
+## `run`
+
+Runs a calibration, dispatching on the config type so you do not have to pick
+the subcommand yourself.
+
+```bash
+camcalib run --config any_config.yaml
+```
+
+| Flag | Description |
+|---|---|
+| `--config`, `-c` | Any CamCalib config |
+
+## `analyze`
+
+Analyse existing calibration results.
+
+```bash
+camcalib analyze --results results/regression/dataset/run/
+```
+
+| Flag | Description |
+|---|---|
+| `--results`, `-r` | Results directory to analyse |
 
 ## Scripts
 
+Not subcommands, but part of the everyday surface:
+
 | Script | Purpose |
 |---|---|
-| `paper_scripts/show_sim_single.sh` | Plot a single simulation run |
+| `scripts/run_regression_tests.py` | Manifest-driven batch runner. `--level benchmark --parallel 8`, `--only <dataset>` |
+| `scripts/run_quick_regression.py` | Six-run subset, roughly ten minutes |
+| `scripts/compare_baseline.py` | Compare current results against a saved baseline |
+| `scripts/save_baseline.py` | Save a new baseline, with a comparison report |
+| `scripts/visualize_result.py` | Post-hoc Rerun 3D viewer for a result directory |
+| `python -m camcalib.analysis.regenerate_html` | Rebuild HTML reports from saved YAML + detection cache |
+| `studies/calib_video_real.py` | Render a calibration MP4 (`--sim`, `--recover`, `--rig-view`) |
 
-## Visualisation
-
-RViz with the shipped display configuration shows the estimated trajectory and
-the board map while a run is in progress:
-
-```bash
-rviz -d src/mvis/launch/display.rviz
-```
+More detail in [Evaluation & metrics](/reference/evaluation/).

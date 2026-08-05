@@ -1,115 +1,128 @@
 ---
 title: FAQ & troubleshooting
-description: Build errors, run failures, and results that look wrong.
+description: Install problems, run failures, and results that look wrong.
 pageType: reference
 ---
 
-## Build
+## Install
 
-### GTSAM fails to build, or Eigen errors at link time
+### Segfault when constructing `gtsam.Pose3`
 
-Turn off `march=native` — this is a known
-[GTSAM issue](https://github.com/borglab/gtsam/issues/75#issuecomment-502809431):
-
-```bash
-cd gtsam/build
-ccmake ..
-# set GTSAM_BUILD_WITH_MARCH_NATIVE=OFF
-```
-
-Also make sure GTSAM uses the *system* Eigen (`GTSAM_USE_SYSTEM_EIGEN=ON`) so
-every package links against the same version.
-
-### catkin tries to build GTSAM
-
-Do not put the GTSAM sources inside the workspace's `src/` folder. Build and
-install it separately, as in [Installation](/getting-started/installation/).
-
-### An LZ4 symbol conflict
-
-A ROS/system library clash — the
-[workaround](https://github.com/ethz-asl/lidar_align/issues/16#issuecomment-504348488)
-applies here unchanged.
-
-### The machine freezes while building
-
-Use fewer parallel jobs:
+GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2 you get a
+crash, not an exception:
 
 ```bash
-catkin build -j2
+pip install "numpy<2"
 ```
 
-### Old GTSAM version
+### `aprilgrid` or ArUco not found
 
-Install a recent release following the
-[vicon2gt instructions](https://github.com/rpng/vicon2gt#building-gtsam-and-dependencies).
+Detector backends are optional extras:
+
+```bash
+pip install -e ".[apriltag]"    # AprilGrid
+pip install -e ".[aruco]"       # ArUco
+```
+
+### Cannot read a ROS bag
+
+```bash
+pip install rosbags
+```
+
+Pure Python — you do not need ROS installed.
+
+### Something else
+
+`bash scripts/setup_env.sh` builds the `cam_calib` environment and runs the test
+suite, which separates an install problem from a data problem.
 
 ## Running
 
-### The calibration diverges immediately
+### Few or no detections
 
-Almost always the base IMU ↔ `cam0` initial transform. It is the one parameter
-that needs a real starting guess — run Kalibr first and use its output
-([Camera–IMU calibration](/guides/camera-imu-calibration/), step 6). Other
-cameras and IMUs can start at identity.
+Check `tag_family`, `rows`, `cols`, and `tag_spacing` against the board you
+actually printed — `rows`/`cols` are **inner corners** for a chessboard but tag
+counts for an AprilGrid. Multi-scale detection handles far and near boards; it
+cannot fix a wrong family.
 
-### IMU initialisation never completes
+### Quality gating is dropping my frames
 
-The bag needs a static period at the start. Check `init_window_time` and
-`init_imu_thresh`, and confirm the recording actually begins at rest.
+By design: pooled-pose filter (≥20% of tags across cameras), per-corner ≥5
+views, per-camera ≥3 views, minimum 6 tags per frame. If most frames are
+dropped the recording is too sparse — get closer, or move more slowly.
 
-### No camera measurements enter the graph
+### Stage 1 initialisation fails
 
-Check `cam_start_time` and `bag_start` — together they may skip past the part of
-the bag where the board is visible. Also confirm the topic names match the bag
-exactly.
+The sanity check caught a degenerate init. Common on wide fisheye with the wrong
+model — try `equidistant`. `max_init_frames` caps how many frames the OpenCV
+init uses.
 
-### It runs but takes forever
+### It is slow
 
-Raise `cam_meas_skip` to use fewer frames, raise `optimize_every_n`, and leave
-`use_marginals` off unless you need covariances. Never leave
-`use_numerical_jacob` on outside debugging.
+`corner_subsample: top_left` is already the default (3–5× faster). Also:
+`factor_hz` to subsample frames, `--parallel` on the regression runner, and
+`cache_dir`, which makes re-runs skip detection entirely.
+
+### A wide-FoV stereo fit diverged
+
+Known: `double_sphere` and `eucm` stereo fits can slide into an fx–xi / alpha
+basin on TUM-VI while single-camera fits stay stable. Fit each camera alone,
+then pin those intrinsics for the joint solve — the recipe is in
+`examples/configs/tumvi_cam_imu/`. See [Camera model](/concepts/camera-model/).
 
 ## Results that look wrong
 
 ### Reprojection error is low but the extrinsics look off
 
-Low reprojection error only says the solution explains its own observations. A
-parameter that was unobservable under the recorded motion settles near its prior
-without raising the residual. Check the reported σ alongside the value — see
-[Evaluation & metrics](/reference/evaluation/).
+A low residual means the solution explains its own observations. A parameter the
+motion never constrained settles near its initial value without raising the
+error. Read the **motion-excitation grade** in the HTML report, and for
+camera–IMU run [`camcalib roundtrip`](/guides/roundtrip/).
 
-### A rolling-shutter camera's time offset is off by half the readout
+### Round-trip FAILs
 
-The timestamp convention is probably wrong. `camN_rs_mode` describes what your
-*driver* stamps, not a preference — see
-[Rolling shutter](/guides/rolling-shutter/).
+That is a real finding. Usual causes: wrong camera model, wrong IMU convention,
+an interpolated accelerometer corrupting `td` (try `gyro_only` or
+`estimate_t_ga`), or insufficient excitation. See
+[Round-trip validation](/guides/roundtrip/#when-it-fails).
+
+### `td` or the lever arm look wrong on a dynamic rig
+
+Check `state_hz`. It defaults to 30 Hz; below that, reprojection, lever, and
+`td` alias on dynamic-motion rigs. Gentle sequences are insensitive to it.
+
+### The T265's time offset is unstable
+
+Its Bosch BMI055 publishes a 62.5 Hz accelerometer interpolated to 200 Hz, which
+injects a gyro-accel timing offset. Either set `gyro_only: true` on that IMU or
+turn on `solve.estimate_t_ga`. See [IMU model](/concepts/imu-model/).
 
 ### IMU intrinsics come back at their initial values
 
 They were not observed. Scale and misalignment need excitation on every axis;
-g-sensitivity needs simultaneous rotation and strong linear acceleration. See
+`Tg` needs simultaneous rotation and strong linear acceleration. See
 [Degeneracy](/concepts/degeneracy/).
 
-### Results differ from Kalibr's numbers
+### Results differ from Kalibr's
 
-Check three things before concluding either is wrong: the IMU model convention
-(`imu_model` defaults to RPNG, not Kalibr — the matrices differ for the same
-device), the sensor numbering (Kalibr's `cam0` is often not MVIS's `Cam0`, see
-[Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/#sensor-numbering)),
-and the transform direction (`T_C0toI` versus `T_ItoC0`).
+Check the IMU convention first — `kalibr`, `rpng`, and `calyx` produce different
+matrices for the same device — then sensor numbering, then transform direction.
+`camcalib.io.kalibr` reads Kalibr camchains directly, which is the reliable way
+to compare.
 
 ### Every translation is off by the same factor
 
-The configured board size does not match the printed board. Measure a tag with
-calipers.
+`tag_size` does not match the printed board. Measure a tag with calipers.
 
-### Results differ between bags of the same rig
+### Results differ between sequences of the same rig
 
-Those parameters were not constrained by the motion in them. Record with fuller
-excitation. Repeatability across bags is the most useful field check you have.
+Those parameters were not constrained by the motion in them. Run a
+[batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
+— spread across sequences is the most honest accuracy signal available without
+ground truth.
 
 ## Still stuck
 
-Open an issue on [the toolbox repository](https://github.com/rpng/mvis) with
-your launch file, the console output, and what the rig is.
+Open an issue on [the repository](https://github.com/rpng/mvis) with your
+config, the console output, and what the rig is.

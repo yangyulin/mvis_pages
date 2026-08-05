@@ -1,35 +1,64 @@
 ---
 title: Python API
-description: Status of a programmatic interface to Open MVIS.
+description: CamCalib's package layout and the modules worth importing directly.
 pageType: reference
+wide: true
 ---
 
-:::caution[Not available]
-Open MVIS is a C++ / ROS toolbox. It has no Python API, and this page is a
-placeholder for one rather than documentation of an existing interface.
+CamCalib is a Python library, so the CLI is one entry point rather than the only
+one. Every stage is importable.
+
+:::note[Not auto-generated yet]
+This page is a hand-written map of the package, not generated API
+documentation. Choosing a docstring-extraction toolchain is open question **O4**
+on the [roadmap](/about/roadmap/). Until then the source is authoritative.
 :::
 
-## What exists today
+## Package layout
 
-The programmatic surface is ROS, not a library import:
+| Module | Contents |
+|---|---|
+| `camcalib.core` | Types — `Observation`, `CameraParams`, `CalibrationResult` — plus config dataclasses |
+| `camcalib.camera` | One `CameraModel` per distortion model; projection, Jacobians, unprojection in one place |
+| `camcalib.board` | Detection — chessboard, AprilGrid, ArUco — and `corner_subsample` |
+| `camcalib.io` | `DataLoader`, streaming `DetectionPipeline`, data sources, detection cache, frame selector, output writers |
+| `camcalib.calibration` | Initialiser (OpenCV PnP), Optimizer (the unified factor), Pipeline, `outlier_rejection`, `camera_projection`, `custom_projections` |
+| `camcalib.analysis` | HTML report, plotting, Rerun 3D visualisation, motion analysis |
+| `camcalib.recalib` | `apply-calib` — corrected-dataset export |
+| `camcalib.cli` | Command-line interface |
 
-- **Launch files** parameterise a run — see
-  [Configuration](/reference/configuration/).
-- **Nodes and scripts** are listed in the [CLI reference](/reference/cli/).
-- **Results** are written as text files with a documented layout — see
-  [Result formats](/reference/result-formats/). Parsing that file is currently
-  how downstream tooling consumes a calibration.
+## Kalibr interop
 
-Driving the toolbox from Python therefore means invoking `roslaunch` and reading
-the result file, which is what the benchmark ingest scripts do.
+`camcalib.io.kalibr` is the one surface for Kalibr files:
 
-## What a real API would need
+| Function | Does |
+|---|---|
+| `read_camchain` | Intrinsics + distortion across pinhole / ds / eucm / fov |
+| `read_camchain_imucam` | Also recovers each camera's `T_cam_imu` and the stereo `T_cn_cnm1` |
+| `write_camchain_imucam` | Exports a cam-IMU result as a round-trippable camchain-imucam |
+| `apriltag_board.from_kalibr_yaml` | Loads an AprilGrid target definition |
 
-For this page to become genuine reference material, three things have to be
-decided first: whether bindings wrap the C++ solver or a separate
-implementation, whether the result file gains a machine-readable serialisation
-alongside the human-readable one, and whether the docs are generated from
-docstrings or written by hand.
+This is the practical path for comparing against, or migrating from, Kalibr.
 
-Until those are settled, generated API documentation would describe an interface
-that does not exist. Progress is tracked on the [roadmap](/about/roadmap/).
+## Regenerating reports
+
+Rebuild HTML reports from saved YAML plus the detection cache, without re-running
+the calibration — useful when only the report template changed:
+
+```bash
+python -m camcalib.analysis.regenerate_html
+```
+
+## Why the models live in one place
+
+`camera/CameraModel` holds each model's projection, Jacobian, and unprojection
+together, and `calibration/camera_projection.py` is shared by the optimiser
+*and* the HTML report. That is a deliberate constraint: reported residuals are
+computed by the same code the solver minimised, so a report cannot disagree
+with the fit it describes.
+
+## Stability
+
+There is no API-stability guarantee yet. The CLI and the config schema are the
+stable surface; treat direct imports as subject to change until this page is
+generated from the source.

@@ -1,108 +1,68 @@
 ---
 title: Installation
-description: Build Open MVIS and its dependencies into a catkin workspace.
+description: Install CamCalib — one-step conda setup or pip into an existing environment.
 pageType: guide
 ---
 
-Build the toolbox into a catkin workspace. Check
-[Requirements](/getting-started/requirements/) first for versions; if a build
-fails, [FAQ & troubleshooting](/about/faq/) collects the errors we see most.
+CamCalib is pure Python and installs with `pip` on Windows, macOS, and Linux.
+There is no ROS dependency and nothing to compile.
 
-## 1. Create the workspace
-
-```bash
-mkdir -p ./workspace/src
-cd workspace/src
-```
-
-## 2. Clone OpenVINS
+## One-step setup (recommended)
 
 ```bash
-git clone https://github.com/rpng/open_vins/
-cd open_vins/
-git checkout v2.3
-cd ..
+bash scripts/setup_env.sh
+conda activate cam_calib
 ```
 
-## 3. Get OpenCV
+Creates the `cam_calib` conda environment, installs every dependency, and runs
+the test suite so you know the install works before you point it at data.
 
-The ROS package is enough for most users:
+## Manual install
 
 ```bash
-sudo apt install ros-melodic-cv-bridge   # Ubuntu 18.04
-sudo apt install ros-noetic-cv-bridge    # Ubuntu 20.04
+pip install -e .
 ```
 
-If you need a source build (see the
-[OpenVINS instructions](https://docs.openvins.com/gs-installing.html#gs-install-opencv)):
+Detector backends are optional extras — install the ones your boards need:
 
 ```bash
-git clone https://github.com/opencv/opencv/
-git clone https://github.com/opencv/opencv_contrib/
-mkdir opencv/build/
-cd opencv/build/
-cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
-make -j8
-sudo make install
+pip install -e ".[apriltag]"    # AprilGrid (aprilgrid package)
+pip install -e ".[aruco]"       # ArUco (opencv-contrib)
+pip install -e ".[dev]"         # pytest
 ```
 
-## 4. Clone the AprilTag library
+## Reading bags
 
-Use the `opencv4` branch if you built against OpenCV 4.
+ROS bags are read through [`rosbags`](https://pypi.org/project/rosbags/) — pure
+Python, no ROS installation:
 
 ```bash
-git clone https://github.com/rpng/apriltags-cpp.git
+pip install rosbags
 ```
 
-## 5. Build GTSAM
+This is what lets a ROS1 or ROS2 bag be calibrated on a machine that has never
+had ROS on it.
 
-GTSAM is the only dependency you have to build yourself — Boost and Eigen ship
-with most Linux distributions. Install the system libraries first:
+:::caution[GTSAM needs NumPy 1.x]
+GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2 installed
+you will get a **segfault** when constructing `gtsam.Pose3(Rot3, np.array)` —
+not an exception, a crash. Pin it:
 
 ```bash
-sudo apt install libboost-all-dev libeigen3-dev libmetis-dev
+pip install "numpy<2"
 ```
-
-Optionally add Intel TBB and MKL for multithreaded optimisation. This is a
-speed-only step; the toolbox runs fine without it.
-
-```bash
-wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
-sudo sh -c 'echo deb https://apt.repos.intel.com/tbb all main > /etc/apt/sources.list.d/intel-tbb.list'
-sudo apt-get update
-sudo apt-get install intel-tbb-2020.0-088
-sudo apt-get install intel-mkl-2020.0-088
-```
-
-Then [build GTSAM](https://gtsam.org/get_started/) and install it globally. Use
-the *system* Eigen so that every package links against the same version:
-
-```bash
-git clone https://github.com/borglab/gtsam
-mkdir gtsam/build/
-cd gtsam/build/
-cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF ..
-make -j6
-sudo make -j6 install
-echo 'export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH' >> ~/.bashrc
-```
-
-:::caution
-Do not place the GTSAM sources inside the `src/` folder of the workspace —
-catkin will try to build them as a package.
 :::
 
-## 6. Clone and build Open MVIS
+## Check the install
 
 ```bash
-git clone https://github.com/yangyulin/mvis.git
-cd ..
-catkin build
+camcalib --help
 ```
+
+Seven subcommands should be listed — `calibrate`, `cam`, `cam-imu`,
+`apply-calib`, `roundtrip`, `run`, `analyze`. They are documented in the
+[CLI reference](/reference/cli/).
 
 ## Next
 
-Run the simulator end-to-end in [Quickstart](/getting-started/quickstart/).
+Calibrate something in [Quickstart](/getting-started/quickstart/).

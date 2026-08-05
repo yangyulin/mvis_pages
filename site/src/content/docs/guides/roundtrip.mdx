@@ -1,0 +1,70 @@
+---
+title: Round-trip validation
+description: Validate a calibration end to end — calibrate, correct, recalibrate, PASS/FAIL.
+pageType: guide
+---
+
+Reprojection error tells you a calibration fits its own observations. It does
+not tell you the calibration is *right*. Round-trip does: apply the calibration
+to the data it came from, then calibrate again. If it was correct, there is
+nothing left to find.
+
+```bash
+camcalib roundtrip -c cam_imu.yaml
+```
+
+One command runs calibrate → [`apply-calib`](/guides/corrected-datasets/) →
+recalibrate → report. It exits non-zero on FAIL, so it belongs in CI.
+
+## What PASS means
+
+Two conditions, and they pull in opposite directions — which is what makes the
+test informative:
+
+**Collapse.** On the corrected bag, every IMU's `Dw` and `Da` must go to
+identity and `b_g` / `b_a` to zero. The first pass claimed to have measured
+those; if it was right, correction consumed them and there is nothing left.
+
+**Preserve.** The camera and IMU extrinsics — and the **stereo baseline** —
+must not move. Correction changes timing and inertial scaling, not geometry. A
+baseline that shifts means the first solve traded geometry against something
+else.
+
+Residual `td` is reported as a **warning, not a failure**: how much of a time
+offset survives correction is observability-dependent.
+
+## Flags
+
+| Flag | Effect |
+|---|---|
+| `-c`, `--config` | The cam-IMU config to validate |
+| `--out` | Report path |
+| `--bag` | Override the config's bag |
+| `--keep-corrected` | Keep the intermediate corrected bag |
+| `--keep-bias` | Passed through to `apply-calib` |
+
+The corrected bag is given a distinct name — so it gets a **fresh detection
+cache** rather than silently reusing the original's — and is deleted afterwards
+unless you keep it.
+
+## Confirmed results
+
+| Rig | Collapse | Preserve |
+|---|---|---|
+| virig 3cams | all four IMUs' `Da` → identity | baseline 69.86 mm stable |
+| Monado / MIC05 | `Da` 1.06 → 1.00, `b_a` −0.25 → −0.01 | baseline 133.8 mm stable |
+
+## When it fails
+
+A FAIL is a real finding, not a flaky test. The usual causes:
+
+- **Wrong camera model** — the intrinsics absorbed error that reappears once
+  timing is corrected. Try another [distortion
+  model](/concepts/camera-model/).
+- **Wrong IMU convention** — see [IMU model](/concepts/imu-model/).
+- **An interpolated accelerometer** corrupting `td`. This is the T265 case;
+  `gyro_only` on that IMU, or estimating `t_ga`, is the fix.
+- **Insufficient excitation** — the parameter was never observed, so correcting
+  by it does nothing consistent.
+
+Same entry point as `studies/roundtrip.py`.

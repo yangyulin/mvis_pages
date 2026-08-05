@@ -63,6 +63,6 @@ When calibrating IMU and ELP cameras, the [Kalibr extension](https://github.com/
 ### Scripts for running MVIS
 
 ```bash
-source devel/setup.bash
-roslaunch mvis yulin_virig_for_mvis_init_large_errors.launch
+camcalib calibrate -c virig_4cams_cam.yaml   # cameras first
+camcalib cam-imu   -c virig_4cams_cam_imu.yaml
 ```

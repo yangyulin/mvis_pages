@@ -1,6 +1,6 @@
 ---
 title: Requirements
-description: Dependencies, supported sensors, and the camera / IMU model matrix for Open MVIS.
+description: What CamCalib needs to run, what it calibrates, and which inputs and boards it accepts.
 pageType: reference
 wide: true
 ---
@@ -8,54 +8,79 @@ wide: true
 import { Image } from 'astro:assets';
 import viRig from '../../../assets/vi_rig.jpg';
 
-What Open MVIS needs in order to build and run, and what it is able to
-calibrate. For the build steps themselves see
-[Installation](/getting-started/installation/).
+CamCalib is **pure Python** and runs on Windows, macOS, and Linux via
+`pip install`. There is no ROS dependency and nothing to compile. Build steps
+are in [Installation](/getting-started/installation/).
 
-## Software dependencies
+## Dependencies
 
-| Dependency | Version | Required | Notes |
-|---|---|---|---|
-| [ROS](http://wiki.ros.org/ROS/Installation) | Melodic / Noetic | yes | data is consumed as ROS bags |
-| [GTSAM](https://github.com/borglab/gtsam) | 4.x | yes | the only dependency you must build from source |
-| [OpenCV](https://github.com/opencv/opencv) | 3 or 4 | yes | `ros-*-cv-bridge` is sufficient |
-| [OpenVINS](https://github.com/rpng/open_vins/tree/develop_v2.3) | v2.3 | yes | feature front-end |
-| [apriltags-cpp](https://github.com/rpng/apriltags-cpp) | `opencv4` branch for OpenCV 4 | yes | AprilTag detection |
-| Boost, Eigen, METIS | system packages | yes | `libboost-all-dev libeigen3-dev libmetis-dev` |
-| [Intel TBB / MKL](https://software.intel.com/en-us/articles/installing-intel-free-libs-and-python-apt-repo) | 2020.0 | optional | multithreaded GTSAM — speed only |
+| Dependency | Required | Notes |
+|---|---|---|
+| Python | yes | — |
+| [GTSAM](https://github.com/borglab/gtsam) 4.2 | yes | Factor-graph optimisation, native SO(3)/SE(3) |
+| NumPy **< 2** | yes | GTSAM 4.2 from pip is built against the NumPy 1.x ABI |
+| OpenCV | yes | Detection and PnP initialisation |
+| [`aprilgrid`](https://pypi.org/project/aprilgrid/) | for AprilGrid | `pip install -e ".[apriltag]"` |
+| `opencv-contrib` | for ArUco | `pip install -e ".[aruco]"` |
+| [`rosbags`](https://pypi.org/project/rosbags/) | to read bags | Pure Python — **no ROS installation** |
+| `pytest` | dev | `pip install -e ".[dev]"` |
 
 ## What can be calibrated
 
-| Quantity | Symbol | Scope | Models / notes |
-|---|---|---|---|
-| Camera intrinsics | `fx, fy, cx, cy` | per camera | refined, or solved from scratch |
-| Camera distortion | `k1…kn` | per camera | rad-tan, equidistant (fisheye) |
-| IMU intrinsics | `Dw, Da, Tg` | per IMU | Kalibr or RPNG model |
-| Gyroscope intrinsics | scale + misalignment | per gyro | Kalibr or RPNG model |
-| Camera–IMU extrinsics | `R_CI, t_CI` | pairwise | rotation + translation |
-| IMU–IMU extrinsics | `R_IiIj, t_IiIj` | pairwise | rotation + translation |
-| Time offsets | `Δt` | pairwise | each sensor → base-IMU clock |
-| Rolling-shutter readout | `tr` | per RS camera | first / middle / last row convention |
+| Quantity | Scope | Notes |
+|---|---|---|
+| Camera intrinsics + distortion | per camera | Six models, mixable across a rig |
+| Camera extrinsics | per camera | Against `reference_camera` |
+| Camera–camera time offsets | pairwise | `optimize_time_offset` |
+| Rolling-shutter readout | per RS camera | Solved jointly, not corrected after |
+| Board poses | per frame | Written to `*_full.yaml` for replay |
+| Camera–IMU extrinsics `T_CtoI` | per camera | — |
+| Camera–IMU time offset `td` | per camera | — |
+| IMU intrinsics `Dw` / `Da` / `Tg` | per IMU | Three conventions |
+| IMU biases `b_g` / `b_a` | per IMU | — |
+| Gyro↔accel offset `t_ga` | base IMU | `solve.estimate_t_ga` |
 
-Any subset can be locked and the remainder solved — the switches are listed in
-the [configuration reference](/reference/configuration/#what-to-calibrate).
+## Camera models
 
-## Calibration targets
+`radtan` · `equidistant` (KB4, **recommended for fisheye**) · `fov` ·
+`double_sphere` · `eucm` · `omni_radtan` (experimental). Details:
+[Camera model](/concepts/camera-model/).
 
-Both target families are supported and are interchangeable:
+## IMU-intrinsics conventions
 
-- [Kalibr AprilGrid](https://github.com/ethz-asl/kalibr/wiki/calibration-targets) — recommended
-- [ArUco boards](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html)
+`kalibr` · `rpng` · `calyx` — a convention, not a quality lever. See
+[IMU model](/concepts/imu-model/).
+
+## Input formats
+
+Detection is streaming — one image at a time — so memory is bounded regardless
+of dataset size.
+
+| `source_type` | Input |
+|---|---|
+| `images` | Folder sorted by filename (`.jpg .jpeg .png .bmp .tiff .tif`) |
+| `timestamped_images` | Folder + CSV of `filename,timestamp` |
+| `rosbag_topic` | ROS1 bag; several cameras from one file |
+| `ros2bag` | ROS2 SQLite bag directory |
+| `euroc` | EuRoC / ASL — TUM-VI, EuRoC MAV, Monado SLAM |
+| `video` | Video file |
+
+## Calibration boards
+
+| Board | `board_type` | Required fields |
+|---|---|---|
+| AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` |
+| Chessboard | `chessboard` | `rows`, `cols` (inner corners), `square_size` (m) |
+| ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` |
+
+Kalibr target YAMLs load directly.
 
 ## Reference rig
 
-The MVIS datasets were collected with a self-built VI-Rig. The rig is not
-required to run the toolbox — it is the configuration that the shipped launch
-files assume.
+The released MVIS datasets come from a self-built VI-Rig. It is not required —
+it is what the shipped example configs assume.
 
 <Image src={viRig} alt="VI-Rig with 4 IMUs and 5 cameras" width="320" />
-
-**Visual-Inertial (VI)-Rig** — 4 IMUs and 5 cameras:
 
 | Sensor | Rate (Hz) | Topic | Resolution |
 |---|---|---|---|
@@ -64,13 +89,5 @@ files assume.
 | Xsens MTI-100 | 400 | `/imu/data` | — |
 | RealSense T265 IMU | 200 | `/t265/imu` | — |
 | FLIR BlackFly | 30 | `/blackfly/image_raw` | 720×540 |
-| RealSense T265 Left | 30 | `/t265/fisheye1/image_raw` | 848×800 |
-| RealSense T265 Right | 30 | `/t265/fisheye2/image_raw` | 848×800 |
-| ELP Left (rolling shutter) | 25 | `/elp/split_sync_image_node/left/image_raw` | 640×480 |
-| ELP Right (rolling shutter) | 25 | `/elp/split_sync_image_node/right/image_raw` | 640×480 |
-
-ROS drivers for these sensors are collected in
-[multi_sensor_drivers](https://github.com/yangyulin/multi_sensor_drivers). If no
-driver exists for your sensor, the
-[Kalibr bag creator](https://github.com/ethz-asl/kalibr/wiki/bag-format) will
-build a bag from raw files.
+| RealSense T265 L / R | 30 | `/t265/fisheye{1,2}/image_raw` | 848×800 |
+| ELP L / R (rolling shutter) | 25 | `/elp/split_sync_image_node/{left,right}/image_raw` | 640×480 |

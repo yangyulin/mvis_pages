@@ -1,118 +1,101 @@
 ---
 title: Multi-camera / multi-IMU rigs
-description: Add auxiliary IMUs and cameras to the graph — modes, initialisation, and sensor numbering.
+description: Calibrate rigs with several cameras and several IMUs in a single graph.
 pageType: guide
 ---
 
-What changes when the rig has more than one IMU. The base workflow in
-[Camera–IMU calibration](/guides/camera-imu-calibration/) still applies — this
-page covers the extra declarations.
+Multi-sensor rigs are the case CamCalib is built for. There is no separate
+stereo step and no pairwise composition: every camera and every IMU enters one
+factor graph, so correlations between them are kept rather than discarded.
 
-## Base and auxiliary IMUs
+## Several cameras
 
-One IMU is the **base**: its clock is the reference every other sensor is
-calibrated to, and it is the only IMU whose pose enters the trajectory. All
-others are **auxiliary**, related to the base by a rigid transform and a time
-offset.
+Add entries and choose the reference:
 
-```xml title="launch/<your>.launch"
-<param name="topic_imu"  type="string" value="/gx3_25/data" />      <!-- base -->
-<param name="topic_imu0" type="string" value="/gx3_35/imu/data" />  <!-- aux 0 -->
-<param name="topic_imu1" type="string" value="/imu/data" />         <!-- aux 1 -->
-<param name="topic_imu2" type="string" value="/t265/imu" />         <!-- aux 2 -->
+```yaml title="config.yaml"
+cameras:
+  - camera_id: 0
+    source_type: rosbag_topic
+    source_path: /data/rig.bag
+    topic: /cam0/image_raw
+    distortion_model: equidistant
+  - camera_id: 1
+    source_type: rosbag_topic
+    source_path: /data/rig.bag
+    topic: /cam1/image_raw
+    distortion_model: equidistant
+  - camera_id: 2
+    source_type: rosbag_topic
+    source_path: /data/rig.bag
+    topic: /cam2/image_raw
+    distortion_model: radtan       # models may be mixed
+    shutter_type: rolling
+
+reference_camera: 0
+optimize_time_offset: true         # for unsynchronised cameras
 ```
 
-Pick the best sensor as base — highest rate, lowest noise. Everything else is
-measured against it, so its errors propagate to the whole rig.
+Extrinsics are expressed against `reference_camera`. Camera-to-camera
+transforms follow by composition through the graph, which is what keeps a
+five-camera rig consistent.
 
-## Full IMU or gyro only
+**Cross-FOV rigs** — a fisheye and a narrow lens on the same rig — are where
+time-offset estimation usually fails. CamCalib runs two independent estimators
+(PnP-based and M5 homography cross-correlation) precisely for this case.
 
-Each auxiliary IMU can contribute both of its sensors or only its gyroscope. The
-list is positional, one entry per auxiliary IMU:
+## Several IMUs
 
-```xml title="launch/<your>.launch"
-<arg name="imus_s_mode" default="[0, 0, 1]" /> <!-- 0: full imu, 1: gyro only -->
+The first entry in `imu_topics` is the **base IMU**: the reference clock, and
+the only IMU that carries the trajectory. Everything else is auxiliary, related
+by a rigid transform and a time offset.
+
+```yaml title="cam_imu.yaml"
+input:
+  imu_topics: ["/imu0", "/imu1", "/t265/imu"]
+  imus:
+    - {}                       # base — needs the accel
+    - {}
+    - {gyro_only: true}        # aux with an untrustworthy accel
 ```
 
-Gyro-only mode drops the accelerometer from the graph. Use it when an
-accelerometer is untrustworthy, or when you only care about the rotational
-extrinsic — a gyro-only auxiliary constrains rotation and time offset but leaves
-its translation to the board geometry.
+Choose the best sensor as base — highest rate, lowest noise. Its errors
+propagate to the whole rig.
 
-## Auxiliary IMU intrinsics
+`gyro_only` is per-IMU and not permitted on the base. What it does and when to
+prefer it over `estimate_t_ga`: [IMU model](/concepts/imu-model/).
 
-Same shape as the base IMU, indexed by `N`:
+## Why redundancy helps
 
-```xml title="launch/<your>.launch"
-<param name="imuN_model" type="int" value="0" />
-<rosparam param="imu_sN_intrinsics_Da">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
-<rosparam param="imu_sN_intrinsics_Dw">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
-<rosparam param="imu_sN_intrinsics_Tg">[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]</rosparam>
-```
+Several IMUs observe the *same* motion. That redundancy constrains parameters a
+single IMU leaves weak — time offsets, readout, and IMU intrinsics — which is
+the reason to carry the extra sensors at all. It is also what makes the
+[round-trip check](/guides/roundtrip/) meaningful on these rigs: a wrong
+calibration usually cannot satisfy every IMU at once.
 
-## IMU–IMU spatial-temporal initialisation
+## Sensor numbering when comparing with Kalibr
 
-Unlike the base IMU ↔ `cam0` transform, IMU-to-IMU transforms are forgiving:
-start at identity and let refinement do the work.
-
-```xml title="launch/<your>.launch"
-<param name="calib_imuimu_dt0" type="double" value="0.01" />
-<rosparam param="T_ItoIsN">
-  [
-    1.0, 0,   0,   -0.38,
-    0,   1.0, 0,    0.24,
-    0,   0,   1.0, -0.10,
-    0,   0,   0,    1.00
-  ]
-</rosparam>
-```
-
-```xml title="launch/<your>.launch"
-<arg name="prior_sigma_imu_dt"    default="0.01" />
-<arg name="prior_sigma_ItoIs_ori" default="0.015" />
-<arg name="prior_sigma_ItoIs_pos" default="0.015" />
-```
-
-:::note[Rotate, don't just translate]
-IMU–IMU translation is observed through the centripetal and Euler terms that
-only appear under rotation. A bag that translates but barely rotates leaves
-those baselines poorly constrained no matter how long it is — see
-[Degeneracy](/concepts/degeneracy/).
-:::
-
-## Enable the auxiliary calibration
-
-```xml title="launch/<your>.launch"
-<arg name="do_calibration_imus_s"     default="true" />  <!-- extrinsics -->
-<arg name="do_calibration_imus_s_td"  default="true" />  <!-- time offset -->
-<arg name="do_calibration_imus_s_in"  default="true" />  <!-- intrinsics -->
-```
-
-## Sensor numbering
-
-Open MVIS numbers sensors by role, not by topic order, and its indices differ
-from Kalibr's. Getting this wrong silently compares the wrong pair of sensors.
-For the released rigs:
+CamCalib numbers sensors by role; Kalibr numbers by input order. Getting this
+wrong silently compares the wrong pair. For the released rigs:
 
 **4 IMUs + 3 cameras**
 
-| Sensor | BlackFly | T265 Left | T265 Right | GX3-25 | GX3-35 | Xsens MTI-100 | T265 IMU |
+| Sensor | BlackFly | T265 L | T265 R | GX3-25 | GX3-35 | Xsens MTI-100 | T265 IMU |
 |---|---|---|---|---|---|---|---|
 | Kalibr | cam0 | cam1 | cam2 | imu0 | imu1 | imu2 | imu3 |
 | MVIS | Cam2 | Cam0 | Cam1 | Ib | Is0 | Is1 | Is2 |
 
 **4 IMUs + 4 cameras**
 
-| Sensor | T265 Left | T265 Right | ELP Left | ELP Right | GX3-25 | GX3-35 | Xsens MTI-100 | T265 IMU |
+| Sensor | T265 L | T265 R | ELP L | ELP R | GX3-25 | GX3-35 | Xsens | T265 IMU |
 |---|---|---|---|---|---|---|---|---|
 | Kalibr (T265) | cam0 | cam1 | — | — | imu0 | imu1 | imu2 | imu3 |
 | Kalibr (ELP) | — | — | cam0 | cam1 | imu0 | imu1 | imu2 | imu3 |
 | MVIS | Cam0 | Cam1 | Cam2 | Cam3 | Ib | Is0 | Is1 | Is2 |
 
-`Ib` is the base IMU, `IsN` the Nth auxiliary.
+CamCalib reads and writes Kalibr `camchain` and `camchain-imucam` files
+directly — see [Result formats](/reference/result-formats/).
 
 ## Worked runs
 
-Both rigs above have complete example pages with data and results:
-[4 IMUs + 3 cams](/examples/in-house-4imus-3cams/) and
-[4 IMUs + 4 cams](/examples/in-house-4imus-4cams/).
+[4 IMUs + 3 cams](/examples/in-house-4imus-3cams/) ·
+[4 IMUs + 4 cams](/examples/in-house-4imus-4cams/)

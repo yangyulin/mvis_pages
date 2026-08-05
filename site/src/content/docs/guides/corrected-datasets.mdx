@@ -1,0 +1,75 @@
+---
+title: Corrected-dataset export
+description: Apply a calibration back onto a raw bag and re-record it calibration-corrected.
+pageType: guide
+---
+
+`camcalib apply-calib` takes a cam-IMU calibration and a raw ROS1 bag and writes
+a new bag with the calibration already applied — IMU intrinsics and bias
+removed, every stream on one timeline. Downstream consumers then get corrected
+data without having to know anything about the calibration.
+
+## Run it
+
+Config-driven, like the calibrator:
+
+```bash
+camcalib apply-calib -c recalib.yaml
+```
+
+Or by flags:
+
+```bash
+camcalib apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
+```
+
+Output defaults to `<bag>.corrected.bag`. The calibration records each sensor's
+**source topic**, so the topic→sensor mapping is derived automatically — there
+is no map to hand-write. `--map` exists for the cases where you must override
+it.
+
+## What gets corrected
+
+| Correction | Detail |
+|---|---|
+| IMU intrinsics | `Dw` / `Da` / `Tg` removed via the inverse model |
+| Static bias | Removed, unless `--keep-bias` |
+| Time alignment | Every camera and auxiliary IMU re-stamped onto the base-IMU timeline by its `td` |
+| Gyro↔accel offset | Base-IMU accel channel re-interpolated at `t + t_ga`, when `t_ga` was calibrated |
+| Undistortion | Images undistorted, with `--undistort` |
+
+A provenance sidecar is written alongside the bag recording what was applied.
+
+:::caution[Re-stamping uses the header clock, not record time]
+Correction is applied on each message's **header** clock. Re-stamping on
+record time would bake every topic's differential receive latency into the
+corrected bag — turning a driver artefact into permanent data. This is the
+single most important detail of the tool.
+:::
+
+## Batch
+
+A batch runner applies one calibration across a whole dataset family, which is
+the usual case: one calibration per rig, many recordings.
+
+## Check it worked
+
+A correct calibration, applied to its own bag, must make that bag recalibrate to
+*nothing left to correct* — every `Dw`/`Da` at identity, biases at zero, while
+the extrinsics and stereo baseline stay put. That check is automated:
+
+```bash
+camcalib roundtrip -c cam_imu.yaml
+```
+
+See [Round-trip validation](/guides/roundtrip/).
+
+## Validated on
+
+TUM MIC05 and TUM-VI raw, where the correction is bit-exact and the corrected
+bag recalibrates to near-identity IMU intrinsics. On the T265, `t_ga` goes
+from −6.32 ms to +0.53 ms and camera `td` from −7.6 ms to −0.37 ms after
+correction.
+
+Implementation: `src/camcalib/recalib/`; example config
+`examples/configs/recalib_example.yaml`.

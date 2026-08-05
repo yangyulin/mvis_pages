@@ -1,9 +1,87 @@
 ---
 title: Camera model
-description: Camera factor with calibration.
+description: The six projection and distortion models CamCalib supports, and how to choose between them.
 pageType: concept
+wide: true
 ---
 
-## Camera Factor with Calibration
+CamCalib implements six distortion models. Each lives in one place —
+`camera/CameraModel` holds its projection, Jacobians, and unprojection — so the
+same models are available in **camera-only and camera–IMU** calibration, in
+board and feature mode, and can be **mixed across cameras** in a single rig.
+Models outside GTSAM's built-ins carry custom analytical Jacobians.
 
-Coming soon — projection residual and Jacobians for global-shutter and rolling-shutter cameras with intrinsic, distortion, extrinsic, time-offset, and per-row readout calibration.
+Symbols follow [Notation & glossary](/concepts/notation/).
+
+## The six models
+
+| Model | Config value | Origin | Suits |
+|---|---|---|---|
+| Pinhole + radial-tangential | `radtan` | Brown–Conrady | Normal lenses |
+| Equidistant (KB4) | `equidistant` | Kannala–Brandt | **Fisheye — recommended** |
+| FOV | `fov` | Devernay–Faugeras | Wide-angle, single parameter |
+| Double Sphere | `double_sphere` | Usenko / Basalt | Very wide FoV |
+| EUCM | `eucm` | Khomutenko | Very wide FoV |
+| Omni + radtan | `omni_radtan` | Mei — **experimental** | Catadioptric, ultra-wide |
+
+```yaml title="config.yaml"
+cameras:
+  - camera_id: 0
+    distortion_model: equidistant
+```
+
+## Choosing one
+
+More parameters is not better. A model richer than the lens needs will fit
+noise, and on wide-FoV data it can slide into a basin that looks converged and
+is not.
+
+- **Normal lens** → `radtan`.
+- **Fisheye** → `equidistant`. It is the recommended default for a reason: it is
+  the best-behaved of the wide-FoV models across the benchmark.
+- **Very wide FoV** → `double_sphere` or `eucm` if `equidistant` leaves
+  structure in the residuals.
+- **Catadioptric** → `omni_radtan`, with the caveat that it is experimental.
+
+:::caution[Wide-FoV models can diverge on stereo]
+On TUM-VI, stereo `double_sphere` and `eucm` fits diverge into an fx–xi /
+alpha basin, while the **single-camera** fit is stable. The working recipe is
+two-step: fit each camera alone, then pin those intrinsics for the joint solve
+(`examples/configs/tumvi_cam_imu/`). A diverged fit is recognisable by an
+implausible focal length or blown-out distortion, not by a large residual.
+:::
+
+CamCalib guards against this: the two-pass **pathology guardrail** reverts to
+pass 1 if the optimiser lands on a non-positive focal, blown-out distortion, or
+a P95 regression. It is a backstop, not a substitute for picking the right
+model.
+
+## Rolling shutter
+
+A rolling-shutter camera exposes rows sequentially, so one image spans a range
+of times. Set `shutter_type: rolling` and the per-row readout is solved with
+everything else:
+
+```yaml title="config.yaml"
+cameras:
+  - camera_id: 0
+    shutter_type: rolling
+```
+
+Projection, time offset, rolling shutter, extrinsic composition, and SLERP pose
+interpolation all live in **one unified factor** rather than being applied in
+sequence. That is what lets readout be estimated jointly rather than corrected
+afterwards — and the same projection code backs the HTML report, so reported
+residuals are the ones the optimiser actually minimised.
+
+Practical guidance: [Rolling shutter](/guides/rolling-shutter/).
+
+## Validation
+
+The models were compared over a 52-run benchmark across MVIS T265 and TUM-VI
+1024 (`doc/investigation_ds_convergence.md`). On the camera–IMU path, TUM-VI raw
+IMU bags show `omni_radtan` and `equidistant` reproducing the Kalibr cam-IMU
+extrinsics to **≤2 mm lever, ≤0.15 mm stereo baseline, ≤1 ms time offset**.
+
+Model choice does not change the geometry a good fit recovers — it changes
+whether you get a good fit at all.

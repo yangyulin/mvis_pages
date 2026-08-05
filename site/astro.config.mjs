@@ -88,6 +88,8 @@ export default defineConfig({
             { label: 'Camera–IMU calibration', link: '/guides/camera-imu-calibration/' },
             { label: 'Multi-camera / multi-IMU rigs', link: '/guides/multi-sensor-rigs/' },
             { label: 'Rolling shutter', link: '/guides/rolling-shutter/' },
+            { label: 'Corrected-dataset export', link: '/guides/corrected-datasets/' },
+            { label: 'Round-trip validation', link: '/guides/roundtrip/' },
             { label: 'Simulation & synthetic data', link: '/guides/simulation/' },
           ],
         },

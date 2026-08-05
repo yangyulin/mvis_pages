@@ -1,74 +1,92 @@
 ---
 title: Comparison vs Kalibr / Basalt
-description: How Open MVIS differs from the other open-source camera–IMU calibration toolboxes.
+description: How CamCalib differs from the other open-source camera–IMU calibration toolboxes.
 pageType: reference
 wide: true
 ---
 
-Where Open MVIS sits relative to the toolboxes most people already use. It is
-not a replacement for Kalibr in the single-IMU case — it was built for rigs
-Kalibr does not model.
+Where CamCalib sits relative to the toolboxes most people already use. Kalibr is
+mature and widely validated; CamCalib is not trying to displace it on the
+single-IMU case it does well.
 
 ## Feature matrix
 
-| Capability | Open MVIS | Kalibr | Basalt |
+| Capability | CamCalib | Kalibr | Basalt |
 |---|---|---|---|
-| Camera intrinsics | refine | solve | solve |
-| Camera distortion | rad-tan, equidistant | rad-tan, equidistant, FOV, DS, EUCM | rad-tan, KB, DS, EUCM |
-| Camera–IMU extrinsics | ✅ | ✅ | ✅ |
-| Camera–IMU time offset | ✅ | ✅ | ✅ |
+| Camera intrinsics + distortion | ✅ | ✅ | ✅ |
+| Distortion models | radtan, equidistant, FOV, DS, EUCM, omni_radtan | radtan, equidistant, FOV, DS, EUCM | radtan, KB, DS, EUCM |
+| **Mixed models across one rig** | ✅ | ✖ | ✖ |
+| Camera–IMU extrinsics + time offset | ✅ | ✅ | ✅ |
 | **Multiple IMUs** | ✅ | ✖ | ✖ |
-| **IMU–IMU extrinsics + time offset** | ✅ | ✖ | ✖ |
-| **Gyro-only auxiliary sensors** | ✅ | ✖ | ✖ |
-| IMU intrinsics (scale, misalignment) | ✅ | ✅ | ✖ |
-| G-sensitivity | ✅ | ✅ | ✖ |
-| **Rolling-shutter readout** | ✅ | via fork | ✖ |
-| Trajectory model | discrete-time factor graph | continuous-time B-spline | continuous-time B-spline |
-| Targets | AprilGrid, ArUco | AprilGrid, checkerboard, circles | AprilGrid |
-| Input | ROS bag | ROS bag | ROS bag, EuroC |
-
-Distortion-model coverage is the honest weak spot: Kalibr and Basalt both
-support more projection models. If your camera needs double-sphere or EUCM, they
-are the better tool today.
+| **Per-IMU gyro-only mode** | ✅ | ✖ | ✖ |
+| IMU intrinsics (scale, misalignment) | ✅ — 3 conventions | ✅ | ✖ |
+| G-sensitivity `Tg` | ✅ | ✅ | ✖ |
+| **Gyro↔accel offset `t_ga`** | ✅ | ✖ | ✖ |
+| Rolling-shutter readout | ✅ | via fork | ✖ |
+| **Corrected-dataset export** | ✅ `apply-calib` | ✖ | ✖ |
+| **Round-trip PASS/FAIL validation** | ✅ `roundtrip` | ✖ | ✖ |
+| **Batch sweep over a dataset family** | ✅ `input.bags` | ✖ | ✖ |
+| Trajectory model | discrete factor graph | continuous-time B-spline | continuous-time B-spline |
+| Boards | AprilGrid, chessboard, ArUco | AprilGrid, chessboard, circles | AprilGrid |
+| Input | ROS1/ROS2 bag, EuRoC, images, video | ROS bag | ROS bag, EuRoC |
+| **Runs without ROS** | ✅ pure Python | ✖ | ✖ |
+| Kalibr camchain interop | ✅ read + write | native | ✖ |
 
 ## What is actually different
 
-**More than one IMU.** Kalibr and Basalt model a single IMU. A rig with four
-must be calibrated in pairs and composed — which accumulates error and discards
-the correlations between the pairwise results. Open MVIS puts every IMU in one
-graph, so an auxiliary IMU's extrinsics and time offset are solved against the
-same trajectory as everything else.
+**No ROS.** Pure Python via `pip`, on Windows, macOS, and Linux. Bags are read
+with `rosbags`. For anyone calibrating outside a ROS environment this is the
+whole story.
 
-**Redundancy is used, not averaged.** Multiple IMUs observe the same motion.
-That redundancy constrains parameters that a single IMU leaves weak — which is
-the reason to carry the extra sensors at all.
+**More than one IMU.** Kalibr and Basalt model a single IMU; a four-IMU rig has
+to be calibrated pairwise and composed, which accumulates error and throws away
+the correlations. CamCalib puts every IMU in one graph.
 
-**Rolling shutter in the base toolbox.** Readout time is solved jointly with
-extrinsics and time offset, and the timestamp convention is explicit
-([Rolling shutter](/guides/rolling-shutter/)). Kalibr needs a
-[community fork](https://github.com/JzHuai0108/kalibr.git) for this.
+**It measures driver artefacts instead of working around them.** `t_ga`
+quantifies the gyro-vs-accel timing offset a driver's interpolation introduces —
+the T265 reads −6.2 ms, stable to ~0.2 ms. Kalibr has no equivalent; the usual
+alternative is to discard the sensor.
 
-**Discrete-time.** Kalibr and Basalt fit a B-spline; Open MVIS pre-integrates
-between states. The trade-off — and why it matters more for multi-IMU rigs — is
-in [Continuous-time refinement](/concepts/continuous-time/).
+**Validation is a command, not a habit.** `camcalib roundtrip` gives a PASS/FAIL
+that requires IMU intrinsics to collapse *and* geometry to hold. Nothing
+comparable ships with the others.
+
+**Discrete-time.** Kalibr and Basalt fit a B-spline; CamCalib places state nodes
+at `state_hz`. The trade-off is in
+[Continuous-time refinement](/concepts/continuous-time/).
+
+## Where the others are still ahead
+
+**Maturity.** Kalibr has a decade of use across the field. CamCalib's 228-run
+benchmark is strong evidence, not the same thing as that.
+
+**Ecosystem.** Kalibr's target generators, tutorials, and community answers have
+no CamCalib equivalent yet.
+
+**Continuous-time.** If your sensors are genuinely asynchronous at high rate, a
+B-spline handles it natively; CamCalib does not yet offer it.
+
+## Agreement with Kalibr
+
+Not a rival claim — a validation. On TUM-VI raw IMU bags, `omni_radtan` and
+`equidistant` reproduce the Kalibr camera–IMU extrinsics to **≤2 mm lever,
+≤0.15 mm stereo baseline, ≤1 ms time offset**. Camera parameters match the
+published TUM-VI and Intel T265 calibrations to under 0.6% on focals.
+
+Kalibr output also reads directly (`camcalib.io.kalibr`), so it is a natural
+source of initial values — refinement from a Kalibr camchain is a supported
+workflow, not a migration.
 
 ## Which to use
 
-- **One IMU, one or two cameras** → Kalibr. Mature, widely validated, more
-  distortion models.
-- **Multiple IMUs, or a gyro-only auxiliary** → Open MVIS. The others do not
-  model it.
-- **Rolling-shutter cameras** → Open MVIS, or Kalibr's fork.
-- **Refining an existing calibration** → Open MVIS, seeded from the other
-  toolbox's output. This is the most common way it is used.
+- **One IMU, one or two cameras, ROS available** → Kalibr.
+- **Multiple IMUs, or a gyro-only auxiliary** → CamCalib.
+- **No ROS on the machine** → CamCalib.
+- **Rolling shutter** → CamCalib, or Kalibr's fork.
+- **Mixed camera models on one rig** → CamCalib.
+- **You need to prove the calibration is right** → CamCalib's round-trip.
 
-Kalibr is a good source of initial guesses, not a competitor to be replaced —
-several [examples](/examples/) start from Kalibr output.
-
-## Measured comparison
-
-The feature matrix says what each tool *can* do, not how well. For accuracy,
-runtime, and convergence on shared datasets, see the
-[leaderboard](/benchmark/leaderboard/) — and read
-[Methodology](/benchmark/methodology/) first, particularly the consensus-baseline
+Measured accuracy on shared datasets is on the
+[leaderboard](/benchmark/leaderboard/) — read
+[Methodology](/benchmark/methodology/) first, especially the consensus-baseline
 caveat.

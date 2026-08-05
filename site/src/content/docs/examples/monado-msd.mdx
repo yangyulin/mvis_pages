@@ -43,8 +43,8 @@ narrow-baseline rigs.
 ## Running it
 
 ```bash
-source devel/setup.bash
-roslaunch mvis monado_msd.launch
+camcalib calibrate -c monado_msd_cam.yaml
+camcalib cam-imu   -c monado_msd_cam_imu.yaml
 ```
 
 ## Result and validation
