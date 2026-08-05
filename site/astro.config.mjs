@@ -3,13 +3,18 @@ import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
-// Build into ../docs so the existing GitHub Pages setup (CNAME in docs/) keeps working
-// once we cut over. Until then, only run `npm run build` after confirming you want to
-// replace the current jemdoc-rendered HTML.
+// GitHub Pages serves `main:/docs`, so the build writes there. A build therefore
+// publishes the site — there is no separate deploy step.
+//
+// Astro EMPTIES outDir before every build. Anything that must survive a build
+// lives in `public/`, not in `docs/` directly. Currently:
+//   - CNAME  the custom domain. Lose it and openmvis.com goes down.
+//   - fig/   legacy jemdoc images, kept so old inbound image links still resolve.
 export default defineConfig({
-  site: 'https://openmvis.github.io',
+  site: 'https://openmvis.com',
   srcDir: './src',
   publicDir: './public',
+  outDir: '../docs',
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],

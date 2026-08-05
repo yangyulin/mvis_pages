@@ -1,110 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!doctype html>
+<!-- Legacy jemdoc URL. Kept as a real file (not an Astro `redirects` entry) so
+     that /MvisData.html resolves — a redirects key ending in .html builds as a
+     directory, which GitHub Pages will not serve at that path. -->
+<html lang="en">
 <head>
-<meta name="generator" content="jemdoc, see http://jemdoc.jaboc.net/" />
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<link rel="stylesheet" href="jemdoc.css" type="text/css" />
-<title></title>
-<!-- MathJax -->
-<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
-</script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-	  TeX: { equationNumbers: { autoNumber: "AMS" } }
-});
-</script>
-<!-- End MathJax -->
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<link rel="canonical" href="/reference/datasets/">
+<meta http-equiv="refresh" content="0; url=/reference/datasets/">
+<meta name="robots" content="noindex">
 </head>
 <body>
-<table summary="Table for page layout." id="tlayout">
-<tr valign="top">
-<td id="layout-menu">
-<div class="menu-category">OpenMVIS</div>
-<div class="menu-item"><a href="index.html">Home</a></div>
-<div class="menu-item"><a href="Compilation.html">Compilation</a></div>
-<div class="menu-item"><a href="QuickStart.html">Quick&nbsp;Start</a></div>
-<div class="menu-item"><a href="Contributors.html">Contributors</a></div>
-<div class="menu-category">Calibration</div>
-<div class="menu-item"><a href="OverView.html">OverView</a></div>
-<div class="menu-item"><a href="Procedures.html">Procedures</a></div>
-<div class="menu-item"><a href="Results.html">Results</a></div>
-<div class="menu-category">MVIS Datasets</div>
-<div class="menu-item"><a href="MvisData.html" class="current">MvisData</a></div>
-<div class="menu-item"><a href="4IMUs3Cams.html">4IMUs+3Cams</a></div>
-<div class="menu-item"><a href="4IMUs4Cams.html">4IMUs+4Cams</a></div>
-<div class="menu-item"><a href="Analysis.html">Analysis</a></div>
-<div class="menu-category">MVIS Math</div>
-<div class="menu-item"><a href="CalibGraph.html">Calib&nbsp;Graph</a></div>
-<div class="menu-item"><a href="BaseImuCalib.html">Base&nbsp;IMU&nbsp;Calib</a></div>
-<div class="menu-item"><a href="AuxImuCalib.html">Aux&nbsp;IMU&nbsp;Calib</a></div>
-<div class="menu-item"><a href="CameraCalib.html">Camera&nbsp;Calib</a></div>
-<div class="menu-item"><a href="Observability.html">Observability</a></div>
-<div class="menu-item"><a href="Degeneracy.html">Degeneracy</a></div>
-</td>
-<td id="layout-content">
-<h2>Datasets Overview</h2>
-<p>This dataset is designed for research/calibration purpose of multiple-visual-inertial sensor rigs.
-</p>
-<ul>
-<li><p>Sensors
-</p>
-</li>
-<li><p>Datasets (<a href="../docs/4IMUs3Cams.html" target=&ldquo;blank&rdquo;>4IMUs+3Cams</a>, <a href="../docs/4IMUs4Cams.html" target=&ldquo;blank&rdquo;>4IMUs+4Cams</a>)
-</p>
-</li>
-</ul>
-<h3>Sensors</h3>
-<p>We use self-built VI-Rig to collect data.
-The VI-Rig contains 4 IMUs, one monocular camera and 2 pair stereo cameras.
-We treat each camera of a stereo as two monocular cameras. So, we claim we have totally 5 cameras.
-</p>
-<table class="imgtable"><tr><td>
-<img src="fig/vi_rig.JPG" alt="VI-Rig" width="250px" />&nbsp;</td>
-<td align="left"><p>Visula-Inertial (VI)-Rig (4 IMUs and 5 Cameras): <br />
-</p>
-<ul>
-<li><p>MicroStrain GX3-25
-</p>
-</li>
-<li><p>MicroStrain GX3-35
-</p>
-</li>
-<li><p>Xsens MTI-100
-</p>
-</li>
-<li><p>RealSense T265 IMU
-</p>
-</li>
-<li><p>FLIR BlackFly
-</p>
-</li>
-<li><p>RealSense T265 Left&amp;Right Cameras
-</p>
-</li>
-<li><p>ELP Left&amp;Right Rolling Shutter Cameras
-</p>
-</li>
-</ul>
-</td></tr></table>
-<p>The ROS drivers can be found <a href="https://github.com/yangyulin/multi_sensor_drivers" target=&ldquo;blank&rdquo;>here</a>.
-</p>
-<h3>Datasets Info</h3>
-<p>The datasets contain the following ros topics:
-</p>
-<table id="Sensor Info">
-<tr class="r1"><td class="c1"><b>sensor</b>                    </td><td class="c2">  <b>hz</b>  </td><td class="c3">  <b>topic</b>                 </td><td class="c4"> <b>resolution</b>  </td></tr>
-<tr class="r2"><td class="c1">MicroStrain GX3-25         </td><td class="c2">  500hz </td><td class="c3"> /gx3_25/data          </td><td class="c4">               </td></tr>
-<tr class="r3"><td class="c1">MicroStrain GX3-25         </td><td class="c2">  100hz </td><td class="c3"> /gx3_35/imu<i>data      </td><td class="c4">               </td></tr>
-<tr class="r4"><td class="c1">Xsens MTI-100              </td><td class="c2">  400hz </td><td class="c3"> /imu/data              </td><td class="c4">               </td></tr>
-<tr class="r5"><td class="c1">RealSense T265 IMU         </td><td class="c2">  200hz </td><td class="c3"> /t265/imu              </td><td class="c4">               </td></tr>
-<tr class="r6"><td class="c1">RealSense T265 Left        </td><td class="c2">  30hz </td><td class="c3"> /t265/fisheye2/image_raw </td><td class="c4"> 848x800    </td></tr>
-<tr class="r7"><td class="c1">RealSense T265 Right       </td><td class="c2">  30hz </td><td class="c3"> /t265/fisheye2/image_raw </td><td class="c4"> 848x800    </td></tr>
-<tr class="r8"><td class="c1">ELP Left Rolling Shutter   </td><td class="c2">  25hz </td><td class="c3"> /elp</i>split_sync_image_node/left/image_raw </td><td class="c4"> 640x480  </td></tr>
-<tr class="r9"><td class="c1">ELP Right Rolling Shutter  </td><td class="c2">  25hz </td><td class="c3"> /elp/split_sync_image_node/right/image_raw </td><td class="c4"> 640x480
-</td></tr></table>
-</td>
-</tr>
-</table>
+<p>This page has moved to <a href="/reference/datasets/">/reference/datasets/</a>.</p>
 </body>
 </html>
