@@ -1,0 +1,171 @@
+---
+title: Looper SA16
+description: A production robotics rig calibrated across four recording campaigns — rolling shutter, IMU oversampling, and hardware sync.
+pageType: example
+wide: true
+---
+
+The looperrobotics **SA16** rig is the example closest to production use: a
+commercial stereo (later three-camera) module recorded four different ways over
+several months. It is the dataset where CamCalib was pushed past a single clean
+sequence into rolling shutter, IMU filter changes, and irregular timestamps —
+and where cross-campaign agreement, not a single residual, is the evidence.
+
+## The rig
+
+| Sensor | Rate | Detail |
+|---|---|---|
+| cam0, cam1 | 20 Hz | 544×640 grayscale, hardware-synced |
+| cam2 *(SA16 7.3 only)* | 4.29 Hz | **rolling shutter**, `tr` estimated |
+| IMU | 400 Hz | `timestamp, omega_xyz, alpha_xyz` |
+
+Board: AprilGrid 6×6, `tag_size` 0.055 m, `tag_spacing` 0.3, family `t36h11`.
+
+## Getting the data into shape
+
+The recordings are not EuRoC, but they are close — one prep step reshapes them
+into a `mav0/` tree, and **no CamCalib code changes were needed** for any
+campaign:
+
+```bash
+python examples/configs/looperrobotics/build_mav0.py \
+  --root '/data/looperrobotics/SA16(96s record)'
+```
+
+Symlinks images, writes `data.csv`, comments the IMU header. The IMU CSV column
+order is already EuRoC-native.
+
+## The two-stage recipe
+
+```bash
+# 1. Camera-only — intrinsics + stereo extrinsics
+camcalib cam -c examples/configs/looperrobotics/cam_only.yaml
+
+# 2. Camera-IMU — T_CtoI, td, IMU intrinsics and biases, intrinsics pinned
+camcalib cam-imu -c examples/configs/looperrobotics/cam_imu.yaml
+```
+
+Cam-IMU uses `window_mode: motion`, which auto-picks the most-exciting 80 s of
+the 96.6 s log.
+
+:::note[Fit cameras individually, then merge]
+The 96 s campaign's lesson: on this rig, per-camera fits merged afterwards beat
+a joint stereo fit. `merge_cam_only.py` combines them.
+:::
+
+## Four campaigns
+
+### SA16 (96 s) — the baseline
+
+Stereo, `radtan` first then `equidistant`. Baseline **98.42 mm**.
+
+### SA16 (7.3) — a rolling-shutter third camera
+
+Adds cam2 at 4.29 Hz with rolling shutter and free `tr`.
+
+| Result | Value |
+|---|---|
+| cam2 readout `tr` | **33.3 ms** — 30.6 µs/line × 1088 rows |
+| `tr` model-dependence | equi 33.30 ms vs radtan 33.77 ms — essentially none |
+| cam2 reprojection | equidistant **2.02 px** vs radtan 7.57 px |
+| cam0 / cam1 reprojection | 0.78 / 0.76 px |
+| Baseline | 98.70 mm (96 s: 98.42) |
+
+:::caution[Un-rotate the rolling-shutter camera at prep time]
+cam2's files are stored 90° rotated relative to the sensor. The rolling-shutter
+model sweeps image **rows**, so on rotated images `tr` collapses to nothing. The
+prep step fixes it:
+
+```bash
+python examples/configs/looperrobotics/build_mav0.py \
+  --root '/data/looperrobotics/SA16(7.3)' --rotate cam2=cw
+```
+
+The recovered 33.3 ms decomposes cleanly into 30.6 µs/line × 1088 rows, which is
+what tells you the number is physical rather than a fitted artefact.
+:::
+
+Equidistant beating radtan by 3.7× on reprojection is the recurring result on
+this rig — `equidistant` is canonical here.
+
+### SA16 (OSR4) — IMU oversampling ratio 4
+
+Two ~51 s stereo recordings with the IMU's oversampling ratio changed to 4.
+
+| Result | Value |
+|---|---|
+| Reprojection | **0.215 / 0.216 px** — the cleanest looper solves |
+| Baseline | 99.24 / 99.26 mm |
+| `t_ga` | collapsed **−5.19 → −1.0 ms** |
+| Camera `td` | shifted **+0.4 ms** common-mode |
+
+**Geometry unchanged, timing shifted.** The OSR4 filter changes the IMU's
+internal group delays — differently for gyro and accel — and `t_ga` plus `td`
+absorb exactly that. The `t_ga` value was confirmed **estimator-free** by
+`studies/tga_correlation_lever.py` (−0.9 to −3.0 ms across bands; 20–80 Hz
+agrees with the solver to ~0.1 ms), so it is a measurement of the hardware, not
+an artefact of the graph.
+
+### SA16 (data-sync) — real hardware timestamps
+
+Two recordings (41.7 / 44.5 s) with the IMU hardware-synced to the camera
+trigger. The first looper set with **non-idealised IMU timestamps**: ~68 µs
+jitter, 114/107 dropped samples, and a timebase running **766/783 ppm slow**
+against the camera — independently observable for the first time, because every
+earlier set was quantised to exactly 2.5000 ms and so had a ratio of 20.000000
+by construction.
+
+| Result | Value |
+|---|---|
+| Reprojection | **0.221 / 0.210 px** — ties OSR4, on *more* excited data |
+| `t_ga` | −1.536 / −1.511 ms |
+| Resampling needed | none |
+| Code changes needed | none |
+
+**The irregular stream costs nothing.** The jittery, gappy, drifting timestamps
+are consumed natively. A forced-400 Hz control proves the recorded stamps are
+the right ones: imposing the old regular convention costs **7× in reprojection**
+and drags `td` to −15.8 ms.
+
+## Round-trip
+
+Every campaign is validated end to end. The `mav0` tree is converted to a bag
+first, since `apply-calib` operates on ROS1 bags:
+
+```bash
+python examples/experiments/convert_mav0_to_bag.py \
+  --mav0 '/data/looperrobotics/SA16(7.3)/mav0' \
+  --out  '/data/looperrobotics/SA16(7.3)/sa16_73.bag'
+
+camcalib roundtrip -c examples/configs/looperrobotics/sa16_73_cam_imu_ros1.yaml \
+  --out results/looperrobotics/sa16_73/roundtrip --keep-corrected
+```
+
+## What the campaigns together show
+
+Baselines of 98.42, 98.70, 99.24, and 99.26 mm across four recording setups —
+different camera counts, IMU filters, and timestamp regimes — with the last two
+matching the robot-arm campaign. That agreement across *independent* recordings
+is a stronger accuracy claim than any single sub-pixel residual, and it is
+exactly what the [batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
+workflow is built to produce.
+
+:::note[One honest caveat]
+The OSR4 campaign hit repeated crashes — NumPy `nditer` errors, corrupted int
+constants, GTSAM shape mismatches — traced to **machine-level instability** on
+the recording workstation, not to CamCalib. Data, code, and environment were
+each ruled out; the stock system Python and Kalibr crashed on the same box.
+Retries converged and the converged results are cross-consistent, but the
+episode is recorded rather than tidied away.
+:::
+
+## Reproducibility
+
+| Item | Value |
+|---|---|
+| Configs | `examples/configs/looperrobotics/` — `cam_only.yaml`, `cam_imu.yaml`, `sa16_73_*`, `osr4/`, `data_sync/` |
+| Prep | `build_mav0.py` (`--rotate cam2=cw` for SA16 7.3) |
+| Merge | `merge_cam_only.py` |
+| Board | AprilGrid 6×6, 0.055 m, spacing 0.3, `t36h11` |
+| Canonical model | `equidistant` |
+| Results | `results/looperrobotics/{sa16,sa16_73,osr4,data_sync}/` |

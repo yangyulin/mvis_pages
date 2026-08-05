@@ -1,36 +1,37 @@
 ---
 title: Roadmap
-description: What is planned for the Open MVIS toolbox, datasets, and benchmark.
+description: What is planned for CamCalib, the datasets, and the benchmark.
 pageType: reference
+wide: true
 ---
 
-What is planned, and what is not. Items here are intentions, not commitments
-with dates.
+Intentions, not commitments with dates.
 
 ## Documentation
 
 | Item | Status |
 |---|---|
-| Theory pages — full derivations and Jacobians | in progress; ported from `BaseImuCalib`, `AuxImuCalib`, `CameraCalib` |
-| Generated CLI reference from node arguments | planned — [CLI](/reference/cli/) is hand-written today |
-| Generated configuration reference | planned — [Configuration](/reference/configuration/) is hand-written today |
-| Example result tables and plots | in progress — [TUM VI](/examples/tum-vi/), [Monado MSD](/examples/monado-msd/) are run but not transcribed |
-| Simulation guide — trajectory authoring, Monte-Carlo driver | in progress |
+| Theory pages — full derivations and Jacobians | in progress; ported from `camera/CameraModel`, the unified factor, and the ACI / `t_ga` derivation |
+| **Generated** CLI reference | planned — [CLI](/reference/cli/) is hand-written and can drift |
+| **Generated** configuration reference | planned — [Configuration](/reference/configuration/) is hand-written and can drift |
+| Generated Python API from docstrings | undecided (**O4**) — [Python API](/reference/python-api/) is a hand-written map today |
+| Simulation guide — authored trajectories | in progress; today's simulation is digital-twin only |
 
 ## Toolbox
 
 | Item | Status |
 |---|---|
 | Continuous-time refinement | planned — see [Continuous-time refinement](/concepts/continuous-time/) |
-| Additional distortion models (double-sphere, EUCM) | under consideration — the main gap vs [Kalibr/Basalt](/about/comparison/) |
-| Machine-readable result serialisation | planned — currently text only |
-| Programmatic API | undecided — see [Python API](/reference/python-api/) |
+| Authored-trajectory synthetic generator | planned — would let degeneracy be studied without recording restricted motion |
+| API stability guarantee | not yet — the CLI and config schema are the stable surface |
+| `omni_radtan` out of experimental | in progress — already validated on TUM-VI camera–IMU |
 
 ## Datasets
 
 | Item | Status |
 |---|---|
-| TUM VIE example | needs data — [TUM VIE](/examples/tum-vie/) |
+| Additional example datasets | open — [TUM VI](/examples/tum-vi/), [Monado](/examples/monado/), and [Looper SA16](/examples/looper-sa16/) are complete |
+| TUM VIE | needs data — not acquired, no runs; the natural successor to TUM VI |
 | Dataset hosting on Hugging Face with Zenodo DOIs | in progress |
 | Contributed datasets | open — [Submit a dataset](/contribute/submit-dataset/) |
 
@@ -49,15 +50,16 @@ with dates.
 |---|---|
 | Real logo replacing the placeholder | planned |
 | Versioned documentation per release | undecided — single "latest" today |
-| API reference tooling | blocked on the API decision above |
+| Release tags and dated changelog entries | planned — see [Changelog](/about/changelog/) |
 
 ## Not planned
 
-- **Replacing Kalibr for single-IMU rigs.** It is mature and well validated;
-  Open MVIS exists for the multi-IMU case.
+- **Replacing Kalibr for single-IMU rigs.** It is mature and widely validated;
+  CamCalib exists for the multi-IMU, multi-model, no-ROS case. See
+  [Comparison](/about/comparison/).
 - **A composite leaderboard score.** Weighting rotation error against runtime is
   the reader's judgement, not the benchmark's — see
   [Methodology](/benchmark/methodology/).
 
-Something you need that is missing? Open an issue on
-[the toolbox repository](https://github.com/rpng/mvis).
+Something missing that you need? Open an issue on
+[the repository](https://github.com/rpng/mvis).

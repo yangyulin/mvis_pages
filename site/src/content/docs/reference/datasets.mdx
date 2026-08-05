@@ -8,14 +8,33 @@ wide: true
 import { Image } from 'astro:assets';
 import viRig from '../../../assets/vi_rig.jpg';
 
-## Datasets Overview
+Datasets released with Open MVIS, plus the public datasets used as worked
+examples.
 
-This dataset is designed for research and calibration of multi-visual-inertial sensor rigs.
+## Released — VI-Rig
 
-- Sensors
-- Datasets ([4 IMUs + 3 Cams](/examples/in-house-4imus-3cams/), [4 IMUs + 4 Cams](/examples/in-house-4imus-4cams/))
+Collected on a self-built VI-Rig for research on multi-visual-inertial
+calibration. Both releases include Kalibr and MVIS reference results.
 
-### Sensors
+| Dataset | Sensors | Sequences |
+|---|---|---|
+| [4 IMUs + 3 cameras](/reference/datasets/virig-4imus-3cams/) | 4 IMUs, 3 global-shutter | 10 AprilGrid + 1 static |
+| [4 IMUs + 4 cameras](/reference/datasets/virig-4imus-4cams/) | 4 IMUs, 2 GS + 2 rolling shutter | 15 |
+
+## Public datasets used as examples
+
+Not hosted here — these are third-party datasets with complete CamCalib runs
+documented against them:
+
+| Dataset | Rig | Example |
+|---|---|---|
+| TUM VI | Stereo 1024² fisheye + BMI160 | [TUM VI](/examples/tum-vi/) |
+| TUM MIC (Monado / Valve Index) | Stereo fisheye + IMU | [Monado](/examples/monado/) |
+| looperrobotics SA16 | 2–3 cameras + 400 Hz IMU | [Looper SA16](/examples/looper-sa16/) |
+
+Contributing one: [Submit a dataset](/contribute/submit-dataset/).
+
+## VI-Rig sensors
 
 We use a self-built VI-Rig to collect data. The rig contains 4 IMUs, one monocular camera, and 2 stereo pairs. Treating each stereo camera as two monocular cameras, we have 5 cameras total.
 

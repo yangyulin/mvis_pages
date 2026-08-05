@@ -1,82 +1,110 @@
 ---
 title: TUM VI
-description: Calibrating the TUM Visual-Inertial dataset and validating against its published camera–IMU extrinsics.
+description: Camera–IMU calibration of the TUM-VI raw bags across all six distortion models, validated against Kalibr.
 pageType: example
 wide: true
 ---
 
 The [TUM Visual-Inertial dataset](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset)
-is the standard external check for a camera–IMU calibrator: it ships a
-stereo-fisheye + IMU rig *and* the authors' own calibration, so a run can be
-scored against a reference someone else produced.
+is the reference check for a camera–IMU calibrator: a stereo-fisheye + IMU rig
+with a **published Kalibr calibration** to score against. It is also the dataset
+where every distortion model can be compared on identical data.
 
 ## The rig
 
-| Sensor | Rate | Notes |
+| Sensor | Rate | Detail |
 |---|---|---|
-| 2 × monochrome global-shutter cameras | 20 Hz | 512×512, fisheye — equidistant model |
-| Bosch BMI160 IMU | 200 Hz | accelerometer + gyroscope |
+| 2 × monochrome global-shutter cameras | 20 Hz | 1024×1024 fisheye |
+| Bosch BMI160 IMU | 200 Hz | `/imu0` |
 
-Use the dataset's **calibration sequences** (the `calib` bags), not the room or
-corridor sequences — the latter are recorded for SLAM evaluation and do not hold
-the board in view.
+Board: AprilGrid 6×6, `tag_size` 0.088 m, `tag_spacing` 0.3, family `t36h11`.
 
 ## Getting the data
 
-Download a calibration sequence in ROS-bag form from the dataset page.
+Use the **raw IMU-calibration bags** — `dataset-calib-imu{1,2,3,4}.bag` — for
+the camera–IMU solve, and `standard_1024/dataset-calib-cam1_1024_16.bag` as the
+board bag when a model needs a camera-only fit first.
 
-:::caution[Two preparation steps are required]
-The bags need fixing before Open MVIS will read them:
-
-1. **Pixel format** — images are stored as `mono16`; the front-end expects
-   `mono8`. Convert with `bag_mono16_to_mono8.py`.
-2. **Clock stamps** — camera and IMU headers need re-stamping onto a common
-   clock, otherwise the solver sees an apparent time offset that is an artefact
-   of the recording rather than the hardware.
-
-Skipping either produces a run that converges to a wrong `td`.
-:::
-
-## Configuration
-
-Fisheye cameras, so the equidistant model:
-
-```xml title="launch/tum_vi.launch"
-<param name="cam0_is_fisheye" type="bool" value="true" />
-<param name="cam1_is_fisheye" type="bool" value="true" />
+```
+tum_vi_calib/
+  raw/dataset-calib-imu{1..4}.bag             # cam-IMU sequences
+  raw/dataset-calib-cam1-camchain.yaml        # Kalibr omni/radtan intrinsics
+  tumvi_camchain.yaml                         # Kalibr equidistant intrinsics
+  standard_1024/dataset-calib-cam1_1024_16.bag
+  omni-radtan-1024/ , pinhole-equi-1024/      # Kalibr cam-IMU reference results
 ```
 
-Seed the base IMU ↔ `cam0` transform from the dataset's published calibration —
-this is the one parameter that needs a real starting point
-([Camera–IMU calibration](/guides/camera-imu-calibration/), step 6).
+## One step, if a camchain exists
 
-## Running it
+`omni_radtan` and `equidistant` ship with a Kalibr camchain for these cameras,
+so the calibration is a single stereo run with intrinsics pinned:
 
 ```bash
-camcalib calibrate -c camcalib_cam0_ds.yaml   # pins the intrinsics
-camcalib cam-imu   -c cam_imu_ds.yaml
+camcalib cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_omni.yaml
+camcalib cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_equi.yaml
 ```
 
-## Result and validation
+## Two steps, otherwise
 
-TUM VI publishes `T_cam_imu` for both cameras, which is exactly what this run
-solves — so the comparison is direct: rotation difference in degrees,
-translation difference in centimetres, per camera.
+`double_sphere`, `eucm`, and `fov` have no shipped camchain, so fit the camera
+first and feed the result in:
 
-:::note[Numbers pending transcription]
-This run has been executed and validated against the published extrinsics, but
-the result tables and plots have not yet been transferred onto this page. They
-land with the next content pass; the configuration and preparation steps above
-are current.
+```bash
+camcalib calibrate -c examples/configs/tumvi_cam_imu/camcalib_cam0_ds.yaml
+camcalib cam-imu   -c examples/configs/tumvi_cam_imu/cam_imu_ds.yaml
+```
+
+:::caution[Fit cam0 alone for the wide-FoV models]
+Stereo camera-only fits **diverge** on this dataset for `double_sphere` and
+`eucm` — the fx–xi / alpha basin. The single-camera fit is stable, so the recipe
+fits cam0 only and runs a single-camera camera–IMU solve. See
+[Camera model](/concepts/camera-model/).
+:::
+
+## Results — imu1, 45 s window
+
+| Model | Mode | Reproj | cam0 lever (mm) | Baseline | `td` |
+|---|---|---|---|---|---|
+| `omni_radtan` | stereo, pinned | 0.273 px | [45.0, −68.7, −43.2] | 100.8 mm | −0.73 ms |
+| `equidistant` | stereo, pinned | 0.277 px | [44.7, −70.1, −43.7] | 100.8 mm | −0.72 ms |
+| `double_sphere` | cam0, pinned | 0.275 px | [44.3, −68.5, −43.9] | — | −0.71 ms |
+| `eucm` | cam0, pinned | 0.275 px | [44.3, −68.3, −43.9] | — | −0.71 ms |
+| `fov` | cam0, pinned | 0.288 px | [44.0, −65.2, −44.0] | — | −0.68 ms |
+| **Kalibr (omni)** | **reference** | 0.11 px | **[46.2, −70.9, −43.7]** | **100.94 mm** | ~0 |
+
+## What the table says
+
+**Every model lands on the same physical rig.** Lever ~[44, −68, −44] mm and
+`td` ~−0.7 ms across all six. Model choice changes how easily you get a good
+fit, not the geometry a good fit recovers.
+
+**Agreement with Kalibr**: `omni_radtan` and `equidistant` reproduce the
+reference lever to **≤2 mm** and the stereo baseline to **≤0.15 mm**, with the
+time offset inside 1 ms.
+
+**Across all four bags**, `omni_radtan` holds: baseline 100.8–101.1 mm, lever
+within ~1 mm, and the freed IMU intrinsics (`Dw`/`Da`) consistent to under 1%.
+That cross-sequence spread is the honest error bar — better evidence than any
+single run's residual.
+
+CamCalib's reprojection error is higher than Kalibr's 0.11 px because the two
+are not measuring the same thing: different corner subsampling and robust
+statistics. Compare the **parameters**, not the residuals.
+
+:::note[Pin the intrinsics in the camera–IMU step]
+Freeing them (`free_intrinsics: true`) lets the fx–xi (omni, ds) or alpha (eucm)
+gauge drift along its equivalence class on a single sequence while reprojection
+stays flat. Extrinsics and `td` stay correct, but the intrinsics are no longer
+uniquely pinned. Freeing the *IMU* intrinsics (`imu_intrinsics: dw_da`) is
+stable.
 :::
 
 ## Reproducibility
 
 | Item | Value |
 |---|---|
-| Dataset | TUM VI, calibration sequences |
-| Preparation | `bag_mono16_to_mono8.py`, clock re-stamp |
-| Reference | dataset-published `T_cam_imu` |
-| Toolbox version | *pending* |
-| Config | *pending* |
-| Data hash | *pending* |
+| Configs | `examples/configs/tumvi_cam_imu/` |
+| Sequence | `dataset-calib-imu1.bag`, `t0` 3.0 s, 45 s window |
+| Board | AprilGrid 6×6, 0.088 m, spacing 0.3, `t36h11` |
+| Reference | Kalibr `omni-radtan-1024/`, `pinhole-equi-1024/` |
+| Detection cache | `/tmp/camcalib_tumvi_detcache` — re-runs repeat only the solve |

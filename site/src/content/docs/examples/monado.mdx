@@ -1,0 +1,125 @@
+---
+title: Monado
+description: Camera–IMU calibration of the Monado / Valve Index rig (TUM MIC), with t_ga and a round-trip check.
+pageType: example
+wide: true
+---
+
+The Monado calibration sequences (TUM MIC) come from a **Valve Index** headset
+rather than a research rig, and ship with Monado's own published calibration.
+That makes them a second opinion on [TUM VI](/examples/tum-vi/) from a different
+toolchain — and the dataset where `t_ga` and round-trip validation earn their
+keep.
+
+## The rig
+
+| Sensor | Detail |
+|---|---|
+| 2 × monochrome cameras | Stereo fisheye |
+| IMU | `/imu0` |
+| Reference | Monado / Valve Index, **baseline 134.0 mm** |
+
+Board: AprilGrid 6×6, `tag_size` **0.03 m**, `tag_spacing` 0.3, family `t36h11`.
+
+:::caution[The board is 3 cm]
+Much smaller than the 8.8 cm AprilGrid most calibration configs assume. Board
+size scales every translation in the result, so a wrong `tag_size` produces a
+calibration that converges cleanly and is uniformly wrong.
+:::
+
+## Getting the data
+
+EuRoC `mav0` layout — no conversion needed:
+
+```
+tum_mic/mic_calib/MIC05_imucalib2/mav0/
+```
+
+MIC05 is the canonical sequence; MIC01, 02, 03, 07, 08, and 11 are also
+configured, which is what makes a cross-sequence spread available.
+
+## Configuration
+
+```yaml title="cam_imu_mic05_tga.yaml"
+input:
+  format: euroc
+  path: /data/tum_mic/mic_calib/MIC05_imucalib2/mav0
+  imu_topics: ["/imu0"]
+  window_mode: motion        # auto-pick the most-exciting 80 s
+  segment_length: 80.0
+  cache_dir: /tmp/camcalib_detcache
+
+board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.03, tag_spacing: 0.3, tag_family: t36h11}
+
+camera_input:
+  path: examples/regression/tum_vi_mic/MIC_camchain_v2.yaml
+
+solve:
+  max_iterations: 40
+  init_kwargs: {keyframe_hz: 2.0, scale_rel_tol: 0.3}
+  estimate_t_ga: true
+  sigma_t_ga: 0.010
+
+estimate:
+  camera: {intrinsics: false, tr: false, td: true, extrinsics: true}
+  imu:    {intrinsics: dw_da, model: calyx}
+
+output:
+  path: results/regression/tum_vi_mic/mic05/cam_imu.json
+
+reference:
+  label: Monado Valve Index
+  baseline_mm: 134.0
+```
+
+Two choices worth noting: `window_mode: motion` picks the most-excited 80 s
+automatically rather than making you hunt for it, and intrinsics are **pinned**
+to the committed camchain so the solve concentrates on extrinsics, `td`, and the
+IMU.
+
+## Running it
+
+```bash
+camcalib cam-imu -c examples/regression/tum_vi_mic/cam_imu_mic05_tga.yaml
+```
+
+## Validation — round-trip
+
+The result is not accepted on its residual. It is applied to its own data and
+recalibrated:
+
+```bash
+camcalib roundtrip -c examples/regression/tum_vi_mic/cam_imu_mic05_tga.yaml \
+  --bag MIC05.bag
+```
+
+| Quantity | Before | After correction | Verdict |
+|---|---|---|---|
+| `Da` | 1.06 | **1.00** | collapsed ✅ |
+| `b_a` | −0.25 | **−0.01** | collapsed ✅ |
+| Stereo baseline | 133.8 mm | **133.8 mm** | preserved ✅ |
+
+Both conditions hold at once, and they pull in opposite directions — the
+accelerometer scale and bias the first pass claimed are consumed by the
+correction, while the geometry does not move. Against Monado's published
+134.0 mm, the recovered 133.8 mm is **0.2 mm** out.
+
+See [Round-trip validation](/guides/roundtrip/).
+
+## `t_ga` on and off
+
+Both variants are configured — `cam_imu_mic05_tga.yaml` and
+`cam_imu_mic05_notga.yaml` — precisely so the effect of estimating the
+gyro↔accel offset can be isolated on real data rather than argued about. See
+[IMU model](/concepts/imu-model/).
+
+## Reproducibility
+
+| Item | Value |
+|---|---|
+| Configs | `examples/regression/tum_vi_mic/` |
+| Sequence | `MIC05_imucalib2`, motion window 80 s |
+| Board | AprilGrid 6×6, **0.03 m**, spacing 0.3, `t36h11` |
+| Camera intrinsics | pinned to `MIC_camchain_v2.yaml` |
+| IMU model | `calyx`, `dw_da`, `t_ga` estimated |
+| Reference | `monado_reference_calibration.yaml`, baseline 134.0 mm |

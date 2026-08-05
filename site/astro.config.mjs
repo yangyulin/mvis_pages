@@ -30,8 +30,14 @@ export default defineConfig({
     '/datasets/sensors': '/getting-started/requirements/',
     '/datasets/mvis-data': '/reference/datasets/',
     '/datasets/analysis': '/reference/evaluation/',
-    '/datasets/4imus-3cams': '/examples/in-house-4imus-3cams/',
-    '/datasets/4imus-4cams': '/examples/in-house-4imus-4cams/',
+    '/datasets/4imus-3cams': '/reference/datasets/virig-4imus-3cams/',
+    '/datasets/4imus-4cams': '/reference/datasets/virig-4imus-4cams/',
+
+    // --- Examples reshaped to Monado / Looper / TUM VI (2026-08-05) ---
+    '/examples/in-house-4imus-3cams': '/reference/datasets/virig-4imus-3cams/',
+    '/examples/in-house-4imus-4cams': '/reference/datasets/virig-4imus-4cams/',
+    '/examples/monado-msd': '/examples/monado/',
+    '/examples/tum-vie': '/examples/',
     '/math/calib-graph': '/concepts/calibration-graph/',
     '/math/camera-calib': '/concepts/camera-model/',
     '/math/base-imu-calib': '/concepts/camera-imu-math/base-imu/',
@@ -119,10 +125,8 @@ export default defineConfig({
           items: [
             { label: 'Overview', link: '/examples/' },
             { label: 'TUM VI', link: '/examples/tum-vi/' },
-            { label: 'TUM VIE', link: '/examples/tum-vie/' },
-            { label: 'Monado MSD', link: '/examples/monado-msd/' },
-            { label: 'In-house — 4 IMUs + 3 cams', link: '/examples/in-house-4imus-3cams/' },
-            { label: 'In-house — 4 IMUs + 4 cams', link: '/examples/in-house-4imus-4cams/' },
+            { label: 'Monado', link: '/examples/monado/' },
+            { label: 'Looper SA16', link: '/examples/looper-sa16/' },
           ],
         },
         {
@@ -133,7 +137,15 @@ export default defineConfig({
             { label: 'Result formats', link: '/reference/result-formats/' },
             { label: 'Evaluation & metrics', link: '/reference/evaluation/' },
             { label: 'Python API', link: '/reference/python-api/' },
-            { label: 'Datasets', link: '/reference/datasets/' },
+            {
+              label: 'Datasets',
+              collapsed: true,
+              items: [
+                { label: 'Overview', link: '/reference/datasets/' },
+                { label: 'VI-Rig — 4 IMUs + 3 cams', link: '/reference/datasets/virig-4imus-3cams/' },
+                { label: 'VI-Rig — 4 IMUs + 4 cams', link: '/reference/datasets/virig-4imus-4cams/' },
+              ],
+            },
           ],
         },
         {
