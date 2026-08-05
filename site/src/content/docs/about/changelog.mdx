@@ -1,0 +1,54 @@
+---
+title: Changelog
+description: Notable changes to the Open MVIS toolbox, datasets, and documentation.
+pageType: reference
+---
+
+Notable changes, newest first. The toolbox has not yet cut tagged releases —
+entries below track the documentation site and the datasets. Toolbox changes are
+in the [commit history](https://github.com/rpng/mvis/commits/master).
+
+## Documentation site
+
+### Guide-site restructure
+
+The documentation was reorganised from five sections into eight, following a
+tutorial / guide / concept / reference / example separation
+([Governance](/contribute/governance/) states the rule). Practical consequences:
+
+- **Getting started** now separates Requirements, Installation, and Quickstart —
+  previously one Compilation page and a mixed Quick Start.
+- **Guides** are task-oriented and no longer explain theory. Camera calibration,
+  rolling shutter, multi-sensor rigs, and simulation each have their own page.
+- **Concepts** collects the maths, with a shared
+  [notation and glossary](/concepts/notation/).
+- **Reference** holds the exhaustive material — configuration, CLI, result
+  formats, evaluation, datasets.
+- **Examples** became a per-dataset gallery with validation against external
+  references.
+- Old URLs redirect. The legacy `openmvis.com/*.html` pages redirect too.
+
+### Initial Starlight site
+
+Migrated from jemdoc to Astro + Starlight: KaTeX maths, search, dark mode,
+edit-this-page links, and the first leaderboard prototype.
+
+## Datasets
+
+### VI-Rig releases
+
+- **4 IMUs + 3 cameras** — 10 AprilGrid sequences plus one static bag, with
+  Kalibr and MVIS reference results.
+  [Details](/examples/in-house-4imus-3cams/)
+- **4 IMUs + 4 cameras** — 15 sequences adding two rolling-shutter cameras, with
+  separate Kalibr references for the T265 and ELP pairs.
+  [Details](/examples/in-house-4imus-4cams/)
+
+## Planned
+
+See the [roadmap](/about/roadmap/).
+
+:::note[Dates pending]
+Entries are ordered but not yet dated, and the toolbox is not yet versioned.
+Adding release tags and dating these entries is on the roadmap.
+:::

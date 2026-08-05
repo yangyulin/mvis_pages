@@ -1,0 +1,63 @@
+---
+title: Roadmap
+description: What is planned for the Open MVIS toolbox, datasets, and benchmark.
+pageType: reference
+---
+
+What is planned, and what is not. Items here are intentions, not commitments
+with dates.
+
+## Documentation
+
+| Item | Status |
+|---|---|
+| Theory pages — full derivations and Jacobians | in progress; ported from `BaseImuCalib`, `AuxImuCalib`, `CameraCalib` |
+| Generated CLI reference from node arguments | planned — [CLI](/reference/cli/) is hand-written today |
+| Generated configuration reference | planned — [Configuration](/reference/configuration/) is hand-written today |
+| Example result tables and plots | in progress — [TUM VI](/examples/tum-vi/), [Monado MSD](/examples/monado-msd/) are run but not transcribed |
+| Simulation guide — trajectory authoring, Monte-Carlo driver | in progress |
+
+## Toolbox
+
+| Item | Status |
+|---|---|
+| Continuous-time refinement | planned — see [Continuous-time refinement](/concepts/continuous-time/) |
+| Additional distortion models (double-sphere, EUCM) | under consideration — the main gap vs [Kalibr/Basalt](/about/comparison/) |
+| Machine-readable result serialisation | planned — currently text only |
+| Programmatic API | undecided — see [Python API](/reference/python-api/) |
+
+## Datasets
+
+| Item | Status |
+|---|---|
+| TUM VIE example | needs data — [TUM VIE](/examples/tum-vie/) |
+| Dataset hosting on Hugging Face with Zenodo DOIs | in progress |
+| Contributed datasets | open — [Submit a dataset](/contribute/submit-dataset/) |
+
+## Benchmark
+
+| Item | Status |
+|---|---|
+| Submission CI validation | in progress |
+| Maintainer re-run / verified badge | planned — [Governance](/contribute/governance/) |
+| Versioned, citable leaderboard snapshots | planned |
+| Annual calibration challenge | under consideration |
+
+## Site
+
+| Item | Status |
+|---|---|
+| Real logo replacing the placeholder | planned |
+| Versioned documentation per release | undecided — single "latest" today |
+| API reference tooling | blocked on the API decision above |
+
+## Not planned
+
+- **Replacing Kalibr for single-IMU rigs.** It is mature and well validated;
+  Open MVIS exists for the multi-IMU case.
+- **A composite leaderboard score.** Weighting rotation error against runtime is
+  the reader's judgement, not the benchmark's — see
+  [Methodology](/benchmark/methodology/).
+
+Something you need that is missing? Open an issue on
+[the toolbox repository](https://github.com/rpng/mvis).

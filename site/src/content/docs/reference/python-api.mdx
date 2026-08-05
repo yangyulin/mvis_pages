@@ -1,0 +1,35 @@
+---
+title: Python API
+description: Status of a programmatic interface to Open MVIS.
+pageType: reference
+---
+
+:::caution[Not available]
+Open MVIS is a C++ / ROS toolbox. It has no Python API, and this page is a
+placeholder for one rather than documentation of an existing interface.
+:::
+
+## What exists today
+
+The programmatic surface is ROS, not a library import:
+
+- **Launch files** parameterise a run — see
+  [Configuration](/reference/configuration/).
+- **Nodes and scripts** are listed in the [CLI reference](/reference/cli/).
+- **Results** are written as text files with a documented layout — see
+  [Result formats](/reference/result-formats/). Parsing that file is currently
+  how downstream tooling consumes a calibration.
+
+Driving the toolbox from Python therefore means invoking `roslaunch` and reading
+the result file, which is what the benchmark ingest scripts do.
+
+## What a real API would need
+
+For this page to become genuine reference material, three things have to be
+decided first: whether bindings wrap the C++ solver or a separate
+implementation, whether the result file gains a machine-readable serialisation
+alongside the human-readable one, and whether the docs are generated from
+docstrings or written by hand.
+
+Until those are settled, generated API documentation would describe an interface
+that does not exist. Progress is tracked on the [roadmap](/about/roadmap/).

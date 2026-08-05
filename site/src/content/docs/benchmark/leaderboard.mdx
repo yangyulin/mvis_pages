@@ -1,0 +1,35 @@
+---
+title: Leaderboard
+description: Public ranking of multi-visual-inertial sensor calibration methods, filterable by sensor configuration and algorithm family.
+pageType: embed
+wide: true
+---
+
+import LeaderboardTable from '../../../components/LeaderboardTable.astro';
+
+Calibration methods ranked across sensor configurations and algorithm families.
+Each entry reports reprojection error, extrinsic accuracy against the Open MVIS
+consensus baseline, time-offset error, runtime, and convergence rate — with
+mean ± stddev over N runs where the submitter provided them.
+
+<LeaderboardTable />
+
+Filter state is preserved in the URL, so a specific comparison can be cited
+directly — for example
+`/benchmark/leaderboard/?config=multi_imu_multi_cam&sort=timeoffset_err_ms`.
+
+## Reading the table
+
+- **Lower is better** for every error metric; **higher is better** for
+  convergence rate.
+- **`—` means not reported**, not zero. Absence is shown rather than filled in.
+- **Compare within a sensor configuration**, not across. A single-IMU
+  single-camera result and a four-IMU result are different problems.
+
+How the categories are defined, how scores are computed, and what the baseline
+is: [Methodology](/benchmark/methodology/).
+
+## Submit
+
+Add your method with a pull request — one YAML file, schema-validated in CI.
+See [Submit results](/contribute/submit-results/).

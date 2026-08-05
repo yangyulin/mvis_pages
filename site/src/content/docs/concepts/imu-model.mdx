@@ -1,0 +1,85 @@
+---
+title: IMU model
+description: How Open MVIS parameterises IMU intrinsics — scale, misalignment, and g-sensitivity — in the Kalibr and RPNG conventions.
+pageType: concept
+---
+
+An ideal IMU reports angular velocity and specific force in its own orthogonal
+frame. A real one reports them through a scale error, a non-orthogonal axis
+triad, and — for the gyroscope — a sensitivity to linear acceleration. Open MVIS
+carries those as state so they are solved rather than assumed.
+
+Symbols follow [Notation & glossary](/concepts/notation/).
+
+## Measurement model
+
+$$
+\boldsymbol{\omega}_m = \mathbf{D}_w\, \boldsymbol{\omega} + \mathbf{T}_g\, \mathbf{a} + \mathbf{b}_g + \mathbf{n}_g
+$$
+
+$$
+\mathbf{a}_m = \mathbf{D}_a\, \mathbf{a} + \mathbf{b}_a + \mathbf{n}_a
+$$
+
+- $\mathbf{D}_w,\ \mathbf{D}_a$ — scale and misalignment, lower- or
+  upper-triangular depending on convention (see below)
+- $\mathbf{T}_g$ — g-sensitivity: how linear acceleration leaks into the
+  gyroscope reading
+- $\mathbf{b}_g,\ \mathbf{b}_a$ — slowly-varying biases, random-walk driven
+- $\mathbf{n}_g,\ \mathbf{n}_a$ — white noise, densities from the datasheet
+
+Only six of the nine entries of each $\mathbf{D}$ are identifiable: the frame
+has to be pinned to something. Which three are fixed is exactly what separates
+the two conventions.
+
+## Two conventions
+
+```xml title="launch/<your>.launch"
+<param name="imu_model" type="int" value="1" />
+<!-- 0: Kalibr, 1: RPNG -->
+```
+
+| | Kalibr (`0`) | RPNG (`1`) |
+|---|---|---|
+| Frame pinned to | accelerometer triad | gyroscope triad |
+| $\mathbf{D}_w$ | lower-triangular | upper-triangular |
+| $\mathbf{D}_a$ | upper-triangular | lower-triangular |
+| Reported alongside | `Tw`, `Ta` (inverses) | `Tw`, `Ta` (inverses) |
+
+They describe the same physical device. A calibration produced under one
+convention is **not** numerically comparable with the other — the matrices
+differ even when the sensor does not. When comparing against an external
+calibration, check which convention produced it before concluding anything from
+the numbers.
+
+:::caution[The default is not the same as Kalibr's]
+`imu_model` defaults to the RPNG parameterisation in the shipped launch files.
+If you are cross-checking against Kalibr output, set it to `0` or convert.
+:::
+
+## Gyro-only auxiliaries
+
+An auxiliary IMU can contribute only its gyroscope
+([Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/)). Then
+$\mathbf{D}_a$, $\mathbf{b}_a$, and the accelerometer noise terms drop out of
+its block, and its translation relative to the base IMU is constrained only
+indirectly. The result file writes identity in place of the unused matrices —
+identity there means *not estimated*, not *estimated as identity*.
+
+## What is actually observable
+
+Scale and misalignment need excitation on every axis: a bag that rotates about
+one axis constrains one row of $\mathbf{D}_w$ and leaves the rest at their
+priors. G-sensitivity is weaker still — it requires simultaneous rotation and
+high linear acceleration, which most hand-held calibration motions do not
+produce. When $\mathbf{T}_g$ comes back near its initial value with a wide
+covariance, it was not observed.
+
+[Observability](/concepts/observability/) treats this properly; the practical
+consequence is in [Degeneracy](/concepts/degeneracy/).
+
+:::note[Derivation in progress]
+The residual Jacobians with respect to $\mathbf{D}_w$, $\mathbf{D}_a$, and
+$\mathbf{T}_g$ are being ported from the `BaseImuCalib` and `AuxImuCalib`
+sources — see [Base IMU factor](/concepts/camera-imu-math/base-imu/).
+:::

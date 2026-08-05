@@ -1,0 +1,40 @@
+---
+title: TUM VIE
+description: Planned example — the TUM Visual-Inertial Event dataset.
+pageType: example
+---
+
+:::caution[Planned — not yet run]
+This example is listed because it is the natural successor to
+[TUM VI](/examples/tum-vi/), but the data has not been acquired and no
+calibration has been run. Nothing on this page should be treated as a result.
+:::
+
+## Why it is on the list
+
+The [TUM Visual-Inertial Event dataset](https://cvg.cit.tum.de/data/datasets/visual-inertial-event-dataset)
+extends the TUM VI rig with higher-resolution frame cameras and a pair of event
+cameras. Two things make it worth running:
+
+- **Higher-resolution stereo fisheye** — 1280×1024, versus 512×512 in TUM VI.
+  Intrinsics and distortion are better constrained, so it is a sharper test of
+  the camera model than its predecessor.
+- **A published reference calibration**, which is what makes an example
+  scoreable at all.
+
+The event cameras are not a target for this toolbox — Open MVIS calibrates
+frame cameras and IMUs. They are simply present in the recordings.
+
+## What needs to happen first
+
+1. Acquire the calibration sequences.
+2. Establish what preparation the bags need — TUM VI required a `mono16` →
+   `mono8` conversion and a clock re-stamp, and it is not yet known whether
+   TUM VIE shares those.
+3. Run and validate against the published extrinsics.
+
+Until then this page stays a stub rather than a half-result. Progress is tracked
+on the [roadmap](/about/roadmap/).
+
+If you already have this data calibrated, that run would be a welcome
+[contribution](/contribute/submit-results/).

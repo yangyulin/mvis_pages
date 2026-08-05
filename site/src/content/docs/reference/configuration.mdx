@@ -1,0 +1,154 @@
+---
+title: Configuration
+description: Every launch-file parameter accepted by Open MVIS — type, default, and meaning.
+pageType: reference
+wide: true
+---
+
+Every parameter the launch files accept. Grouped by role; within a group,
+ordered as they appear in the shipped launch files. For task-oriented guidance
+see [Guides](/guides/camera-imu-calibration/).
+
+:::note[Hand-written, and therefore able to drift]
+This page is maintained by hand against the launch files. Generating it from the
+parameter declarations is on the [roadmap](/about/roadmap/); until then, the
+launch files are authoritative if the two disagree.
+:::
+
+## Dataset
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `dataset` | string | — | Dataset name; used to build output paths |
+| `bag_path` | string | — | Absolute path to the ROS bag |
+| `bag_start` | double | `10` | Seconds to skip from the start of the bag |
+| `bag_durr` | double | `-1` | Seconds to process; `-1` runs to the end |
+
+## Topics
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `topic_imu` | string | — | Base-IMU topic. Required — defines the reference clock |
+| `topic_imuN` | string | — | Nth auxiliary IMU topic (`imu0`, `imu1`, …) |
+| `topic_cameraN` | string | — | Nth camera topic (`camera0`, `camera1`, …) |
+
+At least one IMU and one camera must be declared. Sensor numbering is described
+in [Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/#sensor-numbering).
+
+## IMU noise
+
+Applies to base and auxiliary IMUs alike; take the values from the datasheet or
+an Allan-variance run.
+
+| Parameter | Type | Default | Units | Description |
+|---|---|---|---|---|
+| `gyroscope_noise_density` | double | `1.6968e-04` | rad/s/√Hz | White noise on angular velocity |
+| `gyroscope_random_walk` | double | `1.9393e-05` | rad/s²/√Hz | Gyro bias random walk |
+| `accelerometer_noise_density` | double | `3.0000e-3` | m/s²/√Hz | White noise on specific force |
+| `accelerometer_random_walk` | double | `3.0000e-3` | m/s³/√Hz | Accel bias random walk |
+| `cam_sigma_pix` | double | `1` | px | Pixel measurement noise |
+
+## IMU model and intrinsics
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `imu_model` | int | `1` | `0` = Kalibr, `1` = RPNG. See [IMU model](/concepts/imu-model/) |
+| `imu_b_intrinsics_Dw` | 9× double | identity | Base-IMU gyro scale + misalignment |
+| `imu_b_intrinsics_Da` | 9× double | identity | Base-IMU accel scale + misalignment |
+| `imu_b_intrinsics_Tg` | 9× double | zeros | Base-IMU g-sensitivity |
+| `imuN_model` | int | `0` | Model for the Nth auxiliary IMU |
+| `imu_sN_intrinsics_Dw` | 9× double | identity | Auxiliary IMU gyro scale + misalignment |
+| `imu_sN_intrinsics_Da` | 9× double | identity | Auxiliary IMU accel scale + misalignment |
+| `imu_sN_intrinsics_Tg` | 9× double | zeros | Auxiliary IMU g-sensitivity |
+| `imus_s_mode` | int list | `[0, …]` | Per auxiliary IMU: `0` = full IMU, `1` = gyro only |
+
+## Camera model and intrinsics
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `camN_is_fisheye` | bool | — | `false` = rad-tan, `true` = equidistant |
+| `camN_k` | 4× double | — | `fu, fv, cu, cv` |
+| `camN_d` | 4× double | — | Distortion coefficients |
+| `camN_is_rolling` | bool | `false` | Treat camera N as rolling shutter |
+| `camN_rs_readout_ms` | double | `10` | Initial whole-frame readout time |
+| `camN_rs_mode` | int | `0` | Timestamp row: `0` first, `1` middle, `2` last |
+
+The readout convention is a driver property, not a preference — see
+[Rolling shutter](/guides/rolling-shutter/#2-pick-the-timestamp-convention).
+
+## Initial spatial-temporal calibration
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `calib_camimu_dt0` | double | `0.01` | Initial camera–IMU time offset (s) |
+| `T_C0toI` | 4×4 | — | Initial base-IMU ↔ `cam0` transform. **Needs a real guess** |
+| `calib_imuimu_dt0` | double | `0.01` | Initial IMU–IMU time offset (s) |
+| `T_ItoIsN` | 4×4 | identity | Initial base ↔ Nth auxiliary IMU transform |
+
+## Priors
+
+Prior standard deviations. Widen to let the solver move a parameter further;
+tighten to hold a trusted value near-fixed.
+
+| Parameter | Type | Default | Applies to |
+|---|---|---|---|
+| `prior_sigma_dw` | double | `0.01` | Gyro scale + misalignment |
+| `prior_sigma_da` | double | `0.01` | Accel scale + misalignment |
+| `prior_sigma_tg` | double | `0.008` | G-sensitivity |
+| `prior_sigma_watoI` | double | `0.015` | Gyro-to-IMU frame rotation |
+| `prior_sigma_cam_k` | double | `3.0` | Camera intrinsics |
+| `prior_sigma_cam_d` | double | `0.025` | Distortion coefficients |
+| `prior_sigma_camimu_dt` | double | `0.012` | Camera–IMU time offset |
+| `prior_sigma_cam_rs` | double | `0.008` | Rolling-shutter readout |
+| `prior_sigma_CtoI_pos` | double | `0.015` | Camera–IMU translation |
+| `prior_sigma_CtoI_ori` | double | `0.015` | Camera–IMU rotation |
+| `prior_sigma_imu_dt` | double | `0.01` | IMU–IMU time offset |
+| `prior_sigma_ItoIs_pos` | double | `0.015` | IMU–IMU translation |
+| `prior_sigma_ItoIs_ori` | double | `0.015` | IMU–IMU rotation |
+
+## What to calibrate
+
+Each switch enables one class of variable. Turn off what you already trust —
+this is how partial calibration is expressed.
+
+| Parameter | Type | Default | Solves |
+|---|---|---|---|
+| `do_calibration_cam` | bool | `true` | Camera–IMU extrinsics |
+| `do_calibration_cam_in` | bool | `true` | Camera intrinsics and distortion |
+| `do_calibration_cam_t` | bool | `true` | Camera–IMU time offsets |
+| `do_calibration_rolling` | bool | `true` | Rolling-shutter readout time |
+| `do_calibration_imu_b_in` | bool | `true` | Base-IMU intrinsics |
+| `do_calibration_imus_s` | bool | `true` | Auxiliary IMU extrinsics |
+| `do_calibration_imus_s_td` | bool | `true` | Auxiliary IMU time offsets |
+| `do_calibration_imus_s_in` | bool | `true` | Auxiliary IMU intrinsics |
+
+## Estimator
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `use_marginals` | bool | `false` | Compute marginal covariances (slower) |
+| `skip_optimize_after` | int | `250` | Stop re-optimising after this many keyframes |
+| `optimize_every_n` | int | `5` | Run the optimiser every N keyframes |
+| `max_iterations` | int | `1` | Optimiser iterations per invocation |
+| `use_numerical_jacob` | bool | `false` | Numerical instead of analytic Jacobians. Debugging only — much slower |
+
+## Measurement handling
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `imu_s_start_time` | double | `20` | Seconds before auxiliary IMUs enter the graph |
+| `cam_start_time` | double | `20` | Seconds before camera measurements enter the graph |
+| `cam_meas_skip` | int | `3` | Use every Nth camera frame |
+| `init_window_time` | double | `0.75` | Static-window length for IMU initialisation (s) |
+| `init_imu_thresh` | double | `1.0` | Motion threshold declaring initialisation complete |
+
+## Output
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `dosave_state` | bool | `true` | Write trajectory estimate, covariance, ground truth |
+| `path_state_est` | string | — | Trajectory estimate |
+| `path_state_std` | string | — | Estimated standard deviations |
+| `path_state_gt` | string | — | Ground truth (simulation only) |
+| `dosave_calib` | bool | `true` | Write the calibration result file |
+| `path_calib_est` | string | — | Calibration result path. Format: [Result formats](/reference/result-formats/) |

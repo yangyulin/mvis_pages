@@ -1,0 +1,70 @@
+---
+title: Contributors & citation
+description: People behind Open MVIS, and how to cite the toolbox, the datasets, and the leaderboard.
+pageType: reference
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Image } from 'astro:assets';
+import yang from '../../../assets/yangyulin.jpg';
+import patrick from '../../../assets/patrick.jpg';
+import paul from '../../../assets/Huang2014small.jpg';
+
+Open MVIS is developed by the [Robot Perception and Navigation Group
+(RPNG)](https://sites.udel.edu/robot/) at the University of Delaware.
+
+## Maintainers
+
+<CardGrid>
+  <Card title="Yulin Yang">
+    <Image src={yang} alt="Yulin Yang" width="150" />
+    - [Personal Website](https://yangyulin.net)
+    - yangyulin1@gmail.com
+    - yuyang@udel.edu
+  </Card>
+  <Card title="Patrick Geneva">
+    <Image src={patrick} alt="Patrick Geneva" width="150" />
+    - [Personal Website](https://udel.edu/~pgeneva/)
+    - pgeneva@udel.edu
+  </Card>
+  <Card title="Guoquan (Paul) Huang">
+    <Image src={paul} alt="Guoquan (Paul) Huang" width="150" />
+    - [Personal Website](https://udel.edu/~ghuang/)
+    - ghuang@udel.edu
+  </Card>
+</CardGrid>
+
+## Citing Open MVIS
+
+If you use the toolbox or the benchmark, please cite:
+
+```bibtex
+@misc{openmvis,
+  title  = {{Open MVIS}: A Benchmark for Multi-Visual-Inertial Sensor Calibration},
+  author = {{Open MVIS Contributors}},
+  year   = {2026},
+  url    = {https://openmvis.com}
+}
+```
+
+## Citing the leaderboard
+
+Leaderboard snapshots are versioned so a comparison stays citable after later
+submissions land. Cite the snapshot, not the live page:
+
+> Open MVIS leaderboard vX.Y, accessed &lt;date&gt;.
+> https://openmvis.com/benchmark/leaderboard/
+
+See [Methodology](/benchmark/methodology/) for what the numbers mean.
+
+## Citing the datasets
+
+Each released dataset has its own citation and DOI, given on its page — see
+[Datasets](/reference/datasets/). Cite the dataset in addition to the toolbox
+when your results depend on it.
+
+## Contributing
+
+Contributors of datasets and verified results are credited here. See
+[Governance](/contribute/governance/) for how credit and co-authorship are
+handled, and [Contribute](/contribute/submit-results/) to get started.

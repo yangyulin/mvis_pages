@@ -1,0 +1,80 @@
+---
+title: Examples
+description: Complete calibration runs on public and in-house datasets — pick one that matches your rig.
+pageType: reference
+wide: true
+---
+
+import ExampleGrid from '../../../components/ExampleGrid.astro';
+
+Complete runs, each on a released dataset: the configuration used, the result
+produced, and — where a reference calibration exists — how far the two differ.
+Pick the one whose rig looks most like yours.
+
+<ExampleGrid examples={[
+  {
+    title: 'TUM VI',
+    href: '/examples/tum-vi/',
+    sensors: 'Stereo fisheye + Bosch BMI160',
+    format: 'ROS bag / EuroC',
+    shows: 'Validation against the published T_cam_imu',
+  },
+  {
+    title: 'TUM VIE',
+    href: '/examples/tum-vie/',
+    sensors: 'Stereo fisheye + event cameras + IMU',
+    format: 'HDF5 / ROS bag',
+    shows: 'Higher-resolution successor to TUM VI',
+    status: 'planned',
+  },
+  {
+    title: 'Monado MSD',
+    href: '/examples/monado-msd/',
+    sensors: 'Stereo 960² + 6-DOF IMU @ 1 kHz',
+    format: 'ROS bag, AprilGrid',
+    shows: 'Validation against the Monado reference',
+  },
+  {
+    title: 'In-house — 4 IMUs + 3 cams',
+    href: '/examples/in-house-4imus-3cams/',
+    sensors: '4 IMUs, 3 global-shutter cameras',
+    format: 'ROS bag, AprilGrid',
+    shows: 'Multi-IMU calibration vs Kalibr pairwise',
+  },
+  {
+    title: 'In-house — 4 IMUs + 4 cams',
+    href: '/examples/in-house-4imus-4cams/',
+    sensors: '4 IMUs, 2 global + 2 rolling shutter',
+    format: 'ROS bag, AprilGrid',
+    shows: 'Rolling-shutter readout solved jointly',
+  },
+]} />
+
+## How to read these pages
+
+Every example follows the same structure, so two of them can be compared
+directly:
+
+1. **The rig** — sensors, rates, and what makes the dataset interesting.
+2. **Getting the data** — download and any preparation the bag needs.
+3. **Configuration** — the launch file, in full.
+4. **Running it** — the command and what it prints.
+5. **Result** — the calibration produced.
+6. **Validation** — the same quantities from an independent source, and the
+   difference. This is the part that makes an example evidence rather than a
+   demonstration.
+7. **Reproducibility** — code version, config, and data hash needed to obtain
+   the same numbers.
+
+:::note[Plots are generated, not screenshotted]
+Figures on these pages come out of the run they document. Re-running the
+reproducibility block regenerates them — if a plot and the text disagree, the
+plot is right.
+:::
+
+## Contributing an example
+
+A run on a dataset we do not have is the most useful thing you can send. See
+[Submit a dataset](/contribute/submit-dataset/) for the format, and
+[Submit results](/contribute/submit-results/) if you want it on the
+[leaderboard](/benchmark/leaderboard/) as well.

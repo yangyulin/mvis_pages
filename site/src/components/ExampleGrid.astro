@@ -1,0 +1,51 @@
+---
+// Examples gallery — design plan §1.3 / §4 (scikit-learn gallery pattern).
+//
+// A pick-a-dataset card grid: each card states the rig, the data format, and
+// what the run demonstrates, so a reader can choose an example by their own
+// hardware rather than by name. Cards marked `status: "planned"` are visibly
+// unavailable instead of silently linking to an empty page.
+interface Example {
+  title: string;
+  href: string;
+  sensors: string;
+  format: string;
+  shows: string;
+  status?: 'ready' | 'planned';
+}
+
+interface Props {
+  examples: Example[];
+}
+
+const { examples } = Astro.props;
+---
+
+<div class="example-grid" role="list">
+  {
+    examples.map((ex) => {
+      const planned = ex.status === 'planned';
+      const Tag = planned ? 'div' : 'a';
+      return (
+        <Tag
+          role="listitem"
+          class:list={['example-card', { 'is-planned': planned }]}
+          {...(planned ? {} : { href: ex.href })}
+        >
+          <h3 class="example-card__title">
+            {ex.title}
+            {planned && <span class="example-card__badge">planned</span>}
+          </h3>
+          <dl class="example-card__meta">
+            <dt>Rig</dt>
+            <dd>{ex.sensors}</dd>
+            <dt>Format</dt>
+            <dd>{ex.format}</dd>
+            <dt>Shows</dt>
+            <dd>{ex.shows}</dd>
+          </dl>
+        </Tag>
+      );
+    })
+  }
+</div>

@@ -1,0 +1,89 @@
+---
+title: Notation & glossary
+description: Symbol table and frame conventions used across every Open MVIS theory page.
+pageType: reference
+wide: true
+---
+
+Every equation on this site uses the symbols below. Conventions follow
+[OpenVINS](https://docs.openvins.com/), which shares this lab's lineage — if you
+arrive from there, nothing needs re-learning.
+
+## Frames
+
+| Symbol | Frame | Notes |
+|---|---|---|
+| $\{G\}$ | global | gravity-aligned; yaw and position are unobservable |
+| $\{I\}$ | base IMU | the reference clock and the trajectory's body frame |
+| $\{I_{s_j}\}$ | auxiliary IMU $j$ | rigidly attached to $\{I\}$ |
+| $\{C_i\}$ | camera $i$ | optical frame; $z$ forward |
+| $\{B\}$ | calibration board | fixed in $\{G\}$ |
+
+## Transforms
+
+A rotation is written ${}^{A}_{B}\mathbf{R}$ and takes a vector expressed in
+$\{B\}$ into $\{A\}$. A translation ${}^{A}\mathbf{p}_{B}$ is the origin of
+$\{B\}$ expressed in $\{A\}$. Together:
+
+$$
+{}^{A}\mathbf{p} = {}^{A}_{B}\mathbf{R}\, {}^{B}\mathbf{p} + {}^{A}\mathbf{p}_{B}
+$$
+
+:::note[The result file uses a different spelling]
+Calibration output writes `T_C0toI` for the transform taking points from
+$\{C_0\}$ into $\{I\}$ — the same object as ${}^{I}_{C_0}\mathbf{T}$. The
+`XtoY` naming reads left-to-right in the direction of the mapping. See
+[Result formats](/reference/result-formats/).
+:::
+
+## Calibration state
+
+| Symbol | Quantity | Dimension | Per |
+|---|---|---|---|
+| $\mathbf{f}_i = [f_u\ f_v\ c_u\ c_v]$ | camera intrinsics | 4 | camera |
+| $\mathbf{d}_i$ | distortion coefficients | 4+ | camera |
+| ${}^{I}_{C_i}\mathbf{T}$ | camera extrinsics | 6 | camera |
+| $t_{d,i}$ | camera–IMU time offset | 1 | camera |
+| $t_{r,i}$ | rolling-shutter readout | 1 | RS camera |
+| $\mathbf{D}_w,\ \mathbf{D}_a$ | gyro / accel scale + misalignment | 6 each | IMU |
+| $\mathbf{T}_g$ | g-sensitivity | 9 | IMU |
+| ${}^{I}_{I_{s_j}}\mathbf{T}$ | auxiliary IMU extrinsics | 6 | aux IMU |
+| $t_{d,j}$ | IMU–IMU time offset | 1 | aux IMU |
+| $\mathbf{b}_g,\ \mathbf{b}_a$ | gyro / accel biases | 3 each | IMU |
+
+The full state $\mathbf{x}$ stacks the trajectory with all of the above; the
+cost that acts on it is in
+[Calibration graph](/concepts/calibration-graph/).
+
+## Measurements
+
+| Symbol | Measurement |
+|---|---|
+| $\boldsymbol{\omega}_m$ | measured angular velocity |
+| $\mathbf{a}_m$ | measured specific force |
+| $\mathbf{z}_{i,k}$ | pixel observation of a board corner |
+| $\mathbf{r}$ | residual (subscripted by factor type) |
+| $\boldsymbol{\Sigma}$ | measurement covariance |
+
+## Time
+
+| Symbol | Meaning |
+|---|---|
+| $t_I$ | timestamp on the base-IMU clock — the reference |
+| $t_C$ | timestamp as reported by a camera driver |
+| $t_d$ | offset such that $t_I = t_C + t_d$ |
+| $t_r$ | whole-frame readout time of a rolling-shutter camera |
+
+The sign convention matters: `td` is **added to** the sensor's own stamp to
+reach base-IMU time. The result file states it explicitly as `(t_Ib = t_C + td)`
+next to each value.
+
+## Conventions worth stating once
+
+- **Quaternions** are JPL-convention, as in OpenVINS.
+- **Error states** are defined multiplicatively for rotations,
+  $\mathbf{R} \approx \hat{\mathbf{R}}\,\exp(\delta\boldsymbol{\theta}^\wedge)$,
+  and additively for everything else.
+- **Board points** are exact — the target is treated as rigid and known, so
+  board geometry errors appear as a scale bias on translations rather than as
+  noise.

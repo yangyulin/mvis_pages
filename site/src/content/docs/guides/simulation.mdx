@@ -1,0 +1,85 @@
+---
+title: Simulation & synthetic data
+description: Generate synthetic multi-sensor data, recover the calibration in closed loop, and check consistency with NEES.
+pageType: guide
+---
+
+Simulation is how you separate *the estimator is wrong* from *the data was
+insufficient*. Ground truth is known, so a run can be scored rather than
+eyeballed — and a parameter that fails to converge in simulation will never
+converge on real data.
+
+The first simulated run is in [Quickstart](/getting-started/quickstart/); this
+page covers what to do beyond it.
+
+## The shipped scenario
+
+```bash
+source devel/setup.bash
+roslaunch mvis yulin_sim_multi_imu.launch
+```
+
+Generates 1 base IMU, 2 auxiliary IMUs, 1 auxiliary gyro, and 2 rolling-shutter
+cameras observing a board along a continuous trajectory. Measurements are
+sampled from that trajectory at each sensor's own rate and corrupted with the
+configured noise, so every clock, rate, and readout offset in the graph is
+exercised.
+
+## Closed-loop recovery
+
+The core check: perturb the true calibration, hand the perturbed values in as
+the initial guess, and see whether the solver returns to truth.
+
+```bash
+rosrun mvis error_simulation \
+  OUTPUT_FOLDER/state_est.txt \
+  OUTPUT_FOLDER/state_std.txt \
+  OUTPUT_FOLDER/state_gt.txt
+```
+
+Reports per-parameter error against ground truth next to the estimated standard
+deviation. Read both columns:
+
+- **Error small, σ small** — converged and confident.
+- **Error small, σ large** — right answer, weakly constrained. Suspect luck.
+- **Error large, σ small** — overconfident. The most dangerous outcome, and
+  usually a modelling error rather than a data problem.
+- **Error large, σ large** — not observable from this motion.
+
+## Consistency: Monte-Carlo and NEES
+
+One run cannot tell you whether the reported covariance is honest. Repeat the
+run over many noise seeds and check the normalised estimation error squared —
+NEES should sit near the state dimension. Consistently above it means the filter
+is overconfident; well below means it is conservative.
+
+This is the check that catches a wrong Jacobian, which a single closed-loop run
+happily passes.
+
+## Observability variants
+
+Two restricted-motion scenarios exist specifically to make degeneracy visible:
+
+| Variant | Motion | What it exposes |
+|---|---|---|
+| `_1axis` | rotation about a single axis | extrinsic and IMU-intrinsic directions that need multi-axis excitation |
+| `_planar` | translation confined to a plane | translation baselines and readout terms left unconstrained |
+
+Run these when a real-data calibration produces a suspicious value: if the
+parameter is unobservable under the motion your bag actually contained, the
+problem is the recording, not the solver. [Degeneracy](/concepts/degeneracy/)
+sets out which parameters drop out under which motion.
+
+## Sim-to-real
+
+Simulation results transfer only as far as the modelling does. Keep the
+simulated rig aligned with the real one — same rates, same noise densities, same
+rolling-shutter convention — otherwise a clean simulated recovery says nothing
+about the bag on your disk. When the two disagree, the gap is itself the finding.
+
+:::note[This page is being expanded]
+Custom trajectory authoring, the board and projection models used by the
+generator, and the Monte-Carlo driver scripts are being written up from the
+simulator work. The workflow above is stable; the API details are not yet
+documented here.
+:::

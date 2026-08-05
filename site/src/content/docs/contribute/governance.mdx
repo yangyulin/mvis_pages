@@ -1,0 +1,77 @@
+---
+title: Governance
+description: Who maintains Open MVIS, how submissions are reviewed, and the rules contributors are held to.
+pageType: reference
+---
+
+How the project is run, so that contributors know what to expect before they
+spend effort.
+
+## Maintainers
+
+Open MVIS is maintained by the [Robot Perception and Navigation Group
+(RPNG)](https://sites.udel.edu/robot/) at the University of Delaware. Current
+maintainers are listed on [Contributors](/about/contributors/).
+
+## Review process
+
+| Submission | Reviewed for | Turnaround |
+|---|---|---|
+| Leaderboard result | Schema validity, plausible values, complete provenance | *to be set* |
+| Dataset | Format, dataset card, licence, usability | *to be set* |
+| Documentation | Accuracy, page-type fit (see below) | *to be set* |
+| Code | Correctness, tests, no regression | *to be set* |
+
+CI validates what it can automatically — schema, bounds, build. A maintainer
+reviews what it cannot.
+
+## Verified results
+
+A submitted result is **reported**. A result a maintainer has re-run from the
+submitter's configuration and data is **verified**, and carries a badge on the
+[leaderboard](/benchmark/leaderboard/). Verification depends on the data being
+available and the run being tractable, so it is offered where possible rather
+than required.
+
+The distinction is kept visible on purpose: a leaderboard where reported and
+reproduced numbers are indistinguishable is a leaderboard nobody should trust.
+
+## Documentation rule
+
+Pages on this site declare a `pageType` and are held to it:
+
+| Type | Contains | Does not contain |
+|---|---|---|
+| `tutorial` | One ordered happy path | Alternatives, options, theory |
+| `guide` | Task-oriented steps | Derivations — link to a concept |
+| `concept` | Explanation, maths, figures | Commands — link to a guide |
+| `reference` | Exhaustive, anchor-per-entry | Narrative |
+| `example` | A real run with validation | Concepts introduced for the first time |
+
+A guide that starts explaining means a concept page is missing; a concept page
+that starts instructing means a guide is missing. In both cases the fix is to
+split, not to blend. Documentation pull requests are reviewed against this.
+
+## Conduct
+
+Contributors are expected to be civil and to assume good faith. Harassment,
+personal attacks, and deliberate bad-faith submissions are not tolerated.
+Maintainers may reject submissions and restrict participation. Report problems
+to the maintainer contacts on [Contributors](/about/contributors/).
+
+## Credit
+
+- **Leaderboard entries** are attributed to their submitter.
+- **Datasets** get a DOI, a citation, and named credit.
+- **Substantial contributions** to a dataset or benchmark release are
+  recognised with co-authorship on the corresponding paper.
+
+## Licence
+
+The toolbox and the site are open source — see [License](/about/license/).
+Contributions are accepted under the same licence.
+
+:::note[This document is provisional]
+Review turnaround, a formal code of conduct, and the maintainer list are being
+finalised. The principles above are settled; the procedural detail is not.
+:::

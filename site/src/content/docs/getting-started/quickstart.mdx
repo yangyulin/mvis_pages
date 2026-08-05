@@ -1,0 +1,96 @@
+---
+title: Quickstart
+description: Calibrate a simulated multi-IMU multi-camera rig end to end, and check the result against ground truth.
+pageType: tutorial
+---
+
+import { Image } from 'astro:assets';
+import simEnv from '../../../assets/udel_calib_multi_sensor.png';
+
+Run a full calibration on simulated data and compare it against ground truth.
+No hardware, no dataset download — this is the fastest way to confirm your build
+works and to see what a result looks like.
+
+You need a workspace built as described in
+[Installation](/getting-started/installation/). Budget about five minutes.
+
+## The simulated rig
+
+<Image src={simEnv} alt="Simulation environment" width="400" />
+
+The shipped scenario carries 1 base IMU, 2 auxiliary IMUs, 1 auxiliary gyro, and
+2 rolling-shutter cameras — enough that every class of calibration variable is
+present in the graph.
+
+## 1. Set the output folder
+
+The launch file writes the estimate, its covariance, and ground truth to paths
+you choose. Open `launch/yulin_sim_multi_imu.launch` and point them somewhere
+writable:
+
+```xml title="launch/yulin_sim_multi_imu.launch"
+<arg name="dosave_state"   default="true" />
+<arg name="path_state_est" default="OUTPUT_FOLDER/state_est.txt" />
+<arg name="path_state_std" default="OUTPUT_FOLDER/state_std.txt" />
+<arg name="path_state_gt"  default="OUTPUT_FOLDER/state_gt.txt" />
+<arg name="dosave_calib"   default="true" />
+<arg name="path_calib_est" default="OUTPUT_FOLDER/$(arg dataset)_calib_results.txt" />
+```
+
+## 2. Run the calibration
+
+```bash
+source devel/setup.bash
+roslaunch mvis yulin_sim_multi_imu.launch
+```
+
+The optimiser prints its progress as the graph grows. When it finishes you will
+have `state_est.txt`, `state_std.txt`, `state_gt.txt`, and a
+`*_calib_results.txt` in your output folder.
+
+To watch the trajectory and map while it runs, open RViz with the shipped
+display config:
+
+```bash
+rviz -d src/mvis/launch/display.rviz
+```
+
+## 3. Check the result against ground truth
+
+Because this is simulation, the true calibration is known — so the run can be
+scored rather than eyeballed:
+
+```bash
+rosrun mvis error_simulation \
+  OUTPUT_FOLDER/state_est.txt \
+  OUTPUT_FOLDER/state_std.txt \
+  OUTPUT_FOLDER/state_gt.txt
+```
+
+This reports per-parameter error against ground truth alongside the estimated
+standard deviation. A healthy run has errors that sit inside the reported
+3σ bounds — that consistency check is the point of running simulation at all.
+
+The same thing, plotted:
+
+```bash
+./src/mvis/paper_scripts/show_sim_single.sh
+```
+
+## 4. Read the calibration file
+
+Open `OUTPUT_FOLDER/<dataset>_calib_results.txt`. It holds one block per sensor:
+IMU intrinsics, camera intrinsics and distortion, every extrinsic transform, and
+every time offset. The block layout is documented in
+[Result formats](/reference/result-formats/).
+
+## Next
+
+You have now run the toolbox end to end. From here:
+
+- **Your own bag** → [Camera–IMU calibration](/guides/camera-imu-calibration/)
+  walks through targets, topics, initialisation, and refinement.
+- **More simulation** → [Simulation & synthetic data](/guides/simulation/) covers
+  custom trajectories, Monte-Carlo runs, and NEES consistency.
+- **Public data** → [Examples](/examples/) shows complete runs on released
+  datasets with their reference calibrations.

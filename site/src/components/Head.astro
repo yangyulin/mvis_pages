@@ -1,0 +1,14 @@
+---
+// Content-width opt-in — design plan §4.
+//
+// The site defaults to a ~60rem prose measure so Concepts/Guides/Tutorial pages
+// read at a comfortable line length (COLMAP's narrow measure, uv's calm body).
+// Pages that carry wide tables, gallery grids, or the leaderboard embed set
+// `wide: true` in frontmatter and get the original 72rem column back.
+import Default from '@astrojs/starlight/components/Head.astro';
+
+const wide = Astro.locals.starlightRoute.entry.data.wide === true;
+---
+
+<Default><slot /></Default>
+{wide && <style is:inline>{':root{--sl-content-width:72rem}'}</style>}

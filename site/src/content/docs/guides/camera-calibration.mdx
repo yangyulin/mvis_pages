@@ -1,0 +1,97 @@
+---
+title: Camera calibration
+description: Build a calibration target, get camera intrinsics, and solve camera-to-camera extrinsics.
+pageType: guide
+---
+
+import { Image } from 'astro:assets';
+import kalibrBoard from '../../../assets/kalibr_board.png';
+import aurcoBoard from '../../../assets/aurco.JPG';
+
+Getting from a bare camera to intrinsics you can hand to the joint solver. If
+your rig has an IMU, do this first — [Camera–IMU
+calibration](/guides/camera-imu-calibration/) expects an intrinsics estimate as
+its starting point.
+
+The projection and distortion models themselves are described in
+[Camera model](/concepts/camera-model/).
+
+## 1. Make a target
+
+Open MVIS detects both AprilTag and ArUco boards. A
+[Kalibr board](https://github.com/ethz-asl/kalibr/wiki/calibration-targets) can
+be used unmodified.
+
+<Image src={kalibrBoard} alt="Kalibr AprilGrid target" width="220" />
+
+**AprilGrid** — recommended. Tag IDs make the board self-identifying, so partial
+views still give unambiguous correspondences.
+
+<Image src={aurcoBoard} alt="ArUco target" width="220" />
+
+**ArUco** — supported as an alternative.
+
+:::caution[Measure the printed board]
+Print at 100% scale and measure a tag with calipers rather than trusting the
+generator. A board whose true size differs from the configured size biases every
+translation in the rig by the same scale factor — a silent, systematic error.
+:::
+
+## 2. Record
+
+Fill the frame with the board and cover the whole image, corners included:
+distortion coefficients are only constrained where you actually observed tags.
+Vary distance and viewing angle; avoid motion blur.
+
+## 3. Get an intrinsics estimate
+
+Open MVIS refines intrinsics — it is not a from-scratch mono intrinsics tool.
+Produce the first estimate with whichever of these matches your lens:
+
+| Lens | Tool | Model |
+|---|---|---|
+| Normal | [ROS camera_calibration](http://wiki.ros.org/camera_calibration) | [rad-tan](https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html) |
+| Fisheye | [Kalibr](https://github.com/ethz-asl/kalibr/wiki/multiple-camera-calibration) | [equidistant](https://docs.opencv.org/4.x/db/d58/group__calib3d__fisheye.html) |
+| Either | [Matlab calibration toolbox](http://www.vision.caltech.edu/bouguetj/calib_doc/) | both |
+
+## 4. Declare the model and the estimate
+
+```xml title="launch/<your>.launch"
+<param name="camN_is_fisheye" type="bool" value="true" />
+<!-- false: rad-tan model, true: equi-dist model -->
+
+<arg name="camN_k" default="[288.74, 288.92, 416.15, 405.97]" /> <!-- fu, fv, cu, cv -->
+<arg name="camN_d" default="[-0.0078, 0.0442, -0.0412, 0.0073]" />
+```
+
+The priors control how far the solver is allowed to move them. Widen them if
+your starting estimate is rough; tighten them to hold a trusted calibration
+nearly fixed.
+
+```xml title="launch/<your>.launch"
+<arg name="prior_sigma_cam_k" default="3.0" />
+<arg name="prior_sigma_cam_d" default="0.025" />
+```
+
+## 5. Refine, or lock
+
+Run the graph with intrinsics free to refine them jointly with everything else:
+
+```xml title="launch/<your>.launch"
+<arg name="do_calibration_cam_in" default="true" />
+```
+
+Set it to `false` to hold your prior calibration fixed and solve only the
+extrinsics and time offsets — the "partial calibration" mode from
+[Overview](/getting-started/overview/).
+
+## Camera-to-camera extrinsics
+
+There is no separate stereo step. Every camera is calibrated against the base
+IMU, and camera-to-camera transforms follow by composition — this is what keeps
+a five-camera rig consistent instead of accumulating pairwise error. Add the
+cameras as `topic_cameraN` and run
+[Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+For a rig with no IMU at all, the same composition holds through `cam0`; see
+[Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/).

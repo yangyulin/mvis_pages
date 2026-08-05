@@ -1,0 +1,86 @@
+---
+title: Rolling shutter
+description: Calibrate per-row readout time and pick the right image-timestamp convention.
+pageType: guide
+---
+
+A rolling-shutter camera exposes rows sequentially, so a single image spans a
+range of times rather than one instant. Open MVIS models this by solving the
+**readout time** — how long the sensor takes to scan the frame — jointly with
+the extrinsics and time offset.
+
+## 1. Declare the camera as rolling shutter
+
+```xml title="launch/<your>.launch"
+<param name="cam0_is_rolling"    type="bool"   value="true" />
+<param name="cam0_rs_readout_ms" type="double" value="10" />
+<param name="cam0_rs_mode"       type="int"    value="0" />
+<!-- 0: first row, 1: middle row, 2: last row -->
+```
+
+Set this per camera — a rig can mix global- and rolling-shutter cameras freely,
+as the released [4 IMUs + 4 cams](/examples/in-house-4imus-4cams/) rig does.
+
+## 2. Pick the timestamp convention
+
+`cam0_rs_mode` states **which row the driver's timestamp refers to**. This is a
+property of your camera driver, not a preference:
+
+| Mode | Meaning | Typical source |
+|---|---|---|
+| `0` | timestamp = first row exposed | most V4L2 / UVC drivers |
+| `1` | timestamp = middle row | drivers that centre the stamp |
+| `2` | timestamp = last row | timestamp taken at frame completion |
+
+:::caution[Getting the mode wrong looks like a time offset]
+A wrong convention shifts every observation by half the readout time. The
+solver absorbs that into the camera–IMU time offset, so the run still converges
+and still looks healthy — with a biased `td` and a biased readout estimate. If a
+rolling-shutter camera's `td` differs from its global-shutter neighbours by
+roughly half the readout, suspect the mode before the hardware.
+:::
+
+## 3. Give the readout a starting value
+
+`cam0_rs_readout_ms` is the initial guess for the whole-frame readout. If the
+datasheet does not state it, estimate `frame height / line rate`, or start at
+half the frame period and let refinement pull it in.
+
+The prior on the readout term:
+
+```xml title="launch/<your>.launch"
+<arg name="prior_sigma_cam_rs" default="0.008" />
+```
+
+## 4. Enable readout calibration
+
+```xml title="launch/<your>.launch"
+<arg name="do_calibration_rolling" default="true" />
+```
+
+Then run as usual — see
+[Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+## 5. Check the result
+
+The result file reports the convention and the solved readout per camera:
+
+```
+Rolling shutter: Yes
+Rolling mode: 1 - rolling from middle row of image
+Camera0 readout time for the whole image = 0.010243
+```
+
+A readout that lands near zero means the parameter was not observed — the motion
+was too gentle. Readout time is only excited by motion fast enough that rows see
+meaningfully different geometry; a slow, smooth bag will not constrain it.
+
+## What to expect
+
+Readout time is among the weakest parameters in the graph. Treat a run as
+trustworthy only when the estimate is stable across bags, not because a single
+run converged. [Simulation](/guides/simulation/) is the cheap way to check
+this — the true readout is known there, so the estimate can be scored directly.
+
+The residual and its Jacobians are derived in
+[Camera model](/concepts/camera-model/).

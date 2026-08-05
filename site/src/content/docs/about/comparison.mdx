@@ -1,0 +1,74 @@
+---
+title: Comparison vs Kalibr / Basalt
+description: How Open MVIS differs from the other open-source camera–IMU calibration toolboxes.
+pageType: reference
+wide: true
+---
+
+Where Open MVIS sits relative to the toolboxes most people already use. It is
+not a replacement for Kalibr in the single-IMU case — it was built for rigs
+Kalibr does not model.
+
+## Feature matrix
+
+| Capability | Open MVIS | Kalibr | Basalt |
+|---|---|---|---|
+| Camera intrinsics | refine | solve | solve |
+| Camera distortion | rad-tan, equidistant | rad-tan, equidistant, FOV, DS, EUCM | rad-tan, KB, DS, EUCM |
+| Camera–IMU extrinsics | ✅ | ✅ | ✅ |
+| Camera–IMU time offset | ✅ | ✅ | ✅ |
+| **Multiple IMUs** | ✅ | ✖ | ✖ |
+| **IMU–IMU extrinsics + time offset** | ✅ | ✖ | ✖ |
+| **Gyro-only auxiliary sensors** | ✅ | ✖ | ✖ |
+| IMU intrinsics (scale, misalignment) | ✅ | ✅ | ✖ |
+| G-sensitivity | ✅ | ✅ | ✖ |
+| **Rolling-shutter readout** | ✅ | via fork | ✖ |
+| Trajectory model | discrete-time factor graph | continuous-time B-spline | continuous-time B-spline |
+| Targets | AprilGrid, ArUco | AprilGrid, checkerboard, circles | AprilGrid |
+| Input | ROS bag | ROS bag | ROS bag, EuroC |
+
+Distortion-model coverage is the honest weak spot: Kalibr and Basalt both
+support more projection models. If your camera needs double-sphere or EUCM, they
+are the better tool today.
+
+## What is actually different
+
+**More than one IMU.** Kalibr and Basalt model a single IMU. A rig with four
+must be calibrated in pairs and composed — which accumulates error and discards
+the correlations between the pairwise results. Open MVIS puts every IMU in one
+graph, so an auxiliary IMU's extrinsics and time offset are solved against the
+same trajectory as everything else.
+
+**Redundancy is used, not averaged.** Multiple IMUs observe the same motion.
+That redundancy constrains parameters that a single IMU leaves weak — which is
+the reason to carry the extra sensors at all.
+
+**Rolling shutter in the base toolbox.** Readout time is solved jointly with
+extrinsics and time offset, and the timestamp convention is explicit
+([Rolling shutter](/guides/rolling-shutter/)). Kalibr needs a
+[community fork](https://github.com/JzHuai0108/kalibr.git) for this.
+
+**Discrete-time.** Kalibr and Basalt fit a B-spline; Open MVIS pre-integrates
+between states. The trade-off — and why it matters more for multi-IMU rigs — is
+in [Continuous-time refinement](/concepts/continuous-time/).
+
+## Which to use
+
+- **One IMU, one or two cameras** → Kalibr. Mature, widely validated, more
+  distortion models.
+- **Multiple IMUs, or a gyro-only auxiliary** → Open MVIS. The others do not
+  model it.
+- **Rolling-shutter cameras** → Open MVIS, or Kalibr's fork.
+- **Refining an existing calibration** → Open MVIS, seeded from the other
+  toolbox's output. This is the most common way it is used.
+
+Kalibr is a good source of initial guesses, not a competitor to be replaced —
+several [examples](/examples/) start from Kalibr output.
+
+## Measured comparison
+
+The feature matrix says what each tool *can* do, not how well. For accuracy,
+runtime, and convergence on shared datasets, see the
+[leaderboard](/benchmark/leaderboard/) — and read
+[Methodology](/benchmark/methodology/) first, particularly the consensus-baseline
+caveat.

@@ -1,0 +1,75 @@
+---
+title: Overview
+description: What Open MVIS calibrates, the three ways it is used, and how a calibration run is structured.
+pageType: concept
+---
+
+Open MVIS is an open-source toolbox and public benchmark for the
+spatial-temporal and intrinsic calibration of rigs that combine **multiple IMUs
+with multiple cameras**. Everything is solved in a single factor graph rather
+than in a chain of pairwise calibrations, so a four-IMU, five-camera rig is the
+same problem as a one-IMU, one-camera rig with more variables.
+
+## Three ways it is used
+
+**Refinement.** Start from an existing calibration — typically Kalibr output —
+and refine intrinsics, extrinsics, and time offsets jointly. This is the cheapest
+entry point and the most common one: the initial guess is already close, and the
+graph tightens it.
+
+**Full calibration.** Solve every variable from scratch: IMU and gyroscope
+intrinsics, camera intrinsics and distortion, IMU–IMU and IMU–camera extrinsics,
+time offsets, and rolling-shutter readout time. Needs well-excited motion and a
+reasonable initial guess for the base IMU ↔ `cam0` transform.
+
+**Partial calibration.** Lock what you trust and solve the rest — for example
+fix camera intrinsics from a prior calibration and solve only a newly-added
+IMU's extrinsics and time offset. Every calibration variable has its own on/off
+switch and its own prior.
+
+## Why one graph
+
+Calibrating a multi-sensor rig pairwise accumulates error: each pairwise result
+carries its own uncertainty, and composing them loses the correlations between
+them. Solving jointly keeps those correlations, which matters most for the
+parameters that are only weakly observable on their own — time offsets,
+rolling-shutter readout, and IMU intrinsics. The formulation is written out in
+[Calibration graph](/concepts/calibration-graph/).
+
+## What gets solved
+
+| Quantity | Symbol | Per-sensor or pairwise | Notes |
+|---|---|---|---|
+| Camera intrinsics | `fx, fy, cx, cy, k1..kn` | per camera | rad-tan or equidistant |
+| IMU noise model | `σa, σg, ba, bg` | per IMU | Kalibr or RPNG model |
+| Gyroscope intrinsics | scale + misalignment | per gyro | Kalibr or RPNG model |
+| Camera–IMU extrinsics | `R_CI, t_CI` | pairwise | rotation, translation |
+| IMU–IMU extrinsics | `R_IiIj, t_IiIj` | pairwise | rotation, translation |
+| Time offsets | `Δt` | pairwise | sensor → reference clock |
+| Rolling-shutter readout | `tr` | per RS camera | first / middle / last row |
+
+## The shape of a run
+
+A calibration run always has the same five stages, whichever of the three modes
+you are in:
+
+1. **Target and data** — print a board, record a bag with fully-excited motion.
+2. **Initialisation** — camera intrinsics and the base-IMU ↔ `cam0` transform
+   need a starting point; everything else can start at identity.
+3. **Setup** — declare topics, sensor models, and which variables to solve.
+4. **Optimisation** — the graph runs and writes a result file.
+5. **Refinement** — feed the result back in as the new initial guess and re-run
+   until it stops moving.
+
+Each stage is a step in [Camera–IMU
+calibration](/guides/camera-imu-calibration/); the file the run produces is
+documented in [Result formats](/reference/result-formats/).
+
+## Where to go next
+
+- Never run it before → [Quickstart](/getting-started/quickstart/) calibrates a
+  simulated rig in a few minutes, no hardware needed.
+- Have a bag already → [Camera–IMU
+  calibration](/guides/camera-imu-calibration/).
+- Want to see it on public data → [Examples](/examples/).
+- Want the maths → [Concepts](/concepts/notation/).

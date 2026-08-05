@@ -14,6 +14,34 @@ export default defineConfig({
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
   },
+
+  // Redirects — design plan §3.2 (O7).
+  // These cover the first Starlight tree (5 groups), superseded by the 8-group
+  // migration. The *legacy jemdoc* URLs (openmvis.com/*.html) cannot live here:
+  // a redirects key ending in `.html` builds as a directory, so /Foo.html would
+  // 404. They are static files in `public/` instead.
+  redirects: {
+    '/compilation': '/getting-started/installation/',
+    '/quick-start': '/getting-started/quickstart/',
+    '/contributors': '/about/contributors/',
+    '/calibration/overview': '/getting-started/overview/',
+    '/calibration/procedures': '/guides/camera-imu-calibration/',
+    '/calibration/results': '/reference/result-formats/',
+    '/datasets/sensors': '/getting-started/requirements/',
+    '/datasets/mvis-data': '/reference/datasets/',
+    '/datasets/analysis': '/reference/evaluation/',
+    '/datasets/4imus-3cams': '/examples/in-house-4imus-3cams/',
+    '/datasets/4imus-4cams': '/examples/in-house-4imus-4cams/',
+    '/math/calib-graph': '/concepts/calibration-graph/',
+    '/math/camera-calib': '/concepts/camera-model/',
+    '/math/base-imu-calib': '/concepts/camera-imu-math/base-imu/',
+    '/math/aux-imu-calib': '/concepts/camera-imu-math/aux-imu/',
+    '/math/observability': '/concepts/observability/',
+    '/math/degeneracy': '/concepts/degeneracy/',
+    '/leaderboard': '/benchmark/leaderboard/',
+    '/leaderboard/submit': '/contribute/submit-results/',
+  },
+
   integrations: [
     starlight({
       title: 'Open MVIS',
@@ -36,51 +64,100 @@ export default defineConfig({
       components: {
         ThemeProvider: './src/components/ThemeProvider.astro',
         Footer: './src/components/Footer.astro',
+        // Applies the `wide: true` frontmatter opt-in (design plan §4).
+        Head: './src/components/Head.astro',
       },
+
+      // Sidebar — design plan §3. Eight groups, ordered concepts → how-to →
+      // reference (COLMAP's spine, §1.1). Every leaf declares its pageType in
+      // its own frontmatter, enforced by the §3.1 rule.
       sidebar: [
         {
-          label: 'Open MVIS',
+          label: 'Getting started',
           items: [
-            { label: 'Home', link: '/' },
-            { label: 'Compilation', link: '/compilation/' },
-            { label: 'Quick Start', link: '/quick-start/' },
-            { label: 'Contributors', link: '/contributors/' },
+            { label: 'Overview', link: '/getting-started/overview/' },
+            { label: 'Requirements', link: '/getting-started/requirements/' },
+            { label: 'Installation', link: '/getting-started/installation/' },
+            { label: 'Quickstart', link: '/getting-started/quickstart/' },
           ],
         },
         {
-          label: 'Calibration',
+          label: 'Guides',
           items: [
-            { label: 'Overview', link: '/calibration/overview/' },
-            { label: 'Procedures', link: '/calibration/procedures/' },
-            { label: 'Results', link: '/calibration/results/' },
+            { label: 'Camera calibration', link: '/guides/camera-calibration/' },
+            { label: 'Camera–IMU calibration', link: '/guides/camera-imu-calibration/' },
+            { label: 'Multi-camera / multi-IMU rigs', link: '/guides/multi-sensor-rigs/' },
+            { label: 'Rolling shutter', link: '/guides/rolling-shutter/' },
+            { label: 'Simulation & synthetic data', link: '/guides/simulation/' },
           ],
         },
         {
-          label: 'MVIS Datasets',
+          label: 'Concepts',
           items: [
-            { label: 'Sensors', link: '/datasets/sensors/' },
-            { label: 'MVIS Data', link: '/datasets/mvis-data/' },
-            { label: '4 IMUs + 3 Cams', link: '/datasets/4imus-3cams/' },
-            { label: '4 IMUs + 4 Cams', link: '/datasets/4imus-4cams/' },
-            { label: 'Analysis', link: '/datasets/analysis/' },
+            { label: 'Notation & glossary', link: '/concepts/notation/' },
+            { label: 'Camera model', link: '/concepts/camera-model/' },
+            { label: 'IMU model', link: '/concepts/imu-model/' },
+            {
+              label: 'Camera–IMU calibration math',
+              collapsed: true,
+              items: [
+                { label: 'Overview', link: '/concepts/camera-imu-math/' },
+                { label: 'Base IMU factor', link: '/concepts/camera-imu-math/base-imu/' },
+                { label: 'Auxiliary IMU factor', link: '/concepts/camera-imu-math/aux-imu/' },
+              ],
+            },
+            { label: 'Calibration graph', link: '/concepts/calibration-graph/' },
+            { label: 'Observability', link: '/concepts/observability/' },
+            { label: 'Degeneracy', link: '/concepts/degeneracy/' },
+            { label: 'Continuous-time refinement', link: '/concepts/continuous-time/' },
           ],
         },
         {
-          label: 'MVIS Math',
+          label: 'Examples',
           items: [
-            { label: 'Calib Graph', link: '/math/calib-graph/' },
-            { label: 'Base IMU Calib', link: '/math/base-imu-calib/' },
-            { label: 'Aux IMU Calib', link: '/math/aux-imu-calib/' },
-            { label: 'Camera Calib', link: '/math/camera-calib/' },
-            { label: 'Observability', link: '/math/observability/' },
-            { label: 'Degeneracy', link: '/math/degeneracy/' },
+            { label: 'Overview', link: '/examples/' },
+            { label: 'TUM VI', link: '/examples/tum-vi/' },
+            { label: 'TUM VIE', link: '/examples/tum-vie/' },
+            { label: 'Monado MSD', link: '/examples/monado-msd/' },
+            { label: 'In-house — 4 IMUs + 3 cams', link: '/examples/in-house-4imus-3cams/' },
+            { label: 'In-house — 4 IMUs + 4 cams', link: '/examples/in-house-4imus-4cams/' },
           ],
         },
         {
-          label: 'Leaderboard',
+          label: 'Reference',
           items: [
-            { label: 'Browse', link: '/leaderboard/' },
-            { label: 'Submit', link: '/leaderboard/submit/' },
+            { label: 'Configuration', link: '/reference/configuration/' },
+            { label: 'CLI', link: '/reference/cli/' },
+            { label: 'Result formats', link: '/reference/result-formats/' },
+            { label: 'Evaluation & metrics', link: '/reference/evaluation/' },
+            { label: 'Python API', link: '/reference/python-api/' },
+            { label: 'Datasets', link: '/reference/datasets/' },
+          ],
+        },
+        {
+          label: 'Benchmark',
+          items: [
+            { label: 'Leaderboard', link: '/benchmark/leaderboard/' },
+            { label: 'Methodology', link: '/benchmark/methodology/' },
+          ],
+        },
+        {
+          label: 'Contribute',
+          items: [
+            { label: 'Submit results', link: '/contribute/submit-results/' },
+            { label: 'Submit a dataset', link: '/contribute/submit-dataset/' },
+            { label: 'Governance', link: '/contribute/governance/' },
+          ],
+        },
+        {
+          label: 'About',
+          items: [
+            { label: 'Contributors & citation', link: '/about/contributors/' },
+            { label: 'Comparison vs Kalibr / Basalt', link: '/about/comparison/' },
+            { label: 'FAQ & troubleshooting', link: '/about/faq/' },
+            { label: 'Changelog', link: '/about/changelog/' },
+            { label: 'Roadmap', link: '/about/roadmap/' },
+            { label: 'License', link: '/about/license/' },
           ],
         },
       ],

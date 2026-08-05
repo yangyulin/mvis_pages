@@ -1,0 +1,52 @@
+---
+title: Continuous-time refinement
+description: Where a B-spline trajectory parameterisation helps, and how it differs from the discrete-time graph.
+pageType: concept
+---
+
+Open MVIS solves on a **discrete-time** graph: the trajectory is a set of states
+at measurement times, linked by pre-integrated inertial factors. Kalibr and
+Basalt instead represent the trajectory as a **continuous-time** B-spline and
+evaluate every measurement against it. Both recover the same calibration; they
+differ in how they get there.
+
+## The difference
+
+| | Discrete-time (Open MVIS) | Continuous-time (Kalibr, Basalt) |
+|---|---|---|
+| Trajectory | states at discrete times | control points of a spline |
+| Between states | pre-integrated IMU factor | analytic evaluation of the spline |
+| Asynchronous sensors | handled by interpolation and time offsets | handled natively — query at any $t$ |
+| Cost per iteration | grows with measurement count | grows with control-point count |
+| Model error | none from parameterisation | spline order limits representable motion |
+
+The practical trade: a spline evaluates cleanly at *any* timestamp, which is
+convenient for rigs whose sensors never sample together — but it imposes a
+smoothness the true motion may not have. A knot spacing too coarse for the
+actual dynamics biases the calibration, and the bias is invisible in the
+residuals because the model, not the data, is what is wrong.
+
+## Why the discrete graph is the default here
+
+Multi-IMU rigs are the case Open MVIS is built for, and they push against the
+continuous-time assumption from two sides. Each IMU has its own clock and rate,
+so a single spline must be sampled at many inconsistent times; and the
+high-rate inertial data that makes multi-IMU rigs worth having is exactly the
+content a spline smooths away. Pre-integration keeps every sample.
+
+## Where continuous time still helps
+
+- **Very high-rate sensors** where per-measurement states would explode the
+  graph size.
+- **Cross-checking**: since Kalibr is continuous-time, agreement between the two
+  is evidence that neither parameterisation is driving the answer. This is part
+  of what the [benchmark](/benchmark/methodology/) measures.
+- **Rolling shutter**, where a within-frame trajectory query is natural rather
+  than an interpolation.
+
+:::note[Not yet implemented]
+Continuous-time refinement is a planned addition, not a shipped feature — it is
+documented here because the benchmark compares against continuous-time methods
+and the distinction explains why results differ. Track it on the
+[roadmap](/about/roadmap/).
+:::

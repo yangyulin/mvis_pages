@@ -1,0 +1,51 @@
+---
+title: Camera–IMU calibration math
+description: How the inertial factors carry calibration state — overview of the base and auxiliary IMU derivations.
+pageType: concept
+---
+
+The camera factor constrains geometry; the inertial factors carry the rig
+through the gaps between images. Both are written so that calibration
+parameters appear *inside* the residual rather than being applied afterwards —
+that is what lets the graph solve them.
+
+This section splits along the same line the implementation does:
+
+- **[Base IMU factor](/concepts/camera-imu-math/base-imu/)** — pre-integration
+  between consecutive states, with the base IMU's own intrinsics in the
+  residual. The base IMU defines the trajectory, so its errors move everything.
+- **[Auxiliary IMU factor](/concepts/camera-imu-math/aux-imu/)** — an
+  auxiliary IMU observes the *same* motion through a rigid transform and a time
+  offset. That redundancy is what makes the extra IMUs worth carrying, and it is
+  what the factor encodes.
+
+The camera side lives in [Camera model](/concepts/camera-model/), and the cost
+that assembles all of them is in
+[Calibration graph](/concepts/calibration-graph/). Symbols follow
+[Notation & glossary](/concepts/notation/).
+
+## Why calibration goes inside the factor
+
+The naive alternative — integrate the IMU, then correct the result using a
+calibration estimate — cannot work in a solver, because the correction has no
+derivative with respect to the parameters being solved. Putting
+$\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$, the extrinsics, and the time
+offsets inside the pre-integration means each has a Jacobian, and the optimiser
+can move it.
+
+The cost is that pre-integration is no longer a one-time operation: changing an
+intrinsic changes the integrated quantity, so the factor must expose how its
+value responds. Both derivation pages are structured the same way — measurement
+model, residual, then the Jacobian for every calibration variable it touches.
+
+## What each factor constrains
+
+| Factor | Constrains directly | Constrains indirectly |
+|---|---|---|
+| Base IMU | biases, $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$ | trajectory scale and gravity direction |
+| Auxiliary IMU | ${}^{I}_{I_{s_j}}\mathbf{T}$, $t_{d,j}$, its own intrinsics | base-IMU intrinsics, via redundancy |
+| Camera | intrinsics, ${}^{I}_{C_i}\mathbf{T}$, $t_{d,i}$, $t_{r,i}$ | trajectory in the board frame |
+
+No single factor observes the whole state — which parameters actually become
+observable depends on the motion, and that is the subject of
+[Observability](/concepts/observability/).

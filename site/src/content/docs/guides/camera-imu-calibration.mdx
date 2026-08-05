@@ -1,0 +1,219 @@
+---
+title: Camera–IMU calibration
+description: Calibrate a camera against an IMU — data collection, initialisation, solving, and refinement.
+pageType: guide
+---
+
+The main calibration workflow: record a bag, give the graph a starting point,
+solve, and refine. This page covers one base IMU and one or more cameras. For
+extra IMUs see [Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/); for
+rolling-shutter cameras see [Rolling shutter](/guides/rolling-shutter/).
+
+Why the parameters are coupled the way they are is explained in
+[Camera–IMU calibration math](/concepts/camera-imu-math/).
+
+## 1. Record a bag
+
+Open MVIS reads ROS bags. Drivers for common inertial sensors and cameras are
+collected in
+[multi_sensor_drivers](https://github.com/yangyulin/multi_sensor_drivers); if
+yours is missing, build a bag with the
+[Kalibr bag creator](https://github.com/ethz-asl/kalibr/wiki/bag-format).
+
+Two things decide whether the recording is usable:
+
+:::caution[Stand still first]
+Hold the rig still for a few seconds at the start so the IMU can initialise its
+biases. A bag that starts mid-motion will initialise badly.
+:::
+
+:::caution[Then excite every axis]
+Rotate and translate about all three axes. Time offsets, IMU intrinsics, and
+rolling-shutter readout are only observable under sufficiently rich motion — see
+[Degeneracy](/concepts/degeneracy/) for what unobservability looks like.
+:::
+
+Point the launch file at the bag:
+
+```xml title="launch/<your>.launch"
+<!-- dataset settings -->
+<arg name="dataset"   default="4imus_4cams_15" />
+<arg name="bag_path"  default="/home/lin/Data/dataset/virig_4imus_4cams/$(arg dataset).bag" />
+<arg name="bag_start" default="10" />
+<arg name="bag_durr"  default="-1" />
+```
+
+## 2. Declare the topics
+
+At least one IMU and one camera must be given. `topic_imu` is the **base IMU** —
+the clock every other sensor is calibrated against. `topic_imuN` is the Nth
+auxiliary IMU, `topic_cameraN` the Nth camera.
+
+```xml title="launch/<your>.launch"
+<!-- bag topics -->
+<param name="topic_imu"     type="string" value="/gx3_25/data" />
+<param name="topic_imu0"    type="string" value="/gx3_35/imu/data" />
+<param name="topic_imu1"    type="string" value="/imu/data" />
+<param name="topic_imu2"    type="string" value="/t265/imu" />
+<param name="topic_camera0" type="string" value="/t265/fisheye1/image_raw" />
+<param name="topic_camera1" type="string" value="/t265/fisheye2/image_raw" />
+<param name="topic_camera2" type="string" value="/elp/split_sync_image_node/left/image_raw" />
+<param name="topic_camera3" type="string" value="/elp/split_sync_image_node/right/image_raw" />
+```
+
+## 3. Set the sensor noise
+
+For every IMU, base and auxiliary alike:
+
+```xml title="launch/<your>.launch"
+<param name="gyroscope_noise_density"     type="double" value="1.6968e-04" />
+<param name="gyroscope_random_walk"       type="double" value="1.9393e-05" />
+<param name="accelerometer_noise_density" type="double" value="3.0000e-3" />
+<param name="accelerometer_random_walk"   type="double" value="3.0000e-3" />
+```
+
+And the camera pixel noise:
+
+```xml title="launch/<your>.launch"
+<arg name="cam_sigma_pix" default="1" />
+```
+
+## 4. Initialise the IMU intrinsics
+
+Declare the base IMU's model and its intrinsics prior. The identity matrices
+below are the right starting point unless you have a manufacturer calibration.
+
+```xml title="launch/<your>.launch"
+<param name="imu_model" type="int" value="1" />
+<rosparam param="imu_b_intrinsics_Da">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
+<rosparam param="imu_b_intrinsics_Dw">[1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0]</rosparam>
+<rosparam param="imu_b_intrinsics_Tg">[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]</rosparam>
+```
+
+```xml title="launch/<your>.launch"
+<arg name="prior_sigma_dw"    default="0.01" />
+<arg name="prior_sigma_da"    default="0.01" />
+<arg name="prior_sigma_tg"    default="0.008" />
+<arg name="prior_sigma_watoI" default="0.015" />
+```
+
+The two supported parameterisations are compared in
+[IMU model](/concepts/imu-model/).
+
+## 5. Initialise the camera intrinsics
+
+Declare the projection model per camera:
+
+```xml title="launch/<your>.launch"
+<param name="camN_is_fisheye" type="bool" value="true" />
+<!-- false: rad-tan model, true: equi-dist model -->
+```
+
+Then supply intrinsics and their priors. Getting a starting estimate is its own
+task — see [Camera calibration](/guides/camera-calibration/).
+
+```xml title="launch/<your>.launch"
+<arg name="camN_k" default="[288.74, 288.92, 416.15, 405.97]" /> <!-- fu, fv, cu, cv -->
+<arg name="camN_d" default="[-0.0078, 0.0442, -0.0412, 0.0073]" />
+<arg name="prior_sigma_cam_k" default="3.0" />
+<arg name="prior_sigma_cam_d" default="0.025" />
+```
+
+## 6. Initialise the base IMU ↔ `cam0` transform
+
+This is the one parameter that genuinely needs a good starting point. Everything
+else in the rig can begin at identity and converge; a badly-initialised
+`T_C0toI` will not.
+
+If you use a Kalibr board, run Kalibr first and take its output as the guess.
+
+```xml title="launch/<your>.launch"
+<param name="calib_camimu_dt0" type="double" value="0.01" />
+<rosparam param="T_C0toI">
+  [
+    1.0, 0,    0,    -0.38,
+    0,   0,   -1.0,   0.24,
+    0,   1.0,  0,    -0.10,
+    0,   0,    0,     1.00
+  ]
+</rosparam>
+```
+
+Transforms from the base IMU to the *other* cameras are far more forgiving —
+identity is an acceptable start, then refine.
+
+Priors for the spatial-temporal terms:
+
+```xml title="launch/<your>.launch"
+<arg name="prior_sigma_camimu_dt" default="0.012" />
+<arg name="prior_sigma_cam_rs"    default="0.008" />
+<arg name="prior_sigma_CtoI_pos"  default="0.015" />
+<arg name="prior_sigma_CtoI_ori"  default="0.015" />
+```
+
+## 7. Tune the estimator (optional)
+
+The defaults are good for most bags. The knobs that matter when they are not:
+
+```xml title="launch/<your>.launch"
+<arg name="use_marginals"       default="false" />
+<arg name="skip_optimize_after" default="250" />
+<arg name="optimize_every_n"    default="5" />
+<arg name="max_iterations"      default="1" />
+<arg name="use_numerical_jacob" default="false" />
+```
+
+Which measurements enter the graph, and when IMU initialisation is considered
+converged:
+
+```xml title="launch/<your>.launch"
+<param name="imu_s_start_time" type="double" value="20" />
+<param name="cam_start_time"   type="double" value="20" />
+<param name="cam_meas_skip"    type="int"    value="3" />
+<param name="init_window_time" type="double" value="0.75" />
+<param name="init_imu_thresh"  type="double" value="1.0" />
+```
+
+Every key is listed in the [configuration
+reference](/reference/configuration/).
+
+## 8. Choose what to solve
+
+Each variable class has its own switch. Turn off what you already trust.
+
+```xml title="launch/<your>.launch"
+<arg name="do_calibration_cam"        default="true" />
+<arg name="do_calibration_cam_in"     default="true" />
+<arg name="do_calibration_cam_t"      default="true" />
+<arg name="do_calibration_rolling"    default="true" />
+<arg name="do_calibration_imu_b_in"   default="true" />
+<arg name="do_calibration_imus_s"     default="true" />
+<arg name="do_calibration_imus_s_td"  default="true" />
+<arg name="do_calibration_imus_s_in"  default="true" />
+```
+
+## 9. Run it
+
+```bash
+source devel/setup.bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch
+```
+
+## 10. Refine
+
+The result is written to the path you configured:
+
+```xml title="launch/<your>.launch"
+<arg name="dosave_calib"   default="true" />
+<arg name="path_calib_est" default="$(find mvis)/calib_data/$(arg dataset)_calib_results.txt" />
+```
+
+Compare it against the values you started from:
+
+- **Close to the initial guess** → the calibration has converged. Done.
+- **Still far from it** → the linearisation point was poor. Copy the new values
+  back into the launch file and run again. Repeat until it stops moving.
+
+The file's block layout is documented in
+[Result formats](/reference/result-formats/), and
+[Evaluation & metrics](/reference/evaluation/) covers how to score a run.

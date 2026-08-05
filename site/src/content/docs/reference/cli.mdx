@@ -1,0 +1,81 @@
+---
+title: CLI
+description: Launch files, nodes, and scripts shipped with Open MVIS.
+pageType: reference
+wide: true
+---
+
+Open MVIS has no single binary — it is a set of ROS nodes driven by launch
+files. This page lists what is shipped and what each entry point does. Every
+knob those launch files accept is in
+[Configuration](/reference/configuration/).
+
+:::note[Hand-written, not generated]
+The design intent is to generate this page from the nodes' own argument
+declarations so it cannot drift. That is not wired up yet — treat the source as
+authoritative where this disagrees. Tracked on the [roadmap](/about/roadmap/).
+:::
+
+Every command assumes a sourced workspace:
+
+```bash
+source devel/setup.bash
+```
+
+## Launch files
+
+| Launch file | Purpose |
+|---|---|
+| `yulin_sim_multi_imu.launch` | Simulated rig — 1 base IMU, 2 aux IMUs, 1 aux gyro, 2 RS cameras |
+| `yulin_virig_for_mvis_3cams.launch` | VI-Rig, 4 IMUs + 3 global-shutter cameras |
+| `yulin_virig_for_mvis_init_large_errors.launch` | VI-Rig, 4 IMUs + 2 GS + 2 RS cameras; tolerant initialisation |
+
+```bash
+roslaunch mvis yulin_sim_multi_imu.launch
+```
+
+Arguments are overridden inline in the usual roslaunch way:
+
+```bash
+roslaunch mvis yulin_virig_for_mvis_3cams.launch \
+  dataset:=virig_4imus_3cams_april_01 \
+  bag_path:=/data/virig_4imus_3cams_april_01.bag
+```
+
+## Nodes
+
+### `error_simulation`
+
+Scores a simulation run against ground truth: per-parameter error alongside the
+estimated standard deviation.
+
+```bash
+rosrun mvis error_simulation \
+  OUTPUT_FOLDER/state_est.txt \
+  OUTPUT_FOLDER/state_std.txt \
+  OUTPUT_FOLDER/state_gt.txt
+```
+
+| Positional argument | Meaning |
+|---|---|
+| 1 | State estimate (`path_state_est`) |
+| 2 | Estimated standard deviations (`path_state_std`) |
+| 3 | Ground truth (`path_state_gt`) |
+
+How to read the output is covered in
+[Simulation & synthetic data](/guides/simulation/#closed-loop-recovery).
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `paper_scripts/show_sim_single.sh` | Plot a single simulation run |
+
+## Visualisation
+
+RViz with the shipped display configuration shows the estimated trajectory and
+the board map while a run is in progress:
+
+```bash
+rviz -d src/mvis/launch/display.rviz
+```

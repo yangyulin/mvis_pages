@@ -1,0 +1,115 @@
+---
+title: FAQ & troubleshooting
+description: Build errors, run failures, and results that look wrong.
+pageType: reference
+---
+
+## Build
+
+### GTSAM fails to build, or Eigen errors at link time
+
+Turn off `march=native` — this is a known
+[GTSAM issue](https://github.com/borglab/gtsam/issues/75#issuecomment-502809431):
+
+```bash
+cd gtsam/build
+ccmake ..
+# set GTSAM_BUILD_WITH_MARCH_NATIVE=OFF
+```
+
+Also make sure GTSAM uses the *system* Eigen (`GTSAM_USE_SYSTEM_EIGEN=ON`) so
+every package links against the same version.
+
+### catkin tries to build GTSAM
+
+Do not put the GTSAM sources inside the workspace's `src/` folder. Build and
+install it separately, as in [Installation](/getting-started/installation/).
+
+### An LZ4 symbol conflict
+
+A ROS/system library clash — the
+[workaround](https://github.com/ethz-asl/lidar_align/issues/16#issuecomment-504348488)
+applies here unchanged.
+
+### The machine freezes while building
+
+Use fewer parallel jobs:
+
+```bash
+catkin build -j2
+```
+
+### Old GTSAM version
+
+Install a recent release following the
+[vicon2gt instructions](https://github.com/rpng/vicon2gt#building-gtsam-and-dependencies).
+
+## Running
+
+### The calibration diverges immediately
+
+Almost always the base IMU ↔ `cam0` initial transform. It is the one parameter
+that needs a real starting guess — run Kalibr first and use its output
+([Camera–IMU calibration](/guides/camera-imu-calibration/), step 6). Other
+cameras and IMUs can start at identity.
+
+### IMU initialisation never completes
+
+The bag needs a static period at the start. Check `init_window_time` and
+`init_imu_thresh`, and confirm the recording actually begins at rest.
+
+### No camera measurements enter the graph
+
+Check `cam_start_time` and `bag_start` — together they may skip past the part of
+the bag where the board is visible. Also confirm the topic names match the bag
+exactly.
+
+### It runs but takes forever
+
+Raise `cam_meas_skip` to use fewer frames, raise `optimize_every_n`, and leave
+`use_marginals` off unless you need covariances. Never leave
+`use_numerical_jacob` on outside debugging.
+
+## Results that look wrong
+
+### Reprojection error is low but the extrinsics look off
+
+Low reprojection error only says the solution explains its own observations. A
+parameter that was unobservable under the recorded motion settles near its prior
+without raising the residual. Check the reported σ alongside the value — see
+[Evaluation & metrics](/reference/evaluation/).
+
+### A rolling-shutter camera's time offset is off by half the readout
+
+The timestamp convention is probably wrong. `camN_rs_mode` describes what your
+*driver* stamps, not a preference — see
+[Rolling shutter](/guides/rolling-shutter/).
+
+### IMU intrinsics come back at their initial values
+
+They were not observed. Scale and misalignment need excitation on every axis;
+g-sensitivity needs simultaneous rotation and strong linear acceleration. See
+[Degeneracy](/concepts/degeneracy/).
+
+### Results differ from Kalibr's numbers
+
+Check three things before concluding either is wrong: the IMU model convention
+(`imu_model` defaults to RPNG, not Kalibr — the matrices differ for the same
+device), the sensor numbering (Kalibr's `cam0` is often not MVIS's `Cam0`, see
+[Multi-camera / multi-IMU rigs](/guides/multi-sensor-rigs/#sensor-numbering)),
+and the transform direction (`T_C0toI` versus `T_ItoC0`).
+
+### Every translation is off by the same factor
+
+The configured board size does not match the printed board. Measure a tag with
+calipers.
+
+### Results differ between bags of the same rig
+
+Those parameters were not constrained by the motion in them. Record with fuller
+excitation. Repeatability across bags is the most useful field check you have.
+
+## Still stuck
+
+Open an issue on [the toolbox repository](https://github.com/rpng/mvis) with
+your launch file, the console output, and what the rig is.

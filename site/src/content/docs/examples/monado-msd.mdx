@@ -1,0 +1,73 @@
+---
+title: Monado MSD
+description: Calibrating the Monado Slam Dataset rig and validating against the Monado reference calibration.
+pageType: example
+wide: true
+---
+
+The [Monado Slam Dataset](https://gitlab.freedesktop.org/mateosss/msd) comes
+from an XR headset rather than a research rig — higher IMU rate, tighter
+baseline, and a reference calibration produced by a different toolchain. That
+makes it a useful second opinion alongside [TUM VI](/examples/tum-vi/).
+
+## The rig
+
+| Sensor | Rate | Notes |
+|---|---|---|
+| 2 × monochrome cameras | 60 Hz | 960×960 |
+| 6-DOF IMU | 1000 Hz | accelerometer + gyroscope |
+
+The high IMU rate is the point of interest: pre-integration between camera
+frames carries many more samples than on a 200 Hz rig, which tightens the
+inertial constraint and makes the time offset better observed.
+
+## Getting the data
+
+Download the calibration sequences from the dataset repository. The dataset is
+referred to as `monado_msd` in the Open MVIS manifests.
+
+:::caution[The board is 3 cm]
+The AprilGrid used for these recordings has 3 cm tags — smaller than the default
+in most configs. Board size scales every translation in the result, so a wrong
+value produces a calibration that looks converged and is uniformly wrong. Set it
+before the first run.
+:::
+
+## Configuration
+
+Standard two-camera setup. One practical trick for a rig with more than two
+cameras: seed the extra cameras' extrinsics from a completed camera–IMU result
+rather than from identity — it converges faster and avoids local minima on
+narrow-baseline rigs.
+
+## Running it
+
+```bash
+source devel/setup.bash
+roslaunch mvis monado_msd.launch
+```
+
+## Result and validation
+
+Monado publishes its own calibration for this rig, produced with a different
+toolchain — so agreement is meaningful evidence rather than a self-check.
+Compared quantities: camera intrinsics, `T_cam_imu` per camera, and the
+camera–IMU time offset.
+
+:::note[Numbers pending transcription]
+The run has been executed and compared against the Monado reference; the result
+tables and plots have not yet been transferred onto this page. The
+configuration notes above — manifest name, board size, seeding strategy — are
+current.
+:::
+
+## Reproducibility
+
+| Item | Value |
+|---|---|
+| Dataset | Monado Slam Dataset (`monado_msd`) |
+| Target | AprilGrid, 3 cm tags |
+| Reference | Monado-published calibration |
+| Toolbox version | *pending* |
+| Config | *pending* |
+| Data hash | *pending* |

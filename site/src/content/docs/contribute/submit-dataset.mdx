@@ -1,0 +1,77 @@
+---
+title: Submit a dataset
+description: Contribute a calibration dataset — required format, dataset card, and licensing.
+pageType: guide
+---
+
+A rig we do not have is more useful than another run on a rig we do. Datasets
+are what make the benchmark meaningful, and contributed ones are cited and
+credited.
+
+## 1. Check it is usable
+
+A dataset only helps if a calibration can actually be run on it:
+
+- **Raw, synchronised sensor streams** — no pre-rectified images, no
+  vendor-corrected IMU output. Corrections you cannot undo make intrinsics
+  uncalibratable.
+- **A visible calibration target** for a meaningful part of the recording, with
+  its geometry stated (tag family, tag size, spacing).
+- **Well-excited motion** — rotation about all three axes, not just translation.
+  See [Degeneracy](/concepts/degeneracy/).
+- **A static period at the start** so IMU initialisation has something to work
+  with.
+- **A licence you have the right to grant.**
+
+## 2. Package it
+
+| Item | Requirement |
+|---|---|
+| Data | ROS bag or EuroC layout |
+| Target | Tag family, tag size, spacing, board dimensions |
+| Sensors | Model, rate, resolution, and topic for each |
+| Timing | Whether streams are hardware-synchronised; rolling-shutter convention if applicable |
+| Reference | Any existing calibration, and what produced it |
+
+If a reference calibration exists — even an imperfect one — include it and say
+how it was obtained. It turns the dataset into something a method can be
+validated *against* rather than merely run on.
+
+## 3. Write a dataset card
+
+One page, alongside the data:
+
+- What the rig is and what makes it interesting
+- How and where the recording was made
+- Known problems — dropped frames, clock glitches, saturated segments,
+  soft-synchronised streams
+- Licence and how to cite it
+- Contact for questions
+
+:::note[Say what is wrong with it]
+The known-problems section is the most valuable part. A documented flaw is a
+usable dataset; an undocumented one produces results nobody can explain, and
+costs every later user the same debugging.
+:::
+
+## 4. Licensing
+
+Datasets need a licence that permits redistribution and derivative results —
+CC BY 4.0 is the usual choice. Recordings containing identifiable people or
+private spaces need that resolved before submission, not after.
+
+## 5. Send it
+
+Open an issue on [the site repository](https://github.com/rpng/mvis_pages)
+describing the dataset and linking the data. Hosting is arranged from there:
+large datasets go to Hugging Face with a Zenodo DOI so they are citable.
+
+## Credit
+
+Contributed datasets get a per-dataset DOI and citation, a named entry on
+[Contributors](/about/contributors/), and — where the dataset drives a
+benchmark or dataset paper — co-authorship. Details in
+[Governance](/contribute/governance/).
+
+To submit a *result* on an existing dataset instead, see
+[Submit results](/contribute/submit-results/).

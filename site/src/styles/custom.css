@@ -5,11 +5,14 @@
  */
 
 /* Shared layout + accent
- * Wider content column than Starlight's 45rem default — research pages carry
- * tables, code blocks, equations, and figures that benefit from extra horizontal
- * room. Sidebar bumped slightly to fit the longest menu labels. */
+ * Content column (design plan §4): 60rem is the default — wide enough for code
+ * blocks, equations, and figures, narrow enough that theory prose keeps a
+ * readable ~70ch measure. Pages that genuinely need the full 72rem (Reference
+ * tables, Examples gallery, the leaderboard embed) opt in with `wide: true` in
+ * frontmatter; see src/components/Head.astro.
+ * Sidebar bumped slightly to fit the longest menu labels. */
 :root {
-  --sl-content-width: 72rem;        /* default 45rem (~720px) → ~1150px */
+  --sl-content-width: 60rem;        /* default 45rem; `wide: true` → 72rem */
   --sl-sidebar-width: 19.5rem;      /* default 18.75rem */
   --sl-color-accent: #0284c7;
   --sl-color-accent-low: #bae6fd;
@@ -73,6 +76,69 @@
 .sl-markdown-content h2 {
   border-bottom: 1px solid var(--sl-color-gray-5);
   padding-bottom: 0.3rem;
+}
+
+/* Examples gallery grid (src/components/ExampleGrid.astro) */
+.example-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+  margin-block: 1.5rem;
+}
+.example-card {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.6rem;
+  background: var(--sl-color-black);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+a.example-card:hover {
+  border-color: var(--sl-color-accent);
+  transform: translateY(-2px);
+}
+.example-card.is-planned {
+  opacity: 0.62;
+  border-style: dashed;
+}
+.example-card__title {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  line-height: 1.3;
+  border: none;          /* opt out of the global h2/h3 accent rule */
+  padding: 0;
+}
+a.example-card:hover .example-card__title {
+  color: var(--sl-color-accent);
+}
+.example-card__badge {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 9999px;
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-gray-2);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+.example-card__meta {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr;
+  gap: 0.2rem 0.6rem;
+  margin: 0;
+  font-size: 0.82rem;
+}
+.example-card__meta dt {
+  color: var(--sl-color-gray-3);
+  font-weight: 600;
+}
+.example-card__meta dd {
+  margin: 0;
+  color: var(--sl-color-gray-2);
 }
 
 /* Cite block: pill-styled inline */
