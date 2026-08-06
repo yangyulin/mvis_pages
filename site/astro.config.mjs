@@ -18,6 +18,7 @@ export default defineConfig({
   srcDir: './src',
   publicDir: './public',
   outDir: '../docs',
+
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
