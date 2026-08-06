@@ -10,6 +10,9 @@ import rehypeKatex from 'rehype-katex';
 // lives in `public/`, not in `docs/` directly. Currently:
 //   - CNAME  the custom domain. Lose it and openmvis.com goes down.
 //   - fig/   legacy jemdoc images, kept so old inbound image links still resolve.
+//   - .nojekyll  Pages uses LEGACY (Jekyll) builds on this repo. Without this,
+//               Jekyll strips `_astro/` (all CSS+JS -> 404) and its Liquid
+//               parser fails the build on the BibTeX `{{` in citation blocks.
 export default defineConfig({
   site: 'https://openmvis.com',
   srcDir: './src',
