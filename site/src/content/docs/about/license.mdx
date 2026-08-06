@@ -1,37 +1,48 @@
 ---
 title: License
-description: Licensing for the Open MVIS toolbox, this site, and the released datasets.
+description: Licensing for CamCalib, this site, and the released datasets.
 pageType: reference
 ---
 
 ## Toolbox
 
-The Open MVIS toolbox ([rpng/mvis](https://github.com/rpng/mvis)) is released
-under the **GNU General Public License v3.0**. The full text ships as `LICENSE`
-in the repository.
+CamCalib declares the **MIT License** in its `pyproject.toml`.
 
-GPL-3.0 is copyleft: distributing a modified version, or software that links
-against it, means releasing that work under GPL-3.0 as well. If you are
-embedding the toolbox in a product, check this before you build on it.
+MIT is permissive: use, modify, and redistribute — including in closed-source
+products — provided the copyright notice and licence text travel with it.
+
+:::caution[No LICENSE file yet]
+The declaration lives in package metadata; the repository does not yet carry a
+`LICENSE` file with the full text. Until it does, treat this page as
+*indicative* rather than authoritative. Adding the file is on the
+[roadmap](/about/roadmap/).
+:::
 
 ## This site
 
-The site ([rpng/mvis_pages](https://github.com/rpng/mvis_pages)) — its source,
+[`yangyulin/mvis_pages`](https://github.com/yangyulin/mvis_pages) — source,
 content, and generated pages — is released under the **MIT License**. Prose and
 figures here can be reused with attribution.
 
 ## Datasets
 
-Released datasets carry their own licences, stated on each dataset's page.
-Contributed datasets need a licence permitting redistribution and derivative
-results; CC BY 4.0 is the usual choice. See
+Released datasets carry their own licences, stated on each dataset's page — see
+[Datasets](/reference/datasets/). Contributed datasets need a licence permitting
+redistribution and derivative results; CC BY 4.0 is the usual choice. See
 [Submit a dataset](/contribute/submit-dataset/).
 
 ## Third-party components
 
-Open MVIS builds on software under its own terms — GTSAM (BSD),
-OpenCV (Apache 2.0), OpenVINS (GPL-3.0), apriltags-cpp, and ROS. Their licences
-apply to their own code; consult each project.
+CamCalib builds on software under its own terms. Their licences govern their own
+code:
+
+| Component | Licence |
+|---|---|
+| [GTSAM](https://github.com/borglab/gtsam) | BSD |
+| OpenCV | Apache 2.0 |
+| NumPy | BSD |
+| `aprilgrid` | see project |
+| `rosbags` | see project |
 
 ## Citing
 
@@ -39,6 +50,6 @@ Citation details are on [Contributors & citation](/about/contributors/).
 Datasets have their own DOIs and citations.
 
 :::note[Not legal advice]
-This page summarises the licences for orientation. The licence files in each
+This page summarises licensing for orientation. The licence files in each
 repository are what actually govern use.
 :::
