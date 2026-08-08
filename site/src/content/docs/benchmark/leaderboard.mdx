@@ -8,6 +8,11 @@ wide: true
 import LeaderboardTable from '../../../components/LeaderboardTable.astro';
 
 Calibration methods ranked across sensor configurations and algorithm families.
+Entries are evaluated on the
+[Calibench datasets](https://huggingface.co/datasets/calibench-vi/datasets) —
+our hosted VI-Rig captures plus recipe-fetched third-party sets (see
+[Datasets](/reference/datasets/)) — and the ranking data itself lives in
+[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
 Each entry reports reprojection error, extrinsic accuracy against the Open MVIS
 consensus baseline, time-offset error, runtime, and convergence rate — with
 mean ± stddev over N runs where the submitter provided them.

@@ -1,6 +1,6 @@
 ---
 title: Datasets
-description: Datasets overview for the MVIS multi-visual-inertial calibration benchmark.
+description: Datasets for the MVIS multi-visual-inertial calibration benchmark, hosted in the Calibench Hugging Face organization.
 pageType: reference
 wide: true
 ---
@@ -8,23 +8,42 @@ wide: true
 import { Image } from 'astro:assets';
 import viRig from '../../../assets/vi_rig.jpg';
 
-Datasets released with Open MVIS, plus the public datasets used as worked
-examples.
+All benchmark data lives in the
+[**Calibench** Hugging Face organization](https://huggingface.co/calibench-vi).
+The [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
+repository is the source of truth: it hosts our own VI-Rig captures
+(CC-BY-4.0) and ships download recipes for the third-party datasets the
+benchmark evaluates against. The Google Drive links from the legacy site are
+retired.
 
-## Released — VI-Rig
+## Hosted — VI-Rig captures
 
 Collected on a self-built VI-Rig for research on multi-visual-inertial
-calibration. Both releases include Kalibr and MVIS reference results.
+calibration. Reference Kalibr and MVIS results for these captures are published
+in [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
 
-| Dataset | Sensors | Sequences |
-|---|---|---|
-| [4 IMUs + 3 cameras](/reference/datasets/virig-4imus-3cams/) | 4 IMUs, 3 global-shutter | 10 AprilGrid + 1 static |
-| [4 IMUs + 4 cameras](/reference/datasets/virig-4imus-4cams/) | 4 IMUs, 2 GS + 2 rolling shutter | 15 |
+| Dataset | Sensors | Sequences | Data |
+|---|---|---|---|
+| [4 IMUs + 3 cameras](/reference/datasets/virig-4imus-3cams/) | 4 IMUs, 3 global-shutter | 10 AprilGrid | [`virig-4imus-3cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams) |
+| 4 IMUs + 3 cameras — ArUco | same rig, ArUco-tag sequences | 17 | [`virig-4imus-3cams-aruco`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams-aruco) |
+| [4 IMUs + 4 cameras](/reference/datasets/virig-4imus-4cams/) | 4 IMUs, 2 GS + 2 rolling shutter | 15 AprilGrid (+7 raw) | [`virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams) |
+| 5 IMUs + 4 cameras | 5 IMUs (two T265 stereo fisheye pairs), 4 cameras | 7 AprilGrid | [`virig-5imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams) |
 
-## Public datasets used as examples
+## Third-party datasets (recipes)
 
-Not hosted here — these are third-party datasets with complete CamCalib runs
-documented against them:
+Calibench hosts only data we own; every third-party dataset the benchmark
+evaluates ships as a `download.py` recipe (manifest + checksums) that pulls it
+from its original host — EuRoC MAV, TUM VI, TUM RGB-D, TUM VIE, TUM
+Double-Sphere, TUM RS, Monado MSD, Hilti 2022, Hilti 2023 Handheld,
+PennCOSYVIO, and an urban fisheye set. See
+[`recipes/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/recipes)
+and its
+[`SOURCES.md`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/recipes/SOURCES.md)
+for the exact list and licenses. The [leaderboard](/benchmark/leaderboard/)
+evaluates calibration methods across these datasets plus the hosted VI-Rig
+captures.
+
+Datasets with complete MVIS runs documented as worked examples on this site:
 
 | Dataset | Rig | Example |
 |---|---|---|
@@ -33,6 +52,34 @@ documented against them:
 | looperrobotics SA16 | 2–3 cameras + 400 Hz IMU | [Looper SA16](/examples/looper-sa16/) |
 
 Contributing one: [Submit a dataset](/contribute/submit-dataset/).
+
+## Citation
+
+If you use the Calibench data, please cite the benchmark, and the MVIS paper
+for the VI-Rig captures:
+
+```bibtex
+@misc{calibench2026,
+  title        = {Calibench: Calibration Benchmark Datasets},
+  author       = {Yang, Yulin},
+  year         = {2026},
+  howpublished = {\url{https://huggingface.co/datasets/calibench-vi/datasets}}
+}
+```
+
+```bibtex
+@article{yang2024mvis,
+  title   = {Multi-visual-inertial system: Analysis, calibration, and estimation},
+  author  = {Yang, Yulin and Geneva, Patrick and Huang, Guoquan},
+  journal = {The International Journal of Robotics Research},
+  year    = {2024},
+  doi     = {10.1177/02783649241245726}
+}
+```
+
+Third-party datasets keep their own licenses and citations — the
+[dataset card](https://huggingface.co/datasets/calibench-vi/datasets) maps each
+config to its required upstream citation.
 
 ## VI-Rig sensors
 
