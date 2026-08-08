@@ -13,11 +13,11 @@ validates the schema and rebuilds the site with your entry included.
 ```yaml
 # src/content/leaderboard/<method>__<config>.yaml
 method:
-  name: CamCalib
+  name: MVIS
   version: "0.4.2"
   family: discrete_factor_graph      # see families list below
   open_source: true
-  url_repo: https://github.com/.../CamCalib
+  url_repo: https://github.com/.../MVIS
   url_paper: https://arxiv.org/abs/...
 sensor_config:
   category: multi_imu_multi_cam      # one of 7 categories
@@ -37,8 +37,8 @@ results:
   runtime_s:               {value: 142,  stddev: 8,    n_runs: 5}
   convergence_rate_pct:    100
 artifacts:
-  report_html: reports/camcalib__open_mvis_4imu4cam.html
-  raw_yaml:    raw/camcalib__open_mvis_4imu4cam.yaml
+  report_html: reports/mvis__open_mvis_4imu4cam.html
+  raw_yaml:    raw/mvis__open_mvis_4imu4cam.yaml
 submitted:
   by: Your Name
   date: 2026-04-20

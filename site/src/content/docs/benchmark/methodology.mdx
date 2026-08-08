@@ -25,7 +25,7 @@ imply otherwise.
 | 1 IMU + 1 cam | 1 IMU · 1 cam | Kalibr, OpenVINS, Basalt |
 | 1 IMU + multi cams | 1 IMU · ≥ 2 cams | Kalibr multi-cam VI |
 | Multi IMU + 1 cam | ≥ 2 IMUs · 1 cam | MVIS (partial) |
-| Multi IMU + multi cams | ≥ 2 IMUs · ≥ 2 cams | MVIS, CamCalib |
+| Multi IMU + multi cams | ≥ 2 IMUs · ≥ 2 cams | MVIS |
 
 ## Algorithm families
 
@@ -36,7 +36,7 @@ in particular is discussed in
 
 | Family | Description |
 |---|---|
-| **Factor graph (discrete-time)** | GTSAM / Ceres batch MAP optimisation. CamCalib, MVIS |
+| **Factor graph (discrete-time)** | GTSAM / Ceres batch MAP optimisation. MVIS |
 | **Continuous-time B-spline** | SE(3) B-spline trajectory parameterisation. Kalibr, Basalt |
 | **Filter (EKF)** | Online filtering with calibration in the state. OpenVINS |
 | **Learning-based** | Networks regressing calibration parameters |

@@ -7,7 +7,7 @@ wide: true
 
 The looperrobotics **SA16** rig is the example closest to production use: a
 commercial stereo (later three-camera) module recorded four different ways over
-several months. It is the dataset where CamCalib was pushed past a single clean
+several months. It is the dataset where MVIS was pushed past a single clean
 sequence into rolling shutter, IMU filter changes, and irregular timestamps —
 and where cross-campaign agreement, not a single residual, is the evidence.
 
@@ -24,7 +24,7 @@ Board: AprilGrid 6×6, `tag_size` 0.055 m, `tag_spacing` 0.3, family `t36h11`.
 ## Getting the data into shape
 
 The recordings are not EuRoC, but they are close — one prep step reshapes them
-into a `mav0/` tree, and **no CamCalib code changes were needed** for any
+into a `mav0/` tree, and **no MVIS code changes were needed** for any
 campaign:
 
 ```bash
@@ -39,10 +39,10 @@ order is already EuRoC-native.
 
 ```bash
 # 1. Camera-only — intrinsics + stereo extrinsics
-camcalib cam -c examples/configs/looperrobotics/cam_only.yaml
+mvis cam -c examples/configs/looperrobotics/cam_only.yaml
 
 # 2. Camera-IMU — T_CtoI, td, IMU intrinsics and biases, intrinsics pinned
-camcalib cam-imu -c examples/configs/looperrobotics/cam_imu.yaml
+mvis cam-imu -c examples/configs/looperrobotics/cam_imu.yaml
 ```
 
 Cam-IMU uses `window_mode: motion`, which auto-picks the most-exciting 80 s of
@@ -137,7 +137,7 @@ python examples/experiments/convert_mav0_to_bag.py \
   --mav0 '/data/looperrobotics/SA16(7.3)/mav0' \
   --out  '/data/looperrobotics/SA16(7.3)/sa16_73.bag'
 
-camcalib roundtrip -c examples/configs/looperrobotics/sa16_73_cam_imu_ros1.yaml \
+mvis roundtrip -c examples/configs/looperrobotics/sa16_73_cam_imu_ros1.yaml \
   --out results/looperrobotics/sa16_73/roundtrip --keep-corrected
 ```
 
@@ -153,7 +153,7 @@ workflow is built to produce.
 :::note[One honest caveat]
 The OSR4 campaign hit repeated crashes — NumPy `nditer` errors, corrupted int
 constants, GTSAM shape mismatches — traced to **machine-level instability** on
-the recording workstation, not to CamCalib. Data, code, and environment were
+the recording workstation, not to MVIS. Data, code, and environment were
 each ruled out; the stock system Python and Kalibr crashed on the same box.
 Retries converged and the converged results are cross-consistent, but the
 episode is recorded rather than tidied away.

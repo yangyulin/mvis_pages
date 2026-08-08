@@ -1,11 +1,11 @@
 ---
 title: Configuration
-description: Every key in a CamCalib YAML config — camera-only and camera–IMU.
+description: Every key in an MVIS YAML config — camera-only and camera–IMU.
 pageType: reference
 wide: true
 ---
 
-CamCalib is config-driven: one YAML describes the board, the inputs, and the
+MVIS is config-driven: one YAML describes the board, the inputs, and the
 solve. This page documents every key. For the commands that consume them see
 the [CLI reference](/reference/cli/).
 
@@ -92,7 +92,7 @@ then feed that result in here.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `path` | path | — | Camera calibration produced by `camcalib calibrate` |
+| `path` | path | — | Camera calibration produced by `mvis calibrate` |
 | `free_intrinsics` | bool | `false` | Re-estimate intrinsics rather than pinning them |
 | `estimate_readout` | bool | `false` | Estimate rolling-shutter readout here |
 
@@ -126,7 +126,7 @@ input:
   window_mode: manual
   t0: 3.0
   window: 45.0
-  cache_dir: /tmp/camcalib_tumvi_detcache
+  cache_dir: /tmp/mvis_tumvi_detcache
 board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.088, tag_spacing: 0.3, tag_family: t36h11}
 camera_input:
   path: /tmp/tumvi_calib_ds_cam0.yaml

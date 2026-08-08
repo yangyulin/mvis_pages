@@ -4,7 +4,7 @@ description: Apply a calibration back onto a raw bag and re-record it calibratio
 pageType: guide
 ---
 
-`camcalib apply-calib` takes a cam-IMU calibration and a raw ROS1 bag and writes
+`mvis apply-calib` takes a cam-IMU calibration and a raw ROS1 bag and writes
 a new bag with the calibration already applied — IMU intrinsics and bias
 removed, every stream on one timeline. Downstream consumers then get corrected
 data without having to know anything about the calibration.
@@ -14,13 +14,13 @@ data without having to know anything about the calibration.
 Config-driven, like the calibrator:
 
 ```bash
-camcalib apply-calib -c recalib.yaml
+mvis apply-calib -c recalib.yaml
 ```
 
 Or by flags:
 
 ```bash
-camcalib apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
+mvis apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
 ```
 
 Output defaults to `<bag>.corrected.bag`. The calibration records each sensor's
@@ -59,7 +59,7 @@ A correct calibration, applied to its own bag, must make that bag recalibrate to
 the extrinsics and stereo baseline stay put. That check is automated:
 
 ```bash
-camcalib roundtrip -c cam_imu.yaml
+mvis roundtrip -c cam_imu.yaml
 ```
 
 See [Round-trip validation](/guides/roundtrip/).
@@ -71,5 +71,5 @@ bag recalibrates to near-identity IMU intrinsics. On the T265, `t_ga` goes
 from −6.32 ms to +0.53 ms and camera `td` from −7.6 ms to −0.37 ms after
 correction.
 
-Implementation: `src/camcalib/recalib/`; example config
+Implementation: `src/mvis/recalib/`; example config
 `examples/configs/recalib_example.yaml`.

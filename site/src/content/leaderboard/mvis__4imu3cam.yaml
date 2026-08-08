@@ -3,7 +3,7 @@ method:
   version: "1.0"
   family: discrete_factor_graph
   open_source: true
-  url_repo: https://github.com/yangyulin/mvis
+  url_repo: https://github.com/yangyulin/mvis_pages
   url_paper: ""
 sensor_config:
   category: multi_imu_multi_cam

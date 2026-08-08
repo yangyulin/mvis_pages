@@ -40,8 +40,8 @@ tum_vi_calib/
 so the calibration is a single stereo run with intrinsics pinned:
 
 ```bash
-camcalib cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_omni.yaml
-camcalib cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_equi.yaml
+mvis cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_omni.yaml
+mvis cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_equi.yaml
 ```
 
 ## Two steps, otherwise
@@ -50,8 +50,8 @@ camcalib cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_equi.yaml
 first and feed the result in:
 
 ```bash
-camcalib calibrate -c examples/configs/tumvi_cam_imu/camcalib_cam0_ds.yaml
-camcalib cam-imu   -c examples/configs/tumvi_cam_imu/cam_imu_ds.yaml
+mvis calibrate -c examples/configs/tumvi_cam_imu/mvis_cam0_ds.yaml
+mvis cam-imu   -c examples/configs/tumvi_cam_imu/cam_imu_ds.yaml
 ```
 
 :::caution[Fit cam0 alone for the wide-FoV models]
@@ -87,7 +87,7 @@ within ~1 mm, and the freed IMU intrinsics (`Dw`/`Da`) consistent to under 1%.
 That cross-sequence spread is the honest error bar — better evidence than any
 single run's residual.
 
-CamCalib's reprojection error is higher than Kalibr's 0.11 px because the two
+MVIS's reprojection error is higher than Kalibr's 0.11 px because the two
 are not measuring the same thing: different corner subsampling and robust
 statistics. Compare the **parameters**, not the residuals.
 
@@ -107,4 +107,4 @@ stable.
 | Sequence | `dataset-calib-imu1.bag`, `t0` 3.0 s, 45 s window |
 | Board | AprilGrid 6×6, 0.088 m, spacing 0.3, `t36h11` |
 | Reference | Kalibr `omni-radtan-1024/`, `pinhole-equi-1024/` |
-| Detection cache | `/tmp/camcalib_tumvi_detcache` — re-runs repeat only the solve |
+| Detection cache | `/tmp/mvis_tumvi_detcache` — re-runs repeat only the solve |

@@ -7,7 +7,7 @@ pageType: tutorial
 Write one YAML file, run one command, read the HTML report. This is the whole
 loop — everything else in these docs is a variation on it.
 
-You need CamCalib installed ([Installation](/getting-started/installation/)) and
+You need MVIS installed ([Installation](/getting-started/installation/)) and
 a set of images of an AprilGrid board.
 
 ## 1. Write the config
@@ -41,13 +41,13 @@ output_file: calibration_result.yaml
 :::caution[Measure the printed board]
 `tag_size` is in metres and must match the board you actually printed — measure
 a tag with calipers rather than trusting the generator. It sets the scale of
-every distance CamCalib reports.
+every distance MVIS reports.
 :::
 
 ## 2. Run it
 
 ```bash
-camcalib calibrate --config config.yaml
+mvis calibrate --config config.yaml
 ```
 
 The pipeline runs seven stages — detection, quality gating, per-camera init,

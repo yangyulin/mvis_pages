@@ -1,9 +1,9 @@
 ---
 title: Open MVIS
-description: CamCalib — a Python toolbox and public benchmark for multi-camera, multi-IMU calibration.
+description: MVIS — a Python toolbox and public benchmark for multi-camera, multi-IMU calibration.
 template: splash
 hero:
-  tagline: CamCalib is a Python toolbox for multi-camera and multi-IMU calibration — intrinsics, extrinsics, time offsets, rolling shutter, and IMU intrinsics solved in one factor graph. No ROS required.
+  tagline: MVIS is a Python toolbox for multi-camera and multi-IMU calibration — intrinsics, extrinsics, time offsets, rolling shutter, and IMU intrinsics solved in one factor graph. No ROS required.
   image:
     file: ../../assets/vi_rig.jpg
     alt: VI-Rig with 4 IMUs and 5 cameras
@@ -28,13 +28,13 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 ## Calibrate a whole rig at once
 
-CamCalib — the calibration library behind Open MVIS — solves camera intrinsics
+MVIS — the calibration library behind the Open MVIS benchmark — solves camera intrinsics
 and distortion, extrinsics, time offsets, rolling-shutter readout, board poses,
 camera–IMU transforms, IMU intrinsics, and biases in a **single GTSAM factor
 graph**. Pure Python; `pip install`; Windows, macOS, and Linux.
 
 ```bash
-camcalib calibrate --config config.yaml
+mvis calibrate --config config.yaml
 ```
 
 <CardGrid>
@@ -49,7 +49,7 @@ camcalib calibrate --config config.yaml
     can't trust.
   </Card>
   <Card title="It checks its own work" icon="approve-check">
-    `camcalib roundtrip` applies a calibration to its own data and
+    `mvis roundtrip` applies a calibration to its own data and
     recalibrates. PASS needs IMU intrinsics to collapse to identity *and* the
     stereo baseline to hold — far stronger than a low residual.
   </Card>
@@ -78,9 +78,9 @@ camcalib calibrate --config config.yaml
 - **Three IMU-intrinsics conventions** — `kalibr`, `rpng`, `calyx`
 - **Gyro↔accel offset `t_ga`** — measures a driver's accel-interpolation
   artefact; the T265 reads −6.2 ms, stable to ~0.2 ms across bags
-- **Corrected-dataset export** — `camcalib apply-calib` re-records a raw bag
+- **Corrected-dataset export** — `mvis apply-calib` re-records a raw bag
   with the calibration applied
-- **Round-trip validation** — `camcalib roundtrip`, PASS/FAIL, CI-usable
+- **Round-trip validation** — `mvis roundtrip`, PASS/FAIL, CI-usable
 - **Boards** — chessboard, AprilGrid (Kalibr 2-bit border), ArUco
 - **Kalibr interop** — read and write `camchain` / `camchain-imucam`
 - **Regression harness** — manifest-driven runs with dashboards and baselines

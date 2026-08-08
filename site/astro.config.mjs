@@ -64,9 +64,9 @@ export default defineConfig({
         'The benchmark for multi-visual-inertial sensor calibration — multi-IMU, multi-camera, with leaderboard.',
       logo: { src: './src/assets/logo-placeholder.svg' },
       // Both links must point at a PUBLIC repo or they 404 for visitors.
-      // The toolbox repos (yangyulin/CamCalib, yangyulin/mvis-code) are private,
+      // The toolbox repos (yangyulin/MVIS, yangyulin/mvis-code) are private,
       // so the public site repo is the only working target today. Switch the
-      // social link to CamCalib once that repo is published.
+      // social link to MVIS once that repo is published.
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/yangyulin/mvis_pages' },
       ],

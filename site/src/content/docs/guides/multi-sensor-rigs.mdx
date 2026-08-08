@@ -4,7 +4,7 @@ description: Calibrate rigs with several cameras and several IMUs in a single gr
 pageType: guide
 ---
 
-Multi-sensor rigs are the case CamCalib is built for. There is no separate
+Multi-sensor rigs are the case MVIS is built for. There is no separate
 stereo step and no pairwise composition: every camera and every IMU enters one
 factor graph, so correlations between them are kept rather than discarded.
 
@@ -40,7 +40,7 @@ transforms follow by composition through the graph, which is what keeps a
 five-camera rig consistent.
 
 **Cross-FOV rigs** — a fisheye and a narrow lens on the same rig — are where
-time-offset estimation usually fails. CamCalib runs two independent estimators
+time-offset estimation usually fails. MVIS runs two independent estimators
 (PnP-based and M5 homography cross-correlation) precisely for this case.
 
 ## Several IMUs
@@ -74,7 +74,7 @@ calibration usually cannot satisfy every IMU at once.
 
 ## Sensor numbering when comparing with Kalibr
 
-CamCalib numbers sensors by role; Kalibr numbers by input order. Getting this
+MVIS numbers sensors by role; Kalibr numbers by input order. Getting this
 wrong silently compares the wrong pair. For the released rigs:
 
 **4 IMUs + 3 cameras**
@@ -92,7 +92,7 @@ wrong silently compares the wrong pair. For the released rigs:
 | Kalibr (ELP) | — | — | cam0 | cam1 | imu0 | imu1 | imu2 | imu3 |
 | MVIS | Cam0 | Cam1 | Cam2 | Cam3 | Ib | Is0 | Is1 | Is2 |
 
-CamCalib reads and writes Kalibr `camchain` and `camchain-imucam` files
+MVIS reads and writes Kalibr `camchain` and `camchain-imucam` files
 directly — see [Result formats](/reference/result-formats/).
 
 ## Worked runs

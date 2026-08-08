@@ -1,11 +1,11 @@
 ---
 title: Camera model
-description: The six projection and distortion models CamCalib supports, and how to choose between them.
+description: The six projection and distortion models MVIS supports, and how to choose between them.
 pageType: concept
 wide: true
 ---
 
-CamCalib implements six distortion models. Each lives in one place —
+MVIS implements six distortion models. Each lives in one place —
 `camera/CameraModel` holds its projection, Jacobians, and unprojection — so the
 same models are available in **camera-only and camera–IMU** calibration, in
 board and feature mode, and can be **mixed across cameras** in a single rig.
@@ -51,7 +51,7 @@ two-step: fit each camera alone, then pin those intrinsics for the joint solve
 implausible focal length or blown-out distortion, not by a large residual.
 :::
 
-CamCalib guards against this: the two-pass **pathology guardrail** reverts to
+MVIS guards against this: the two-pass **pathology guardrail** reverts to
 pass 1 if the optimiser lands on a non-positive focal, blown-out distortion, or
 a P95 regression. It is a backstop, not a substitute for picking the right
 model.

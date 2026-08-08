@@ -47,7 +47,7 @@ input:
   imu_topics: ["/imu0"]
   window_mode: motion        # auto-pick the most-exciting 80 s
   segment_length: 80.0
-  cache_dir: /tmp/camcalib_detcache
+  cache_dir: /tmp/mvis_detcache
 
 board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.03, tag_spacing: 0.3, tag_family: t36h11}
 
@@ -80,7 +80,7 @@ IMU.
 ## Running it
 
 ```bash
-camcalib cam-imu -c examples/regression/tum_vi_mic/cam_imu_mic05_tga.yaml
+mvis cam-imu -c examples/regression/tum_vi_mic/cam_imu_mic05_tga.yaml
 ```
 
 ## Validation — round-trip
@@ -89,7 +89,7 @@ The result is not accepted on its residual. It is applied to its own data and
 recalibrated:
 
 ```bash
-camcalib roundtrip -c examples/regression/tum_vi_mic/cam_imu_mic05_tga.yaml \
+mvis roundtrip -c examples/regression/tum_vi_mic/cam_imu_mic05_tga.yaml \
   --bag MIC05.bag
 ```
 

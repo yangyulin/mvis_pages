@@ -4,7 +4,7 @@ description: Solve camera–IMU extrinsics, time offset, IMU intrinsics, and bia
 pageType: guide
 ---
 
-Camera–IMU calibration is a **two-step** workflow in CamCalib: calibrate the
+Camera–IMU calibration is a **two-step** workflow in MVIS: calibrate the
 cameras first, then feed that result into the cam-IMU solve. Pinning intrinsics
 that a board sequence already constrained well keeps them from being traded
 against the lever arm.
@@ -15,7 +15,7 @@ Run a camera-only calibration on a board sequence
 ([Camera calibration](/guides/camera-calibration/)):
 
 ```bash
-camcalib calibrate -c camcalib_cam0_ds.yaml
+mvis calibrate -c mvis_cam0_ds.yaml
 ```
 
 Its `output_file` becomes the cam-IMU config's `camera_input.path`.
@@ -30,7 +30,7 @@ input:
   window_mode: manual
   t0: 3.0
   window: 45.0
-  cache_dir: /tmp/camcalib_detcache
+  cache_dir: /tmp/mvis_detcache
 
 board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.088, tag_spacing: 0.3, tag_family: t36h11}
 
@@ -53,7 +53,7 @@ output:
 ## 3. Run
 
 ```bash
-camcalib cam-imu -c cam_imu.yaml
+mvis cam-imu -c cam_imu.yaml
 ```
 
 Solves camera–IMU extrinsics `T_CtoI`, time offset `td`, rolling-shutter
@@ -129,7 +129,7 @@ measures `t_ga ≈ −6.2 ms`, stable to ~0.2 ms across bags. Details in
 Do not stop at the residual:
 
 ```bash
-camcalib roundtrip -c cam_imu.yaml
+mvis roundtrip -c cam_imu.yaml
 ```
 
 [Round-trip validation](/guides/roundtrip/) applies the calibration to its own

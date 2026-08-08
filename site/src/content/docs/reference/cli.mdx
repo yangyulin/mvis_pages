@@ -1,15 +1,15 @@
 ---
 title: CLI
-description: Every camcalib subcommand and its flags.
+description: Every mvis subcommand and its flags.
 pageType: reference
 wide: true
 ---
 
-CamCalib installs a single entry point, `camcalib`, with seven subcommands.
+MVIS installs a single entry point, `mvis`, with seven subcommands.
 Everything is config-driven — flags select *what* to run, the YAML says *how*.
 
 ```bash
-camcalib --help
+mvis --help
 ```
 
 | Subcommand | Purpose |
@@ -24,7 +24,7 @@ camcalib --help
 
 :::note[Hand-written, and therefore able to drift]
 Generating this page from the parsers is on the [roadmap](/about/roadmap/).
-Until then `camcalib <subcommand> --help` is authoritative.
+Until then `mvis <subcommand> --help` is authoritative.
 :::
 
 ## `calibrate`
@@ -32,7 +32,7 @@ Until then `camcalib <subcommand> --help` is authoritative.
 Camera calibration from a config file.
 
 ```bash
-camcalib calibrate --config config.yaml
+mvis calibrate --config config.yaml
 ```
 
 | Flag | Description |
@@ -47,7 +47,7 @@ Camera-only calibration driven by a `CamRunConfig` YAML — the run-oriented
 variant, used by the batch and regression harnesses.
 
 ```bash
-camcalib cam --config example_cam_run.yaml
+mvis cam --config example_cam_run.yaml
 ```
 
 | Flag | Description |
@@ -60,7 +60,7 @@ Joint camera–IMU calibration: extrinsics `T_CtoI`, time offset `td`,
 rolling-shutter readout, IMU intrinsics, and biases.
 
 ```bash
-camcalib cam-imu --config cam_imu.yaml
+mvis cam-imu --config cam_imu.yaml
 ```
 
 | Flag | Description |
@@ -78,8 +78,8 @@ Apply a saved cam-IMU calibration back onto a raw ROS1 bag and re-record it
 calibration-corrected.
 
 ```bash
-camcalib apply-calib -c recalib.yaml
-camcalib apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
+mvis apply-calib -c recalib.yaml
+mvis apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
 ```
 
 | Flag | Description |
@@ -102,7 +102,7 @@ recalibrate the corrected bag, and report PASS/FAIL. Exits non-zero on FAIL, so
 it works in CI.
 
 ```bash
-camcalib roundtrip -c cam_imu.yaml
+mvis roundtrip -c cam_imu.yaml
 ```
 
 | Flag | Description |
@@ -121,19 +121,19 @@ Runs a calibration, dispatching on the config type so you do not have to pick
 the subcommand yourself.
 
 ```bash
-camcalib run --config any_config.yaml
+mvis run --config any_config.yaml
 ```
 
 | Flag | Description |
 |---|---|
-| `--config`, `-c` | Any CamCalib config |
+| `--config`, `-c` | Any MVIS config |
 
 ## `analyze`
 
 Analyse existing calibration results.
 
 ```bash
-camcalib analyze --results results/regression/dataset/run/
+mvis analyze --results results/regression/dataset/run/
 ```
 
 | Flag | Description |
@@ -151,7 +151,7 @@ Not subcommands, but part of the everyday surface:
 | `scripts/compare_baseline.py` | Compare current results against a saved baseline |
 | `scripts/save_baseline.py` | Save a new baseline, with a comparison report |
 | `scripts/visualize_result.py` | Post-hoc Rerun 3D viewer for a result directory |
-| `python -m camcalib.analysis.regenerate_html` | Rebuild HTML reports from saved YAML + detection cache |
+| `python -m mvis.analysis.regenerate_html` | Rebuild HTML reports from saved YAML + detection cache |
 | `studies/calib_video_real.py` | Render a calibration MP4 (`--sim`, `--recover`, `--rig-view`) |
 
 More detail in [Evaluation & metrics](/reference/evaluation/).

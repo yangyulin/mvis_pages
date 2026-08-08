@@ -1,20 +1,20 @@
 ---
 title: Installation
-description: Install CamCalib — one-step conda setup or pip into an existing environment.
+description: Install MVIS — one-step conda setup or pip into an existing environment.
 pageType: guide
 ---
 
-CamCalib is pure Python and installs with `pip` on Windows, macOS, and Linux.
+MVIS is pure Python and installs with `pip` on Windows, macOS, and Linux.
 There is no ROS dependency and nothing to compile.
 
 ## One-step setup (recommended)
 
 ```bash
 bash scripts/setup_env.sh
-conda activate cam_calib
+conda activate mvis
 ```
 
-Creates the `cam_calib` conda environment, installs every dependency, and runs
+Creates the `mvis` conda environment, installs every dependency, and runs
 the test suite so you know the install works before you point it at data.
 
 ## Manual install
@@ -56,7 +56,7 @@ pip install "numpy<2"
 ## Check the install
 
 ```bash
-camcalib --help
+mvis --help
 ```
 
 Seven subcommands should be listed — `calibrate`, `cam`, `cam-imu`,

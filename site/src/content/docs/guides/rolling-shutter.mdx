@@ -5,7 +5,7 @@ pageType: guide
 ---
 
 A rolling-shutter camera exposes rows sequentially, so one image spans a range
-of times. CamCalib solves the **readout time** as a parameter rather than
+of times. MVIS solves the **readout time** as a parameter rather than
 correcting for it afterwards.
 
 ## Enable it
@@ -46,7 +46,7 @@ Two checks worth more than a single run's residual:
 - **Repeatability.** Calibrate several sequences of the same rig with
   [batch mode](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
   and compare. A readout that moves between sequences was not observed in them.
-- **Round-trip.** [`camcalib roundtrip`](/guides/roundtrip/) catches a readout
+- **Round-trip.** [`mvis roundtrip`](/guides/roundtrip/) catches a readout
   that absorbed error belonging to the time offset.
 
 :::caution[Readout and time offset trade against each other]

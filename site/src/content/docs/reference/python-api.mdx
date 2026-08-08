@@ -1,11 +1,11 @@
 ---
 title: Python API
-description: CamCalib's package layout and the modules worth importing directly.
+description: MVIS's package layout and the modules worth importing directly.
 pageType: reference
 wide: true
 ---
 
-CamCalib is a Python library, so the CLI is one entry point rather than the only
+MVIS is a Python library, so the CLI is one entry point rather than the only
 one. Every stage is importable.
 
 :::note[Not auto-generated yet]
@@ -18,18 +18,18 @@ on the [roadmap](/about/roadmap/). Until then the source is authoritative.
 
 | Module | Contents |
 |---|---|
-| `camcalib.core` | Types — `Observation`, `CameraParams`, `CalibrationResult` — plus config dataclasses |
-| `camcalib.camera` | One `CameraModel` per distortion model; projection, Jacobians, unprojection in one place |
-| `camcalib.board` | Detection — chessboard, AprilGrid, ArUco — and `corner_subsample` |
-| `camcalib.io` | `DataLoader`, streaming `DetectionPipeline`, data sources, detection cache, frame selector, output writers |
-| `camcalib.calibration` | Initialiser (OpenCV PnP), Optimizer (the unified factor), Pipeline, `outlier_rejection`, `camera_projection`, `custom_projections` |
-| `camcalib.analysis` | HTML report, plotting, Rerun 3D visualisation, motion analysis |
-| `camcalib.recalib` | `apply-calib` — corrected-dataset export |
-| `camcalib.cli` | Command-line interface |
+| `mvis.core` | Types — `Observation`, `CameraParams`, `CalibrationResult` — plus config dataclasses |
+| `mvis.camera` | One `CameraModel` per distortion model; projection, Jacobians, unprojection in one place |
+| `mvis.board` | Detection — chessboard, AprilGrid, ArUco — and `corner_subsample` |
+| `mvis.io` | `DataLoader`, streaming `DetectionPipeline`, data sources, detection cache, frame selector, output writers |
+| `mvis.calibration` | Initialiser (OpenCV PnP), Optimizer (the unified factor), Pipeline, `outlier_rejection`, `camera_projection`, `custom_projections` |
+| `mvis.analysis` | HTML report, plotting, Rerun 3D visualisation, motion analysis |
+| `mvis.recalib` | `apply-calib` — corrected-dataset export |
+| `mvis.cli` | Command-line interface |
 
 ## Kalibr interop
 
-`camcalib.io.kalibr` is the one surface for Kalibr files:
+`mvis.io.kalibr` is the one surface for Kalibr files:
 
 | Function | Does |
 |---|---|
@@ -46,7 +46,7 @@ Rebuild HTML reports from saved YAML plus the detection cache, without re-runnin
 the calibration — useful when only the report template changed:
 
 ```bash
-python -m camcalib.analysis.regenerate_html
+python -m mvis.analysis.regenerate_html
 ```
 
 ## Why the models live in one place

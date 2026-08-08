@@ -1,6 +1,6 @@
 ---
 title: Result formats
-description: The files CamCalib writes — dual YAML, cam-IMU JSON, HTML reports, and Kalibr interop.
+description: The files MVIS writes — dual YAML, cam-IMU JSON, HTML reports, and Kalibr interop.
 pageType: reference
 wide: true
 ---
@@ -25,7 +25,7 @@ you can ask whether a change was faster overall or only in one stage.
 
 ## Cam-IMU JSON
 
-`camcalib cam-imu` writes a JSON result containing, per sensor:
+`mvis cam-imu` writes a JSON result containing, per sensor:
 
 | Field | Meaning |
 |---|---|
@@ -71,12 +71,12 @@ pipeline timing, and collapsible appendices. Print-friendly CSS.
 Rebuild reports from saved YAML plus the detection cache, without recalibrating:
 
 ```bash
-python -m camcalib.analysis.regenerate_html
+python -m mvis.analysis.regenerate_html
 ```
 
 ## Kalibr interop
 
-`camcalib.io.kalibr` is the one surface for Kalibr files:
+`mvis.io.kalibr` is the one surface for Kalibr files:
 
 | Function | Direction | Handles |
 |---|---|---|
@@ -84,8 +84,8 @@ python -m camcalib.analysis.regenerate_html
 | `read_camchain_imucam` | in | Also each camera's `T_cam_imu` and stereo `T_cn_cnm1` |
 | `write_camchain_imucam` | out | Exports a cam-IMU result as a round-trippable camchain-imucam |
 
-This is how a Kalibr calibration becomes a CamCalib starting point, and how a
-CamCalib result goes back into a Kalibr-expecting pipeline.
+This is how a Kalibr calibration becomes an MVIS starting point, and how a
+MVIS result goes back into a Kalibr-expecting pipeline.
 
 ## Ground-truth comparison
 
@@ -95,7 +95,7 @@ exists, the dashboard annotates each parameter with its deviation — for exampl
 
 ## Corrected bags
 
-[`camcalib apply-calib`](/guides/corrected-datasets/) writes a corrected ROS1
+[`mvis apply-calib`](/guides/corrected-datasets/) writes a corrected ROS1
 bag plus a **provenance sidecar** recording which calibration was applied and
 what it changed. The bag is ordinary — anything that read the original reads
 the corrected one.

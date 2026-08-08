@@ -1,10 +1,10 @@
 ---
 title: Overview
-description: What CamCalib is, what it calibrates, and how a calibration run is structured.
+description: What MVIS is, what it calibrates, and how a calibration run is structured.
 pageType: concept
 ---
 
-CamCalib is a Python camera-calibration toolbox for single- and multi-camera
+MVIS is a Python camera-calibration toolbox for single- and multi-camera
 systems, built on GTSAM factor-graph optimisation with native SO(3)/SE(3) Lie
 group support. It is the calibration library behind Open MVIS, and it replaces
 the earlier C++/ROS implementation.
@@ -27,7 +27,7 @@ camera-only and camera–IMU calibration, and mixable across cameras in one rig.
 offset, and intrinsics; per-IMU gyro-only mode for sensors whose accelerometer
 you cannot trust.
 
-**It checks its own work.** `camcalib roundtrip` applies a calibration to the
+**It checks its own work.** `mvis roundtrip` applies a calibration to the
 data it came from and recalibrates — a PASS requires the IMU intrinsics to
 collapse to identity *and* the geometry to stay put. That is a much stronger
 statement than a low residual.
@@ -37,7 +37,7 @@ statement than a low residual.
 **Full calibration.** Solve everything from a board sequence.
 
 **Refinement.** Start from an existing calibration — Kalibr output reads
-directly via `camcalib.io.kalibr` — and refine it.
+directly via `mvis.io.kalibr` — and refine it.
 
 **Partial calibration.** Pin what you trust and solve the rest. The common case
 is camera–IMU calibration with intrinsics pinned from a prior camera-only run,
@@ -63,10 +63,10 @@ Detection → Quality gating → Init → Per-camera opt → Alignment → Joint
 
 1. **Target and data** — print a board, record with well-excited motion.
 2. **Config** — one YAML: board, cameras, optimiser.
-3. **Run** — `camcalib calibrate -c config.yaml`.
+3. **Run** — `mvis calibrate -c config.yaml`.
 4. **Read** — `*_calib.yaml` to deploy, `*_full.yaml` to replay, and a
    self-contained HTML report.
-5. **Validate** — repeatability across sequences, and `camcalib roundtrip` for
+5. **Validate** — repeatability across sequences, and `mvis roundtrip` for
    camera–IMU.
 
 ## Where to go next

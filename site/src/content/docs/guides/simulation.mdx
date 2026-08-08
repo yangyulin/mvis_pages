@@ -5,7 +5,7 @@ pageType: guide
 ---
 
 Simulation is how you separate *the estimator is wrong* from *the data was
-insufficient*. In CamCalib the synthetic data is built **from a real
+insufficient*. In MVIS the synthetic data is built **from a real
 calibration**, so the simulated rig is the rig you actually calibrated rather
 than an idealised stand-in.
 
@@ -65,7 +65,7 @@ with its deviation — `Δ +0.27% GT=190.97` — colour-coded by accuracy band. 
 
 Two substitutes, in order of strength:
 
-1. **[Round-trip](/guides/roundtrip/)** — `camcalib roundtrip` applies the
+1. **[Round-trip](/guides/roundtrip/)** — `mvis roundtrip` applies the
    calibration to its own bag and recalibrates. PASS requires IMU intrinsics to
    collapse *and* geometry to hold.
 2. **Repeatability** — a
@@ -74,7 +74,7 @@ Two substitutes, in order of strength:
    not constrained by the motion in them.
 
 :::note[No synthetic-scenario generator yet]
-CamCalib simulates *from a calibration*; there is no authored-trajectory
+MVIS simulates *from a calibration*; there is no authored-trajectory
 generator for exploring motions you have not recorded — so
 degeneracy studies still need real sequences with restricted motion. Tracked on
 the [roadmap](/about/roadmap/); the theory is in

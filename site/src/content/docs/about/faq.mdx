@@ -34,7 +34,7 @@ Pure Python — you do not need ROS installed.
 
 ### Something else
 
-`bash scripts/setup_env.sh` builds the `cam_calib` environment and runs the test
+`bash scripts/setup_env.sh` builds the `mvis` environment and runs the test
 suite, which separates an install problem from a data problem.
 
 ## Running
@@ -78,7 +78,7 @@ then pin those intrinsics for the joint solve — the recipe is in
 A low residual means the solution explains its own observations. A parameter the
 motion never constrained settles near its initial value without raising the
 error. Read the **motion-excitation grade** in the HTML report, and for
-camera–IMU run [`camcalib roundtrip`](/guides/roundtrip/).
+camera–IMU run [`mvis roundtrip`](/guides/roundtrip/).
 
 ### Round-trip FAILs
 
@@ -108,7 +108,7 @@ They were not observed. Scale and misalignment need excitation on every axis;
 
 Check the IMU convention first — `kalibr`, `rpng`, and `calyx` produce different
 matrices for the same device — then sensor numbering, then transform direction.
-`camcalib.io.kalibr` reads Kalibr camchains directly, which is the reliable way
+`mvis.io.kalibr` reads Kalibr camchains directly, which is the reliable way
 to compare.
 
 ### Every translation is off by the same factor
