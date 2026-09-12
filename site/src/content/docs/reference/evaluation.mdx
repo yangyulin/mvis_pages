@@ -66,37 +66,35 @@ intrinsics, distortion, and baseline across a collection.
 
 ## Regression harness
 
-Manifest-driven batch runs with per-run HTML reports, a colour-coded index, and
-a cross-collection repeatability summary:
+MVIS validates itself with a three-tier regression suite: every row re-solves a
+real recording and compares the result against a committed per-collection
+baseline with per-metric tolerances (focal, distortion, extrinsics, time
+offsets, readout, reprojection). Tiers are supersets — a deeper tier re-runs
+everything above it:
+
+| Tier | Command | Rows | Runtime | Role |
+|---|---|---|---|---|
+| fast | `--level fast` | 9 | ~30 min | the gate — every change passes it |
+| mid | `--level mid` | 27 | ~1.5–2.5 h | routine deep check (3 recordings per family) |
+| full | `--level full` | 102 | ~6–10 h | every collection of every suite dataset |
 
 ```bash
-python3 scripts/run_regression_tests.py --level benchmark --parallel 8
-python3 scripts/run_quick_regression.py            # ~6 runs, ~10 min
-python3 scripts/run_regression_tests.py --only tum_vi_standard
+python scripts/run_regression.py --mode all --level fast
+python scripts/run_regression.py --only mvis_elp/imu_bag1      # one row
+python scripts/run_regression.py --only <row> --update-baseline # re-bless
 ```
 
-Dashboards land at `results/regression/{index,summary}.html`. Details in
-`doc/regression_tests.md`.
+The 9 seed rows span the calibration space on four datasets: global- and
+rolling-shutter, mono/stereo/3-camera, single-, two- and mixed-IMU
+configurations. The other 93 row configs are *generated* from the seeds
+(only the recording changes) and drift-guarded by a test that regenerates
+them, so solver settings cannot silently diverge across a family. The design
+story is on the [regression testing](/contribute/regression-testing/) page.
 
 ## Baselines
 
-```bash
-python3 scripts/compare_baseline.py --verbose
-python3 scripts/save_baseline.py --name baseline_2026_04_20
-```
-
-Saving a baseline generates a comparison against the previous one: per-dataset
-reprojection errors, timing, camera parameters (mean ± stddev), extrinsics, and
-rolling-shutter readout, with ground-truth values where available. This is how
-a change is shown not to have regressed anything.
-
-## Timing prediction
-
-A physics-informed Ridge model (v2, R² = 0.97) trained on accumulated runs
-predicts runtime, with a linear v1 fallback. It retrains after each regression
-run and baseline save, and accounts for core contention when predicting parallel
-runs.
-
-## Current validated state
-
-**228 runs across 65 dataset families, zero failures.**
+One committed JSON per (dataset, collection) under
+`examples/regression/baselines/` holds the blessed metrics. A gate run
+re-solves and compares; `--update-baseline` re-blesses after an intentional
+change, and the diff of the baseline file *is* the review artifact — every
+numeric shift a change causes is visible in the PR.

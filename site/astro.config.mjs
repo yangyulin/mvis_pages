@@ -172,6 +172,7 @@ export default defineConfig({
           label: 'Contribute',
           items: [
             { label: 'Submit results', link: '/contribute/submit-results/' },
+            { label: 'Regression testing', link: '/contribute/regression-testing/' },
             { label: 'Submit a dataset', link: '/contribute/submit-dataset/' },
             { label: 'Governance', link: '/contribute/governance/' },
           ],

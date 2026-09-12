@@ -1,0 +1,101 @@
+---
+title: Regression testing
+description: How MVIS validates itself — the three-tier suite, blessed baselines, generated row configs, and the gate discipline every change passes.
+pageType: reference
+---
+
+Every change to the MVIS solvers must demonstrate, on real recordings, that it
+changed only what it intended to change. This page is the design of that
+machinery — read it before touching solver code, and see
+[Evaluation & metrics](/reference/evaluation/) for the metrics themselves.
+
+## The idea: reproducibility against blessed baselines
+
+A regression **row** is one calibration solve of one recording ("collection")
+of one dataset, with a committed **baseline** JSON holding the blessed result
+metrics. A run re-solves the row and gates every metric against the baseline
+with per-metric tolerances — focal length, distortion coefficients, extrinsics
+and stereo baseline, time offsets (`td`, `t_ga`), rolling-shutter readout, and
+reprojection statistics. Any exceeded tolerance fails the run and the exit code.
+
+Baselines are committed files, so **the diff of a baseline is the review
+artifact**: when a change intentionally moves a number, the re-bless commit
+shows exactly which metrics moved, on which recordings, by how much.
+
+## Three superset tiers
+
+| Tier | Command | Rows | Runtime | When |
+|---|---|---|---|---|
+| **fast** | `--level fast` | 9 | ~30 min | every change (the gate) |
+| **mid** | `--level mid` | 27 | ~1.5–2.5 h | weekly; after solver-behavior changes |
+| **full** | `--level full` | 102 | ~6–10 h | before releases; after re-blessing events |
+
+Tiers are supersets (`fast ⊂ mid ⊂ full`): each manifest row is tagged with the
+lowest tier that includes it, and running a tier executes every row at or below
+it — no row is ever duplicated.
+
+```bash
+python scripts/run_regression.py --mode all --level fast
+python scripts/run_regression.py --only mvis_elp/imu_bag1        # single row
+python scripts/run_regression.py --only <row> --update-baseline  # re-bless
+```
+
+## What the 9 seed rows cover
+
+The fast tier is one **seed row per family**, chosen so the gate spans the
+calibration space on four datasets:
+
+| Family | Sensors | Coverage |
+|---|---|---|
+| TUM-VI raw stereo | 2 GS cams | global-shutter stereo intrinsics/extrinsics |
+| TUM-VI stereo + IMU | 2 GS + IMU | GS camera-IMU, time offsets |
+| Looper stereo / RS mono | 2 GS; 1 RS | synced-pair path; mono rolling shutter + readout |
+| Looper 3-cam + IMU | 2 GS + 1 RS + MEMS IMU | multi-camera IMU with mixed shutters |
+| ELP RS stereo | 2 RS cams | rolling-shutter stereo + readout |
+| ELP stereo + two IMUs | 2 RS + 2 IMUs | multi-IMU: aux extrinsics, inter-IMU time offset, per-IMU `t_ga` |
+| ELP mono + Microstrain | 1 RS + IMU | mono-RS camera-IMU |
+| Mixed-shutter + IMU | 1 GS + 1 RS + IMU | cross-shutter camera pair, GS-anchored time offsets |
+
+The mid tier re-runs each family on **3 recordings**; the full tier on **every
+recording the dataset has** (e.g. all 15 bags of the multi-IMU rig, all 10
+Looper recordings, all 12 TUM-VI calib bags).
+
+## Generated row configs, drift-guarded
+
+Only the 9 seed configs are written by hand. The other 93 are **generated**
+from their seed, changing nothing but the input recording and the output path
+— one generator script owns the mapping. A unit test regenerates all of them
+in memory and asserts the committed files match byte-for-byte, and that the
+manifests carry exactly the expected tier shape. A family's solver settings
+therefore cannot silently diverge between recordings, and a settings change to
+a family is by construction a one-line seed diff plus a regeneration.
+
+## Blessing discipline
+
+- **Vet before blessing**: a new row is solved once and reviewed (values
+  compared against sibling recordings and physical expectations) before its
+  baseline is written. Unusable recordings are excluded with a manifest note,
+  not left failing.
+- **Re-bless narrowly**: `--update-baseline --only dataset/collection` touches
+  exactly one row; family-wide re-blessing is scripted and resumable (rows
+  whose baseline already exists are skipped), so an interrupted sweep continues
+  where it stopped.
+- **Cross-validating references**: some rows exist to check each other — the
+  same IMU's gyro↔accel offset is measured both as an auxiliary IMU under
+  rolling-shutter cameras and as the base IMU under a global-shutter camera;
+  both must agree every run.
+- **Repeatability across recordings** is the deepest check the tiers add: a
+  parameter that is really observable comes out the same on every recording of
+  the same rig (stereo baselines repeat within fractions of a millimetre;
+  time offsets within fractions of a millisecond), and a parameter that
+  scatters across recordings is flagged as weakly constrained rather than
+  trusted.
+
+## What this has caught
+
+The tier build-out itself demonstrated the design: the vetting pass exposed a
+long-standing frame-selection ordering bug that only manifested on 3 of 87
+recordings (caught by a working-set/selection-flag consistency assert), and
+the cross-recording spread immediately separated well-conditioned
+configurations from poorly-conditioned ones (e.g. a weak base IMU under
+rolling-shutter-only anchoring) before any baseline froze bad values.
