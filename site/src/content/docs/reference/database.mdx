@@ -1,0 +1,96 @@
+---
+title: The capture database
+description: The .mvisdb file behind every run — the one-container object model, the run overlay, and its on-disk SQL form.
+pageType: reference
+wide: true
+---
+
+Every MVIS run works out of a single SQLite file per capture — the `.mvisdb`.
+A sealed, content-hashed **capture core** holds everything expensive (board
+detections, full IMU streams); each solve writes a disposable per-`run_id`
+**overlay** recording every decision (which frames, boards and corners were
+used, and why the rest were excluded) and every estimate. Deleting a run
+cascades its whole story away; the core is never touched after sealing, so
+detection work is paid once per recording.
+
+## Design view — the one container
+
+The in-memory object model the pipeline actually touches: one `MVISDatabase`
+per capture, with one run's overlay folded into inline flags. Annotations on
+the right; <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> fields are computed, never
+stored; D-numbers reference internal design decisions.
+
+<div style="background:var(--sl-color-gray-6);border:1px solid var(--sl-color-gray-5);border-radius:10px;padding:18px 20px;overflow-x:auto">
+<pre style="margin:0;font-size:12.5px;line-height:1.72;background:none;border:none;padding:0"><span style="color:var(--sl-color-gray-3);opacity:.55"></span><span style="color:var(--sl-color-accent-high);font-weight:600">MVISDatabase</span>                            <span style="color:var(--sl-color-gray-3)">the one container (<span style="color:#b98a2e">D55</span>) — live run or loaded via capture.load(run_id) · flags <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">INLINE</span> (<span style="color:#b98a2e">D53</span>) · overlay tables = its on-disk form</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> streams: list[<span style="color:var(--sl-color-accent-high);font-weight:600">CameraStream</span>]              <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> camera_id — the number you wrote in the YAML</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>   <span style="color:var(--sl-color-gray-3)">├─ camera_id · topic · source_type · source_path</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>   <span style="color:var(--sl-color-gray-3)">├─ info: <span style="color:var(--sl-color-accent-high);font-weight:600">CameraInfo</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   │</span>     <span style="color:var(--sl-color-gray-3)">name · shutter · readout_s · rolling_mode</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   │</span>     <span style="color:var(--sl-color-gray-3)">intrinsics · distortion · camera_model · resolution · calib_provenance</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   │</span>     <span style="color:var(--sl-color-gray-3)"><span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> stereo_pair · projection · distortion_kind · is_fisheye</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   └─</span> frames: list[<span style="color:var(--sl-color-accent-high);font-weight:600">FrameData</span>]              <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> frame_id · <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">UNIQUE</span> (camera_id, timestamp)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>       <span style="color:var(--sl-color-gray-3)">├─ frame_id · camera_id · timestamp</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#b98a2e">is_motion_still</span> · <span style="color:#b98a2e">is_selected_to_use</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">is_valid_to_use</span> = OR over every group below</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       ├─</span> board_detections: list[<span style="color:var(--sl-color-accent-high);font-weight:600">BoardDetection</span>]   <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">ONE PER BOARD SEEN</span> · <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> (frame_id, board_id)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ board_id</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> n_detections · n_tags · detect_status</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ pose_cam_to_board: <span style="color:var(--sl-color-accent-high);font-weight:600">PoseCamToBoard</span>&#123;T, source&#125; · <span style="color:#b98a2e">is_valid_to_use</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">is_selected_to_use</span> = frame.selected AND own selection</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │   └─</span> detections: list[<span style="color:var(--sl-color-accent-high);font-weight:600">TagDetection</span>]       <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> (frame_id, board_id, point_id)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">├─ point_id · uv · detector_emission_order</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> tag_id · corner_id · row = int(uv[1])</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#b98a2e">is_valid</span> · <span style="color:#b98a2e">is_selected</span> · <span style="color:#b98a2e">exclude_reason</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">└─ residual: <span style="color:var(--sl-color-accent-high);font-weight:600">Residual</span>&#123;<span style="color:#b98a2e">residual_px</span>, <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">residual_source</span>&#125;</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       ├─</span> tag_feature_detections                       <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">TODO</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       └─</span> free_feature_detections                      <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">TODO</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> boards: dict[int, <span style="color:var(--sl-color-accent-high);font-weight:600">Board</span>]                 <span style="color:var(--sl-color-gray-3)"><span style="color:var(--sl-color-accent-high);font-weight:600">Board</span> = &#123;<span style="color:var(--sl-color-accent-high);font-weight:600">BoardInfo</span>, [<span style="color:var(--sl-color-accent-high);font-weight:600">BoardPt</span>]&#125;</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   ├─</span> info: <span style="color:var(--sl-color-accent-high);font-weight:600">BoardInfo</span>   <span style="color:var(--sl-color-gray-3)">board_type · rows · cols · cell_size_m · gap_m · tag_family · start_id · corners_per_tag · config_hash</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   │</span>                     <span style="color:var(--sl-color-gray-3)"><span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> is_kalibr_tag · num_tags · num_points</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   └─</span> board_pts: list[<span style="color:var(--sl-color-accent-high);font-weight:600">BoardPt</span>]   <span style="color:var(--sl-color-gray-3)">board_pt_id · board_pt_3d · info: <span style="color:var(--sl-color-accent-high);font-weight:600">BoardPtInfo</span>&#123;tag_id, corner_id&#125;</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> imus: list[<span style="color:var(--sl-color-accent-high);font-weight:600">ImuStream</span>]                    <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> imu_id — the position in imu_topics</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   ├─</span> info: <span style="color:var(--sl-color-accent-high);font-weight:600">ImuInfo</span>     <span style="color:var(--sl-color-gray-3)">name · topic · frequency_hz · gyro_unit · accel_unit · gyro_only</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   │</span>                     <span style="color:var(--sl-color-gray-3)">gyro_noise · gyro_bias_noise · accel_noise · accel_bias_noise</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   │                     </span>intrinsics: <span style="color:var(--sl-color-accent-high);font-weight:600">ImuIntrinsics</span>&#123;xi24, model&#125; · td_gyro_to_accel_s · calib_provenance   <span style="color:var(--sl-color-gray-3)"><span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> role</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│   └─</span> meas: <span style="color:var(--sl-color-accent-high);font-weight:600">ImuMeasurements</span>   <span style="color:var(--sl-color-gray-3)">t_gyro · gyro · t_accel · accel   <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> synchronized</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> rig: <span style="color:var(--sl-color-accent-high);font-weight:600">Rig</span>   <span style="color:var(--sl-color-gray-3)">base_camera_id · base_imu_id · sync_kind · sync_tolerance_s</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>                <span style="color:var(--sl-color-gray-3)"><span style="color:#8b7ce0;font-style:italic">⟨derived, per run⟩</span> reference_stream = (imu, base_imu_id) if cam_imu else (cam, base_camera_id)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> estimate_states: <span style="color:var(--sl-color-accent-high);font-weight:600">EstimateStates</span> | None   <span style="color:var(--sl-color-gray-3)">the estimate side of THIS run — a projection, zero new tables</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>reference_stream: (cam, base_camera_id) | (imu, base_imu_id)   <span style="color:var(--sl-color-gray-3)">keyed on run.calib_choice</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>state_hz                                     <span style="color:var(--sl-color-gray-3)">the reference stream&#x27;s knot rate</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>     <span style="color:var(--sl-color-gray-3)">base_state: <span style="color:var(--sl-color-accent-high);font-weight:600">CamOnly</span>&#123;t, T_cam_to_board (F,7)&#125; | <span style="color:var(--sl-color-accent-high);font-weight:600">CamImu</span>&#123;t, T_imu_to_world (K,7), v, b_g, b_a&#125;</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>sensor_states[]: <span style="color:var(--sl-color-accent-high);font-weight:600">SensorState</span>                 <span style="color:var(--sl-color-gray-3)">one per sensor — reference included (its factor_hz, relative = None)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>        <span style="color:var(--sl-color-gray-3)">sensor · factor_hz · relative&#123;T_x_to_ref · td_x_to_ref_s · provenance&#125;</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│</span>        <span style="color:var(--sl-color-gray-3)">· intrinsics: <span style="color:var(--sl-color-accent-high);font-weight:600">Camera</span>&#123;fxfycxcy · dist · model · readout · provenance&#125; | <span style="color:var(--sl-color-accent-high);font-weight:600">Imu</span>&#123;xi24 · model · provenance&#125;</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>boards[board_id]: T_board_to_world (7,)      <span style="color:var(--sl-color-gray-3)">one per board, from state_var — cam-IMU only</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>world_frame                                  <span style="color:var(--sl-color-gray-3)">the yaw gauge; None in cam-only — the board IS the reference</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">└─</span> run_id: int | None                        <span style="color:var(--sl-color-gray-3)">every run field above resolves against this</span></pre>
+</div>
+
+## On-disk form
+
+The same container serializes to three SQL layers:
+
+- **Sealed capture core** — `capture`, `camera`, `imu`/`imu_meas`,
+  `board`/`board_pt`, `rig`, `stereo_pair`, and the observation hierarchy
+  `frame` → `board_detection` → `detection` (corner arrays as packed
+  float64 blobs). Immutable once `capture.content_hash` is set.
+- **Run overlay** (per `run_id`, `ON DELETE CASCADE`) — `run`, the sparse
+  *selection story* (`frame_status`, `board_detection_status`,
+  `detection_status`: only rows that differ from selected/valid are
+  written), and the results (`result_camera`, `result_imu`, `extrinsic` —
+  every cam↔cam, cam↔IMU and IMU↔IMU edge with `T`, `td`, and sigmas in
+  one table).
+- **Trajectory** (camera-IMU runs) — `estimate_meta`, `state_knot`/`state_var`
+  (the state timeline and typed variables), `frame_bracket` (which knots
+  bracket each frame and at what interpolation factor), and `world_frame`
+  (the gravity-aligned convention).
+
+The status tables mirror the core hierarchy one-for-one, which is what makes
+the write-through selection ledger — and the consistency checks between the
+working set and the stored flags — cheap. Loading folds one run's overlay back
+onto the objects above, so pipeline code never sees SQL.
+
+The selection story is also what powers the run audit: every excluded frame,
+board pose and corner carries its `exclude_reason` and stage, so a calibration
+result can always answer "why was this observation not used?".

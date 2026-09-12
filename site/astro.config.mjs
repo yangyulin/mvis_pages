@@ -148,6 +148,7 @@ export default defineConfig({
             { label: 'Configuration', link: '/reference/configuration/' },
             { label: 'CLI', link: '/reference/cli/' },
             { label: 'Result formats', link: '/reference/result-formats/' },
+            { label: 'Capture database', link: '/reference/database/' },
             { label: 'Evaluation & metrics', link: '/reference/evaluation/' },
             { label: 'Python API', link: '/reference/python-api/' },
             {
