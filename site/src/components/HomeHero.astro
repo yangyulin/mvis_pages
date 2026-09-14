@@ -7,6 +7,20 @@
 // detection tile per camera, and a readout of values MVIS recovered from that
 // recording. Media: public/media/hero/ — rendered by openmvis-internal
 // demo_video/render_hero.py + render_hero_tiles.py.
+//
+// Cache busting: the media keep fixed file names, so every URL carries a short content
+// hash (?v=...) computed at build time. A re-render changes the hash, and browsers fetch
+// the new video instead of replaying their cached copy.
+import { readdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+
+// resolved from the project root (the bundled module lives elsewhere at build time)
+const MEDIA_DIR = `${process.cwd()}/public/media/hero/`;
+const V = {};
+for (const f of readdirSync(MEDIA_DIR)) {
+  V[f] = createHash('sha1').update(readFileSync(MEDIA_DIR + f)).digest('hex').slice(0, 10);
+}
+const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
 ---
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,8 +28,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
 <section class="mh" aria-label="Open MVIS">
-  <video class="mh-video" id="mhVideo" muted playsinline preload="auto" poster="/media/hero/hero_virig_3cams.jpg" aria-hidden="true">
-    <source src="/media/hero/hero_virig_3cams.mp4" type="video/mp4" />
+  <video class="mh-video" id="mhVideo" muted playsinline preload="auto" poster={u('hero_virig_3cams.jpg')} aria-hidden="true">
+    <source src={u('hero_virig_3cams.mp4')} type="video/mp4" />
   </video>
 
   <div class="mh-stage">
@@ -192,18 +206,18 @@
   }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{ V }}>
   (function () {
     var RIGS = {
-      virig3: { src: "/media/hero/hero_virig_3cams.mp4", poster: "/media/hero/hero_virig_3cams.jpg",
+      virig3: { src: mu("hero_virig_3cams.mp4"), poster: mu("hero_virig_3cams.jpg"),
         sensors: "3 cam · 4 IMU", window: "80.0 <small>s</small>", rms: "0.70 <small>px</small>", td: "−2.77 <small>ms</small>",
         xlabel: "Kalibr baseline", xval: "Δp 2.6 <small>mm</small>", corners: "84–124",
         caption: "Recovered by MVIS from virig_4imus_3cams / april_01." },
-      looper: { src: "/media/hero/hero_looper.mp4", poster: "/media/hero/hero_looper.jpg",
+      looper: { src: mu("hero_looper.mp4"), poster: mu("hero_looper.jpg"),
         sensors: "3 cam · 1 IMU", window: "66.4 <small>s</small>", rms: "0.68 <small>px</small>", td: "+1.22 <small>ms</small>",
         xlabel: "RS readout", xval: "31.6 <small>ms</small>", corners: "60–116",
         caption: "Recovered by MVIS from Looper Robotics Insight-9 / bag1, including one rolling-shutter camera." },
-      virig4: { src: "/media/hero/hero_virig_4cams.mp4", poster: "/media/hero/hero_virig_4cams.jpg",
+      virig4: { src: mu("hero_virig_4cams.mp4"), poster: mu("hero_virig_4cams.jpg"),
         sensors: "4 cam · 4 IMU", window: "80.0 <small>s</small>", rms: "2.26 <small>px</small>", td: "−6.00 <small>ms</small>",
         xlabel: "ELP time offset", xval: "−124.4 <small>ms</small>", corners: "75–118",
         caption: "Recovered by MVIS from mvis_4imus_4cams / bag01: two T265 fisheyes and a rolling-shutter ELP stereo pair." }
@@ -213,6 +227,7 @@
       looper: [["cam0","Insight-9 cam0","global","#ffc850",640,752],["cam1","Insight-9 cam1","global","#a0ffa0",640,752],["cam2","Insight-9 cam2","rolling","#5aaaff",640,362]],
       virig4: [["cam0","T265 fisheye1","global","#ffc850",640,604],["cam1","T265 fisheye2","global","#a0ffa0",640,604],["cam2","ELP left","rolling","#5aaaff",640,480],["cam3","ELP right","rolling","#ff8cc8",640,480]]
     };
+    function mu(f) { return "/media/hero/" + f + "?v=" + (V[f] || "0"); }
     var LIVE_CYCLE = 5.0;
     var ORDER = ["virig3", "looper", "virig4"];
     var current = "virig3";
@@ -244,8 +259,8 @@
         v.muted = true; v.loop = false; v.playsInline = true; v.preload = "auto";
         v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true");
         v.width = c[4]; v.height = c[5];
-        v.poster = "/media/hero/" + key + "_" + c[0] + ".jpg";
-        v.src = "/media/hero/" + key + "_" + c[0] + ".mp4";
+        v.poster = mu(key + "_" + c[0] + ".jpg");
+        v.src = mu(key + "_" + c[0] + ".mp4");
         fig.appendChild(cap); fig.appendChild(v); li.appendChild(fig); tilesEl.appendChild(li);
         tileVids.push(v);
       });
@@ -271,7 +286,7 @@
     // warm the browser cache for the next recording so the hand-over has no stall
     function preloadNext(key) {
       var nk = ORDER[(ORDER.indexOf(key) + 1) % ORDER.length];
-      [RIGS[nk].src].concat(TILES[nk].map(function (c) { return "/media/hero/" + nk + "_" + c[0] + ".mp4"; })).forEach(function (src) {
+      [RIGS[nk].src].concat(TILES[nk].map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); })).forEach(function (src) {
         var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src;
       });
     }
