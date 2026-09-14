@@ -22,7 +22,7 @@
     <div class="mh-lede">
       <div class="mh-eyebrow"><b>v0.1</b><span>Toolbox + public benchmark</span></div>
       <h1>OpenMVIS</h1>
-      <p class="mh-sub">Open-source <em>multi-visual-inertial</em> system calibration</p>
+      <p class="mh-sub">Open-source <em>multi-visual-inertial</em> <span class="mh-nw">system calibration</span></p>
       <div class="mh-actions">
         <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -116,10 +116,11 @@
     font-stretch: 120%; letter-spacing: -0.035em;
   }
   .mh-sub {
-    margin: 18px 0 0; max-width: 30rem; color: #c9d4e0; text-wrap: balance;
+    margin: 18px 0 0; max-width: 42rem; color: #c9d4e0;
     font: 600 clamp(22px, 2.6vw, 34px)/1.15 var(--mh-display); font-stretch: 108%; letter-spacing: -0.012em;
   }
-  .mh-sub em { font-style: normal; color: var(--mh-sky); }
+  .mh-sub em { font-style: normal; color: var(--mh-sky); white-space: nowrap; }
+  .mh-nw { white-space: nowrap; }
   .mh-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
   .mh-btn {
     display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 7px;
@@ -250,13 +251,18 @@
       });
     }
 
+    // Before playback starts (or with reduced motion) the hero and tiles show their posters,
+    // which are rendered at 60 % of the loop; outline the camera shown at that moment.
+    var POSTER_FRACTION = 0.6, LOOP_S = 15;
     function tick() {
-      var t = video.currentTime || 0, d = video.duration || 10, n = tileVids.length;
+      var d = video.duration || LOOP_S, n = tileVids.length;
+      var atPoster = video.paused && !(video.currentTime > 0);
+      var t = atPoster ? POSTER_FRACTION * d : (video.currentTime || 0);
       tileVids.forEach(function (v, k) {
         if (!video.paused && v.paused) safePlay(v);
         if (video.paused && !v.paused) v.pause();
         var dt = Math.abs((v.currentTime || 0) - t);
-        if (!video.ended && dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
+        if (!atPoster && !video.ended && dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
         v.parentNode.classList.toggle("live", n > 0 && k === Math.floor(t / LIVE_CYCLE) % n);
       });
       requestAnimationFrame(tick);
