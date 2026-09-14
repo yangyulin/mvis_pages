@@ -5,12 +5,13 @@
 // Each MVIS calibration listed in rigs.json plays a 15 s real-time pass (rig flying its recovered
 // trajectory, frustums, board corners in the colour of the camera shown in 3-D), then the next one.
 // Layouts (plan: mira docs/plans/mvis/web-pages/homepage-responsive):
-//   phone  (< 641 px)       title · 16:9 video with a live-camera inset · CTA · chips · 3 readout values · Details
+//   phone  (< 641 px)       title · 16:9 video (live camera baked into its corner) · CTA · chips · 3 readout values · Details
 //   tablet (641–1099 px)    text | video (inset) · bar underneath · Details
 //   wide   (≥ 1100 px)      text over the left of a contained, right-aligned loop · tile column sized from the
 //                           available height · one-line bar; the whole hero fits the first viewport
 // Media: public/media/hero/ — openmvis-internal demo_video/render_hero.py, render_hero_tiles.py and
-// build_site_media.py (1920 + 960 px loops, per-camera tiles 400 + 240 px, one live-camera track per rig).
+// build_site_media.py (1920 px loop; 960 px loop with the live camera baked in; per-camera tiles 400 + 240 px).
+// All encodes have a keyframe every second so companion seeks stay cheap on phones.
 //
 // Cache busting: every media URL carries a short content hash (?v=...) computed at build time.
 import { readdirSync, readFileSync } from 'node:fs';
@@ -52,9 +53,6 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     <div class="mh-frame" id="mhFrame">
       <video class="mh-main" id="mhVideo" muted playsinline preload="metadata" aria-hidden="true"
              poster={u(`hero_${first.key}_960.jpg`)}></video>
-      <div class="mh-inset" id="mhInset">
-        <video id="mhLive" muted playsinline preload="metadata" aria-hidden="true" poster={u(`${first.key}_live.jpg`)}></video>
-      </div>
       <button class="mh-bigplay" id="mhBigPlay" type="button" hidden aria-label="Play the calibration video">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg>
       </button>
@@ -152,11 +150,8 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
 
   /* ---- video ---- */
   .mh-video { min-width: 0; }
-  .mh-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--mh-night); }
+  .mh-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--mh-night); touch-action: manipulation; -webkit-user-select: none; user-select: none; }
   .mh-main { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--mh-night); }
-  .mh-inset { position: absolute; right: 8px; bottom: 8px; width: 34%; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden;
-              box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55); background: var(--mh-night); }
-  .mh-inset video { display: block; width: 100%; height: 100%; object-fit: contain; }
   .mh-bigplay { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 64px; height: 64px; border-radius: 50%;
                 border: 1px solid var(--mh-rule); background: rgba(5, 7, 10, 0.7); color: var(--mh-ink); display: grid; place-items: center; cursor: pointer; }
   .mh-bigplay[hidden] { display: none; }
@@ -266,7 +261,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
                -webkit-mask-composite: source-in;
                mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 96%, transparent 100%), linear-gradient(180deg, transparent 0, #000 10%, #000 90%, transparent 100%);
                mask-composite: intersect; }
-    .mh-inset, .mh-more, .mh-cta-phone, .mh-label, .mh-note { display: none; }
+    .mh-more, .mh-cta-phone, .mh-label, .mh-note { display: none; }
     .mh-tiles { grid-column: 3; grid-row: 1; align-self: center; display: grid; gap: 10px; position: relative; z-index: 2; }
     .mh-bar { grid-column: 1 / -1; grid-row: 2; margin-inline: calc(-1 * var(--mh-side)); padding-inline: var(--mh-side); position: relative; z-index: 2;
               grid-template-columns: minmax(0, 24rem) minmax(0, 1fr) auto; background: linear-gradient(180deg, rgba(5, 7, 10, 0.6), rgba(5, 7, 10, 0.9)); }
@@ -304,7 +299,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     RIG_DATA.forEach(function (r) { ORDER.push(r.key); RIGS[r.key] = r; });
     var hero = document.querySelector(".mh");
     if (!hero) return;
-    var video = document.getElementById("mhVideo"), live = document.getElementById("mhLive");
+    var video = document.getElementById("mhVideo");
     var frame = document.getElementById("mhFrame"), videoBox = hero.querySelector(".mh-video");
     var tilesEl = document.getElementById("mhTiles"), stripEl = document.getElementById("mhStrip"), more = document.getElementById("mhMore");
     var textEl = hero.querySelector(".mh-text"), barEl = hero.querySelector(".mh-bar");
@@ -315,7 +310,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     var lean = !!conn.saveData || /(^|-)2g$/.test(conn.effectiveType || "");
     var current = ORDER[0], layout = null, userPaused = false, onScreen = true, preloaded = {};
     var LIVE_CYCLE = RIG_DATA[0].live_cycle || 5, POSTER_FRACTION = 0.6, LOOP_S = RIG_DATA[0].duration || 15;
-    var sync = [];                 // videos that follow the hero clock: {v, k}; k = camera index, -1 = live track
+    var sync = [];                 // companion videos that follow the hero clock: {v, k, lat, lastSeek, seekStart}
 
     function isWide() { return window.innerWidth >= 1100; }
     function heroSrc(key) { return (isWide() && !lean) ? mu("hero_" + key + ".mp4") : mu("hero_" + key + "_960.mp4"); }
@@ -338,16 +333,24 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
       return { li: li, v: v };
     }
 
+    function addCompanion(v, k) {
+      var s = { v: v, k: k, lat: 0.15, lastSeek: 0, seekStart: 0 };
+      // measure how long a seek really takes on this device, so the next one can aim ahead
+      v.addEventListener("seeked", function () {
+        if (s.seekStart) { s.lat = Math.min(1.5, 0.5 * s.lat + 0.5 * (performance.now() - s.seekStart) / 1000); s.seekStart = 0; }
+      });
+      sync.push(s);
+    }
+
     function buildCompanions(key) {
+      sync.forEach(function (s) { s.v.pause(); s.v.removeAttribute("src"); s.v.load(); });
       sync = [];
       tilesEl.innerHTML = ""; stripEl.innerHTML = "";
       var cams = RIGS[key].tiles;
       if (isWide()) {
-        cams.forEach(function (c, k) { var t = makeTile(key, c, false); tilesEl.appendChild(t.li); sync.push({ v: t.v, k: k }); });
-        if (live.getAttribute("src")) { live.removeAttribute("src"); live.load(); }
-      } else {
-        live.poster = mu(key + "_live.jpg"); live.src = mu(key + "_live.mp4"); sync.push({ v: live, k: -1 });
-        if (more.open) cams.forEach(function (c, k) { var t = makeTile(key, c, true); stripEl.appendChild(t.li); sync.push({ v: t.v, k: k }); });
+        cams.forEach(function (c, k) { var t = makeTile(key, c, false); tilesEl.appendChild(t.li); addCompanion(t.v, k); });
+      } else if (more.open) {
+        cams.forEach(function (c, k) { var t = makeTile(key, c, true); stripEl.appendChild(t.li); addCompanion(t.v, k); });
       }
       fit();
     }
@@ -360,14 +363,15 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
       });
     }
 
+    // Start the hero and every companion in the same call, so a tap's user gesture covers all of them (iOS),
+    // and without seeking: companions were paused together with the hero and are already aligned.
     function play() {
       bigPlay.hidden = true;
-      safePlay(video).then(function () {
-        sync.forEach(function (s) { try { s.v.currentTime = video.currentTime; } catch (e) {} safePlay(s.v).catch(function () {}); });
-      }).catch(function () { if (!userPaused) bigPlay.hidden = false; });   // autoplay refused (e.g. iOS Low Power Mode)
+      safePlay(video).catch(function () { if (!userPaused) bigPlay.hidden = false; });   // autoplay refused (e.g. iOS Low Power Mode)
+      sync.forEach(function (s) { s.v.playbackRate = 1; if (!s.v.ended) safePlay(s.v).catch(function () {}); });
       setToggle();
     }
-    function pause() { video.pause(); setToggle(); }
+    function pause() { video.pause(); sync.forEach(function (s) { s.v.pause(); }); setToggle(); }
 
     function select(key, autoplay) {
       if (!RIGS[key]) return;
@@ -382,19 +386,33 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
       else { ro.forEach(function (d) { d.classList.add("swap"); }); setTimeout(function () { applyReadout(key); ro.forEach(function (d) { d.classList.remove("swap"); }); }, 220); }
     }
 
-    // keep companions on the hero clock and outline the camera shown in 3-D
+    // Keep companions on the hero clock and outline the camera shown in 3-D.
+    //  - never start a seek while one is running (a new seek cancels the old one: that was the freeze)
+    //  - drift under 0.5 s: nudge playbackRate instead of seeking
+    //  - larger drift: one seek aimed ahead by the measured seek latency, at most once per second
+    var SEEK_DRIFT = 0.5, SEEK_COOLDOWN = 1000;
     function tick() {
-      var d = video.duration || LOOP_S;
+      var d = video.duration || LOOP_S, now = performance.now();
       var atPoster = video.paused && !(video.currentTime > 0);
       var t = atPoster ? POSTER_FRACTION * d : (video.currentTime || 0);
       var n = RIGS[current].tiles.length, liveK = Math.floor(t / LIVE_CYCLE) % n;
+      var heroHeld = video.paused || video.readyState < 3;     // paused, or buffering: companions wait for the hero
       sync.forEach(function (s) {
         var v = s.v;
-        if (!video.paused && v.paused && !v.ended) safePlay(v).catch(function () {});
-        if (video.paused && !v.paused) v.pause();
-        var dt = Math.abs((v.currentTime || 0) - t);
-        if (!atPoster && !video.ended && dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
-        if (s.k >= 0) { var tile = v.closest(".mh-tile"); if (tile) tile.classList.toggle("live", s.k === liveK); }
+        if (heroHeld) { if (!v.paused) v.pause(); }
+        else if (v.paused && !v.ended && !v.seeking) safePlay(v).catch(function () {});
+        if (!atPoster && !heroHeld && !video.ended && !v.seeking && v.readyState >= 2) {
+          var drift = (v.currentTime || 0) - t;
+          if (Math.abs(drift) > SEEK_DRIFT && now - s.lastSeek > SEEK_COOLDOWN && t < d - 1) {
+            s.lastSeek = now; s.seekStart = now; v.playbackRate = 1;
+            v.currentTime = Math.min(d - 0.05, t + s.lat);
+          } else if (Math.abs(drift) > 0.04) {
+            v.playbackRate = Math.max(0.8, Math.min(1.25, 1 - drift));
+          } else if (v.playbackRate !== 1) {
+            v.playbackRate = 1;
+          }
+        }
+        var tile = v.closest(".mh-tile"); if (tile) tile.classList.toggle("live", s.k === liveK);
       });
       if (!video.paused && video.currentTime > 0.6 * d) preloadNext();
       requestAnimationFrame(tick);
@@ -404,7 +422,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     function preloadNext() {
       var nk = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
       if (preloaded[nk] || nk === current) return; preloaded[nk] = true;
-      var srcs = [heroSrc(nk)].concat(isWide() ? RIGS[nk].tiles.map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); }) : [mu(nk + "_live.mp4")]);
+      var srcs = [heroSrc(nk)].concat(isWide() ? RIGS[nk].tiles.map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); }) : []);
       srcs.forEach(function (src) { var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src; });
     }
 
@@ -446,9 +464,16 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     toggle.addEventListener("click", function () { if (video.paused) { userPaused = false; play(); } else { userPaused = true; pause(); } });
     bigPlay.addEventListener("click", function (e) { e.stopPropagation(); userPaused = false; play(); });
     frame.addEventListener("click", function () { if (video.paused) { userPaused = false; play(); } else { userPaused = true; pause(); } });
+    frame.addEventListener("dblclick", function (e) { e.preventDefault(); });
     video.addEventListener("ended", function () { select(ORDER[(ORDER.indexOf(current) + 1) % ORDER.length], true); });
-    video.addEventListener("play", setToggle); video.addEventListener("pause", setToggle);
-    more.addEventListener("toggle", function () { if (!isWide()) { buildCompanions(current); if (!video.paused) play(); } });
+    video.addEventListener("play", setToggle);
+    video.addEventListener("pause", function () { sync.forEach(function (s) { s.v.pause(); }); setToggle(); });
+    more.addEventListener("toggle", function () {
+      if (isWide()) return;
+      buildCompanions(current);
+      sync.forEach(function (s) { s.v.addEventListener("loadedmetadata", function () { try { s.v.currentTime = video.currentTime || 0; } catch (e) {} }, { once: true }); });
+      if (!video.paused) play();
+    });
 
     function autoResume() { if (onScreen && !document.hidden && !userPaused && !reduce && !lean && video.paused && !video.ended) play(); }
     if ("IntersectionObserver" in window) {
