@@ -2,7 +2,7 @@
 // Homepage hero (overrides Starlight's Hero, which only renders on pages with a
 // `hero` frontmatter block — i.e. the landing page).
 //
-// A 10 s silent loop of a real MVIS calibration (rig flying its recovered trajectory,
+// A 15 s real-time pass of each of three MVIS calibrations, cycled (rig flying its recovered trajectory,
 // frustums, board corners in the colour of the camera shown in 3-D), one synced
 // detection tile per camera, and a readout of values MVIS recovered from that
 // recording. Media: public/media/hero/ — rendered by openmvis-internal
@@ -14,15 +14,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
 <section class="mh" aria-label="Open MVIS">
-  <video class="mh-video" id="mhVideo" muted loop playsinline preload="auto" poster="/media/hero/hero_virig_3cams.jpg" aria-hidden="true">
+  <video class="mh-video" id="mhVideo" muted playsinline preload="auto" poster="/media/hero/hero_virig_3cams.jpg" aria-hidden="true">
     <source src="/media/hero/hero_virig_3cams.mp4" type="video/mp4" />
   </video>
 
   <div class="mh-stage">
     <div class="mh-lede">
       <div class="mh-eyebrow"><b>v0.1</b><span>Toolbox + public benchmark</span></div>
-      <h1>Every camera and IMU on the rig, <em>one factor graph.</em></h1>
-      <p class="mh-tag">MVIS calibrates intrinsics, extrinsics, time offsets, rolling-shutter readout and IMU intrinsics jointly, from a single recording. Pure Python. No ROS required.</p>
+      <h1>OpenMVIS</h1>
+      <p class="mh-sub">Open-source <em>multi-visual-inertial</em> system calibration</p>
       <div class="mh-actions">
         <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -36,7 +36,7 @@
 
   <div class="mh-readout">
     <div class="mh-rigs">
-      <span class="mh-label" id="mhRigsLabel">Recording in the background</span>
+      <span class="mh-label" id="mhRigsLabel">Cycling through three recordings</span>
       <div class="mh-chips" role="group" aria-labelledby="mhRigsLabel">
         <button class="mh-chip" id="mh-rig-virig3" type="button" data-rig="virig3" aria-pressed="true">VI-Rig · 3 cam</button>
         <button class="mh-chip" id="mh-rig-looper" type="button" data-rig="looper" aria-pressed="false">Looper Insight-9</button>
@@ -53,8 +53,8 @@
     </dl>
     <p class="mh-note">
       <span id="mhCaption">Recovered by MVIS from virig_4imus_3cams / april_01.</span>
-      <span class="mh-legend">The outlined tile is the camera shown in 3-D; the board corners it detects take its colour, the rest stay grey. Tiles: green detected, magenta reprojected.</span>
-      <button class="mh-play" id="mhPlay" type="button" aria-controls="mhVideo">Pause loop</button>
+      <span class="mh-legend">Each camera has its own colour. The outlined tile is the camera shown in 3-D, and the board corners it detects take that colour. In the tiles, coloured circles are detections and white crosses are reprojections.</span>
+      <button class="mh-play" id="mhPlay" type="button" aria-controls="mhVideo">Pause</button>
     </p>
   </div>
 </section>
@@ -111,12 +111,15 @@
   }
   .mh-eyebrow b { color: var(--mh-sky); font-weight: 500; }
   .mh h1 {
-    margin: 0; color: var(--mh-ink); text-wrap: balance;
-    font: 780 clamp(38px, 6vw, 76px)/0.98 var(--mh-display);
-    font-stretch: 118%; letter-spacing: -0.028em;
+    margin: 0; color: var(--mh-ink);
+    font: 800 clamp(52px, 8.4vw, 112px)/0.92 var(--mh-display);
+    font-stretch: 120%; letter-spacing: -0.035em;
   }
-  .mh h1 em { font-style: normal; color: var(--mh-sky); }
-  .mh-tag { margin: 22px 0 0; max-width: 36rem; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.55; color: #c9d4e0; }
+  .mh-sub {
+    margin: 18px 0 0; max-width: 30rem; color: #c9d4e0; text-wrap: balance;
+    font: 600 clamp(22px, 2.6vw, 34px)/1.15 var(--mh-display); font-stretch: 108%; letter-spacing: -0.012em;
+  }
+  .mh-sub em { font-style: normal; color: var(--mh-sky); }
   .mh-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
   .mh-btn {
     display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 7px;
@@ -209,7 +212,9 @@
       looper: [["cam0","Insight-9 cam0","global","#ffc850",640,752],["cam1","Insight-9 cam1","global","#a0ffa0",640,752],["cam2","Insight-9 cam2","rolling","#5aaaff",640,362]],
       virig4: [["cam0","T265 fisheye1","global","#ffc850",640,604],["cam1","T265 fisheye2","global","#a0ffa0",640,604],["cam2","ELP left","rolling","#5aaaff",640,480],["cam3","ELP right","rolling","#ff8cc8",640,480]]
     };
-    var LIVE_CYCLE = 3.5;
+    var LIVE_CYCLE = 5.0;
+    var ORDER = ["virig3", "looper", "virig4"];
+    var current = "virig3";
     var hero = document.querySelector(".mh");
     if (!hero) return;
     var video = document.getElementById("mhVideo");
@@ -223,7 +228,7 @@
 
     function safePlay(v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
     function play() { safePlay(video); tileVids.forEach(function (v) { v.currentTime = video.currentTime; safePlay(v); }); }
-    function setToggle() { toggle.textContent = video.paused ? "Play loop" : "Pause loop"; }
+    function setToggle() { toggle.textContent = video.paused ? "Play" : "Pause"; }
 
     function buildTiles(key) {
       var cams = TILES[key];
@@ -235,7 +240,7 @@
         var cap = document.createElement("figcaption");
         cap.innerHTML = "<i></i><b>" + c[0] + "</b><span>" + c[1] + (c[2] === "rolling" ? " · RS" : "") + "</span><em>in 3-D</em>";
         var v = document.createElement("video");
-        v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
+        v.muted = true; v.loop = false; v.playsInline = true; v.preload = "auto";
         v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true");
         v.width = c[4]; v.height = c[5];
         v.poster = "/media/hero/" + key + "_" + c[0] + ".jpg";
@@ -251,19 +256,29 @@
         if (!video.paused && v.paused) safePlay(v);
         if (video.paused && !v.paused) v.pause();
         var dt = Math.abs((v.currentTime || 0) - t);
-        if (dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
+        if (!video.ended && dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
         v.parentNode.classList.toggle("live", n > 0 && k === Math.floor(t / LIVE_CYCLE) % n);
       });
       requestAnimationFrame(tick);
     }
 
-    function select(key) {
+    // warm the browser cache for the next recording so the hand-over has no stall
+    function preloadNext(key) {
+      var nk = ORDER[(ORDER.indexOf(key) + 1) % ORDER.length];
+      [RIGS[nk].src].concat(TILES[nk].map(function (c) { return "/media/hero/" + nk + "_" + c[0] + ".mp4"; })).forEach(function (src) {
+        var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src;
+      });
+    }
+
+    function select(key, autoplay) {
       var r = RIGS[key]; if (!r) return;
+      current = key;
       chips.forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.rig === key ? "true" : "false"); });
       var wasPaused = video.paused;
       video.poster = r.poster; video.src = r.src;
       buildTiles(key);
-      if (!wasPaused) play();
+      if (!wasPaused || autoplay) play();
+      preloadNext(key);
       var apply = function () {
         readout.querySelectorAll("[data-k]").forEach(function (el) { if (r[el.dataset.k] != null) el.innerHTML = r[el.dataset.k]; });
         caption.textContent = r.caption; readout.classList.remove("swap"); setToggle();
@@ -273,9 +288,12 @@
 
     chips.forEach(function (c) { c.addEventListener("click", function () { select(c.dataset.rig); }); });
     toggle.addEventListener("click", function () { if (video.paused) play(); else video.pause(); });
+    // one pass of a recording, then the next one
+    video.addEventListener("ended", function () { select(ORDER[(ORDER.indexOf(current) + 1) % ORDER.length], true); });
     video.addEventListener("play", setToggle); video.addEventListener("pause", setToggle);
 
     buildTiles("virig3");
+    preloadNext("virig3");
     if (!reduce) play();
     setToggle();
     requestAnimationFrame(tick);
