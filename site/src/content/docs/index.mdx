@@ -2,103 +2,12 @@
 title: Open MVIS
 description: MVIS — a Python toolbox and public benchmark for multi-camera, multi-IMU calibration.
 template: splash
+wide: true
 hero:
-  tagline: MVIS is a Python toolbox for multi-camera and multi-IMU calibration — intrinsics, extrinsics, time offsets, rolling shutter, and IMU intrinsics solved in one factor graph. No ROS required.
-  image:
-    file: ../../assets/vi_rig.jpg
-    alt: VI-Rig with 4 IMUs and 5 cameras
-  actions:
-    - text: Get started
-      link: /getting-started/quickstart/
-      icon: right-arrow
-      variant: primary
-    - text: Browse the leaderboard
-      link: /benchmark/leaderboard/
-      icon: external
-    - text: View on GitHub
-      link: https://github.com/yangyulin/mvis_pages
-      icon: external
-      variant: minimal
+  tagline: MVIS calibrates intrinsics, extrinsics, time offsets, rolling-shutter readout and IMU intrinsics jointly, from a single recording.
 pageType: landing
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import HomeSections from '../../components/HomeSections.astro';
 
-<span class="cite-pill">v0.1 &middot; public benchmark</span>
-
-## Calibrate a whole rig at once
-
-MVIS — the calibration library behind the Open MVIS benchmark — solves camera intrinsics
-and distortion, extrinsics, time offsets, rolling-shutter readout, board poses,
-camera–IMU transforms, IMU intrinsics, and biases in a **single GTSAM factor
-graph**. Pure Python; `pip install`; Windows, macOS, and Linux.
-
-```bash
-mvis calibrate --config config.yaml
-```
-
-<CardGrid>
-  <Card title="Six camera models" icon="setting">
-    `radtan`, `equidistant` (KB4), `fov`, `double_sphere`, `eucm`, and
-    experimental `omni_radtan` — mixable across cameras in one rig, in both
-    camera-only and camera–IMU calibration.
-  </Card>
-  <Card title="Multi-IMU" icon="random">
-    Several IMUs in one graph, each with its own extrinsics, time offset, and
-    intrinsics. Per-IMU gyro-only mode for sensors whose accelerometer you
-    can't trust.
-  </Card>
-  <Card title="It checks its own work" icon="approve-check">
-    `mvis roundtrip` applies a calibration to its own data and
-    recalibrates. PASS needs IMU intrinsics to collapse to identity *and* the
-    stereo baseline to hold — far stronger than a low residual.
-  </Card>
-  <Card title="Reports you can send" icon="document">
-    One self-contained HTML file: intrinsics tables, 3D extrinsics, error
-    analysis, motion-excitation grades, detection statistics, timing.
-  </Card>
-  <Card title="No ROS needed" icon="rocket">
-    ROS1 and ROS2 bags read through `rosbags`, plus EuRoC/ASL, image folders,
-    and video — on a machine that has never had ROS installed.
-  </Card>
-  <Card title="Public leaderboard" icon="star">
-    Filterable by sensor configuration and algorithm family. Submit by pull
-    request and cite it as `Open MVIS leaderboard, vX.Y`.
-  </Card>
-</CardGrid>
-
-## Main features
-
-- **Single- and multi-camera calibration** — joint optimisation of intrinsics,
-  distortion, extrinsics, time offsets, rolling-shutter readout, and board poses
-- **Camera–IMU calibration** — `T_CtoI`, `td`, readout, IMU intrinsics, and
-  biases, for single or multi cam/IMU rigs and all six distortion models
-- **Batch sweeps** — one config, many sequences (`input.bags`), each into its
-  own result; the basis of the repeatability study
-- **Three IMU-intrinsics conventions** — `kalibr`, `rpng`, `calyx`
-- **Gyro↔accel offset `t_ga`** — measures a driver's accel-interpolation
-  artefact; the T265 reads −6.2 ms, stable to ~0.2 ms across bags
-- **Corrected-dataset export** — `mvis apply-calib` re-records a raw bag
-  with the calibration applied
-- **Round-trip validation** — `mvis roundtrip`, PASS/FAIL, CI-usable
-- **Boards** — chessboard, AprilGrid (Kalibr 2-bit border), ArUco
-- **Kalibr interop** — read and write `camchain` / `camchain-imucam`
-- **Regression harness** — manifest-driven runs with dashboards and baselines
-
-## Validated
-
-228 runs across 65 dataset families, zero failures. Camera parameters match the
-published TUM-VI and Intel T265 calibrations to **under 0.6% on focals**; on
-TUM-VI raw IMU bags the camera–IMU path reproduces Kalibr's extrinsics to
-**≤2 mm lever, ≤0.15 mm stereo baseline, ≤1 ms time offset**.
-
-## Cite
-
-```bibtex
-@misc{openmvis,
-  title  = {{Open MVIS}: A Benchmark for Multi-Visual-Inertial Sensor Calibration},
-  author = {{Open MVIS Contributors}},
-  year   = {2026},
-  url    = {https://openmvis.com}
-}
-```
+<HomeSections />

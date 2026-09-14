@@ -82,6 +82,9 @@ export default defineConfig({
       ],
       components: {
         ThemeProvider: './src/components/ThemeProvider.astro',
+        // Homepage hero: calibration loop + synced camera tiles + readout. Starlight
+        // only renders Hero on pages with `hero` frontmatter (the landing page).
+        Hero: './src/components/HomeHero.astro',
         Footer: './src/components/Footer.astro',
         // Applies the `wide: true` frontmatter opt-in (design plan §4).
         Head: './src/components/Head.astro',

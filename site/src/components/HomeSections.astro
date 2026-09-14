@@ -1,0 +1,194 @@
+---
+// Homepage body sections (below HomeHero). Uses Starlight's theme tokens so the
+// site's light/dark toggle applies; wrapped in .not-content to opt out of the
+// markdown typography rules (h2 underline, table header fill).
+---
+
+<div class="not-content mhs">
+  <section class="mhs-band">
+    <div class="mhs-split">
+      <div>
+        <p class="mhs-kicker">Calibrate a whole rig at once</p>
+        <h2>From one recording to a full sensor model.</h2>
+        <div class="mhs-prose">
+          <p>MVIS is the calibration library behind the Open MVIS benchmark. It solves camera intrinsics and distortion, extrinsics, time offsets, rolling-shutter readout, board poses, camera–IMU transforms, IMU intrinsics and biases in a single GTSAM factor graph.</p>
+          <p>ROS1 and ROS2 bags are read through <code>rosbags</code>, alongside EuRoC/ASL folders, image folders and video, on a machine that has never had ROS installed.</p>
+        </div>
+      </div>
+      <div>
+        <pre class="mhs-term" aria-label="Command-line usage"><span class="c"># cameras only</span>
+<span class="p">$ </span>mvis cam -c camera.yaml
+
+<span class="c"># cameras + IMUs, jointly</span>
+<span class="p">$ </span>mvis cam-imu -c cam_imu.yaml
+
+<span class="c"># apply the result and recalibrate; PASS / FAIL</span>
+<span class="p">$ </span>mvis roundtrip -c cam_imu.yaml</pre>
+        <p class="mhs-cap">One self-contained HTML report per run.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mhs-band">
+    <p class="mhs-kicker">What the graph estimates</p>
+    <h2>The state, not a sequence of stages.</h2>
+    <div class="mhs-state">
+      <table>
+        <thead>
+          <tr><th scope="col">Quantity</th><th scope="col">Symbol</th><th scope="col">Per</th><th scope="col">Unit</th><th scope="col">Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="q">Intrinsics + distortion</td><td class="sym">f, c, k</td><td class="per">camera</td><td class="unit">px</td><td>Six models, mixable within one rig</td></tr>
+          <tr><td class="q">Camera–IMU extrinsics</td><td class="sym">T_CtoI</td><td class="per">camera</td><td class="unit">m · log(R) rad</td><td>Every camera to the base IMU</td></tr>
+          <tr><td class="q">Camera time offset</td><td class="sym">t_d</td><td class="per">camera</td><td class="unit">ms</td><td>Recovers USB lag of −124 ms on the ELP stereo</td></tr>
+          <tr><td class="q">Rolling-shutter readout</td><td class="sym">t_r</td><td class="per">camera</td><td class="unit">ms</td><td>Each corner projected at its own row time</td></tr>
+          <tr><td class="q">IMU–IMU extrinsics</td><td class="sym">T_IstoI</td><td class="per">aux IMU</td><td class="unit">m · log(R) rad</td><td>Plus a per-IMU time offset</td></tr>
+          <tr><td class="q">IMU intrinsics</td><td class="sym">D_w, D_a</td><td class="per">IMU</td><td class="unit">—</td><td><code>kalibr</code>, <code>rpng</code> or <code>calyx</code> convention</td></tr>
+          <tr><td class="q">Gyro–accel offset</td><td class="sym">t_ga</td><td class="per">IMU</td><td class="unit">ms</td><td>The T265 reads −6.2 ms, stable to ~0.2 ms across bags</td></tr>
+          <tr><td class="q">Biases</td><td class="sym">b_g, b_a</td><td class="per">IMU</td><td class="unit">rad/s · m/s²</td><td>Along the whole trajectory</td></tr>
+          <tr><td class="q">Board pose + trajectory</td><td class="sym">T_BinW, T_ItoW(t)</td><td class="per">recording</td><td class="unit">m · log(R) rad</td><td>Chessboard, AprilGrid or ArUco targets</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mhs-band">
+    <div class="mhs-split">
+      <div>
+        <p class="mhs-kicker">Camera models</p>
+        <h2>Six projection models.</h2>
+        <ul class="mhs-models">
+          <li><code>radtan</code><span>Pinhole, radial–tangential</span></li>
+          <li><code>equidistant</code><span>Kannala–Brandt KB4 fisheye</span></li>
+          <li><code>fov</code><span>Field-of-view model</span></li>
+          <li><code>double_sphere</code><span>Wide-angle fisheye</span></li>
+          <li><code>eucm</code><span>Extended unified camera</span></li>
+          <li class="exp"><code>omni_radtan</code><span>Omnidirectional</span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="mhs-kicker">Validated</p>
+        <h2>Checked against published calibrations.</h2>
+        <div class="mhs-figs">
+          <div class="mhs-fig"><b>228</b><p>regression runs across 65 dataset families, with zero failures</p></div>
+          <div class="mhs-fig"><b>&lt;0.6<small>%</small></b><p>focal-length difference from the published TUM-VI and Intel T265 calibrations</p></div>
+          <div class="mhs-fig"><b>≤2<small>mm</small></b><p>lever arm vs Kalibr on TUM-VI raw IMU bags, with ≤0.15 mm stereo baseline and ≤1 ms time offset</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mhs-band">
+    <div class="mhs-split">
+      <figure class="mhs-rig">
+        <img src="/media/hero/vi_rig.jpg" alt="VI-Rig with 4 IMUs and 5 cameras mounted on one frame" width="1400" height="1050" loading="lazy" />
+        <figcaption>VI-Rig: 4 IMUs and 5 cameras, one of the rigs in the Calibench roster.</figcaption>
+      </figure>
+      <div>
+        <p class="mhs-kicker">It checks its own work</p>
+        <h2>A low residual is not the test.</h2>
+        <div class="mhs-prose">
+          <p><code>mvis roundtrip</code> applies a calibration to its own data and recalibrates. PASS needs the IMU intrinsics to collapse to identity and the stereo baseline to hold. See <a href="/guides/roundtrip/">Round-trip validation</a>.</p>
+        </div>
+        <dl class="mhs-facts">
+          <div><dt>Inputs</dt><dd>ROS1 and ROS2 bags, EuRoC/ASL, image folders, video</dd></div>
+          <div><dt>Targets</dt><dd>Chessboard, AprilGrid with Kalibr 2-bit border, ArUco</dd></div>
+          <div><dt>Interop</dt><dd>Reads and writes Kalibr <code>camchain</code> and <code>camchain-imucam</code></dd></div>
+          <div><dt>Export</dt><dd><code>mvis apply-calib</code> re-records a raw bag with the calibration applied</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="mhs-band">
+    <p class="mhs-kicker">Cite</p>
+    <h2>If you use the toolbox or the benchmark.</h2>
+    <div class="mhs-cites">
+      <figure>
+        <figcaption>Benchmark</figcaption>
+        <pre class="mhs-term">@misc&#123;openmvis,
+  title  = &#123;&#123;Open MVIS&#125;: A Benchmark for Multi-Visual-Inertial Sensor Calibration&#125;,
+  author = &#123;&#123;Open MVIS Contributors&#125;&#125;,
+  year   = &#123;2026&#125;,
+  url    = &#123;https://openmvis.com&#125;
+&#125;</pre>
+      </figure>
+      <figure>
+        <figcaption>Method</figcaption>
+        <pre class="mhs-term">@article&#123;yang2024mvis,
+  title   = &#123;Multi-visual-inertial system: Analysis, calibration, and estimation&#125;,
+  author  = &#123;Yang, Yulin and Geneva, Patrick and Huang, Guoquan&#125;,
+  journal = &#123;The International Journal of Robotics Research&#125;,
+  year    = &#123;2024&#125;,
+  doi     = &#123;10.1177/02783649241245726&#125;
+&#125;</pre>
+      </figure>
+    </div>
+    <p class="mhs-cap">Cite leaderboard results as <code>Open MVIS leaderboard, vX.Y</code>.</p>
+  </section>
+</div>
+
+<style is:global>
+  .mhs {
+    --mhs-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mhs-mono: "JetBrains Mono", var(--sl-font-mono, ui-monospace), monospace;
+    color: var(--sl-color-gray-2);
+  }
+  .mhs code { font-family: var(--mhs-mono); font-size: 0.88em; }
+  .mhs-band { padding-block: clamp(48px, 7vw, 88px); border-top: 1px solid var(--sl-color-hairline); }
+  .mhs-band:first-child { border-top: 0; padding-top: clamp(32px, 5vw, 64px); }
+  .mhs-kicker { font: 500 12px/1 var(--mhs-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--sl-color-accent); margin: 0 0 14px; }
+  .mhs h2 { margin: 0; color: var(--sl-color-white); text-wrap: balance; font: 720 clamp(28px, 3.4vw, 42px)/1.05 var(--mhs-display); font-stretch: 112%; letter-spacing: -0.02em; }
+  .mhs-prose { max-width: 38rem; }
+  .mhs-prose p { margin: 16px 0 0; }
+  .mhs-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+
+  .mhs-term { background: #0f172a; color: #dbe4ee; border-radius: 10px; font: 400 14px/1.75 var(--mhs-mono); padding: 18px 20px; overflow-x: auto; margin: 0; border: 1px solid var(--sl-color-hairline); }
+  .mhs-term .p { color: #38bdf8; user-select: none; }
+  .mhs-term .c { color: #7d8ea4; }
+  .mhs-cap { font: 500 12px/1.4 var(--mhs-mono); color: var(--sl-color-gray-3); margin: 10px 2px 0; }
+
+  .mhs-state { margin-top: 36px; overflow-x: auto; border-top: 2px solid var(--sl-color-white); }
+  .mhs-state table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 15px; }
+  .mhs-state th, .mhs-state td { text-align: left; padding: 13px 14px 13px 0; border-bottom: 1px solid var(--sl-color-hairline); vertical-align: baseline; background: none; }
+  .mhs-state th { font: 500 11px/1 var(--mhs-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--sl-color-gray-3); padding-top: 14px; }
+  .mhs-state td { color: var(--sl-color-gray-2); }
+  .mhs-state td.q { color: var(--sl-color-white); font-weight: 500; }
+  .mhs-state td.sym { font: 500 14px/1.3 var(--mhs-mono); color: var(--sl-color-accent); white-space: nowrap; }
+  .mhs-state td.unit, .mhs-state td.per { font: 400 13px/1.3 var(--mhs-mono); color: var(--sl-color-gray-3); white-space: nowrap; }
+
+  .mhs-models { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+  .mhs-models li { padding: 12px 0; margin: 0; border-bottom: 1px solid var(--sl-color-hairline); display: grid; gap: 3px; }
+  .mhs-models code { font-size: 15px; color: var(--sl-color-white); font-weight: 500; }
+  .mhs-models span { font-size: 13.5px; color: var(--sl-color-gray-3); }
+  .mhs-models .exp code::after { content: "experimental"; margin-left: 8px; font: 500 10px/1 var(--mhs-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sl-color-gray-3); border: 1px solid var(--sl-color-hairline); border-radius: 4px; padding: 3px 5px; vertical-align: 2px; }
+
+  .mhs-figs { margin-top: 28px; }
+  .mhs-fig { display: grid; grid-template-columns: minmax(7.5rem, auto) minmax(0, 1fr); gap: 18px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--sl-color-hairline); }
+  .mhs-fig b { font: 760 clamp(26px, 3vw, 36px)/1 var(--mhs-display); font-stretch: 115%; letter-spacing: -0.02em; color: var(--sl-color-white); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mhs-fig b small { font: 500 15px/1 var(--mhs-mono); color: var(--sl-color-gray-3); margin-left: 4px; letter-spacing: 0; }
+  .mhs-fig p { margin: 0; font-size: 15px; }
+
+  .mhs-rig { margin: 0; }
+  .mhs-rig img { display: block; width: 100%; height: auto; max-width: 100%; border-radius: 10px; }
+  .mhs-rig figcaption { font: 400 13px/1.5 var(--mhs-mono); color: var(--sl-color-gray-3); margin-top: 10px; }
+  .mhs-facts { margin: 26px 0 0; }
+  .mhs-facts div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--sl-color-hairline); }
+  .mhs-facts dt { font: 500 11px/1.9 var(--mhs-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--sl-color-gray-3); }
+  .mhs-facts dd { margin: 0; font-size: 15px; }
+
+  .mhs-cites { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 30px; }
+  .mhs-cites figure { margin: 0; min-width: 0; }
+  .mhs-cites figcaption { font: 500 12px/1 var(--mhs-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sl-color-gray-3); margin-bottom: 10px; }
+  .mhs-cites .mhs-term { font-size: 13px; line-height: 1.65; }
+
+  .mhs, .mhs-split > *, .mhs-cites > * { min-width: 0; max-width: 100%; }
+  .mhs h2 { border-bottom: 0; padding-bottom: 0; }
+  @media (max-width: 860px) {
+    .mhs-split, .mhs-cites { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .mhs-models { grid-template-columns: minmax(0, 1fr); }
+    .mhs-fig, .mhs-facts div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  }
+</style>
