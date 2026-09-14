@@ -2,15 +2,17 @@
 // Homepage hero (overrides Starlight's Hero, which only renders on pages with a
 // `hero` frontmatter block — i.e. the landing page).
 //
-// A 15 s real-time pass of each MVIS calibration listed in rigs.json, cycled (rig flying its recovered trajectory,
-// frustums, board corners in the colour of the camera shown in 3-D), one synced
-// detection tile per camera, and a readout of values MVIS recovered from that
-// recording. Media: public/media/hero/ — rendered by openmvis-internal
-// demo_video/render_hero.py + render_hero_tiles.py.
+// Each MVIS calibration listed in rigs.json plays a 15 s real-time pass (rig flying its recovered
+// trajectory, frustums, board corners in the colour of the camera shown in 3-D), then the next one.
+// Layouts (plan: mira docs/plans/mvis/web-pages/homepage-responsive):
+//   phone  (< 641 px)       title · 16:9 video with a live-camera inset · CTA · chips · 3 readout values · Details
+//   tablet (641–1099 px)    text | video (inset) · bar underneath · Details
+//   wide   (≥ 1100 px)      text over the left of a contained, right-aligned loop · tile column sized from the
+//                           available height · one-line bar; the whole hero fits the first viewport
+// Media: public/media/hero/ — openmvis-internal demo_video/render_hero.py, render_hero_tiles.py and
+// build_site_media.py (1920 + 960 px loops, per-camera tiles 400 + 240 px, one live-camera track per rig).
 //
-// Cache busting: the media keep fixed file names, so every URL carries a short content
-// hash (?v=...) computed at build time. A re-render changes the hash, and browsers fetch
-// the new video instead of replaying their cached copy.
+// Cache busting: every media URL carries a short content hash (?v=...) computed at build time.
 import { readdirSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
@@ -22,8 +24,6 @@ for (const f of readdirSync(MEDIA_DIR)) {
 }
 const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
 
-// rigs.json is written by openmvis-internal demo_video/build_site_media.py: cycle order,
-// chip labels, captions, readout values and per-camera tiles for every recording.
 const { rigs } = JSON.parse(readFileSync(MEDIA_DIR + 'rigs.json', 'utf8'));
 const first = rigs[0];
 const countWords = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
@@ -35,48 +35,71 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
 <section class="mh" aria-label="Open MVIS">
-  <video class="mh-video" id="mhVideo" muted playsinline preload="auto" poster={u(`hero_${first.key}.jpg`)} aria-hidden="true">
-    <source src={u(`hero_${first.key}.mp4`)} type="video/mp4" />
-  </video>
-
-  <div class="mh-stage">
-    <div class="mh-lede">
-      <div class="mh-eyebrow"><b>v0.1</b><span>Toolbox + public benchmark</span></div>
-      <h1>OpenMVIS</h1>
-      <p class="mh-sub">Open-source <em>multi-visual-inertial</em> <span class="mh-nw">system calibration</span></p>
-      <div class="mh-actions">
-        <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
-          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </a>
-        <a class="mh-btn mh-ghost" href="/benchmark/leaderboard/">Browse the leaderboard</a>
-        <a class="mh-btn mh-ghost" href="/examples/">See the examples</a>
-      </div>
+  <div class="mh-text">
+    <div class="mh-eyebrow"><b>v0.1</b><span>Toolbox + public benchmark</span></div>
+    <h1>OpenMVIS</h1>
+    <p class="mh-sub">Open-source <em>multi-visual-inertial</em> <span class="mh-nw">system calibration</span></p>
+    <div class="mh-actions">
+      <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+      <a class="mh-btn mh-ghost" href="/benchmark/leaderboard/">Leaderboard</a>
+      <a class="mh-btn mh-ghost" href="/examples/">Examples</a>
     </div>
-    <ul class="mh-tiles" id="mhTiles" aria-label="Detections in each camera"></ul>
   </div>
 
-  <div class="mh-readout">
+  <div class="mh-video">
+    <div class="mh-frame" id="mhFrame">
+      <video class="mh-main" id="mhVideo" muted playsinline preload="metadata" aria-hidden="true"
+             poster={u(`hero_${first.key}_960.jpg`)}></video>
+      <div class="mh-inset" id="mhInset">
+        <video id="mhLive" muted playsinline preload="metadata" aria-hidden="true" poster={u(`${first.key}_live.jpg`)}></video>
+      </div>
+      <button class="mh-bigplay" id="mhBigPlay" type="button" hidden aria-label="Play the calibration video">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <ul class="mh-tiles" id="mhTiles" aria-label="Detections in each camera"></ul>
+
+  <div class="mh-cta-phone">
+    <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </a>
+    <div class="mh-links"><a href="/benchmark/leaderboard/">Leaderboard</a><a href="/examples/">Examples</a></div>
+  </div>
+
+  <div class="mh-bar">
     <div class="mh-rigs">
       <span class="mh-label" id="mhRigsLabel">{cycleLabel}</span>
-      <div class="mh-chips" role="group" aria-labelledby="mhRigsLabel">
+      <div class="mh-chips" id="mhChips" role="group" aria-labelledby="mhRigsLabel">
         {rigs.map((r, i) => (
           <button class="mh-chip" id={`mh-rig-${r.key}`} type="button" data-rig={r.key} aria-pressed={i === 0 ? 'true' : 'false'}>{r.chip}</button>
         ))}
       </div>
     </div>
-    <dl class="mh-ro" id="mhReadout" aria-live="polite">
+    <dl class="mh-ro" aria-live="polite">
       <div><dt>Sensors</dt><dd data-k="sensors" set:html={first.sensors} /></div>
-      <div><dt>Window</dt><dd data-k="window" set:html={first.window} /></div>
       <div><dt>Reproj median</dt><dd data-k="rms" set:html={first.rms} /></div>
-      <div><dt>Base cam offset</dt><dd data-k="td" set:html={first.td} /></div>
-      <div><dt data-k="xlabel" set:html={first.xlabel} /><dd data-k="xval" set:html={first.xval} /></div>
-      <div><dt>Corners / frame</dt><dd data-k="corners" set:html={first.corners} /></div>
+      <div><dt>Window</dt><dd data-k="window" set:html={first.window} /></div>
+      <div class="mh-x"><dt>Base cam offset</dt><dd data-k="td" set:html={first.td} /></div>
+      <div class="mh-x"><dt data-k="xlabel" set:html={first.xlabel} /><dd data-k="xval" set:html={first.xval} /></div>
+      <div class="mh-x"><dt>Corners / frame</dt><dd data-k="corners" set:html={first.corners} /></div>
     </dl>
-    <p class="mh-note">
-      <span id="mhCaption">{first.caption}</span>
-      <span class="mh-legend">Each camera has its own colour. The outlined tile is the camera shown in 3-D, and the board corners it detects take that colour. In the tiles, coloured circles are detections and white crosses are reprojections.</span>
-      <button class="mh-play" id="mhPlay" type="button" aria-controls="mhVideo">Pause</button>
-    </p>
+    <button class="mh-play" id="mhPlay" type="button" aria-controls="mhVideo">Pause</button>
+    <p class="mh-note"><span data-k="caption">{first.caption}</span> The outlined camera is the one shown in 3-D; the board corners it detects take its colour.</p>
+
+    <details class="mh-more" id="mhMore">
+      <summary>Details: all cameras and readout</summary>
+      <dl class="mh-ro mh-ro-more">
+        <div><dt>Base cam offset</dt><dd data-k="td" set:html={first.td} /></div>
+        <div><dt data-k="xlabel" set:html={first.xlabel} /><dd data-k="xval" set:html={first.xval} /></div>
+        <div><dt>Corners / frame</dt><dd data-k="corners" set:html={first.corners} /></div>
+      </dl>
+      <p class="mh-legend"><span data-k="caption">{first.caption}</span> Each camera has its own colour. The outlined camera is the one shown in 3-D, and the board corners it detects take that colour. In the camera views, coloured circles are detections and white crosses are reprojections.</p>
+      <ul class="mh-strip" id="mhStrip"></ul>
+    </details>
   </div>
 </section>
 
@@ -92,122 +115,183 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     --mh-amber: #ff9f1c;
     --mh-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
     --mh-mono: "JetBrains Mono", var(--sl-font-mono, ui-monospace), monospace;
-    --mh-gutter: clamp(16px, 4vw, 48px);
-    --mh-tw: 11rem;
-    --mh-reserve: calc(var(--mh-tw) * var(--mh-cols, 1) + (var(--mh-cols, 1) - 1) * 10px + 2 * var(--mh-gutter));
+    --mh-gutter: clamp(16px, 3.5vw, 48px);
+    --mh-side: var(--mh-gutter);
 
     position: relative;
     isolation: isolate;
     width: 100vw;
     margin-inline: calc(50% - 50vw);
     margin-top: -1.5rem;
-    min-height: clamp(560px, calc(84svh - var(--sl-nav-height, 3.5rem)), 800px);
     background: var(--mh-night);
     color: var(--mh-ink);
     display: grid;
-    grid-template-rows: 1fr auto;
-    overflow: hidden;
+    padding-inline: var(--mh-side);
   }
-  .mh-video {
-    position: absolute; inset: 0 var(--mh-reserve) 0 28%;
-    width: auto; height: 100%;
-    object-fit: cover; z-index: -2; background: var(--mh-night);
-  }
-  .mh::before {
-    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-    background:
-      linear-gradient(90deg, rgba(5,7,10,1) 0%, rgba(5,7,10,0.96) 30%, rgba(5,7,10,0.35) 44%, rgba(5,7,10,0) 56%),
-      linear-gradient(180deg, rgba(5,7,10,0.55) 0%, rgba(5,7,10,0) 14%, rgba(5,7,10,0) 58%, rgba(5,7,10,0.9) 100%);
-  }
-  .mh-stage > *, .mh-readout > * { min-width: 0; }
-  .mh h1 { border-bottom: 0; padding-bottom: 0; }
-  .mh-stage {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px;
-    align-items: center; padding: 36px var(--mh-gutter) 28px;
-  }
-  .mh-lede { max-width: 44rem; }
-  .mh-eyebrow {
-    font: 500 12px/1 var(--mh-mono); letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--mh-dim); display: flex; gap: 12px; align-items: center; margin-bottom: 22px;
-  }
+  .mh :focus-visible { outline: 2px solid var(--mh-sky); outline-offset: 3px; border-radius: 3px; }
+  .mh h1, .mh p, .mh dl, .mh ul { margin: 0; }
+  .mh h1 { border-bottom: 0; padding-bottom: 0; color: var(--mh-ink); }
+
+  /* ---- text ---- */
+  .mh-text { min-width: 0; }
+  .mh-eyebrow { font: 500 12px/1 var(--mh-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mh-dim);
+                display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
   .mh-eyebrow b { color: var(--mh-sky); font-weight: 500; }
-  .mh h1 {
-    margin: 0; color: var(--mh-ink);
-    font: 800 clamp(52px, 8.4vw, 112px)/0.92 var(--mh-display);
-    font-stretch: 120%; letter-spacing: -0.035em;
-  }
-  .mh-sub {
-    margin: 18px 0 0; max-width: 42rem; color: #c9d4e0;
-    font: 600 clamp(22px, 2.6vw, 34px)/1.15 var(--mh-display); font-stretch: 108%; letter-spacing: -0.012em;
-  }
+  .mh h1 { font: 800 clamp(44px, 4.4vw, 88px)/0.92 var(--mh-display); font-stretch: 120%; letter-spacing: -0.035em; white-space: nowrap; }
+  .mh .mh-sub { margin-top: 14px; color: #c9d4e0; font: 600 clamp(20px, 2vw, 32px)/1.15 var(--mh-display); font-stretch: 108%; letter-spacing: -0.012em; }
   .mh-sub em { font-style: normal; color: var(--mh-sky); white-space: nowrap; }
   .mh-nw { white-space: nowrap; }
-  .mh-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-  .mh-btn {
-    display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 7px;
-    font-weight: 600; font-size: 15px; line-height: 1; text-decoration: none; border: 1px solid transparent;
-  }
+  .mh-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .mh-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 8px;
+            font-weight: 600; font-size: 15px; line-height: 1; text-decoration: none; border: 1px solid transparent; }
+  .mh-btn svg { width: 16px; height: 16px; }
   .mh-primary { background: var(--mh-sky); color: #04111c; }
   .mh-primary:hover { background: #7dd3fc; color: #04111c; }
-  .mh-ghost { color: var(--mh-ink); border-color: var(--mh-rule); background: rgba(5,7,10,0.35); }
+  .mh-ghost { color: var(--mh-ink); border-color: var(--mh-rule); background: rgba(5, 7, 10, 0.35); }
   .mh-ghost:hover { border-color: var(--mh-dim); color: #fff; }
-  .mh-btn svg { width: 16px; height: 16px; }
-  .mh :focus-visible { outline: 2px solid var(--mh-sky); outline-offset: 3px; border-radius: 3px; }
 
-  .mh-tiles { display: grid; grid-template-columns: repeat(var(--mh-cols, 1), var(--mh-tw)); gap: 10px; align-content: center; margin: 0; padding: 0; list-style: none; }
-  .mh-tiles li { margin: 0; }
-  .mh-tile { margin: 0; border: 1px solid var(--mh-rule); border-radius: 7px; overflow: hidden; background: rgba(5,7,10,0.72); transition: border-color .3s ease, box-shadow .3s ease; }
-  .mh-tile figcaption { display: flex; align-items: center; gap: 7px; padding: 6px 8px; font: 500 11px/1.2 var(--mh-mono); color: var(--mh-dim); white-space: nowrap; overflow: hidden; }
+  /* ---- video ---- */
+  .mh-video { min-width: 0; }
+  .mh-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--mh-night); }
+  .mh-main { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--mh-night); }
+  .mh-inset { position: absolute; right: 8px; bottom: 8px; width: 34%; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden;
+              box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55); background: var(--mh-night); }
+  .mh-inset video { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .mh-bigplay { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 64px; height: 64px; border-radius: 50%;
+                border: 1px solid var(--mh-rule); background: rgba(5, 7, 10, 0.7); color: var(--mh-ink); display: grid; place-items: center; cursor: pointer; }
+  .mh-bigplay[hidden] { display: none; }
+  .mh-bigplay svg { width: 28px; height: 28px; margin-left: 3px; }
+
+  /* ---- tiles (wide) and strip (Details) ---- */
+  .mh-tiles, .mh-strip { list-style: none; padding: 0; }
+  .mh-tiles li, .mh-strip li { margin: 0; }
+  .mh-tile { margin: 0; border: 1px solid var(--mh-rule); border-radius: 7px; overflow: hidden; background: rgba(5, 7, 10, 0.72);
+             transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+  .mh-tile figcaption { display: flex; align-items: center; gap: 7px; padding: 5px 8px; font: 500 11px/1.2 var(--mh-mono); color: var(--mh-dim);
+                        white-space: nowrap; overflow: hidden; }
   .mh-tile figcaption i { width: 7px; height: 7px; border-radius: 2px; background: var(--cam); flex: none; }
   .mh-tile figcaption b { color: var(--mh-ink); font-weight: 500; }
   .mh-tile figcaption span { overflow: hidden; text-overflow: ellipsis; }
-  .mh-tile figcaption em { margin-left: auto; font-style: normal; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--cam); opacity: 0; transition: opacity .3s ease; }
+  .mh-tile figcaption em { margin-left: auto; font-style: normal; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cam);
+                           opacity: 0; transition: opacity 0.3s ease; }
   .mh-tile video { display: block; width: 100%; height: auto; max-width: 100%; background: var(--mh-night); }
-  .mh-tile.live { border-color: var(--cam); box-shadow: 0 0 0 1px var(--cam), 0 8px 28px rgba(0,0,0,.45); }
+  .mh-tile.live { border-color: var(--cam); box-shadow: 0 0 0 1px var(--cam); }
   .mh-tile.live figcaption em { opacity: 1; }
+  .mh .mh-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-top: 12px; }
 
-  .mh-readout {
-    border-top: 1px solid var(--mh-rule);
-    background: linear-gradient(180deg, rgba(5,7,10,0.2), rgba(5,7,10,0.75));
-    backdrop-filter: blur(6px);
-    padding: 16px var(--mh-gutter) 18px;
-    display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 18px 40px; align-items: end;
-  }
-  .mh-rigs { display: grid; gap: 10px; max-width: 36rem; }
-  .mh-label, .mh-ro dt { font: 500 10.5px/1 var(--mh-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--mh-dim); }
-  .mh-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .mh-chip { font-size: 13px; font-weight: 500; line-height: 1; color: var(--mh-dim); background: transparent; border: 1px solid var(--mh-rule); border-radius: 999px; padding: 8px 13px; cursor: pointer; }
+  /* ---- bar ---- */
+  .mh-bar { border-top: 1px solid var(--mh-rule); display: grid; gap: 12px 28px; align-items: center; padding-block: 14px; min-width: 0; }
+  .mh-rigs { display: grid; gap: 8px; min-width: 0; }
+  .mh-label, .mh-ro dt { font: 500 10.5px/1 var(--mh-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mh-dim); }
+  .mh-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; padding-right: 28px;
+              -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+  .mh-chips::-webkit-scrollbar { display: none; }
+  .mh-chip { flex: none; scroll-snap-align: start; font-size: 13px; font-weight: 500; line-height: 1; color: var(--mh-dim); background: transparent;
+             border: 1px solid var(--mh-rule); border-radius: 999px; padding: 0 13px; min-height: 36px; cursor: pointer; white-space: nowrap; }
   .mh-chip:hover { color: var(--mh-ink); border-color: var(--mh-dim); }
   .mh-chip[aria-pressed="true"] { color: #04111c; background: var(--mh-ink); border-color: var(--mh-ink); }
-  .mh-ro { margin: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 22px; transition: opacity .25s ease; }
+  .mh-ro { display: grid; gap: 10px 22px; transition: opacity 0.25s ease; min-width: 0; }
   .mh-ro.swap { opacity: 0; }
   .mh-ro div { min-width: 0; }
-  .mh-ro dt { display: flex; align-items: center; gap: 7px; }
+  .mh-ro dt { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; }
   .mh-ro dt::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--mh-amber); flex: none; }
-  .mh-ro dd { margin: 8px 0 0; font: 500 15px/1.2 var(--mh-mono); font-variant-numeric: tabular-nums; color: var(--mh-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mh-ro dd { margin: 6px 0 0; font: 500 15px/1.2 var(--mh-mono); font-variant-numeric: tabular-nums; color: var(--mh-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mh-ro dd small { color: var(--mh-dim); font-size: 12px; }
-  .mh-note { grid-column: 1 / -1; margin: 0; font-size: 12px; line-height: 1.5; color: var(--mh-dim); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .mh-legend { flex: 1 1 28rem; }
-  .mh-play { font: 500 12px/1 var(--mh-mono); color: var(--mh-dim); background: none; border: 0; padding: 0; cursor: pointer; letter-spacing: .06em; }
+  .mh-play { font: 500 12px/1 var(--mh-mono); color: var(--mh-dim); background: none; border: 1px solid var(--mh-rule); border-radius: 6px;
+             min-height: 36px; padding: 0 12px; cursor: pointer; letter-spacing: 0.06em; justify-self: end; }
   .mh-play:hover { color: var(--mh-ink); }
+  .mh-note { font-size: 12px; line-height: 1.5; color: var(--mh-dim); grid-column: 1 / -1; }
+  .mh-more { grid-column: 1 / -1; color: var(--mh-dim); font-size: 13px; }
+  .mh-more summary { cursor: pointer; list-style: none; font: 500 13px/1 var(--mh-mono); color: var(--mh-ink); min-height: 44px; display: flex; align-items: center; }
+  .mh-more summary::-webkit-details-marker { display: none; }
+  .mh-more summary::before { content: "▸"; color: var(--mh-sky); margin-right: 8px; }
+  .mh-more[open] summary::before { content: "▾"; }
+  .mh .mh-ro-more { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 4px; }
+  .mh .mh-legend { margin-top: 12px; line-height: 1.55; }
+  .mh-cta-phone { display: none; }
 
-  @media (max-width: 1180px) {
-    .mh { --mh-reserve: 0px; }
-    .mh-video { inset: 0 0 0 20%; }
+  /* ================= phone ================= */
+  @media (max-width: 640px) {
+    .mh { grid-template-columns: minmax(0, 1fr); padding-inline: 0; }
+    .mh-text { padding: 22px var(--mh-gutter) 16px; }
+    .mh-eyebrow, .mh-actions, .mh-tiles, .mh-label, .mh-play, .mh-note, .mh-ro .mh-x { display: none; }
+    .mh h1 { font-size: clamp(42px, 12.5vw, 56px); }
+    .mh .mh-sub { font-size: 20px; margin-top: 10px; }
+    .mh-cta-phone { display: grid; gap: 4px; padding: 14px var(--mh-gutter) 0; }
+    .mh-cta-phone .mh-primary { width: 100%; min-height: 48px; font-size: 16px; }
+    .mh-links { display: flex; justify-content: center; gap: 24px; }
+    .mh-links a { color: var(--mh-ink); text-decoration: none; font-size: 15px; font-weight: 500; min-height: 44px; display: inline-flex; align-items: center; }
+    .mh-links a:hover { color: var(--mh-sky); }
+    .mh-bar { padding: 10px var(--mh-gutter) 4px; border-top: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .mh-chip { min-height: 40px; }
     .mh-ro { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .mh-readout { grid-template-columns: minmax(0, 1fr); }
-    .mh-stage > *, .mh-readout > * { min-width: 0; }
-  .mh h1 { border-bottom: 0; padding-bottom: 0; }
-  .mh-stage { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-    .mh-tiles { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 10.5rem; overflow-x: auto; padding-bottom: 6px; align-items: start; }
+    .mh-ro dd { font-size: 14px; }
   }
-  @media (max-width: 860px) {
-    .mh-video { inset: 0; }
-    .mh::before { background: linear-gradient(180deg, rgba(5,7,10,0.7) 0%, rgba(5,7,10,0.55) 45%, rgba(5,7,10,0.92) 100%); }
+
+  /* ================= tablet ================= */
+  @media (min-width: 641px) and (max-width: 1099px) {
+    .mh { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 28px; align-items: center; padding-block: 28px 0; }
+    .mh-tiles, .mh-note, .mh-cta-phone { display: none; }
+    .mh h1 { font-size: clamp(38px, 5.4vw, 64px); }
+    .mh .mh-sub { font-size: clamp(20px, 2.6vw, 26px); }
+    .mh-actions .mh-btn { padding: 0 14px; }
+    .mh-bar { grid-column: 1 / -1; margin-top: 24px; margin-inline: calc(-1 * var(--mh-side)); padding-inline: var(--mh-side);
+              grid-template-columns: minmax(0, 1fr) auto; }
+    .mh-rigs { grid-column: 1 / -1; }
+    .mh-ro { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mh-ro .mh-x { display: none; }
   }
-  @media (max-width: 520px) {
-    .mh-ro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* short landscape phones */
+  @media (min-width: 641px) and (max-width: 1099px) and (max-height: 480px) {
+    .mh { padding-block: 12px 0; align-items: start; }
+    .mh-eyebrow { display: none; }
+    .mh h1 { font-size: 40px; }
+    .mh .mh-sub { font-size: 18px; margin-top: 8px; }
+    .mh-actions { margin-top: 14px; gap: 8px; }
+    .mh-bar { margin-top: 12px; }
   }
+
+  /* ================= wide (laptop / desktop) ================= */
+  @media (min-width: 1100px) {
+    .mh { --mh-side: max(var(--mh-gutter), calc((100vw - 1760px) / 2));
+          height: clamp(560px, calc(100svh - var(--sl-nav-height, 3.5rem)), 900px);
+          grid-template-columns: minmax(22rem, 36rem) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) auto;
+          column-gap: clamp(20px, 2vw, 40px); }
+    .mh-text { grid-column: 1; grid-row: 1; align-self: center; position: relative; z-index: 2; }
+    /* the loop is placed by JS over the free area right of ~55 % of the text column (this is the pre-JS fallback) */
+    .mh-video { position: absolute; z-index: 1; left: 40%; right: 260px; top: 0; bottom: 90px; }
+    .mh-frame { position: absolute; inset: 0; width: auto; aspect-ratio: auto; }
+    .mh-main { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 96%, transparent 100%), linear-gradient(180deg, transparent 0, #000 10%, #000 90%, transparent 100%);
+               -webkit-mask-composite: source-in;
+               mask-image: linear-gradient(90deg, transparent 0, #000 22%, #000 96%, transparent 100%), linear-gradient(180deg, transparent 0, #000 10%, #000 90%, transparent 100%);
+               mask-composite: intersect; }
+    .mh-inset, .mh-more, .mh-cta-phone, .mh-label, .mh-note { display: none; }
+    .mh-tiles { grid-column: 3; grid-row: 1; align-self: center; display: grid; gap: 10px; position: relative; z-index: 2; }
+    .mh-bar { grid-column: 1 / -1; grid-row: 2; margin-inline: calc(-1 * var(--mh-side)); padding-inline: var(--mh-side); position: relative; z-index: 2;
+              grid-template-columns: minmax(0, 24rem) minmax(0, 1fr) auto; background: linear-gradient(180deg, rgba(5, 7, 10, 0.6), rgba(5, 7, 10, 0.9)); }
+    .mh-ro { grid-template-columns: repeat(6, minmax(0, auto)); justify-content: space-between; }
+  }
+  @media (min-width: 1100px) and (max-width: 1439px) {
+    .mh-bar { grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) auto; column-gap: 18px; }
+    .mh-ro { gap: 8px 12px; }
+    .mh-ro dt { letter-spacing: 0.04em; font-size: 10px; gap: 5px; }
+    .mh-ro dd { font-size: 14px; }
+  }
+  @media (min-width: 1100px) and (min-height: 880px) {
+    .mh-label, .mh-note { display: block; }
+    .mh-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  }
+  @media (min-width: 1100px) and (max-height: 800px) {
+    .mh h1 { font-size: 64px; }
+    .mh .mh-sub { font-size: 23px; }
+    .mh-eyebrow { margin-bottom: 12px; }
+    .mh-actions { margin-top: 20px; }
+    .mh-actions .mh-btn { min-height: 40px; font-size: 14px; padding: 0 14px; }
+    .mh-bar { padding-block: 10px; }
+  }
+  @media (min-width: 1100px) and (max-height: 680px) { .mh-eyebrow { display: none; } }
+
   @media (prefers-reduced-motion: reduce) {
     .mh-ro, .mh-tile, .mh-tile figcaption em { transition: none; }
   }
@@ -215,123 +299,167 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
 
 <script is:inline define:vars={{ V, RIG_DATA: rigs }}>
   (function () {
-    var RIGS = {}, TILES = {}, ORDER = [];
-    RIG_DATA.forEach(function (r) {
-      ORDER.push(r.key);
-      TILES[r.key] = r.tiles;
-      RIGS[r.key] = { src: mu("hero_" + r.key + ".mp4"), poster: mu("hero_" + r.key + ".jpg"), sensors: r.sensors, window: r.window,
-                      rms: r.rms, td: r.td, xlabel: r.xlabel, xval: r.xval, corners: r.corners, caption: r.caption,
-                      cycle: r.live_cycle, duration: r.duration };
-    });
     function mu(f) { return "/media/hero/" + f + "?v=" + (V[f] || "0"); }
-    var LIVE_CYCLE = RIG_DATA[0].live_cycle || 5.0;
-    var current = ORDER[0];
+    var RIGS = {}, ORDER = [];
+    RIG_DATA.forEach(function (r) { ORDER.push(r.key); RIGS[r.key] = r; });
     var hero = document.querySelector(".mh");
     if (!hero) return;
-    var video = document.getElementById("mhVideo");
-    var readout = document.getElementById("mhReadout");
-    var caption = document.getElementById("mhCaption");
-    var toggle = document.getElementById("mhPlay");
-    var tilesEl = document.getElementById("mhTiles");
+    var video = document.getElementById("mhVideo"), live = document.getElementById("mhLive");
+    var frame = document.getElementById("mhFrame"), videoBox = hero.querySelector(".mh-video");
+    var tilesEl = document.getElementById("mhTiles"), stripEl = document.getElementById("mhStrip"), more = document.getElementById("mhMore");
+    var textEl = hero.querySelector(".mh-text"), barEl = hero.querySelector(".mh-bar");
+    var toggle = document.getElementById("mhPlay"), bigPlay = document.getElementById("mhBigPlay");
     var chips = hero.querySelectorAll(".mh-chip");
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var tileVids = [];
+    var conn = navigator.connection || {};
+    var lean = !!conn.saveData || /(^|-)2g$/.test(conn.effectiveType || "");
+    var current = ORDER[0], layout = null, userPaused = false, onScreen = true, preloaded = {};
+    var LIVE_CYCLE = RIG_DATA[0].live_cycle || 5, POSTER_FRACTION = 0.6, LOOP_S = RIG_DATA[0].duration || 15;
+    var sync = [];                 // videos that follow the hero clock: {v, k}; k = camera index, -1 = live track
 
-    function safePlay(v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-    function play() { safePlay(video); tileVids.forEach(function (v) { v.currentTime = video.currentTime; safePlay(v); }); }
+    function isWide() { return window.innerWidth >= 1100; }
+    function heroSrc(key) { return (isWide() && !lean) ? mu("hero_" + key + ".mp4") : mu("hero_" + key + "_960.mp4"); }
+    function heroPoster(key) { return isWide() ? mu("hero_" + key + ".jpg") : mu("hero_" + key + "_960.jpg"); }
+    function safePlay(v) { var p = v.play(); return (p && p.catch) ? p : Promise.resolve(); }
     function setToggle() { toggle.textContent = video.paused ? "Play" : "Pause"; }
 
-    function buildTiles(key) {
-      var cams = TILES[key];
-      tilesEl.innerHTML = ""; tileVids = [];
-      hero.style.setProperty("--mh-cols", cams.length >= 4 ? 2 : 1);
-      cams.forEach(function (c) {
-        var li = document.createElement("li");
-        var fig = document.createElement("figure"); fig.className = "mh-tile"; fig.style.setProperty("--cam", c[3]);
-        var cap = document.createElement("figcaption");
-        cap.innerHTML = "<i></i><b>" + c[0] + "</b><span>" + c[1] + (c[2] === "rolling" ? " · RS" : "") + "</span><em>in 3-D</em>";
-        var v = document.createElement("video");
-        v.muted = true; v.loop = false; v.playsInline = true; v.preload = "auto";
-        v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true");
-        v.width = c[4]; v.height = c[5];
-        v.poster = mu(key + "_" + c[0] + ".jpg");
-        v.src = mu(key + "_" + c[0] + ".mp4");
-        fig.appendChild(cap); fig.appendChild(v); li.appendChild(fig); tilesEl.appendChild(li);
-        tileVids.push(v);
+    function makeTile(key, c, small) {
+      var li = document.createElement("li");
+      var fig = document.createElement("figure"); fig.className = "mh-tile"; fig.style.setProperty("--cam", c[3]);
+      var cap = document.createElement("figcaption");
+      cap.innerHTML = "<i></i><b>" + c[0] + "</b>" + (small ? "" : "<span>" + c[1] + (c[2] === "rolling" ? " · RS" : "") + "</span><em>in 3-D</em>");
+      var v = document.createElement("video");
+      v.muted = true; v.playsInline = true; v.preload = "metadata";
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true");
+      v.width = c[4]; v.height = c[5];
+      var base = key + "_" + c[0] + (small ? "_240" : "");
+      v.poster = mu(base + ".jpg"); v.src = mu(base + ".mp4");
+      fig.appendChild(cap); fig.appendChild(v); li.appendChild(fig);
+      return { li: li, v: v };
+    }
+
+    function buildCompanions(key) {
+      sync = [];
+      tilesEl.innerHTML = ""; stripEl.innerHTML = "";
+      var cams = RIGS[key].tiles;
+      if (isWide()) {
+        cams.forEach(function (c, k) { var t = makeTile(key, c, false); tilesEl.appendChild(t.li); sync.push({ v: t.v, k: k }); });
+        if (live.getAttribute("src")) { live.removeAttribute("src"); live.load(); }
+      } else {
+        live.poster = mu(key + "_live.jpg"); live.src = mu(key + "_live.mp4"); sync.push({ v: live, k: -1 });
+        if (more.open) cams.forEach(function (c, k) { var t = makeTile(key, c, true); stripEl.appendChild(t.li); sync.push({ v: t.v, k: k }); });
+      }
+      fit();
+    }
+
+    function applyReadout(key) {
+      var r = RIGS[key];
+      hero.querySelectorAll("[data-k]").forEach(function (el) {
+        var val = el.dataset.k === "caption" ? r.caption : r[el.dataset.k];
+        if (val != null) el.innerHTML = val;
       });
     }
 
-    // Before playback starts (or with reduced motion) the hero and tiles show their posters,
-    // which are rendered at 60 % of the loop; outline the camera shown at that moment.
-    var POSTER_FRACTION = 0.6, LOOP_S = 15;
+    function play() {
+      bigPlay.hidden = true;
+      safePlay(video).then(function () {
+        sync.forEach(function (s) { try { s.v.currentTime = video.currentTime; } catch (e) {} safePlay(s.v).catch(function () {}); });
+      }).catch(function () { if (!userPaused) bigPlay.hidden = false; });   // autoplay refused (e.g. iOS Low Power Mode)
+      setToggle();
+    }
+    function pause() { video.pause(); setToggle(); }
+
+    function select(key, autoplay) {
+      if (!RIGS[key]) return;
+      current = key;
+      chips.forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.rig === key ? "true" : "false"); });
+      var wasPlaying = !video.paused;
+      video.poster = heroPoster(key); video.src = heroSrc(key);
+      buildCompanions(key);
+      if (wasPlaying || autoplay) play();
+      var ro = hero.querySelectorAll(".mh-ro");
+      if (reduce) applyReadout(key);
+      else { ro.forEach(function (d) { d.classList.add("swap"); }); setTimeout(function () { applyReadout(key); ro.forEach(function (d) { d.classList.remove("swap"); }); }, 220); }
+    }
+
+    // keep companions on the hero clock and outline the camera shown in 3-D
     function tick() {
-      var d = video.duration || LOOP_S, n = tileVids.length;
+      var d = video.duration || LOOP_S;
       var atPoster = video.paused && !(video.currentTime > 0);
       var t = atPoster ? POSTER_FRACTION * d : (video.currentTime || 0);
-      tileVids.forEach(function (v, k) {
-        if (!video.paused && v.paused) safePlay(v);
+      var n = RIGS[current].tiles.length, liveK = Math.floor(t / LIVE_CYCLE) % n;
+      sync.forEach(function (s) {
+        var v = s.v;
+        if (!video.paused && v.paused && !v.ended) safePlay(v).catch(function () {});
         if (video.paused && !v.paused) v.pause();
         var dt = Math.abs((v.currentTime || 0) - t);
         if (!atPoster && !video.ended && dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
-        v.parentNode.classList.toggle("live", n > 0 && k === Math.floor(t / LIVE_CYCLE) % n);
+        if (s.k >= 0) { var tile = v.closest(".mh-tile"); if (tile) tile.classList.toggle("live", s.k === liveK); }
       });
-      if (!video.paused && video.currentTime > 0.6 * d) preloadNext(current);
+      if (!video.paused && video.currentTime > 0.6 * d) preloadNext();
       requestAnimationFrame(tick);
     }
 
-    // Warm the cache for the next recording only when the current one is 60 % through and
-    // still playing, so a visitor downloads at most the recording on screen plus the next one.
-    var preloaded = {};
-    function preloadNext(key) {
-      var nk = ORDER[(ORDER.indexOf(key) + 1) % ORDER.length];
-      if (preloaded[nk] || nk === key) return;
-      preloaded[nk] = true;
-      [RIGS[nk].src].concat(TILES[nk].map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); })).forEach(function (src) {
-        var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src;
-      });
+    // warm the next recording once the current one is 60 % through
+    function preloadNext() {
+      var nk = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
+      if (preloaded[nk] || nk === current) return; preloaded[nk] = true;
+      var srcs = [heroSrc(nk)].concat(isWide() ? RIGS[nk].tiles.map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); }) : [mu(nk + "_live.mp4")]);
+      srcs.forEach(function (src) { var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src; });
     }
 
-    function select(key, autoplay) {
-      var r = RIGS[key]; if (!r) return;
-      current = key;
-      chips.forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.rig === key ? "true" : "false"); });
-      var wasPaused = video.paused;
-      video.poster = r.poster; video.src = r.src;
-      buildTiles(key);
-      if (!wasPaused || autoplay) play();
-      var apply = function () {
-        readout.querySelectorAll("[data-k]").forEach(function (el) { if (r[el.dataset.k] != null) el.innerHTML = r[el.dataset.k]; });
-        caption.textContent = r.caption; readout.classList.remove("swap"); setToggle();
-      };
-      if (reduce) apply(); else { readout.classList.add("swap"); setTimeout(apply, 220); }
+    // wide layout: tile column width from the available height; the loop fills the free area right of the text
+    function fit() {
+      if (!isWide()) { videoBox.style.cssText = ""; tilesEl.style.cssText = ""; return; }
+      var cams = RIGS[current].tiles, cols = cams.length >= 4 ? 2 : 1, rows = Math.ceil(cams.length / cols);
+      var H = hero.clientHeight, barH = barEl.offsetHeight, pad = 24;
+      var avail = H - barH - 2 * pad, aspectSum = 0;
+      for (var r = 0; r < rows; r++) { var m = 0; for (var c = 0; c < cols; c++) { var cam = cams[r * cols + c]; if (cam) m = Math.max(m, cam[5] / cam[4]); } aspectSum += m; }
+      var colW = (avail - rows * 24 - (rows - 1) * 10) / aspectSum;
+      colW = Math.max(110, Math.min(colW, 240, (window.innerWidth * 0.24 - (cols - 1) * 10) / cols));
+      tilesEl.style.gridTemplateColumns = "repeat(" + cols + ", " + Math.floor(colW) + "px)";
+      var hb = hero.getBoundingClientRect(), tb = textEl.getBoundingClientRect(), lb = tilesEl.getBoundingClientRect();
+      var right = (lb.width ? lb.left : hb.right - 40) - hb.left - 24;
+      var minLeft = tb.left - hb.left + tb.width * 0.55;
+      var h = H - barH - 2 * pad, w = h * 16 / 9;
+      if (right - w < minLeft) { w = right - minLeft; h = w * 9 / 16; }
+      var left = right - w, top = (H - barH - h) / 2;
+      videoBox.style.cssText = "left:" + Math.round(left) + "px;top:" + Math.round(top) + "px;width:" + Math.round(w) + "px;height:" + Math.round(h) + "px;right:auto;bottom:auto";
+    }
+
+    function onLayoutChange() {
+      var l = isWide() ? "wide" : "narrow";
+      if (l === layout) { fit(); return; }
+      layout = l;
+      var wasPlaying = !video.paused, t = video.currentTime || 0;
+      video.poster = heroPoster(current);
+      var src = heroSrc(current);
+      if (video.getAttribute("src") !== src) {
+        video.src = src;
+        if (t > 0) video.addEventListener("loadedmetadata", function once() { video.removeEventListener("loadedmetadata", once); try { video.currentTime = t; } catch (e) {} });
+      }
+      buildCompanions(current);
+      if (wasPlaying) play();
     }
 
     chips.forEach(function (c) { c.addEventListener("click", function () { select(c.dataset.rig); }); });
-    toggle.addEventListener("click", function () { if (video.paused) play(); else video.pause(); });
-    // one pass of a recording, then the next one
+    toggle.addEventListener("click", function () { if (video.paused) { userPaused = false; play(); } else { userPaused = true; pause(); } });
+    bigPlay.addEventListener("click", function (e) { e.stopPropagation(); userPaused = false; play(); });
+    frame.addEventListener("click", function () { if (video.paused) { userPaused = false; play(); } else { userPaused = true; pause(); } });
     video.addEventListener("ended", function () { select(ORDER[(ORDER.indexOf(current) + 1) % ORDER.length], true); });
     video.addEventListener("play", setToggle); video.addEventListener("pause", setToggle);
+    more.addEventListener("toggle", function () { if (!isWide()) { buildCompanions(current); if (!video.paused) play(); } });
 
-    // Data saver / very slow connections: show the posters, play only on request.
-    var conn = navigator.connection || {};
-    var lean = !!conn.saveData || /(^|-)2g$/.test(conn.effectiveType || "");
-    var userPaused = false;
-    toggle.addEventListener("click", function () { userPaused = video.paused; });   // runs after the play/pause handler
-
-    // Stop playing (and downloading the next recordings) while the hero is off screen or the tab is hidden.
-    var onScreen = true;
     function autoResume() { if (onScreen && !document.hidden && !userPaused && !reduce && !lean && video.paused && !video.ended) play(); }
     if ("IntersectionObserver" in window) {
-      new IntersectionObserver(function (es) {
-        onScreen = es[0].isIntersecting;
-        if (!onScreen && !video.paused) video.pause(); else autoResume();
-      }, { threshold: 0.15 }).observe(hero);
+      new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; if (!onScreen && !video.paused) video.pause(); else autoResume(); }, { threshold: 0.15 }).observe(hero);
     }
     document.addEventListener("visibilitychange", function () { if (document.hidden) { if (!video.paused) video.pause(); } else autoResume(); });
+    var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(onLayoutChange, 120); });
 
-    buildTiles(current);
-    if (!reduce && !lean) play();
-    setToggle();
+    onLayoutChange();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    if (!reduce && !lean) play(); else { setToggle(); if (lean) bigPlay.hidden = false; }
     requestAnimationFrame(tick);
   })();
 </script>

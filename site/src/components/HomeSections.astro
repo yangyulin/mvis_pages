@@ -187,6 +187,14 @@
   @media (max-width: 860px) {
     .mhs-split, .mhs-cites { grid-template-columns: minmax(0, 1fr); }
   }
+  @media (max-width: 640px) {
+    .mhs-band { padding-block: 40px; }
+    .mhs-term { font-size: 13px; }
+    .mhs-cites .mhs-term { white-space: pre-wrap; word-break: break-word; }
+    .mhs-state { position: relative; }
+    .mhs-state::after { content: "scroll →"; position: sticky; left: 100%; display: block; width: max-content; margin-top: 6px;
+                        font: 500 11px/1 var(--mhs-mono); color: var(--sl-color-gray-3); }
+  }
   @media (max-width: 520px) {
     .mhs-models { grid-template-columns: minmax(0, 1fr); }
     .mhs-fig, .mhs-facts div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
