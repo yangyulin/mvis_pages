@@ -1,0 +1,260 @@
+{
+ "rigs": [
+  {
+   "key": "virig3",
+   "chip": "VI-Rig · 3 cam",
+   "caption": "Recovered by MVIS from virig_4imus_3cams / april_01.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "Blackfly",
+     "global",
+     "#ffc850",
+     400,
+     300
+    ],
+    [
+     "cam1",
+     "T265 fisheye1",
+     "global",
+     "#a0ffa0",
+     400,
+     376
+    ],
+    [
+     "cam2",
+     "T265 fisheye2",
+     "global",
+     "#5aaaff",
+     400,
+     376
+    ]
+   ],
+   "sensors": "3 cam · 4 IMU",
+   "window": "80.0 <small>s</small>",
+   "rms": "0.82 <small>px</small>",
+   "td": "−2.77 <small>ms</small>",
+   "corners": "93–119",
+   "xlabel": "Kalibr baseline",
+   "xval": "Δp 2.6 <small>mm</small>"
+  },
+  {
+   "key": "looper",
+   "chip": "Looper Insight-9",
+   "caption": "Recovered by MVIS from Looper Robotics Insight-9 / bag1, including one rolling-shutter camera.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "Insight-9 cam0",
+     "global",
+     "#ffc850",
+     400,
+     470
+    ],
+    [
+     "cam1",
+     "Insight-9 cam1",
+     "global",
+     "#a0ffa0",
+     400,
+     470
+    ],
+    [
+     "cam2",
+     "Insight-9 cam2",
+     "rolling",
+     "#5aaaff",
+     400,
+     226
+    ]
+   ],
+   "sensors": "3 cam · 1 IMU",
+   "window": "66.4 <small>s</small>",
+   "rms": "0.60 <small>px</small>",
+   "td": "+1.22 <small>ms</small>",
+   "corners": "60–116",
+   "xlabel": "RS readout",
+   "xval": "31.6 <small>ms</small>"
+  },
+  {
+   "key": "virig4",
+   "chip": "VI-Rig · 4 cam",
+   "caption": "Recovered by MVIS from mvis_4imus_4cams / bag01: two T265 fisheyes and a rolling-shutter ELP stereo pair.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "T265 fisheye1",
+     "global",
+     "#ffc850",
+     400,
+     376
+    ],
+    [
+     "cam1",
+     "T265 fisheye2",
+     "global",
+     "#a0ffa0",
+     400,
+     376
+    ],
+    [
+     "cam2",
+     "ELP left",
+     "rolling",
+     "#5aaaff",
+     400,
+     300
+    ],
+    [
+     "cam3",
+     "ELP right",
+     "rolling",
+     "#ff8cc8",
+     400,
+     300
+    ]
+   ],
+   "sensors": "4 cam · 4 IMU",
+   "window": "80.0 <small>s</small>",
+   "rms": "1.00 <small>px</small>",
+   "td": "−6.00 <small>ms</small>",
+   "corners": "75–118",
+   "xlabel": "ELP time offset",
+   "xval": "−124.4 <small>ms</small>"
+  },
+  {
+   "key": "mic",
+   "chip": "Valve Index · MIC",
+   "caption": "Recovered by MVIS from the Monado MIC calibration set (Valve Index, MIC05).",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "Index left",
+     "global",
+     "#ffc850",
+     400,
+     400
+    ],
+    [
+     "cam1",
+     "Index right",
+     "global",
+     "#a0ffa0",
+     400,
+     400
+    ]
+   ],
+   "sensors": "2 cam · 1 IMU",
+   "window": "71.6 <small>s</small>",
+   "rms": "0.48 <small>px</small>",
+   "td": "−2.20 <small>ms</small>",
+   "corners": "107–125",
+   "xlabel": "cam0–cam1 baseline",
+   "xval": "133.8 <small>mm</small>"
+  },
+  {
+   "key": "moc",
+   "chip": "Odyssey+ · MOC",
+   "caption": "Recovered by MVIS from the Monado MOC calibration set (Samsung Odyssey+, MOC02).",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "Odyssey+ left",
+     "global",
+     "#ffc850",
+     400,
+     300
+    ],
+    [
+     "cam1",
+     "Odyssey+ right",
+     "global",
+     "#a0ffa0",
+     400,
+     300
+    ]
+   ],
+   "sensors": "2 cam · 1 IMU",
+   "window": "43.8 <small>s</small>",
+   "rms": "2.46 <small>px</small>",
+   "td": "−0.87 <small>ms</small>",
+   "corners": "39–48",
+   "xlabel": "cam0–cam1 baseline",
+   "xval": "105.6 <small>mm</small>"
+  },
+  {
+   "key": "mgc",
+   "chip": "Reverb G2 · MGC",
+   "caption": "Recovered by MVIS from the Monado MGC calibration set (HP Reverb G2, MGC04, front camera pair).",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "Reverb G2 cam0",
+     "global",
+     "#ffc850",
+     400,
+     300
+    ],
+    [
+     "cam1",
+     "Reverb G2 cam1",
+     "global",
+     "#a0ffa0",
+     400,
+     300
+    ]
+   ],
+   "sensors": "2 cam · 1 IMU",
+   "window": "41.6 <small>s</small>",
+   "rms": "0.76 <small>px</small>",
+   "td": "−1.72 <small>ms</small>",
+   "corners": "87–95",
+   "xlabel": "cam0–cam1 baseline",
+   "xval": "108.4 <small>mm</small>"
+  },
+  {
+   "key": "tumvi",
+   "chip": "TUM-VI raw",
+   "caption": "Recovered by MVIS from TUM-VI raw calib-imu1.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "TUM-VI cam0",
+     "global",
+     "#ffc850",
+     400,
+     400
+    ],
+    [
+     "cam1",
+     "TUM-VI cam1",
+     "global",
+     "#a0ffa0",
+     400,
+     400
+    ]
+   ],
+   "sensors": "2 cam · 1 IMU",
+   "window": "48.9 <small>s</small>",
+   "rms": "0.68 <small>px</small>",
+   "td": "+0.18 <small>ms</small>",
+   "corners": "144–144",
+   "xlabel": "cam0–cam1 baseline",
+   "xval": "101.0 <small>mm</small>"
+  }
+ ]
+}

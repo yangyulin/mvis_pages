@@ -2,7 +2,7 @@
 // Homepage hero (overrides Starlight's Hero, which only renders on pages with a
 // `hero` frontmatter block — i.e. the landing page).
 //
-// A 15 s real-time pass of each of three MVIS calibrations, cycled (rig flying its recovered trajectory,
+// A 15 s real-time pass of each MVIS calibration listed in rigs.json, cycled (rig flying its recovered trajectory,
 // frustums, board corners in the colour of the camera shown in 3-D), one synced
 // detection tile per camera, and a readout of values MVIS recovered from that
 // recording. Media: public/media/hero/ — rendered by openmvis-internal
@@ -21,6 +21,13 @@ for (const f of readdirSync(MEDIA_DIR)) {
   V[f] = createHash('sha1').update(readFileSync(MEDIA_DIR + f)).digest('hex').slice(0, 10);
 }
 const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
+
+// rigs.json is written by openmvis-internal demo_video/build_site_media.py: cycle order,
+// chip labels, captions, readout values and per-camera tiles for every recording.
+const { rigs } = JSON.parse(readFileSync(MEDIA_DIR + 'rigs.json', 'utf8'));
+const first = rigs[0];
+const countWords = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} recordings`;
 ---
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -28,8 +35,8 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
 <section class="mh" aria-label="Open MVIS">
-  <video class="mh-video" id="mhVideo" muted playsinline preload="auto" poster={u('hero_virig_3cams.jpg')} aria-hidden="true">
-    <source src={u('hero_virig_3cams.mp4')} type="video/mp4" />
+  <video class="mh-video" id="mhVideo" muted playsinline preload="auto" poster={u(`hero_${first.key}.jpg`)} aria-hidden="true">
+    <source src={u(`hero_${first.key}.mp4`)} type="video/mp4" />
   </video>
 
   <div class="mh-stage">
@@ -50,23 +57,23 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
 
   <div class="mh-readout">
     <div class="mh-rigs">
-      <span class="mh-label" id="mhRigsLabel">Cycling through three recordings</span>
+      <span class="mh-label" id="mhRigsLabel">{cycleLabel}</span>
       <div class="mh-chips" role="group" aria-labelledby="mhRigsLabel">
-        <button class="mh-chip" id="mh-rig-virig3" type="button" data-rig="virig3" aria-pressed="true">VI-Rig · 3 cam</button>
-        <button class="mh-chip" id="mh-rig-looper" type="button" data-rig="looper" aria-pressed="false">Looper Insight-9</button>
-        <button class="mh-chip" id="mh-rig-virig4" type="button" data-rig="virig4" aria-pressed="false">VI-Rig · 4 cam</button>
+        {rigs.map((r, i) => (
+          <button class="mh-chip" id={`mh-rig-${r.key}`} type="button" data-rig={r.key} aria-pressed={i === 0 ? 'true' : 'false'}>{r.chip}</button>
+        ))}
       </div>
     </div>
     <dl class="mh-ro" id="mhReadout" aria-live="polite">
-      <div><dt>Sensors</dt><dd data-k="sensors">3 cam · 4 IMU</dd></div>
-      <div><dt>Window</dt><dd data-k="window">80.0 <small>s</small></dd></div>
-      <div><dt>Reproj RMS</dt><dd data-k="rms">0.70 <small>px</small></dd></div>
-      <div><dt>Base cam offset</dt><dd data-k="td">−2.77 <small>ms</small></dd></div>
-      <div><dt data-k="xlabel">Kalibr baseline</dt><dd data-k="xval">Δp 2.6 <small>mm</small></dd></div>
-      <div><dt>Corners / frame</dt><dd data-k="corners">84–124</dd></div>
+      <div><dt>Sensors</dt><dd data-k="sensors" set:html={first.sensors} /></div>
+      <div><dt>Window</dt><dd data-k="window" set:html={first.window} /></div>
+      <div><dt>Reproj median</dt><dd data-k="rms" set:html={first.rms} /></div>
+      <div><dt>Base cam offset</dt><dd data-k="td" set:html={first.td} /></div>
+      <div><dt data-k="xlabel" set:html={first.xlabel} /><dd data-k="xval" set:html={first.xval} /></div>
+      <div><dt>Corners / frame</dt><dd data-k="corners" set:html={first.corners} /></div>
     </dl>
     <p class="mh-note">
-      <span id="mhCaption">Recovered by MVIS from virig_4imus_3cams / april_01.</span>
+      <span id="mhCaption">{first.caption}</span>
       <span class="mh-legend">Each camera has its own colour. The outlined tile is the camera shown in 3-D, and the board corners it detects take that colour. In the tiles, coloured circles are detections and white crosses are reprojections.</span>
       <button class="mh-play" id="mhPlay" type="button" aria-controls="mhVideo">Pause</button>
     </p>
@@ -166,7 +173,7 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
     padding: 16px var(--mh-gutter) 18px;
     display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 18px 40px; align-items: end;
   }
-  .mh-rigs { display: grid; gap: 10px; }
+  .mh-rigs { display: grid; gap: 10px; max-width: 36rem; }
   .mh-label, .mh-ro dt { font: 500 10.5px/1 var(--mh-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--mh-dim); }
   .mh-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .mh-chip { font-size: 13px; font-weight: 500; line-height: 1; color: var(--mh-dim); background: transparent; border: 1px solid var(--mh-rule); border-radius: 999px; padding: 8px 13px; cursor: pointer; }
@@ -206,31 +213,19 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
   }
 </style>
 
-<script is:inline define:vars={{ V }}>
+<script is:inline define:vars={{ V, RIG_DATA: rigs }}>
   (function () {
-    var RIGS = {
-      virig3: { src: mu("hero_virig_3cams.mp4"), poster: mu("hero_virig_3cams.jpg"),
-        sensors: "3 cam · 4 IMU", window: "80.0 <small>s</small>", rms: "0.70 <small>px</small>", td: "−2.77 <small>ms</small>",
-        xlabel: "Kalibr baseline", xval: "Δp 2.6 <small>mm</small>", corners: "84–124",
-        caption: "Recovered by MVIS from virig_4imus_3cams / april_01." },
-      looper: { src: mu("hero_looper.mp4"), poster: mu("hero_looper.jpg"),
-        sensors: "3 cam · 1 IMU", window: "66.4 <small>s</small>", rms: "0.68 <small>px</small>", td: "+1.22 <small>ms</small>",
-        xlabel: "RS readout", xval: "31.6 <small>ms</small>", corners: "60–116",
-        caption: "Recovered by MVIS from Looper Robotics Insight-9 / bag1, including one rolling-shutter camera." },
-      virig4: { src: mu("hero_virig_4cams.mp4"), poster: mu("hero_virig_4cams.jpg"),
-        sensors: "4 cam · 4 IMU", window: "80.0 <small>s</small>", rms: "2.26 <small>px</small>", td: "−6.00 <small>ms</small>",
-        xlabel: "ELP time offset", xval: "−124.4 <small>ms</small>", corners: "75–118",
-        caption: "Recovered by MVIS from mvis_4imus_4cams / bag01: two T265 fisheyes and a rolling-shutter ELP stereo pair." }
-    };
-    var TILES = {
-      virig3: [["cam0","Blackfly","global","#ffc850",640,480],["cam1","T265 fisheye1","global","#a0ffa0",640,604],["cam2","T265 fisheye2","global","#5aaaff",640,604]],
-      looper: [["cam0","Insight-9 cam0","global","#ffc850",640,752],["cam1","Insight-9 cam1","global","#a0ffa0",640,752],["cam2","Insight-9 cam2","rolling","#5aaaff",640,362]],
-      virig4: [["cam0","T265 fisheye1","global","#ffc850",640,604],["cam1","T265 fisheye2","global","#a0ffa0",640,604],["cam2","ELP left","rolling","#5aaaff",640,480],["cam3","ELP right","rolling","#ff8cc8",640,480]]
-    };
+    var RIGS = {}, TILES = {}, ORDER = [];
+    RIG_DATA.forEach(function (r) {
+      ORDER.push(r.key);
+      TILES[r.key] = r.tiles;
+      RIGS[r.key] = { src: mu("hero_" + r.key + ".mp4"), poster: mu("hero_" + r.key + ".jpg"), sensors: r.sensors, window: r.window,
+                      rms: r.rms, td: r.td, xlabel: r.xlabel, xval: r.xval, corners: r.corners, caption: r.caption,
+                      cycle: r.live_cycle, duration: r.duration };
+    });
     function mu(f) { return "/media/hero/" + f + "?v=" + (V[f] || "0"); }
-    var LIVE_CYCLE = 5.0;
-    var ORDER = ["virig3", "looper", "virig4"];
-    var current = "virig3";
+    var LIVE_CYCLE = RIG_DATA[0].live_cycle || 5.0;
+    var current = ORDER[0];
     var hero = document.querySelector(".mh");
     if (!hero) return;
     var video = document.getElementById("mhVideo");
@@ -280,12 +275,17 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
         if (!atPoster && !video.ended && dt > 0.12 && dt < d - 0.3 && v.readyState >= 2) v.currentTime = t;
         v.parentNode.classList.toggle("live", n > 0 && k === Math.floor(t / LIVE_CYCLE) % n);
       });
+      if (!video.paused && video.currentTime > 0.6 * d) preloadNext(current);
       requestAnimationFrame(tick);
     }
 
-    // warm the browser cache for the next recording so the hand-over has no stall
+    // Warm the cache for the next recording only when the current one is 60 % through and
+    // still playing, so a visitor downloads at most the recording on screen plus the next one.
+    var preloaded = {};
     function preloadNext(key) {
       var nk = ORDER[(ORDER.indexOf(key) + 1) % ORDER.length];
+      if (preloaded[nk] || nk === key) return;
+      preloaded[nk] = true;
       [RIGS[nk].src].concat(TILES[nk].map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); })).forEach(function (src) {
         var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src;
       });
@@ -299,7 +299,6 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
       video.poster = r.poster; video.src = r.src;
       buildTiles(key);
       if (!wasPaused || autoplay) play();
-      preloadNext(key);
       var apply = function () {
         readout.querySelectorAll("[data-k]").forEach(function (el) { if (r[el.dataset.k] != null) el.innerHTML = r[el.dataset.k]; });
         caption.textContent = r.caption; readout.classList.remove("swap"); setToggle();
@@ -313,9 +312,25 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
     video.addEventListener("ended", function () { select(ORDER[(ORDER.indexOf(current) + 1) % ORDER.length], true); });
     video.addEventListener("play", setToggle); video.addEventListener("pause", setToggle);
 
-    buildTiles("virig3");
-    preloadNext("virig3");
-    if (!reduce) play();
+    // Data saver / very slow connections: show the posters, play only on request.
+    var conn = navigator.connection || {};
+    var lean = !!conn.saveData || /(^|-)2g$/.test(conn.effectiveType || "");
+    var userPaused = false;
+    toggle.addEventListener("click", function () { userPaused = video.paused; });   // runs after the play/pause handler
+
+    // Stop playing (and downloading the next recordings) while the hero is off screen or the tab is hidden.
+    var onScreen = true;
+    function autoResume() { if (onScreen && !document.hidden && !userPaused && !reduce && !lean && video.paused && !video.ended) play(); }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        onScreen = es[0].isIntersecting;
+        if (!onScreen && !video.paused) video.pause(); else autoResume();
+      }, { threshold: 0.15 }).observe(hero);
+    }
+    document.addEventListener("visibilitychange", function () { if (document.hidden) { if (!video.paused) video.pause(); } else autoResume(); });
+
+    buildTiles(current);
+    if (!reduce && !lean) play();
     setToggle();
     requestAnimationFrame(tick);
   })();
