@@ -76,13 +76,13 @@ const RIG_DATA = [{"key":"virig3","chip":"VI-Rig · 3 cam","caption":"Recovered 
       v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("aria-hidden", "true");
       v.width = c[4]; v.height = c[5];
       var base = key + "_" + c[0] + (small ? "_240" : "");
-      v.poster = mu(base + ".jpg"); v.src = mu(base + ".mp4");
+      v.poster = mu(base + ".jpg"); v.src = mu(base + ".mp4"); v.dataset.src = mu(base + ".mp4"); v.dataset.cam = c[0];
       fig.appendChild(cap); fig.appendChild(v); li.appendChild(fig);
       return { li: li, v: v };
     }
 
     function addCompanion(v, k) {
-      var s = { v: v, k: k, lat: 0.15, lastSeek: 0, seekStart: 0 };
+      var s = { v: v, k: k, lat: 0.15, lastSeek: 0, seekStart: 0, lastT: -1, lastAdvance: performance.now(), lastRecover: 0, recoveries: 0 };
       // measure how long a seek really takes on this device, so the next one can aim ahead
       v.addEventListener("seeked", function () {
         if (s.seekStart) { s.lat = Math.min(1.5, 0.5 * s.lat + 0.5 * (performance.now() - s.seekStart) / 1000); s.seekStart = 0; }
@@ -138,7 +138,23 @@ const RIG_DATA = [{"key":"virig3","chip":"VI-Rig · 3 cam","caption":"Recovered 
     //  - never start a seek while one is running (a new seek cancels the old one: that was the freeze)
     //  - drift under 0.5 s: nudge playbackRate instead of seeking
     //  - larger drift: one seek aimed ahead by the measured seek latency, at most once per second
-    var SEEK_DRIFT = 0.5, SEEK_COOLDOWN = 1000;
+    var SEEK_DRIFT = 0.5, SEEK_COOLDOWN = 1000, STALL_MS = 1500, RECOVER_GAP_MS = 3000, MAX_RECOVERIES = 6;
+
+    // Watchdog: a companion that stops advancing while the hero plays (stalled network request, stuck seek,
+    // decoder error) is reloaded from a fresh URL and put back on the hero clock. Browsers differ in why a
+    // single video element stalls; this recovers from all of them instead of guessing the cause.
+    function recover(s, why) {
+      var v = s.v, now = performance.now();
+      s.recoveries++; s.lastRecover = now; s.lastAdvance = now; s.seekStart = 0; s.lastSeek = now;
+      if (window.console) console.info("[openmvis hero] reloading " + (v.dataset.cam || "video") + " (" + why + ", attempt " + s.recoveries + ")");
+      v.pause();
+      v.src = v.dataset.src + "&r=" + s.recoveries;          // fresh cache entry: sidesteps a locked or broken one
+      v.load();
+      v.addEventListener("loadedmetadata", function () {
+        try { v.currentTime = Math.min((video.duration || LOOP_S) - 0.05, (video.currentTime || 0) + s.lat); } catch (e) {}
+        if (!video.paused) safePlay(v).catch(function () {});
+      }, { once: true });
+    }
     function tick() {
       var d = video.duration || LOOP_S, now = performance.now();
       var atPoster = video.paused && !(video.currentTime > 0);
@@ -147,6 +163,11 @@ const RIG_DATA = [{"key":"virig3","chip":"VI-Rig · 3 cam","caption":"Recovered 
       var heroHeld = video.paused || video.readyState < 3;     // paused, or buffering: companions wait for the hero
       sync.forEach(function (s) {
         var v = s.v;
+        if (heroHeld || atPoster) { s.lastAdvance = now; s.lastT = v.currentTime; }
+        else if (v.currentTime > s.lastT + 0.01 || v.ended) { s.lastAdvance = now; s.lastT = v.currentTime; }
+        else if ((v.error || now - s.lastAdvance > STALL_MS) && now - s.lastRecover > RECOVER_GAP_MS && s.recoveries < MAX_RECOVERIES && t < (video.duration || LOOP_S) - 1) {
+          recover(s, v.error ? "error " + v.error.code : "stalled"); return;
+        }
         if (heroHeld) { if (!v.paused) v.pause(); }
         else if (v.paused && !v.ended && !v.seeking) safePlay(v).catch(function () {});
         if (!atPoster && !heroHeld && !video.ended && !v.seeking && v.readyState >= 2) {
@@ -171,7 +192,8 @@ const RIG_DATA = [{"key":"virig3","chip":"VI-Rig · 3 cam","caption":"Recovered 
       var nk = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
       if (preloaded[nk] || nk === current) return; preloaded[nk] = true;
       var srcs = [heroSrc(nk)].concat(isWide() ? RIGS[nk].tiles.map(function (c) { return mu(nk + "_" + c[0] + ".mp4"); }) : []);
-      srcs.forEach(function (src) { var p = document.createElement("video"); p.muted = true; p.preload = "auto"; p.src = src; });
+      // download into the HTTP cache (no hidden <video> players that could lock the same cache entries as the visible ones)
+      srcs.forEach(function (src) { if (window.fetch) fetch(src, { priority: "low" }).then(function (r) { return r.arrayBuffer(); }).catch(function () {}); });
     }
 
     // wide layout: tile column width from the available height; the loop fills the free area right of the text
@@ -229,6 +251,16 @@ const RIG_DATA = [{"key":"virig3","chip":"VI-Rig · 3 cam","caption":"Recovered 
     }
     document.addEventListener("visibilitychange", function () { if (document.hidden) { if (!video.paused) video.pause(); } else autoResume(); });
     var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(onLayoutChange, 120); });
+
+    if (/[?&]debug=1/.test(location.search)) {
+      var dbg = document.createElement("pre");
+      dbg.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:9999;margin:0;padding:8px 10px;background:rgba(0,0,0,.85);color:#9f9;font:11px/1.35 ui-monospace,monospace;border-radius:6px;pointer-events:none;max-width:96vw;white-space:pre";
+      document.body.appendChild(dbg);
+      setInterval(function () {
+        var f = function (v) { return (v.currentTime || 0).toFixed(2) + (v.paused ? " P" : " >") + (v.seeking ? " S" : "") + " rs" + v.readyState + " ns" + v.networkState + (v.error ? " E" + v.error.code : "") + " x" + v.playbackRate.toFixed(2); };
+        dbg.textContent = "rig " + current + "  hero " + f(video) + "\n" + sync.map(function (s) { return (s.v.dataset.cam || "?") + "  " + f(s.v) + "  lat " + s.lat.toFixed(2) + "  rec " + s.recoveries; }).join("\n");
+      }, 250);
+    }
 
     onLayoutChange();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
