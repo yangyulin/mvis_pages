@@ -74,9 +74,9 @@ everything above it:
 
 | Tier | Command | Rows | Runtime | Role |
 |---|---|---|---|---|
-| fast | `--level fast` | 9 | ~30 min | the gate — every change passes it |
-| mid | `--level mid` | 27 | ~1.5–2.5 h | routine deep check (3 recordings per family) |
-| full | `--level full` | 102 | ~6–10 h | every collection of every suite dataset |
+| fast | `--level fast` | 10 | ~35 min | the gate — every change passes it |
+| mid | `--level mid` | 30 | ~1.5–2.5 h | routine deep check (3 recordings per family) |
+| full | `--level full` | 106 | ~6–10 h | every collection of every suite dataset |
 
 ```bash
 python scripts/run_regression.py --mode all --level fast
@@ -84,9 +84,9 @@ python scripts/run_regression.py --only mvis_elp/imu_bag1      # one row
 python scripts/run_regression.py --only <row> --update-baseline # re-bless
 ```
 
-The 9 seed rows span the calibration space on four datasets: global- and
+The 10 seed rows span the calibration space on five datasets: global- and
 rolling-shutter, mono/stereo/3-camera, single-, two- and mixed-IMU
-configurations. The other 93 row configs are *generated* from the seeds
+configurations. The other 96 row configs are *generated* from the seeds
 (only the recording changes) and drift-guarded by a test that regenerates
 them, so solver settings cannot silently diverge across a family. The design
 story is on the [regression testing](/contribute/regression-testing/) page.
