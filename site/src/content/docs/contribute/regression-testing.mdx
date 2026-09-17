@@ -40,24 +40,25 @@ python scripts/run_regression.py --only mvis_elp/imu_bag1        # single row
 python scripts/run_regression.py --only <row> --update-baseline  # re-bless
 ```
 
-## What the 9 seed rows cover
+## The nine rows: T1–T9
 
 The fast tier is one **seed row per family**, chosen so the gate spans the
 calibration space on four datasets:
 
-| Family | Sensors | Coverage |
-|---|---|---|
-| TUM-VI raw stereo | 2 GS cams | global-shutter stereo intrinsics/extrinsics |
-| TUM-VI stereo + IMU | 2 GS + IMU | GS camera-IMU, time offsets |
-| Looper stereo / RS mono | 2 GS; 1 RS | synced-pair path; mono rolling shutter + readout |
-| Looper 3-cam + IMU | 2 GS + 1 RS + MEMS IMU | multi-camera IMU with mixed shutters |
-| ELP RS stereo | 2 RS cams | rolling-shutter stereo + readout |
-| ELP stereo + two IMUs | 2 RS + 2 IMUs | multi-IMU: aux extrinsics, inter-IMU time offset, per-IMU `t_ga` |
-| ELP mono + Microstrain | 1 RS + IMU | mono-RS camera-IMU |
-| Mixed-shutter + IMU | 1 GS + 1 RS + IMU | cross-shutter camera pair, GS-anchored time offsets |
+| Row | Mode | Recording (fast) | Sensors / coverage |
+|---|---|---|---|
+| T1 | cam | `tum_vi_raw/cam1` | GS stereo, equidistant |
+| T2 | cam | `looper_insight9/stereo01` | GS synced stereo pair |
+| T3 | cam | `looper_insight9/cam2_rs` | RS mono + readout estimation |
+| T4 | cam | `mvis_elp/stereo_rs` | RS stereo + readout |
+| T5 | cam-IMU | `tum_vi_raw/imu1` | GS stereo + IMU, time offsets |
+| T6 | cam-IMU | `mvis_elp/imu_bag1` | RS stereo + two IMUs: aux extrinsics, inter-IMU time offset, per-IMU `t_ga` |
+| T7 | cam-IMU | `mvis_elp_t265/imu_mixed` | mixed shutter (GS fisheye + RS) + IMU, GS-anchored time offsets |
+| T8 | cam-IMU | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
+| T9 | cam-IMU | `mvis_elp/imu_gx3_bag1` | RS mono + single IMU |
 
 The mid tier re-runs each family on **3 recordings**; the full tier on **every
-recording the dataset has** (e.g. all 15 bags of the multi-IMU rig, all 10
+recording the dataset has** (all 15 bags of the multi-IMU rig, all 10
 Looper recordings, all 12 TUM-VI calib bags).
 
 ## Generated row configs, drift-guarded
