@@ -255,6 +255,62 @@
    "corners": "144–144",
    "xlabel": "cam0–cam1 baseline",
    "xval": "101.0 <small>mm</small>"
+  },
+  {
+   "key": "uzhs",
+   "chip": "UZH-FPV · Snapdragon",
+   "caption": "Recovered by MVIS from the UZH-FPV drone racing calibration set: Snapdragon Flight stereo fisheye, outdoor_forward.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "Snapdragon left",
+     "global",
+     "#ffc850",
+     400,
+     300
+    ],
+    [
+     "cam1",
+     "Snapdragon right",
+     "global",
+     "#a0ffa0",
+     400,
+     300
+    ]
+   ],
+   "sensors": "2 cam · 1 IMU",
+   "window": "44.7 <small>s</small>",
+   "rms": "0.28 <small>px</small>",
+   "td": "−7.17 <small>ms</small>",
+   "corners": "77–78",
+   "xlabel": "cam0–cam1 baseline",
+   "xval": "79.4 <small>mm</small>"
+  },
+  {
+   "key": "uzhd",
+   "chip": "UZH-FPV · DAVIS",
+   "caption": "Recovered by MVIS from the UZH-FPV drone racing calibration set: the DAVIS event camera's frame output, outdoor_forward.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "DAVIS frames",
+     "global",
+     "#ffc850",
+     400,
+     300
+    ]
+   ],
+   "sensors": "1 cam · 1 IMU",
+   "window": "45.6 <small>s</small>",
+   "rms": "0.33 <small>px</small>",
+   "td": "+5.79 <small>ms</small>",
+   "corners": "73",
+   "xlabel": "Camera model",
+   "xval": "equidistant"
   }
  ]
 }
