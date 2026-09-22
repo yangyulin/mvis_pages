@@ -79,7 +79,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     </div>
     <dl class="mh-ro" aria-live="polite">
       <div><dt>Sensors</dt><dd data-k="sensors" set:html={first.sensors} /></div>
-      <div><dt>Reproj median</dt><dd data-k="rms" set:html={first.rms} /></div>
+      <div><dt>Reproj<span class="mh-lo"> median</span></dt><dd data-k="rms" set:html={first.rms} /></div>
       <div><dt>Window</dt><dd data-k="window" set:html={first.window} /></div>
       <div class="mh-x"><dt>Base cam offset</dt><dd data-k="td" set:html={first.td} /></div>
       <div class="mh-x"><dt data-k="xlabel" set:html={first.xlabel} /><dd data-k="xval" set:html={first.xval} /></div>
@@ -223,8 +223,18 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     .mh-links a:hover { color: var(--mh-sky); }
     .mh-bar { padding: 10px var(--mh-gutter) 4px; border-top: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; }
     .mh-chip { min-height: 40px; }
-    .mh-ro { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .mh-ro dd { font-size: 14px; }
+    /* three values in ~358 px: drop the long half of the label and tighten the columns,
+       otherwise "REPROJ MEDIAN" and "3 cam · 4 IMU" are cut off by their column */
+    .mh-ro { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; }
+    .mh-ro .mh-lo { display: none; }
+    .mh-ro dt { letter-spacing: 0.06em; gap: 5px; }
+    .mh-ro dd { font-size: 13.5px; margin-top: 5px; }
+    /* the Details readout carries the long labels ("cam0-cam1 baseline"): two columns on every phone */
+    .mh .mh-ro-more { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  /* small phones (<= 400 px): three columns cannot hold "3 cam · 4 IMU", so use two */
+  @media (max-width: 400px) {
+    .mh-ro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   /* ================= tablet ================= */
@@ -399,7 +409,9 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
       var b = chipBox.getBoundingClientRect(), c = chip.getBoundingClientRect();
       var pad = chipBox.classList.contains("at-end") ? 0 : 36;
       if (c.left >= b.left && c.right <= b.right - pad) return;
-      chipBox.scrollTo({ left: chipBox.scrollLeft + (c.left - b.left) - (b.width - c.width) / 2, behavior: reduce ? "auto" : "smooth" });
+      // align to the start of the strip: the chips snap to start, so centring gets pulled back
+      // by scroll-snap on narrow phones and can land the chip under the fade again
+      chipBox.scrollTo({ left: chipBox.scrollLeft + (c.left - b.left) - 8, behavior: reduce ? "auto" : "smooth" });
     }
 
     function select(key, autoplay) {
