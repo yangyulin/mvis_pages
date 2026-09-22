@@ -178,8 +178,12 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
   .mh-bar { border-top: 1px solid var(--mh-rule); display: grid; gap: 12px 28px; align-items: center; padding-block: 14px; min-width: 0; }
   .mh-rigs { display: grid; gap: 8px; min-width: 0; }
   .mh-label, .mh-ro dt { font: 500 10.5px/1 var(--mh-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--mh-dim); }
-  .mh-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; padding-right: 28px;
+  .mh-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+  /* the fade only exists while the row really is wider than its box (JS sets .is-over) */
+  .mh-chips.is-over { padding-right: 28px;
               -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+  /* at the end of the strip there is nothing more to hint at, and the last name must be readable */
+  .mh-chips.is-over.at-end { -webkit-mask-image: none; mask-image: none; }
   .mh-chips::-webkit-scrollbar { display: none; }
   .mh-chip { flex: none; scroll-snap-align: start; font-size: 13px; font-weight: 500; line-height: 1; color: var(--mh-dim); background: transparent;
              border: 1px solid var(--mh-rule); border-radius: 999px; padding: 0 13px; min-height: 36px; cursor: pointer; white-space: nowrap; }
@@ -263,12 +267,16 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
                mask-composite: intersect; }
     .mh-more, .mh-cta-phone, .mh-label, .mh-note { display: none; }
     .mh-tiles { grid-column: 3; grid-row: 1; align-self: center; display: grid; gap: 10px; position: relative; z-index: 2; }
+    /* two rows: every recording chip on its own full-width row, readout + Pause below */
     .mh-bar { grid-column: 1 / -1; grid-row: 2; margin-inline: calc(-1 * var(--mh-side)); padding-inline: var(--mh-side); position: relative; z-index: 2;
-              grid-template-columns: minmax(0, 24rem) minmax(0, 1fr) auto; background: linear-gradient(180deg, rgba(5, 7, 10, 0.6), rgba(5, 7, 10, 0.9)); }
-    .mh-ro { grid-template-columns: repeat(6, minmax(0, auto)); justify-content: space-between; }
+              grid-template-columns: minmax(0, 1fr) auto; gap: 10px 28px;
+              background: linear-gradient(180deg, rgba(5, 7, 10, 0.6), rgba(5, 7, 10, 0.9)); }
+    .mh-rigs { grid-column: 1 / -1; }
+    .mh-ro { grid-column: 1; grid-template-columns: repeat(6, minmax(0, auto)); justify-content: space-between; }
+    .mh-play { grid-column: 2; align-self: center; }
   }
   @media (min-width: 1100px) and (max-width: 1439px) {
-    .mh-bar { grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) auto; column-gap: 18px; }
+    .mh-bar { grid-template-columns: minmax(0, 1fr) auto; column-gap: 18px; }
     .mh-ro { gap: 8px 12px; }
     .mh-ro dt { letter-spacing: 0.04em; font-size: 10px; gap: 5px; }
     .mh-ro dd { font-size: 14px; }
@@ -373,10 +381,35 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     }
     function pause() { video.pause(); sync.forEach(function (s) { s.v.pause(); }); setToggle(); }
 
+    // The chip row is a scroller only when the chips do not fit (phones, narrow tablets). When it does
+    // scroll, keep the recording that is playing in view: before this, the strip stayed at scrollLeft 0
+    // and recordings past the third were faded out or off-screen for the whole cycle.
+    var chipBox = document.getElementById("mhChips"), lastChipDrag = -Infinity;
+    ["pointerdown", "wheel", "touchstart"].forEach(function (e) {
+      chipBox.addEventListener(e, function () { lastChipDrag = performance.now(); }, { passive: true });
+    });
+    function updateChipOverflow() {
+      chipBox.classList.toggle("is-over", chipBox.scrollWidth > chipBox.clientWidth + 2);
+      chipBox.classList.toggle("at-end", chipBox.scrollLeft >= chipBox.scrollWidth - chipBox.clientWidth - 2);
+    }
+    chipBox.addEventListener("scroll", updateChipOverflow, { passive: true });
+    function showChip(chip) {
+      if (!chipBox.classList.contains("is-over") || !chip) return;
+      if (performance.now() - lastChipDrag < 5000) return;          // do not fight a finger on the strip
+      var b = chipBox.getBoundingClientRect(), c = chip.getBoundingClientRect();
+      var pad = chipBox.classList.contains("at-end") ? 0 : 36;
+      if (c.left >= b.left && c.right <= b.right - pad) return;
+      chipBox.scrollTo({ left: chipBox.scrollLeft + (c.left - b.left) - (b.width - c.width) / 2, behavior: reduce ? "auto" : "smooth" });
+    }
+
     function select(key, autoplay) {
       if (!RIGS[key]) return;
       current = key;
-      chips.forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.rig === key ? "true" : "false"); });
+      chips.forEach(function (c) {
+        var on = c.dataset.rig === key;
+        c.setAttribute("aria-pressed", on ? "true" : "false");
+        if (on) showChip(c);
+      });
       var wasPlaying = !video.paused;
       video.poster = heroPoster(key); video.src = heroSrc(key);
       buildCompanions(key);
@@ -468,6 +501,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     }
 
     function onLayoutChange() {
+      updateChipOverflow();
       var l = isWide() ? "wide" : "narrow";
       if (l === layout) { fit(); return; }
       layout = l;
