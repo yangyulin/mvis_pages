@@ -53,11 +53,11 @@ calibration space on four datasets:
 | T4 | cam | `mvis_elp/stereo_rs` | RS stereo + readout |
 | T5 | cam | `monado_mgc/mono01` | GS mono intrinsics (Reverb G2 cam0, 640×480 equidistant) |
 | T6 | cam-IMU | `tum_vi_raw/imu1` | GS stereo + IMU, time offsets |
-| T7 | cam-IMU | `mvis_elp/imu_bag1` | RS stereo + two IMUs: aux extrinsics, inter-IMU time offset, per-IMU `t_ga` |
-| T8 | cam-IMU | `mvis_elp/imu_gx3_bag1` | RS mono + single IMU |
-| T9 | cam-IMU | `mvis_elp_t265/imu_mixed` | mixed shutter (GS fisheye + RS) + IMU, GS-anchored time offsets |
-| T10 | cam-IMU | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
-| T11 | cam-IMU | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU (512 frame-skip release) |
+| T7 | cam-IMU | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU (512 frame-skip release) |
+| T8 | cam-IMU | `mvis_elp/imu_bag1` | RS stereo + two IMUs: aux extrinsics, inter-IMU time offset, per-IMU `t_ga` |
+| T9 | cam-IMU | `mvis_elp/imu_gx3_bag1` | RS mono + single IMU |
+| T10 | cam-IMU | `mvis_elp_t265/imu_mixed` | mixed shutter (GS fisheye + RS) + IMU, GS-anchored time offsets |
+| T11 | cam-IMU | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
 
 The mid tier re-runs each family on **3 recordings**; the full tier on **every
 recording the dataset has** (all 15 bags of the multi-IMU rig, all 10
