@@ -27,8 +27,8 @@ shows exactly which metrics moved, on which recordings, by how much.
 | Tier | Command | Rows | Runtime | When |
 |---|---|---|---|---|
 | **fast** | `--level fast` | 11 | ~40 min | every change (the gate) |
-| **mid** | `--level mid` | 31 | ~1.5–2.5 h | weekly; after solver-behavior changes |
-| **full** | `--level full` | 107 | ~6–10 h | before releases; after re-blessing events |
+| **mid** | `--level mid` | 33 | ~1.5–2.5 h | weekly; after solver-behavior changes |
+| **full** | `--level full` | 110 | ~6–10 h | before releases; after re-blessing events |
 
 Tiers are supersets (`fast ⊂ mid ⊂ full`): each manifest row is tagged with the
 lowest tier that includes it, and running a tier executes every row at or below
@@ -57,7 +57,7 @@ calibration space on four datasets:
 | T8 | cam-IMU | `mvis_elp/imu_gx3_bag1` | RS mono + single IMU |
 | T9 | cam-IMU | `mvis_elp_t265/imu_mixed` | mixed shutter (GS fisheye + RS) + IMU, GS-anchored time offsets |
 | T10 | cam-IMU | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
-| T11 | cam-IMU | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU (512 frame-skip release, single recording) |
+| T11 | cam-IMU | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU (512 frame-skip release) |
 
 The mid tier re-runs each family on **3 recordings**; the full tier on **every
 recording the dataset has** (all 15 bags of the multi-IMU rig, all 10
@@ -65,7 +65,7 @@ Looper recordings, all 12 TUM-VI calib bags).
 
 ## Generated row configs, drift-guarded
 
-Only the 11 seed configs are written by hand. The other 96 are **generated**
+Only the 11 seed configs are written by hand. The other 99 are **generated**
 from their seed, changing nothing but the input recording and the output path
 — one generator script owns the mapping. A unit test regenerates all of them
 in memory and asserts the committed files match byte-for-byte, and that the
