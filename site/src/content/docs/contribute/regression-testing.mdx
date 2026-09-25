@@ -26,9 +26,9 @@ shows exactly which metrics moved, on which recordings, by how much.
 
 | Tier | Command | Rows | Runtime | When |
 |---|---|---|---|---|
-| **fast** | `--level fast` | 11 | ~40 min | every change (the gate) |
-| **mid** | `--level mid` | 33 | ~1.5–2.5 h | weekly; after solver-behavior changes |
-| **full** | `--level full` | 110 | ~6–10 h | before releases; after re-blessing events |
+| **fast** | `--level fast` | 15 | ~50 min | every change (the gate) |
+| **mid** | `--level mid` | 45 | ~2.5 h | weekly; after solver-behavior changes |
+| **full** | `--level full` | 147 | ~7 h | before releases; after re-blessing events |
 
 Tiers are supersets (`fast ⊂ mid ⊂ full`): each manifest row is tagged with the
 lowest tier that includes it, and running a tier executes every row at or below
@@ -40,7 +40,7 @@ python scripts/run_regression.py --only mvis_elp/imu_bag1        # single row
 python scripts/run_regression.py --only <row> --update-baseline  # re-bless
 ```
 
-## The eleven rows: T1–T11
+## The ten families: T1–T10
 
 The fast tier is one **seed row per family**, chosen so the gate spans the
 calibration space on four datasets:
@@ -49,15 +49,19 @@ calibration space on four datasets:
 |---|---|---|---|
 | T1 | cam | `tum_vi_raw/cam1` | GS stereo, equidistant |
 | T2 | cam | `looper_insight9/stereo01` | GS synced stereo pair |
-| T3 | cam | `looper_insight9/cam2_rs` | RS mono + readout estimation |
+| T3 | cam | `mvis_t265/stereo` | GS fisheye stereo (848×800 equidistant) |
 | T4 | cam | `mvis_elp/stereo_rs` | RS stereo + readout |
-| T5 | cam | `monado_mgc/mono01` | GS mono intrinsics (Reverb G2 cam0, 640×480 equidistant) |
-| T6 | cam-IMU | `tum_vi_raw/imu1` | GS stereo + IMU, time offsets |
-| T7 | cam-IMU | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU (512 frame-skip release) |
-| T8 | cam-IMU | `mvis_elp/imu_bag1` | RS stereo + two IMUs: aux extrinsics, inter-IMU time offset, per-IMU `t_ga` |
-| T9 | cam-IMU | `mvis_elp/imu_gx3_bag1` | RS mono + single IMU |
-| T10 | cam-IMU | `mvis_elp_t265/imu_mixed` | mixed shutter (GS fisheye + RS) + IMU, GS-anchored time offsets |
-| T11 | cam-IMU | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
+| T5 | cam | `monado_mgc/mono01` | GS mono intrinsics |
+| T6 | cam-IMU ×2 | `tum_vi_raw/imu1` | GS stereo + raw (pre-factory-cal) IMU |
+| T7 | cam-IMU ×2 | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU |
+| T8 | cam-IMU ×2 | `mvis_elp_t265/imu_mixed` | mixed shutter + IMU + aux IMU (the physical time-offset references) |
+| T9 | cam-IMU ×2 | `mvis_elp/imu_bag1` | RS stereo + two IMUs |
+| T10 | cam-IMU ×2 | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
+
+Every cam-IMU row runs in two IMU-model variants — **calyx** (scale +
+cross-coupling, no g-sensitivity; reported as the decomposed Dw = R·U) and
+**kalibr** (full intrinsics including Tg g-sensitivity and the gyro→accel
+rotation, directly comparable with the Kalibr toolbox).
 
 The mid tier re-runs each family on **3 recordings**; the full tier on **every
 recording the dataset has** (all 15 bags of the multi-IMU rig, all 10
@@ -65,7 +69,7 @@ Looper recordings, all 12 TUM-VI calib bags).
 
 ## Generated row configs, drift-guarded
 
-Only the 11 seed configs are written by hand. The other 99 are **generated**
+Only the 10 seed configs are written by hand. The other 138 (including every kalibr variant) are **generated**
 from their seed, changing nothing but the input recording and the output path
 — one generator script owns the mapping. A unit test regenerates all of them
 in memory and asserts the committed files match byte-for-byte, and that the
