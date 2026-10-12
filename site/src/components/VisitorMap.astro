@@ -1,0 +1,13 @@
+---
+// MapMyVisitors widget (stats: https://mapmyvisitors.com/web/1c8u3). Homepage
+// only, so it counts landing-page visits, not every docs page view.
+const id = 'uD2NluqU7wVjLLSofSEu-iVTPShQgvy6G7oRL40yTB4';
+---
+<div class="visitor-map">
+  <script is:inline type="text/javascript" id="mapmyvisitors" src={`//mapmyvisitors.com/map.js?d=${id}&cl=ffffff&w=a`}></script>
+</div>
+
+<style>
+  .visitor-map { display: flex; justify-content: center; max-width: 360px; margin: 48px auto 0; }
+  .visitor-map :global(img), .visitor-map :global(canvas) { max-width: 100%; height: auto; }
+</style>
