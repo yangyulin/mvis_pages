@@ -290,6 +290,9 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     .mh-ro { gap: 8px 12px; }
     .mh-ro dt { letter-spacing: 0.04em; font-size: 10px; gap: 5px; }
     .mh-ro dd { font-size: 14px; }
+    /* ten recordings: tighter chips keep the row unscrolled down to 1280 px (1190 px of chips at the full size) */
+    .mh-chips { gap: 4px; }
+    .mh-chip { padding: 0 9px; font-size: 12.5px; }
   }
   @media (min-width: 1100px) and (min-height: 880px) {
     .mh-label, .mh-note { display: block; }

@@ -311,6 +311,54 @@
    "corners": "73",
    "xlabel": "Camera model",
    "xval": "equidistant"
+  },
+  {
+   "key": "dibuli",
+   "chip": "Dibuli Prism-A4L",
+   "caption": "Recovered by MVIS from the Dibuli Prism-A4L example calibration (4 global-shutter fisheye cameras + ICM-45686, e1000), camera and IMU intrinsics estimated.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "cam1 (front L)",
+     "global",
+     "#ffc850",
+     400,
+     320
+    ],
+    [
+     "cam1",
+     "cam0 (side)",
+     "global",
+     "#a0ffa0",
+     400,
+     320
+    ],
+    [
+     "cam2",
+     "cam2 (front R)",
+     "global",
+     "#5aaaff",
+     400,
+     320
+    ],
+    [
+     "cam3",
+     "cam3 (side)",
+     "global",
+     "#ff8cc8",
+     400,
+     320
+    ]
+   ],
+   "sensors": "4 cam · 1 IMU",
+   "window": "60.2 <small>s</small>",
+   "rms": "0.92 <small>px</small>",
+   "td": "+1.97 <small>ms</small>",
+   "corners": "64–198",
+   "xlabel": "Kalibr baseline",
+   "xval": "Δp ≤ 1.8 <small>mm</small>"
   }
  ]
 }
