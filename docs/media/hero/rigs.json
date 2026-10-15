@@ -359,6 +359,38 @@
    "corners": "64–198",
    "xlabel": "Kalibr baseline",
    "xval": "Δp ≤ 1.8 <small>mm</small>"
+  },
+  {
+   "key": "gilabs",
+   "chip": "GiLabs EGO1GS",
+   "caption": "Recovered by MVIS from a GiLabs EGO1GS head-worn rig (global-shutter 1080p fisheye stereo + 470 Hz IMU), camera and IMU intrinsics estimated.",
+   "duration": 15.0,
+   "live_cycle": 5.0,
+   "tiles": [
+    [
+     "cam0",
+     "EGO1GS cam0",
+     "global",
+     "#ffc850",
+     400,
+     224
+    ],
+    [
+     "cam1",
+     "EGO1GS cam1",
+     "global",
+     "#a0ffa0",
+     400,
+     224
+    ]
+   ],
+   "sensors": "2 cam · 1 IMU",
+   "window": "25.0 <small>s</small>",
+   "rms": "0.76 <small>px</small>",
+   "td": "−1.33 <small>ms</small>",
+   "corners": "136–137",
+   "xlabel": "Kalibr baseline",
+   "xval": "Δp 0.1 <small>mm</small>"
   }
  ]
 }
