@@ -1,5 +1,5 @@
 {
- "batch": "2026-11-02",
+ "batch": "2026-11-02b",
  "scoring": {
   "scored_keys": [
    "fx",
@@ -47,7 +47,7 @@
    "mode": "camera+imu",
    "title": "Mixed t265-f1 + ELP-L, aux Xsens",
    "subtitle": "bags 01–15 · Kalibr with ELP-L as global shutter (bag 8 excluded)",
-   "caveat": "MVIS solves t265 fisheye 1 (GS) + ELP-L (rolling shutter, readout estimated) + both IMUs. Kalibr's camera + IMU solver is global-shutter only, so its runs (imu_mixed_bag1–15_elpgs) take ELP-L as a GS camera and its readout tr is reported as 0 (its model, not counted). Kalibr bag 8 is excluded: its base gyro scales (1.12 / 1.25) are far from the other 14 bags (1.04–1.06), a failed solve; MVIS bag 8 stays in the all-n line.",
+   "caveat": "MVIS solves t265 fisheye 1 (GS) + ELP-L (rolling shutter, readout estimated) + both IMUs. Kalibr's camera + IMU solver is global-shutter only, so its runs (imu_mixed_bag1–15_elpgs) take ELP-L as a GS camera and its readout tr is reported as 0 (its model, not counted). Kalibr bag 8 is excluded: its base gyro scales (1.23 / 2.23) are far from the other 14 bags (about 1.01), a failed solve; MVIS bag 8 stays in the all-n line.",
    "bas_caveat": "No Basalt row: Basalt cannot calibrate T7 — no rolling-shutter model for ELP-L, one IMU per run, and one time offset shared by all cameras (the t265 and ELP clocks share no frame stamps)."
   },
   "T8": {

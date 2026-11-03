@@ -1,5 +1,5 @@
 {
- "batch": "2026-11-02",
+ "batch": "2026-11-02b",
  "datasets": [
   {
    "id": "virig",
@@ -159,11 +159,11 @@
     },
     {
      "method": "Kalibr",
-     "score": 5.9216,
+     "score": 5.4679,
      "families": {
       "T1": 2.8547,
       "T2": 5.5662,
-      "T7": 5.9853,
+      "T7": 4.1706,
       "T8": 9.2801
      }
     },
@@ -297,13 +297,13 @@
       },
       {
        "method": "Kalibr",
-       "score": 5.9853,
+       "score": 4.1706,
        "coverage": [
         6,
         6
        ],
        "n_recordings": 14,
-       "reproj_median_px": 0.7473
+       "reproj_median_px": 0.5812
       },
       {
        "method": "Basalt",

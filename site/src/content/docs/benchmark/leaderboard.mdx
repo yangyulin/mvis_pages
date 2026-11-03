@@ -9,7 +9,7 @@ import DatasetLeaderboard from '../../../components/DatasetLeaderboard.astro';
 
 MVIS, [Kalibr](https://github.com/ethz-asl/kalibr) and
 [Basalt](https://gitlab.com/VladyslavUsenko/basalt) calibrated on the same recordings, with one
-leaderboard per dataset. This is batch **2026-11-02**. The records live in
+leaderboard per dataset. This is batch **2026-11-02b**. The records live in
 [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results), and there is an
 [interactive version](https://huggingface.co/spaces/calibench-vi/leaderboard) with every parameter.
 
@@ -23,8 +23,8 @@ leaderboard per dataset. This is batch **2026-11-02**. The records live in
   nothing it estimates could be scored there, so that family is left out.
 - **Compare within a dataset**, not across datasets.
 
-Kalibr and Basalt are the runs of 2026-10-22. The MVIS rows use later settings, including different data settings
-on T6, T7 and T8, so read those three with care. Full rules: [Methodology](/benchmark/methodology/).
+Kalibr on T7 was re-run on 2026-11-02 on the corrected bags; the other Kalibr and Basalt runs are from 2026-10-22, on
+data that correction does not touch. Data settings still differ from MVIS on T6, T7 and T8, so read those three with care. Full rules: [Methodology](/benchmark/methodology/).
 
 ## VI-Rig: 4 IMUs + 3 cameras
 
