@@ -25,3 +25,6 @@
 }
 .sp + * {margin-top:1.25rem}
 .sp .chart svg{max-width:44rem}
+.sp .sensorimg{margin:0 0 1rem;max-width:26rem}
+.sp .sensorimg img{display:block;width:100%;border-radius:.6rem;background:#fff;border:1px solid var(--line)}
+.sp .sensorimg figcaption{font-size:.8rem;color:var(--muted);margin-top:.35rem}
