@@ -1,30 +1,32 @@
 ---
 title: Leaderboard
-description: MVIS, Kalibr and Basalt ranked per dataset on the same recordings, by how well each repeats its calibration across recordings.
+description: MVIS, Kalibr and Basalt calibration results side by side on the same datasets, parameter by parameter.
 pageType: embed
 wide: true
+tableOfContents: false
 ---
 
 import DatasetLeaderboard from '../../../components/DatasetLeaderboard.astro';
+import LeaderboardHowTo from '../../../components/LeaderboardHowTo.astro';
 
-MVIS, [Kalibr](https://github.com/ethz-asl/kalibr) and
-[Basalt](https://gitlab.com/VladyslavUsenko/basalt) calibrated on the same recordings, with one
-leaderboard per dataset. This is batch **2026-11-02b**. The records live in
-[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results), and there is an
-[interactive version](https://huggingface.co/spaces/calibench-vi/leaderboard) with every parameter.
+The calibration results of MVIS, [Kalibr](https://github.com/ethz-asl/kalibr) and
+[Basalt](https://gitlab.com/VladyslavUsenko/basalt) on the same datasets: every parameter as median ± sd (n) across
+recordings, with the differences between tools. This is batch **2026-11-02b**. The records live in
+[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results), and the
+[Space](https://huggingface.co/spaces/calibench-vi/leaderboard) shows the same tables.
 
-## How to read a score
+**There is no ground truth.** Differences show where tools disagree, not who is right. Spread shows repeatability
+across recordings, not accuracy. The MVIS authors run this board and made every run, including Kalibr and Basalt.
 
-- **The score measures repeatability, not accuracy.** It compares how much each parameter varies across
-  recordings of the same rig. These datasets have no ground truth, so a method can repeat well and still be biased.
-- **Lower is better, and 1.00 is the best.** A score of 2 means twice the spread of the best method on that
-  parameter, averaged over the parameters. Scores are capped at 10.
-- **`10 (not run)` means the tool cannot run that family**, and the dataset score counts it. `n/a` means it ran but
-  nothing it estimates could be scored there, so that family is left out.
-- **Compare within a dataset**, not across datasets.
+Kalibr on T7 was re-run on 2026-11-02 on the corrected bags; the other Kalibr and Basalt runs are from 2026-10-22 or
+earlier. Data settings still differ from MVIS on T6, T7 and T8, so read those three with care. More in
+[Methodology](/benchmark/methodology/).
 
-Kalibr on T7 was re-run on 2026-11-02 on the corrected bags; the other Kalibr and Basalt runs are from 2026-10-22, on
-data that correction does not touch. Data settings still differ from MVIS on T6, T7 and T8, so read those three with care. Full rules: [Methodology](/benchmark/methodology/).
+<LeaderboardHowTo />
+
+Wide tables scroll sideways to the difference columns.
+
+Datasets: [VI-Rig 3 cameras](#vi-rig-4-imus--3-cameras) · [VI-Rig 4 cameras](#vi-rig-4-imus--4-cameras) · [TUM-VI](#tum-vi) · [Looper Insight-9](#looper-insight-9) · [Monado MGC](#monado-mgc)
 
 ## VI-Rig: 4 IMUs + 3 cameras
 

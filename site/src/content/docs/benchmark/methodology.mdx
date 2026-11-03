@@ -1,6 +1,6 @@
 ---
 title: Methodology
-description: How leaderboard entries are categorised, scored, and ranked.
+description: What the leaderboard tables show and how to read them.
 pageType: concept
 wide: true
 ---
@@ -10,47 +10,42 @@ produced. The metric definitions are shared with
 [Evaluation & metrics](/reference/evaluation/), so a local run and a published
 entry measure the same thing.
 
-## What the board ranks
+## What the board shows
 
-There is one leaderboard per dataset. MVIS, Kalibr and Basalt each calibrate the same recordings of a rig, and the
-board ranks them on **repeatability**: how little each parameter varies across recordings. The parameters are `fx`,
-`fy`, `cx`, `cy`, the stereo baseline, the camera or IMU lever arm, the time offset `td` and the rolling-shutter
-readout `tr`.
+There is one table per dataset, grouped by regression family and then by sensor. MVIS, Kalibr and Basalt each calibrate
+the recordings of a rig, and each cell gives a parameter as median ± sd (n) across the recordings that tool solved.
+The board gives no scores or ranks: a single number would encode a judgement about which parameters matter.
 
-:::caution[Repeatability is not accuracy]
-These datasets have no metrological ground truth. A method that repeats the same bias on every recording scores well.
+:::caution[Differences are not errors]
+These datasets have no metrological ground truth. A difference shows that two tools disagree, not which one is right,
+and a small spread shows repeatability, not accuracy: a method can repeat the same bias on every recording.
 MVIS checks accuracy separately, against known truth, in its digital-twin regression
 ([Regression testing](/contribute/regression-testing/)).
 :::
 
-## Scoring
+## Differences
 
-For each parameter, each method's score is its standard deviation across recordings divided by the smallest among the
-methods, capped at 10.
+Each difference column subtracts the medians of two tools. A ◆ marks a difference larger than the larger of the two
+spreads.
 
-| Level | Score |
+No difference is shown where it would mislead: values a tool takes as input, values shown only, missing values, and
+rows where the tools' models differ. Reprojection error isn't compared, because it measures fit.
+
+## Values that aren't estimates
+
+| Label | Meaning |
 |---|---|
-| Family | Mean over the parameters that apply to the method |
-| Dataset | Mean over all the dataset's families |
-
-An aggregate like this encodes a judgement about what matters, so the per-family tables are always shown beneath it.
-
-## Missing values
-
-| Case | Treatment |
-|---|---|
-| Parameter the tool holds fixed by design, such as Kalibr's intrinsics in its camera + IMU solve | Left out for that tool |
-| Parameter the tool should solve but has no result for, including fewer than 2 recordings | Scores 10 |
-| Family the tool cannot run | Shown as `10 (not run)`, and counts in the dataset score |
-| Family it ran with nothing scorable | Shown as `n/a`, and left out of the dataset score |
-
-So a tool is penalised on a dataset for families it cannot run, such as Basalt on the multi-IMU rigs, or Kalibr and Basalt
-on the rolling-shutter cameras of T8. The penalty reflects what the tool supports, not a failed solve.
+| `fixed` | Kalibr's camera + IMU runs take this value as input, for example intrinsics |
+| `shown` | The tool estimated it with a different model, so there's no difference against it |
+| `no run` or `not run` | The tool has no result here, and the family's notes give the reason |
+| `(3/15)` | The tool solved only 3 of the family's 15 recordings |
 
 ## Known limits
 
 - MVIS rows and the Kalibr and Basalt runs were not all made on the same date. Data settings differ on T6, T7 and T8.
-- A method's score moves when another method improves, because scores are relative to the best.
+- Recording counts differ per tool on some families, so a difference can mix recording sets. These cells are marked.
+- The MVIS column uses Kalibr's IMU model on camera + IMU families, so the IMU rows share one model. The MVIS default
+  fills fewer rows and is in a closed fold under each family.
 
 ## Versioning
 
