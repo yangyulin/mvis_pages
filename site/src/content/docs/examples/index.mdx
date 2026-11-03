@@ -62,6 +62,34 @@ map of the solved rig and full results.
     format: 'ROS bag → EuRoC mav0',
     shows: 'Repeatability across 10 recordings of one sensor',
   },
+  {
+    title: 'GI Ego1, global-shutter module',
+    href: '/examples/gi-ego1-gs-module/',
+    sensors: 'Stereo fisheye + IMU @ 200 Hz',
+    format: 'MCAP → EuRoC mav0',
+    shows: 'Shutter type read from the solved readout',
+  },
+  {
+    title: 'Dibuli Prism-A4L',
+    href: '/examples/dibuli-prism-a4l/',
+    sensors: '4 global-shutter fisheye + IMU @ 798 Hz',
+    format: 'Camera + IMU bags',
+    shows: 'Very wide lenses on an EUCM fit, at two exposures',
+  },
+  {
+    title: 'a4n stereo module',
+    href: '/examples/a4n/',
+    sensors: 'Stereo fisheye + IMU @ 300 Hz',
+    format: 'MP4 + IMU CSV → EuRoC mav0',
+    shows: "Two units of one module, and a lever arm that's still open",
+  },
+  {
+    title: 'Hanpo stereo module',
+    href: '/examples/hanpo/',
+    sensors: 'Stereo colour fisheye + IMU @ 505 Hz',
+    format: 'MP4 → EuRoC mav0',
+    shows: 'Stereo and single-camera solves of one recording',
+  },
 ]} />
 
 :::note[Sensor pages have no independent reference]

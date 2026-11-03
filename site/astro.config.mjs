@@ -149,7 +149,11 @@ export default defineConfig({
               items: [
                 { label: 'GI Ego1', link: '/examples/gi-ego1/' },
                 { label: 'GI EGO1GS', link: '/examples/gi-ego1gs/' },
+                { label: 'GI Ego1, global-shutter module', link: '/examples/gi-ego1-gs-module/' },
                 { label: 'Looper Insight-9', link: '/examples/looper-insight9/' },
+                { label: 'Dibuli Prism-A4L', link: '/examples/dibuli-prism-a4l/' },
+                { label: 'a4n stereo module', link: '/examples/a4n/' },
+                { label: 'Hanpo stereo module', link: '/examples/hanpo/' },
               ],
             },
           ],
