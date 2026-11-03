@@ -47,6 +47,12 @@ rows where the tools' models differ. Reprojection error isn't compared, because 
 - The MVIS column uses Kalibr's IMU model on camera + IMU families, so the IMU rows share one model. The MVIS default
   fills fewer rows and is in a closed fold under each family.
 
+## Configs
+
+Each family on the leaderboard links to the configs behind it, per tool. They're kept with the records in
+[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results/tree/main/configs), and the README there
+explains the files.
+
 ## Versioning
 
 Each batch is dated and kept in the history of
