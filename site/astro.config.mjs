@@ -55,7 +55,14 @@ export default defineConfig({
     '/math/degeneracy': '/concepts/degeneracy/',
     '/leaderboard': '/benchmark/leaderboard/',
     '/leaderboard/submit': '/contribute/submit-results/',
-    '/examples/hanpo': '/examples/hampo/',
+    '/examples/hanpo': '/benchmark/sensors/hampo/',
+    '/examples/hampo': '/benchmark/sensors/hampo/',
+    '/examples/a4n': '/benchmark/sensors/a4n/',
+    '/examples/dibuli-prism-a4l': '/benchmark/sensors/dibuli-prism-a4l/',
+    '/examples/gi-ego1': '/benchmark/sensors/gi-ego1/',
+    '/examples/gi-ego1gs': '/benchmark/sensors/gi-ego1gs/',
+    '/examples/gi-ego1-gs-module': '/benchmark/sensors/gi-ego1-gs-module/',
+    '/examples/looper-insight9': '/benchmark/sensors/looper-insight9/',
   },
 
   integrations: [
@@ -144,19 +151,6 @@ export default defineConfig({
             { label: 'TUM VI', link: '/examples/tum-vi/' },
             { label: 'Monado', link: '/examples/monado/' },
             { label: 'Looper SA16', link: '/examples/looper-sa16/' },
-            {
-              label: 'Sensors',
-              collapsed: true,
-              items: [
-                { label: 'GI Ego1', link: '/examples/gi-ego1/' },
-                { label: 'GI EGO1GS', link: '/examples/gi-ego1gs/' },
-                { label: 'GI Ego1, global-shutter module', link: '/examples/gi-ego1-gs-module/' },
-                { label: 'Looper Insight-9', link: '/examples/looper-insight9/' },
-                { label: 'Dibuli Prism-A4L', link: '/examples/dibuli-prism-a4l/' },
-                { label: 'a4n stereo module', link: '/examples/a4n/' },
-                { label: 'Hampo stereo module', link: '/examples/hampo/' },
-              ],
-            },
           ],
         },
         {
@@ -184,6 +178,24 @@ export default defineConfig({
           items: [
             { label: 'Leaderboard', link: '/benchmark/leaderboard/' },
             { label: 'Methodology', link: '/benchmark/methodology/' },
+            {
+              label: 'Sensors',
+              collapsed: true,
+              items: [
+                { label: 'Overview', link: '/benchmark/sensors/' },
+                { label: 'Intel RealSense T265', link: '/benchmark/sensors/intel-t265/' },
+                { label: 'Valve Index', link: '/benchmark/sensors/valve-index/' },
+                { label: 'HP Reverb G2', link: '/benchmark/sensors/hp-reverb-g2/' },
+                { label: 'Samsung Odyssey+', link: '/benchmark/sensors/samsung-odyssey-plus/' },
+                { label: 'Looper Insight-9', link: '/benchmark/sensors/looper-insight9/' },
+                { label: 'GI Ego1', link: '/benchmark/sensors/gi-ego1/' },
+                { label: 'GI EGO1GS', link: '/benchmark/sensors/gi-ego1gs/' },
+                { label: 'GI Ego1, global-shutter module', link: '/benchmark/sensors/gi-ego1-gs-module/' },
+                { label: 'Dibuli Prism-A4L', link: '/benchmark/sensors/dibuli-prism-a4l/' },
+                { label: 'Hampo stereo module', link: '/benchmark/sensors/hampo/' },
+                { label: 'a4n stereo module', link: '/benchmark/sensors/a4n/' },
+              ],
+            },
           ],
         },
         {
