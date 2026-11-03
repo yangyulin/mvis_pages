@@ -55,6 +55,7 @@ export default defineConfig({
     '/math/degeneracy': '/concepts/degeneracy/',
     '/leaderboard': '/benchmark/leaderboard/',
     '/leaderboard/submit': '/contribute/submit-results/',
+    '/examples/hanpo': '/examples/hampo/',
   },
 
   integrations: [
@@ -153,7 +154,7 @@ export default defineConfig({
                 { label: 'Looper Insight-9', link: '/examples/looper-insight9/' },
                 { label: 'Dibuli Prism-A4L', link: '/examples/dibuli-prism-a4l/' },
                 { label: 'a4n stereo module', link: '/examples/a4n/' },
-                { label: 'Hampo stereo module', link: '/examples/hanpo/' },
+                { label: 'Hampo stereo module', link: '/examples/hampo/' },
               ],
             },
           ],
