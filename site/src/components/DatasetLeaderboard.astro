@@ -1,0 +1,95 @@
+---
+import board from '../data/leaderboard/leaderboard.json';
+import fams from '../data/leaderboard/families.json';
+
+interface Props { id: string }
+const { id } = Astro.props;
+const dataset = board.datasets.find((d) => d.id === id);
+if (!dataset) throw new Error(`no leaderboard dataset ${id}`);
+const familyInfo: Record<string, any> = fams.families;
+const familyIds = dataset.families.map((f: any) => f.T);
+
+function score(v: number | null | undefined, notRun = false): string {
+  if (v === null || v === undefined) return 'n/a';
+  return notRun ? `${v.toFixed(2)} (not run)` : v.toFixed(2);
+}
+const ranked = (rows: any[]) => {
+  let rank = 0;
+  return rows.map((r) => ({ ...r, rank: r.score === null ? '—' : ++rank }));
+};
+---
+
+<div class="lb-wrap">
+  <div class="lb-table-wrap">
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th class="num">Rank</th><th>Method</th><th class="num">Dataset score</th>
+          {familyIds.map((t: string) => <th class="num">{t}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {ranked(dataset.ranking).map((r: any, i: number) => (
+          <tr class={i === 0 ? 'best' : ''}>
+            <td class="num">{r.rank}</td>
+            <td>{r.method}</td>
+            <td class="num"><strong>{score(r.score)}</strong></td>
+            {familyIds.map((t: string) => {
+              const fam = dataset.families.find((f: any) => f.T === t);
+              const row = fam.ranking.find((x: any) => x.method === r.method);
+              return <td class="num">{score(r.families[t], row && row.n_recordings === 0)}</td>;
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  {dataset.families.map((fam: any) => {
+    const info = familyInfo[fam.T];
+    return (
+      <details class="lb-family">
+        <summary><b>{fam.T}</b> {info.title} <span class="muted">· {info.mode}</span></summary>
+        {info.subtitle && <p class="muted">{info.subtitle}</p>}
+        <div class="lb-table-wrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th class="num">Rank</th><th>Method</th><th class="num">Score</th>
+                <th class="num">Parameters scored</th><th class="num">Recordings</th><th class="num">Median reprojection (px)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ranked(fam.ranking).map((r: any) => (
+                <tr>
+                  <td class="num">{r.rank}</td>
+                  <td>{r.method}</td>
+                  <td class="num">{score(r.score, r.n_recordings === 0)}</td>
+                  <td class="num">{r.coverage[0]} of {r.coverage[1]}</td>
+                  <td class="num">{r.n_recordings}</td>
+                  <td class="num">{r.reproj_median_px ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {info.caveat && <p class="muted">{info.caveat}</p>}
+        {info.bas_caveat && <p class="muted">{info.bas_caveat}</p>}
+      </details>
+    );
+  })}
+</div>
+
+<style>
+  .lb-wrap { margin-block: 1rem 2rem; }
+  .lb-table-wrap { overflow-x: auto; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); }
+  .lb-table { display: table; width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  .lb-table th, .lb-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--sl-color-gray-5); text-align: left; }
+  .lb-table th { background: var(--sl-color-gray-6); font-weight: 600; white-space: nowrap; }
+  .lb-table th.num, .lb-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lb-table tr.best td { background: color-mix(in srgb, var(--sl-color-accent) 10%, transparent); }
+  .lb-family { margin-top: 0.75rem; }
+  .lb-family summary { cursor: pointer; padding: 0.35rem 0; }
+  .lb-family .lb-table-wrap { margin-top: 0.5rem; }
+  .muted { color: var(--sl-color-gray-3); font-size: 0.85rem; }
+</style>

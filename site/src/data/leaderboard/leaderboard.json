@@ -1,0 +1,815 @@
+{
+ "batch": "2026-11-02",
+ "datasets": [
+  {
+   "id": "virig",
+   "title": "VI-Rig 4 IMUs + 3 cams (ours)",
+   "ranking": [
+    {
+     "method": "MVIS (Kalibr IMU model)",
+     "score": 1.1442,
+     "families": {
+      "T6c": 1.2614,
+      "T6": 1.027
+     }
+    },
+    {
+     "method": "MVIS",
+     "score": 1.1453,
+     "families": {
+      "T6c": 1.2614,
+      "T6": 1.0292
+     }
+    },
+    {
+     "method": "Kalibr",
+     "score": 4.2781,
+     "families": {
+      "T6c": 5.5498,
+      "T6": 3.0064
+     }
+    },
+    {
+     "method": "Basalt",
+     "score": 6.442,
+     "families": {
+      "T6c": 2.884,
+      "T6": 10
+     }
+    }
+   ],
+   "families": [
+    {
+     "T": "T6c",
+     "title": "3 GS cameras — camera calibration",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.2614,
+       "coverage": [
+        14,
+        14
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.2614,
+       "coverage": [
+        14,
+        14
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Basalt",
+       "score": 2.884,
+       "coverage": [
+        8,
+        10
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 5.5498,
+       "coverage": [
+        14,
+        14
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T6",
+     "title": "3 GS cameras + 4 IMUs",
+     "ranking": [
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.027,
+       "coverage": [
+        26,
+        26
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": 0.1965
+      },
+      {
+       "method": "MVIS",
+       "score": 1.0292,
+       "coverage": [
+        26,
+        26
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": 0.197
+      },
+      {
+       "method": "Kalibr",
+       "score": 3.0064,
+       "coverage": [
+        12,
+        12
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": 0.217
+      },
+      {
+       "method": "Basalt",
+       "score": 10,
+       "coverage": [
+        0,
+        26
+       ],
+       "n_recordings": 0,
+       "reproj_median_px": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mvis_rig",
+   "title": "VI-Rig 4 IMUs + 4 cams: t265 + ELP (ours)",
+   "ranking": [
+    {
+     "method": "MVIS",
+     "score": 1.0328,
+     "families": {
+      "T1": 1.0568,
+      "T2": 1,
+      "T7": 1.0459,
+      "T8": 1.0283
+     }
+    },
+    {
+     "method": "MVIS (Kalibr IMU model)",
+     "score": 1.0765,
+     "families": {
+      "T1": 1.0568,
+      "T2": 1,
+      "T7": 1.0169,
+      "T8": 1.2323
+     }
+    },
+    {
+     "method": "Kalibr",
+     "score": 5.9216,
+     "families": {
+      "T1": 2.8547,
+      "T2": 5.5662,
+      "T7": 5.9853,
+      "T8": 9.2801
+     }
+    },
+    {
+     "method": "Basalt",
+     "score": 7.2359,
+     "families": {
+      "T1": 1.7078,
+      "T2": null,
+      "T7": 10,
+      "T8": 10
+     }
+    }
+   ],
+   "families": [
+    {
+     "T": "T1",
+     "title": "t265 GS fisheye stereo",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.0568,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 14,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.0568,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 14,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Basalt",
+       "score": 1.7078,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 14,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 2.8547,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 14,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T2",
+     "title": "ELP RS stereo + readout",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1,
+       "coverage": [
+        10,
+        10
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1,
+       "coverage": [
+        10,
+        10
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 5.5662,
+       "coverage": [
+        10,
+        10
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Basalt",
+       "score": null,
+       "coverage": [
+        0,
+        0
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T7",
+     "title": "Mixed t265-f1 + ELP-L, aux Xsens",
+     "ranking": [
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.0169,
+       "coverage": [
+        16,
+        16
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": 0.1905
+      },
+      {
+       "method": "MVIS",
+       "score": 1.0459,
+       "coverage": [
+        16,
+        16
+       ],
+       "n_recordings": 14,
+       "reproj_median_px": 0.1905
+      },
+      {
+       "method": "Kalibr",
+       "score": 5.9853,
+       "coverage": [
+        6,
+        6
+       ],
+       "n_recordings": 14,
+       "reproj_median_px": 0.7473
+      },
+      {
+       "method": "Basalt",
+       "score": 10,
+       "coverage": [
+        0,
+        16
+       ],
+       "n_recordings": 0,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T8",
+     "title": "ELP RS stereo + two IMUs (IMUs only)",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.0283,
+       "coverage": [
+        17,
+        17
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": 0.173
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.2323,
+       "coverage": [
+        17,
+        17
+       ],
+       "n_recordings": 15,
+       "reproj_median_px": 0.172
+      },
+      {
+       "method": "Kalibr",
+       "score": 9.2801,
+       "coverage": [
+        2,
+        17
+       ],
+       "n_recordings": 3,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Basalt",
+       "score": 10,
+       "coverage": [
+        0,
+        17
+       ],
+       "n_recordings": 0,
+       "reproj_median_px": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tum_vi",
+   "title": "TUM-VI calibration bags",
+   "ranking": [
+    {
+     "method": "MVIS",
+     "score": 1.0984,
+     "families": {
+      "T3": 1.1624,
+      "T9": 1.0952,
+      "T10": 1.0376
+     }
+    },
+    {
+     "method": "MVIS (Kalibr IMU model)",
+     "score": 1.1285,
+     "families": {
+      "T3": 1.1624,
+      "T9": 1.141,
+      "T10": 1.082
+     }
+    },
+    {
+     "method": "Basalt",
+     "score": 2.1691,
+     "families": {
+      "T3": 1.3051,
+      "T9": 2.4748,
+      "T10": 2.7274
+     }
+    },
+    {
+     "method": "Kalibr",
+     "score": 4.3534,
+     "families": {
+      "T3": 1.7073,
+      "T9": 5.7857,
+      "T10": 5.5673
+     }
+    }
+   ],
+   "families": [
+    {
+     "T": "T3",
+     "title": "Camera stereo (raw)",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.1624,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 8,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.1624,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 8,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Basalt",
+       "score": 1.3051,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 8,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 1.7073,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 8,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T9",
+     "title": "Camera + IMU, raw stream",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.0952,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.094
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.141,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.094
+      },
+      {
+       "method": "Basalt",
+       "score": 2.4748,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 5.7857,
+       "coverage": [
+        4,
+        4
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.1087
+      }
+     ]
+    },
+    {
+     "T": "T10",
+     "title": "Camera + IMU, standard-512",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.0376,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.07775
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.082,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.07775
+      },
+      {
+       "method": "Basalt",
+       "score": 2.7274,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 5.5673,
+       "coverage": [
+        4,
+        4
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.08029
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "looper_insight9",
+   "title": "Looper Robotics Insight-9",
+   "ranking": [
+    {
+     "method": "MVIS",
+     "score": 1.7584,
+     "families": {
+      "T4": 2.4157,
+      "T11": 1.101
+     }
+    },
+    {
+     "method": "MVIS (Kalibr IMU model)",
+     "score": 2.112,
+     "families": {
+      "T4": 2.4157,
+      "T11": 1.8084
+     }
+    },
+    {
+     "method": "Basalt",
+     "score": 3.1498,
+     "families": {
+      "T4": 1.4945,
+      "T11": 4.8051
+     }
+    },
+    {
+     "method": "Kalibr",
+     "score": 4.3787,
+     "families": {
+      "T4": 1.3388,
+      "T11": 7.4185
+     }
+    }
+   ],
+   "families": [
+    {
+     "T": "T4",
+     "title": "Camera stereo",
+     "ranking": [
+      {
+       "method": "Kalibr",
+       "score": 1.3388,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Basalt",
+       "score": 1.4945,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS",
+       "score": 2.4157,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 2.4157,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T11",
+     "title": "3-cam + IMU",
+     "ranking": [
+      {
+       "method": "MVIS",
+       "score": 1.101,
+       "coverage": [
+        21,
+        21
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": 0.217
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.8084,
+       "coverage": [
+        21,
+        21
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": 0.215
+      },
+      {
+       "method": "Basalt",
+       "score": 4.8051,
+       "coverage": [
+        13,
+        21
+       ],
+       "n_recordings": 10,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 7.4185,
+       "coverage": [
+        4,
+        12
+       ],
+       "n_recordings": 3,
+       "reproj_median_px": 0.1691
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "monado_msd",
+   "title": "Monado SLAM Datasets (MGC)",
+   "ranking": [
+    {
+     "method": "Basalt",
+     "score": 1.3884,
+     "families": {
+      "T5": 1.2061,
+      "T12": 1.5707
+     }
+    },
+    {
+     "method": "MVIS (Kalibr IMU model)",
+     "score": 1.888,
+     "families": {
+      "T5": 2.5153,
+      "T12": 1.2608
+     }
+    },
+    {
+     "method": "MVIS",
+     "score": 1.903,
+     "families": {
+      "T5": 2.5153,
+      "T12": 1.2908
+     }
+    },
+    {
+     "method": "Kalibr",
+     "score": 3.2755,
+     "families": {
+      "T5": 1.9128,
+      "T12": 4.6383
+     }
+    }
+   ],
+   "families": [
+    {
+     "T": "T5",
+     "title": "cam0 + cam1 stereo",
+     "ranking": [
+      {
+       "method": "Basalt",
+       "score": 1.2061,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 1.9128,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS",
+       "score": 2.5153,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      },
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 2.5153,
+       "coverage": [
+        9,
+        9
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      }
+     ]
+    },
+    {
+     "T": "T12",
+     "title": "cam0 + cam1 + IMU",
+     "ranking": [
+      {
+       "method": "MVIS (Kalibr IMU model)",
+       "score": 1.2608,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.119
+      },
+      {
+       "method": "MVIS",
+       "score": 1.2908,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.119
+      },
+      {
+       "method": "Basalt",
+       "score": 1.5707,
+       "coverage": [
+        13,
+        13
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": null
+      },
+      {
+       "method": "Kalibr",
+       "score": 4.6383,
+       "coverage": [
+        4,
+        4
+       ],
+       "n_recordings": 4,
+       "reproj_median_px": 0.1409
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
