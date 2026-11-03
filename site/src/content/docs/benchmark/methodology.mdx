@@ -49,9 +49,10 @@ rows where the tools' models differ. Reprojection error isn't compared, because 
 
 ## Configs
 
-Each family on the leaderboard links to the configs behind it, per tool. They're kept with the records in
-[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results/tree/main/configs), and the README there
-explains the files.
+Each family on the leaderboard has a closed **Run config** section per tool: the command for one recording, the
+settings, and what differs on the others. Kalibr logs no command line, so its camera-only commands are rebuilt from the
+settings the run passed. The Basalt runs use our own headless build. The files are kept with the records in
+[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results/tree/main/configs).
 
 ## Versioning
 
