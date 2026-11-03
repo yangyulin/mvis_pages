@@ -35,6 +35,41 @@ Pick the one whose rig looks most like yours.
   },
 ]} />
 
+## Sensors
+
+One page per sensor, all in the same format, with the calibration process, a
+map of the solved rig and full results.
+
+<ExampleGrid examples={[
+  {
+    title: 'GI Ego1',
+    href: '/examples/gi-ego1/',
+    sensors: 'Stereo rolling-shutter fisheye + IMU @ 200 Hz',
+    format: 'MCAP → EuRoC mav0',
+    shows: 'Readout estimated with the rig, from one recording',
+  },
+  {
+    title: 'GI EGO1GS',
+    href: '/examples/gi-ego1gs/',
+    sensors: 'Stereo global-shutter fisheye + IMU @ 470 Hz',
+    format: 'MCAP → EuRoC mav0',
+    shows: 'Very wide lenses, and gaps from frames lost at decode',
+  },
+  {
+    title: 'Looper Insight-9',
+    href: '/examples/looper-insight9/',
+    sensors: '2 mono + 1 rolling-shutter colour + IMU @ 400 Hz',
+    format: 'ROS bag → EuRoC mav0',
+    shows: 'Repeatability across 10 recordings of one sensor',
+  },
+]} />
+
+:::note[Sensor pages have no independent reference]
+Sensor pages show what MVIS solved, with any repeatability we have, and say when
+no independent source exists. Reproducibility there gives the settings, batch
+date and, where we have it, the recording's sha256.
+:::
+
 ## How to read these pages
 
 Every example follows the same structure, so two of them can be compared

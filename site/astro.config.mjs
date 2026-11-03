@@ -143,6 +143,15 @@ export default defineConfig({
             { label: 'TUM VI', link: '/examples/tum-vi/' },
             { label: 'Monado', link: '/examples/monado/' },
             { label: 'Looper SA16', link: '/examples/looper-sa16/' },
+            {
+              label: 'Sensors',
+              collapsed: true,
+              items: [
+                { label: 'GI Ego1', link: '/examples/gi-ego1/' },
+                { label: 'GI EGO1GS', link: '/examples/gi-ego1gs/' },
+                { label: 'Looper Insight-9', link: '/examples/looper-insight9/' },
+              ],
+            },
           ],
         },
         {
