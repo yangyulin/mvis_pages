@@ -14,5 +14,5 @@ const data = JSON.stringify({ rigs: s.rigs, procs: s.procs, plotly: s.plotly }).
 ---
 
 <div class="not-content sp" set:html={html} />
-{part === 'map' && <script type="application/json" id="sp-data" set:html={data} />}
+{(part === 'map' || part === 'rig') && <script type="application/json" id="sp-data" set:html={data} />}
 <script src="../scripts/sensor-page.js"></script>
