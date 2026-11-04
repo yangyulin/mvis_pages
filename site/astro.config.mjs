@@ -192,6 +192,7 @@ export default defineConfig({
                 { label: 'HP Reverb G2', link: '/benchmark/sensors/hp-reverb-g2/' },
                 { label: 'Samsung Odyssey+', link: '/benchmark/sensors/samsung-odyssey-plus/' },
                 { label: 'LooperRobotics Insight 9', link: '/benchmark/sensors/looper-insight9/' },
+                { label: 'LooperRobotics Insight 9, robot arm', link: '/benchmark/sensors/looper-insight9-arm/' },
                 { label: 'GI Ego1', link: '/benchmark/sensors/gi-ego1/' },
                 { label: 'GI EGO1GS', link: '/benchmark/sensors/gi-ego1gs/' },
                 { label: 'Dibuli Prism-A4L', link: '/benchmark/sensors/dibuli-prism-a4l/' },
