@@ -62,7 +62,8 @@ export default defineConfig({
     '/examples/dibuli-prism-a4l': '/benchmark/sensors/dibuli-prism-a4l/',
     '/examples/gi-ego1': '/benchmark/sensors/gi-ego1/',
     '/examples/gi-ego1gs': '/benchmark/sensors/gi-ego1gs/',
-    '/examples/gi-ego1-gs-module': '/benchmark/sensors/gi-ego1-gs-module/',
+    '/examples/gi-ego1-gs-module': '/benchmark/sensors/gi-ego1gs/',
+    '/benchmark/sensors/gi-ego1-gs-module': '/benchmark/sensors/gi-ego1gs/',
     '/examples/looper-insight9': '/benchmark/sensors/looper-insight9/',
   },
 
@@ -97,6 +98,7 @@ export default defineConfig({
         Footer: './src/components/Footer.astro',
         // Applies the `wide: true` frontmatter opt-in (design plan §4).
         Head: './src/components/Head.astro',
+        PageTitle: './src/components/PageTitle.astro',
       },
 
       // Sidebar — design plan §3. Eight groups, ordered concepts → how-to →
@@ -188,10 +190,9 @@ export default defineConfig({
                 { label: 'Valve Index', link: '/benchmark/sensors/valve-index/' },
                 { label: 'HP Reverb G2', link: '/benchmark/sensors/hp-reverb-g2/' },
                 { label: 'Samsung Odyssey+', link: '/benchmark/sensors/samsung-odyssey-plus/' },
-                { label: 'Looper Insight-9', link: '/benchmark/sensors/looper-insight9/' },
+                { label: 'LooperRobotics Insight 9', link: '/benchmark/sensors/looper-insight9/' },
                 { label: 'GI Ego1', link: '/benchmark/sensors/gi-ego1/' },
                 { label: 'GI EGO1GS', link: '/benchmark/sensors/gi-ego1gs/' },
-                { label: 'GI Ego1, global-shutter module', link: '/benchmark/sensors/gi-ego1-gs-module/' },
                 { label: 'Dibuli Prism-A4L', link: '/benchmark/sensors/dibuli-prism-a4l/' },
                 { label: 'Hampo stereo module', link: '/benchmark/sensors/hampo/' },
                 { label: 'XQ20 stereo headset', link: '/benchmark/sensors/xq20/' },

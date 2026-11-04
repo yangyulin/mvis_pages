@@ -95,6 +95,7 @@ export const collections = {
         // tables, example galleries, and the leaderboard embed need 72rem;
         // prose pages keep the ~60rem measure.
         wide: z.boolean().default(false),
+        sensor: z.string().optional(),
       }),
     }),
   }),

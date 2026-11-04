@@ -8,7 +8,9 @@
 import Default from '@astrojs/starlight/components/Head.astro';
 
 const wide = Astro.locals.starlightRoute.entry.data.wide === true;
+const sensor = Boolean((Astro.locals.starlightRoute.entry.data as any).sensor);
 ---
 
 <Default><slot /></Default>
 {wide && <style is:inline>{':root{--sl-content-width:72rem}'}</style>}
+{sensor && <style is:inline>{'@media (max-width:44rem){.sl-markdown-content h2{font-size:1.5rem}}'}</style>}
