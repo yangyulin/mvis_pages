@@ -154,6 +154,7 @@ export default defineConfig({
             { label: 'TUM VI', link: '/examples/tum-vi/' },
             { label: 'Monado', link: '/examples/monado/' },
             { label: 'Looper SA16', link: '/examples/looper-sa16/' },
+            { label: 'UZH-FPV', link: '/examples/uzh-fpv/' },
           ],
         },
         {

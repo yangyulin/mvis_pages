@@ -157,3 +157,19 @@ a.example-card:hover .example-card__title {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
+
+/* Results tables (leaderboard, examples): no sideways scrolling on a desktop window. Each table takes its natural width
+ * when it fits and wraps its cells when it doesn't. Here, not in board.css, which the leaderboard export regenerates.
+ * Phones keep the swipe in board.css, because seven columns can't fit there. */
+:root:has(.lb-wrap) { --sl-content-width: 80rem; }  /* the widest table needs 74rem */
+:root:has(.lb-wrap) .sl-markdown-content > :is(p, ul, ol, h2, h3, table) { max-width: 60rem; }  /* prose stays readable */
+@media (min-width: 641px) {
+  .lb-wrap .cb .tw,
+  .lb-wrap .cb .sc { overflow-x: visible; }
+  .lb-wrap .cb table { width: auto; table-layout: auto; }
+  .lb-wrap .cb .v,
+  .lb-wrap .cb .d { min-width: 0; white-space: normal; }
+  .lb-wrap .cb th.p,
+  .lb-wrap .cb td.p { min-width: 0; }
+  .lb-wrap .cb pre.cfg { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: visible; }
+}

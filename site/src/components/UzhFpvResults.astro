@@ -1,0 +1,13 @@
+---
+// The same table as the leaderboard page, made by the leaderboard's own renderer from this study's results:
+// scripts/mvis/datacard_results/uzh_site.py in the mira repo. Not part of the leaderboard batch.
+import results from '../data/leaderboard/uzh_fpv.json';
+import '../data/leaderboard/board.css';
+---
+
+<div class="not-content cb" set:html={results.how_to_read} />
+<div class="not-content lb-wrap" set:html={results.fragment} />
+
+<style>
+  .lb-wrap { margin-block: 1rem 2rem; }
+</style>
