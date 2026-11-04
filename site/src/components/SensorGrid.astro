@@ -40,13 +40,15 @@ const cards = order.map((slug) => {
   .sg-type { font-size: 0.85rem; line-height: 1.4; color: var(--sl-color-text); }
   .sg-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: auto; padding-top: 0.5rem; }
   .sg-tags span { font-size: 0.72rem; font-weight: 600; line-height: 1.3; padding: 0.12rem 0.5rem; border-radius: 99px; background: var(--sl-color-bg-nav); color: var(--sl-color-text); }
+  /* Phones: two columns, whole 3:2 photo on top. The type line waits for the sensor's page, so names and tags stay readable. */
   @media (max-width: 34rem) {
-    .sg { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
-    .sg-card a { flex-direction: row; align-items: stretch; }
-    .sg-card img { width: 38%; flex: none; aspect-ratio: auto; height: auto; object-fit: cover; border-bottom: 0; border-right: 1px solid var(--sl-color-hairline); }
-    .sg-body { padding: 0.6rem 0.7rem; }
-    .sg-name { font-size: 1rem; }
-    .sg-type { font-size: 0.8rem; }
+    .sg { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+    .sg-body { padding: 0.55rem 0.6rem 0.65rem; gap: 0.15rem; }
+    .sg-maker { font-size: 0.7rem; }
+    .sg-name { font-size: 0.95rem; }
+    .sg-type { display: none; }
+    .sg-tags { gap: 0.25rem; padding-top: 0.4rem; }
+    .sg-tags span { font-size: 0.68rem; padding: 0.1rem 0.4rem; }
   }
   @media (prefers-reduced-motion: reduce) { .sg-card a { transition: none; } .sg-card a:hover { transform: none; } }
 </style>
