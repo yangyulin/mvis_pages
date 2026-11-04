@@ -46,7 +46,7 @@
 .rig-view{margin:0;border:1px solid var(--line);border-radius:.6rem;background:var(--bg);overflow:hidden}.rig-view figcaption{font-size:.8rem;font-weight:600;color:var(--strong);padding:.5rem .75rem;border-bottom:1px solid var(--line)}.rig-view svg{display:block;width:100%;height:auto}
 .rig-view text{font-size:12px;fill:var(--strong);font-family:inherit}.rig-view .dim{font-weight:600;font-variant-numeric:tabular-nums;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}.rig-view .dl{stroke:var(--muted);stroke-width:1;fill:none}.rig-view .lever{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;fill:none}.rig-view .gridline{stroke:var(--line);stroke-width:.5}.rig-view .imu{fill:var(--strong)}.rig-view .sc{stroke:var(--muted);stroke-width:2}.rig-view .sct{fill:var(--muted);font-size:11px}
 .rig-table{margin-top:.75rem}.rig-note{font-size:.8rem;color:var(--muted);margin:.5rem 0 0}
-.stage canvas{touch-action:auto}.tools{position:static;padding:.5rem;border-top:1px solid var(--line)}.tools button{min-height:2.75rem;padding:0 .8rem}
+.stage{overflow:hidden}.stage canvas{touch-action:auto;height:26rem}.rig-h{font-size:1.05rem;color:var(--strong);margin:1.5rem 0 .6rem}.tools{position:static;padding:.5rem;border-top:1px solid var(--line)}.tools button{min-height:2.75rem;padding:0 .8rem}
 .sp-bar{display:flex;flex-wrap:wrap;gap:.25rem;padding:.5rem;border:1px solid var(--line);border-top:0}.sp-bar button{min-height:2.75rem;padding:0 .8rem;font:inherit;font-size:.85rem;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:.35rem;cursor:pointer}.sp-fsbtn{margin-left:auto}
 .procplot{border-radius:.6rem .6rem 0 0}.procplot.locked{pointer-events:none}
 .mvis-progress button,.mvis-progress select{min-height:2.75rem;padding:0 1rem;font-weight:600}.mvis-progress input[type=range]{flex:1 1 100%;order:3;height:2.75rem;margin:0}.mvis-progress input[type=range]::-webkit-slider-thumb{width:1.5rem;height:1.5rem}.mvis-progress input[type=range]::-moz-range-thumb{width:1.5rem;height:1.5rem}.mvis-progress-label{font-size:.9rem;color:var(--ink);margin-left:auto}
@@ -54,6 +54,7 @@
 .proc-open{display:block;width:100%;padding:0;background:var(--soft);border:1px solid var(--line);border-radius:.6rem;overflow:hidden;font:inherit;color:var(--ink);cursor:pointer}.proc-open svg{display:block;width:100%;height:auto}.proc-open span{display:block;min-height:2.75rem;line-height:2.75rem;font-weight:600;background:var(--accent);color:var(--bg)}
 .sp-fs{position:fixed;inset:0;z-index:1000;margin:0;background:var(--bg);display:flex;flex-direction:column;border-radius:0}.sp-fs .procplot,.sp-fs canvas{flex:1 1 auto;height:auto!important;min-height:0;border:0;border-radius:0;touch-action:none}.sp-fs .procplot{overflow:hidden}.sp-fs .tools,.sp-fs .sp-bar,.sp-fs .mvis-progress{position:relative;z-index:1;background:var(--bg);flex:none;border-radius:0;padding-bottom:max(.5rem,env(safe-area-inset-bottom))}.sp-done{position:absolute;top:max(.5rem,env(safe-area-inset-top));right:.5rem;z-index:2;min-height:2.75rem;padding:0 1rem;font:inherit;font-weight:700;background:var(--accent);color:var(--bg);border:0;border-radius:.45rem;cursor:pointer}
 .proc-open[hidden],[data-rp][hidden]{display:none}.sp-fs .sp-fsbtn{display:none}
+@media(max-width:44rem){.stage canvas{height:23rem}}
 
 }
 .sp + * {margin-top:1.25rem}
