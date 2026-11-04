@@ -140,6 +140,11 @@ a.example-card:hover .example-card__title {
   margin: 0;
   color: var(--sl-color-gray-2);
 }
+/* Starlight spaces adjacent markdown siblings; in this grid that pushes labels off their values. */
+.example-card__meta > dt,
+.example-card__meta > dd {
+  margin-top: 0 !important;
+}
 
 /* Cite block: pill-styled inline */
 .cite-pill {
