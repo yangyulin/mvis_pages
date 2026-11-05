@@ -10,8 +10,20 @@ import SensorGrid from '../../../../components/SensorGrid.astro';
 
 Cameras and IMUs calibrated with MVIS. Each page has the sensor's specs and sources, the calibration process, a map of the solved rig and full results.
 
-<SensorGrid order={["intel-t265", "looper-insight9", "dibuli-prism-a4l", "hampo", "gi-ego1", "gi-ego1gs", "xq20", "valve-index", "hp-reverb-g2", "samsung-odyssey-plus"]} />
+[Tracking cameras and modules](#tracking-cameras-and-modules) · [Head-worn cameras](#head-worn-cameras) · [VR headsets](#vr-headsets)
+
+## Tracking cameras and modules
+
+<SensorGrid slugs={["intel-t265", "looper-insight9", "dibuli-prism-a4l", "hampo"]} />
+
+## Head-worn cameras
+
+<SensorGrid slugs={["gi-ego1", "gi-ego1gs", "xq20"]} />
+
+## VR headsets
+
+<SensorGrid slugs={["valve-index", "hp-reverb-g2", "samsung-odyssey-plus"]} />
 
 :::note[What these pages show]
-Each page shows what MVIS solved, with any repeatability we have, and says when no independent source exists. They have no scores, and they aren't part of the [leaderboard](/benchmark/leaderboard/).
+Each page shows what MVIS solved, with any repeatability we have, and says when no independent source exists. They have no scores, and they aren't part of the [results tables](/benchmark/leaderboard/).
 :::
