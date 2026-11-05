@@ -55,6 +55,7 @@
 .sp-fs{position:fixed;inset:0;z-index:1000;margin:0;background:var(--bg);display:flex;flex-direction:column;border-radius:0}.sp-fs .procplot,.sp-fs canvas{flex:1 1 auto;height:auto!important;min-height:0;border:0;border-radius:0;touch-action:none}.sp-fs .procplot{overflow:hidden}.sp-fs .tools,.sp-fs .sp-bar,.sp-fs .mvis-progress{position:relative;z-index:1;background:var(--bg);flex:none;border-radius:0;padding-bottom:max(.5rem,env(safe-area-inset-bottom))}.sp-done{position:absolute;top:max(.5rem,env(safe-area-inset-top));right:.5rem;z-index:2;min-height:2.75rem;padding:0 1rem;font:inherit;font-weight:700;background:var(--accent);color:var(--bg);border:0;border-radius:.45rem;cursor:pointer}
 .proc-open[hidden],[data-rp][hidden]{display:none}.sp-fs .sp-fsbtn{display:none}
 @media(max-width:44rem){.stage canvas{height:23rem}}
+.rig-note{margin:.5rem 0 0;font-size:.8rem;color:var(--dim,inherit)}
 
 }
 .sp + * {margin-top:1.25rem}
