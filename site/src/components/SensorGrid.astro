@@ -33,7 +33,7 @@ const cards = slugs.map((slug) => {
   .sg-card a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
   .sg-card img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; background: #fff; border-bottom: 1px solid var(--sl-color-hairline); }
   .sg-body { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.8rem 0.9rem 0.9rem; flex: 1; min-width: 0; }
-  .sg-maker { min-height: 1.3em; font-size: 0.75rem; font-weight: 600; color: var(--sl-color-gray-3); line-height: 1.3; }
+  .sg-maker { min-height: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75rem; font-weight: 600; color: var(--sl-color-gray-3); line-height: 1.3; }
   .sg-name { font-size: 1.1rem; font-weight: 700; color: var(--sl-color-white); line-height: 1.25; }
   .sg-type { font-size: 0.85rem; line-height: 1.4; color: var(--sl-color-text); }
   .sg-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: auto; padding-top: 0.5rem; }

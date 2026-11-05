@@ -75,6 +75,11 @@ def main() -> int:
             page.goto(base + link)
             if not current_is_open(page):
                 problems.append(f"{link}: current page not shown open")
+        phone = browser.new_page(viewport={"width": 320, "height": 640})
+        phone.goto(f"{base}/benchmark/sensors/")
+        heights = set(phone.evaluate("[...document.querySelectorAll('.sg-maker')].map(m => Math.round(m.getBoundingClientRect().height))"))
+        if len(heights) > 1:
+            problems.append(f"maker lines differ in height at 320 px: {sorted(heights)}")
         browser.close()
     (out / "nav_report.json").write_text(json.dumps({"links": len(links), "problems": problems}, indent=1))
     print(f"{len(links)} links, {len(problems)} problems")
