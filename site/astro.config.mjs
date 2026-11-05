@@ -2,6 +2,10 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { readFileSync } from 'node:fs';
+
+// Written by export_sensor.py with the Sensors overview, so both list sensors in one order.
+const sensorNav = JSON.parse(readFileSync(new URL('./src/data/sensor-nav.json', import.meta.url), 'utf8'));
 
 // GitHub Pages serves `main:/docs`, so the build writes there. A build therefore
 // publishes the site — there is no separate deploy step.
@@ -128,7 +132,34 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Examples & benchmark',
+          items: [
+            {
+              label: 'Examples',
+              collapsed: true,
+              items: [
+                { label: 'Overview', link: '/examples/' },
+                { label: 'TUM VI', link: '/examples/tum-vi/' },
+                { label: 'Monado', link: '/examples/monado/' },
+                { label: 'Looper SA16', link: '/examples/looper-sa16/' },
+                { label: 'UZH-FPV', link: '/examples/uzh-fpv/' },
+              ],
+            },
+            {
+              label: 'Sensors',
+              collapsed: true,
+              items: [
+                { label: 'Overview', link: '/benchmark/sensors/' },
+                ...sensorNav.map(({ label, link }) => ({ label, link })),
+              ],
+            },
+            { label: 'Results', link: '/benchmark/leaderboard/' },
+            { label: 'Methodology', link: '/benchmark/methodology/' },
+          ],
+        },
+        {
           label: 'Concepts',
+          collapsed: true,
           items: [
             { label: 'Notation & glossary', link: '/concepts/notation/' },
             { label: 'Camera model', link: '/concepts/camera-model/' },
@@ -149,17 +180,8 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Examples',
-          items: [
-            { label: 'Overview', link: '/examples/' },
-            { label: 'TUM VI', link: '/examples/tum-vi/' },
-            { label: 'Monado', link: '/examples/monado/' },
-            { label: 'Looper SA16', link: '/examples/looper-sa16/' },
-            { label: 'UZH-FPV', link: '/examples/uzh-fpv/' },
-          ],
-        },
-        {
           label: 'Reference',
+          collapsed: true,
           items: [
             { label: 'Configuration', link: '/reference/configuration/' },
             { label: 'CLI', link: '/reference/cli/' },
@@ -179,30 +201,6 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Benchmark',
-          items: [
-            { label: 'Leaderboard', link: '/benchmark/leaderboard/' },
-            { label: 'Methodology', link: '/benchmark/methodology/' },
-            {
-              label: 'Sensors',
-              collapsed: true,
-              items: [
-                { label: 'Overview', link: '/benchmark/sensors/' },
-                { label: 'Intel RealSense T265', link: '/benchmark/sensors/intel-t265/' },
-                { label: 'Valve Index', link: '/benchmark/sensors/valve-index/' },
-                { label: 'HP Reverb G2', link: '/benchmark/sensors/hp-reverb-g2/' },
-                { label: 'Samsung Odyssey+', link: '/benchmark/sensors/samsung-odyssey-plus/' },
-                { label: 'LooperRobotics Insight 9', link: '/benchmark/sensors/looper-insight9/' },
-                { label: 'GI Ego1', link: '/benchmark/sensors/gi-ego1/' },
-                { label: 'GI EGO1GS', link: '/benchmark/sensors/gi-ego1gs/' },
-                { label: 'Dibuli Prism-A4L', link: '/benchmark/sensors/dibuli-prism-a4l/' },
-                { label: 'Hampo stereo module', link: '/benchmark/sensors/hampo/' },
-                { label: 'XQ20 stereo headset', link: '/benchmark/sensors/xq20/' },
-              ],
-            },
-          ],
-        },
-        {
           label: 'Contribute',
           items: [
             { label: 'Submit results', link: '/contribute/submit-results/' },
@@ -213,6 +211,7 @@ export default defineConfig({
         },
         {
           label: 'About',
+          collapsed: true,
           items: [
             { label: 'Contributors & citation', link: '/about/contributors/' },
             { label: 'Comparison vs Kalibr / Basalt', link: '/about/comparison/' },
