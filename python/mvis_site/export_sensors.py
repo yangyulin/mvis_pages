@@ -141,8 +141,25 @@ def write(site: Path, plan: Plan) -> list[str]:
     return plan.slugs
 
 
-def main(site: Path, private_config: Path, media: Path) -> list[str]:
+def only(pub: dict, slug: str) -> dict:
+    """pub cut down to one sensor, for exporting it on a machine without the others' results."""
+    if slug not in pub["sensors"]:
+        raise SystemExit(f"{slug} is not in public_sensors.yaml")
+    return {**pub, "sensors": {slug: pub["sensors"][slug]}}
+
+
+def main(site: Path, private_config: Path, media: Path, slug: str | None = None) -> list[str]:
+    """Export every public sensor, or with slug only that one: its data, MDX and media, plus the sidebar and overview
+    built from the full list. The other sensors' files and the shared assets are left as they are."""
     pub = public_sensors()
     cfg = solve_config(yaml.safe_load(Path(private_config).read_text(encoding="utf-8")))
-    plan = render(pub, collect(pub, cfg), Path(media), DATA / "photos")
+    part = only(pub, slug) if slug else pub
+    plan = render(part, collect(part, cfg), Path(media), DATA / "photos")
+    if slug:
+        nav = json.dumps(sensor_nav(pub), indent=1) + "\n"
+        plan.problems += [f"sidebar: {x}" for x in public_problems(nav)]
+        plan.texts["site/src/data/sensor-nav.json"] = nav
+        plan.texts[f"{DOCS}/index.mdx"] = overview_mdx(pub)
+        for shared in (f"{DATA_DIR}/sensor.css", "site/src/scripts/sensor-page.js"):
+            del plan.texts[shared]
     return write(Path(site), plan)

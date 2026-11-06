@@ -27,7 +27,7 @@ def test_t265_is_first_and_labels_keep_full_names(pub):
 
 def test_groups_follow_the_chosen_order(pub):
     assert [(g["title"], g["slugs"]) for g in sensor_groups(pub)] == [
-        ("Tracking cameras and modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "hampo"]),
+        ("Tracking cameras and modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "alg-avs111c", "hampo"]),
         ("Head-worn cameras", ["gi-ego1", "gi-ego1gs", "xq20"]),
         ("VR headsets", ["valve-index", "hp-reverb-g2", "samsung-odyssey-plus"]),
     ]
@@ -61,10 +61,14 @@ def test_unknown_shutter_is_left_out_of_the_tags(pub):
         assert any("shutter" in t for t in c["tags"]) == known, slug
 
 
+# Live without a demo or hosted data, at the user's request (2026-11-06): no demo rendered yet, no permission to host the bag.
+NO_DEMO_NOT_HOSTED = ("alg-avs111c",)
+
+
 def test_every_page_has_a_cited_photo_a_short_type_and_a_demo(pub):
     for slug, p in pub["sensors"].items():
         img = p["header"]["image"]
-        assert len(p["header"]["type"]) <= 90 and "demo" in p, slug
+        assert len(p["header"]["type"]) <= 90 and ("demo" in p or slug in NO_DEMO_NOT_HOSTED), slug
         if img["kind"] == "photo":
             assert (DATA / "photos" / img["file"]).exists() and img["credit"] and img["alt"], slug
 
@@ -82,6 +86,9 @@ def test_looper_and_valve_link_their_examples(pub):
 def test_every_sensor_page_links_to_its_hosted_data(pub):
     for slug, p in pub["sensors"].items():
         html = dataset_rows(p, pub["data_url"])
+        if slug in NO_DEMO_NOT_HOSTED:
+            assert "Not hosted" in html and "__" not in html, slug
+            continue
         assert f"calibench-vi/community/tree/main/{slug}/" in html and "__" not in html, slug
         if slug not in ("dibuli-prism-a4l", "hampo", "xq20"):
             assert "calibench-vi/datasets/tree/main/" in html, slug

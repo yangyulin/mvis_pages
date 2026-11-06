@@ -122,3 +122,10 @@ def test_ms_is_median_and_sample_sd():
 def test_reproj_prefers_the_median():
     assert m.reproj({"reproj_median_px": 0.4, "reproj_rms_px": 0.9}) == ("median", 0.4)
     assert m.reproj({"reproj_median_px": None, "reproj_rms_px": 0.9}) == ("RMS", 0.9)
+
+
+def test_board_svg_chessboard_to_scale():
+    svg = m.board_svg({"type": "chessboard", "rows": 9, "cols": 12, "square_mm": 25}, {})
+    assert 'aria-label="Chessboard 9 by 12 squares, to scale"' in svg
+    assert "12 × 9 squares (11 × 8 inner corners), 25 mm squares, 300 × 225 mm" in svg
+    assert svg.count("h25.00v25.00") == 54          # half of 108 squares are black

@@ -15,6 +15,11 @@
   "group": "Tracking cameras and modules"
  },
  {
+  "label": "ALG AVS111C-Y stereo module",
+  "link": "/benchmark/sensors/alg-avs111c/",
+  "group": "Tracking cameras and modules"
+ },
+ {
   "label": "Hampo stereo module",
   "link": "/benchmark/sensors/hampo/",
   "group": "Tracking cameras and modules"

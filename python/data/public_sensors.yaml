@@ -139,6 +139,53 @@ sensors:
         baseline: {auto: baseline}
         imu: {v: "ICM-45686 by default, 6-axis", tag: maker, src: "https://dibuli.com/content/docs/en/prism.md"}
         output: {v: "USB 3.x; TF card; ROS bag export", tag: maker, src: "https://dibuli.com/index.html"}
+  alg-avs111c:
+    group: cameras
+    key: alg-avs111c
+    title: ALG AVS111C-Y stereo module
+    description: GMSL2 global-shutter stereo module from ALG Tech with a 6-axis IMU, calibrated with MVIS as stereo + IMU.
+    lead: GMSL2 stereo camera module from Shenzhen Aili-Light Technology (ALG Tech, 艾利光), with two global-shutter cameras 50 mm apart and a 6-axis IMU. One recording, solved as stereo + IMU. The recording matches ALG's AVS111C-Y; the exact model isn't confirmed by the maker.
+    chips: [Stereo, Global shutter, 88 Hz IMU, GMSL2]
+    card: {name: "AVS111C-Y stereo", maker: ALG Tech, tags: [Global shutter, 2 cameras, 88 Hz IMU], sensors: "Stereo global-shutter + IMU @ 88 Hz", format: "ROS2 bag → EuRoC mav0", shows: "A stereo + IMU solve on a chessboard, after fixing the IMU's unit scale"}
+    source: https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html
+    source_label: ALG AVS111C-Y product page
+    checked: 2026-11-06
+    company: {name: Shenzhen Aili-Light Technology (ALG Tech), url: "https://www.aili-light.com/"}
+    hardware:
+      - [Maker, Shenzhen Aili-Light Technology (ALG Tech), Maker]
+      - [Closest published model, "AVS111C-Y: 1280×800, 50 mm baseline, 120° × 76°, global shutter. Matched from this recording; the exact model isn't confirmed", Maker]
+      - [Cameras, "2 × 1280×800, about 26 Hz in this recording", Measured]
+      - [Shutter, "Global on the AVS111C-Y sheet; a rolling-shutter solve finds no readout", Measured]
+      - [Lens, "1.67 mm, 120° horizontal on the AVS111C-Y sheet", Maker]
+      - [IMU, "6-axis, up to 6400 Hz on the sheet; 88 Hz in this recording", Maker]
+      - [Link and power, "GMSL2, power over coax, 9 to 12 V", Maker]
+    dataset:
+      - [Recordings, "1 recording, 24 s. cam0 623 frames, cam1 618, IMU 2,107 samples"]
+      - [Format, "ROS2 bag, converted to EuRoC layout"]
+      - [Board, "Chessboard 12×9 squares, 25 mm"]
+      - [Licence, None]
+      - [Hosted, Not hosted]
+    method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga on, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-06."
+    limits:
+      - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
+      - The IMU runs at about 88 Hz with uneven spacing, and the motion is slow, so the lever arm is the least certain result.
+      - The model is matched from resolution, baseline, field of view and shutter, not confirmed by the maker.
+    header:
+      type: "GMSL2 stereo camera module with a 6-axis IMU"
+      maker: {name: Shenzhen Aili-Light Technology (ALG Tech), url: "https://www.aili-light.com/"}
+      contact:
+        - {item: Email, v: sales@aili-light.com, url: "mailto:sales@aili-light.com"}
+        - {item: Phone, v: "+86 755 2721 8150", url: "tel:+8675527218150"}
+      links: {product: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html", product_label: "Closest model: AVS111C-Y"}
+      image: {kind: photo, file: alg-avs111c.png, alt: "ALG AVS111C-Y stereo camera module", credit: "Photo: ALG Tech, AVS111C-Y product page. Closest published model; exact model not confirmed", url: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html"}
+      foot: "Values measured in this recording · Maker values from the AVS111C-Y product page, read 2026-11-06"
+      key_specs:
+        cameras: {v: "2 × 1280×800"}
+        shutter: {v: Global, tag: maker, src: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html"}
+        fov: {auto: fov}
+        baseline: {auto: baseline}
+        imu: {v: "6-axis, 88 Hz here"}
+        output: {v: "GMSL2, ROS2 bag"}
   hampo:
     group: cameras
     key: hampo

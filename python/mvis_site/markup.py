@@ -64,11 +64,26 @@ def lens_svg(v) -> str:
     return "".join(parts)
 
 
+def chessboard_svg(b) -> str:
+    """A chessboard to scale: rows x cols squares, black at the top left, one square of white margin."""
+    sq, cols, rows = b["square_mm"], b["cols"], b["rows"]
+    w, h = cols * sq, rows * sq
+    d = "".join(f"M{c * sq:.2f} {r * sq:.2f}h{sq:.2f}v{sq:.2f}h{-sq:.2f}z" for r in range(rows) for c in range(cols) if (r + c) % 2 == 0)
+    m = sq
+    return (f'<figure class=board><svg viewBox="{-m:.1f} {-m:.1f} {w + 2 * m:.1f} {h + 2 * m:.1f}" role="img" aria-label="Chessboard {rows} by {cols} squares, to scale">'
+            f'<rect x="{-m:.1f}" y="{-m:.1f}" width="{w + 2 * m:.1f}" height="{h + 2 * m:.1f}" fill="#fff"/><path fill="#111" d="{d}"/></svg>'
+            f'<figcaption>Chessboard {cols} × {rows} squares ({cols - 1} × {rows - 1} inner corners), {sq:g} mm squares, '
+            f'{w:.0f} × {h:.0f} mm. To scale</figcaption></figure>')
+
+
 def board_svg(b, tags: dict) -> str:
     """The AprilGrid to scale: Kalibr layout, tag 0 at bottom left, each tag 6x6 data bits inside a 2-bit black border, black squares at the gaps' crossings.
 
     tags: tag id (as a string) to its 6x6 bit rows, from assets.apriltag().
+    A board with type "chessboard" (rows, cols = squares, square_mm) is drawn by chessboard_svg instead.
     """
+    if b.get("type") == "chessboard":
+        return chessboard_svg(b)
     tag = b["tag_mm"]
     gap = tag * b["spacing"]
     cols, rows = b["cols"], b["rows"]

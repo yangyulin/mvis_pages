@@ -174,3 +174,11 @@ def test_render_takes_demo_file_names_from_the_private_config(world):
     world["cfg"]["sensors"]["shared"]["demo_media"] = {"clip_c": "clip_a"}  # the private file name differs from the public clip name
     copies = {rel: src.name for src, rel in _plan(world).copies}
     assert copies["site/public/media/sensors/rig-groups/demo.mp4"] == "clip_a.mp4" and copies["site/public/media/sensors/rig-groups/demo.jpg"] == "clip_a.jpg"
+
+
+def test_only_cuts_pub_to_one_sensor_and_refuses_unknown():
+    pub = {"data_url": "u", "groups": [], "sensors": {"a": {"t": 1}, "b": {"t": 2}}}
+    assert X.only(pub, "b") == {"data_url": "u", "groups": [], "sensors": {"b": {"t": 2}}}
+    assert list(pub["sensors"]) == ["a", "b"]
+    with pytest.raises(SystemExit):
+        X.only(pub, "c")
