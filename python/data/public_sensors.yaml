@@ -1,0 +1,463 @@
+# Text for the public openmvis.com sensor pages. Written fresh: no maker-versus-MVIS comparison, internal path, code hash or device id.
+# Numbers come from the run named by `key` in the private sensors.yaml (kept in mira, passed to export_sensors.py by path).
+# A demo `from` names the clip; the private sensors.yaml maps it to the file in the media folder (demo_media) when that name holds a device id.
+# Only sensors listed here reach the site.
+data_url: https://huggingface.co/datasets/calibench-vi/datasets/tree/main
+groups:
+  - {id: cameras, title: Tracking cameras and modules}
+  - {id: head-worn, title: Head-worn cameras}
+  - {id: vr, title: VR headsets}
+# The order below is the order on the site: sidebar and Sensors overview. Every sensor needs a group.
+sensors:
+  intel-t265:
+    group: cameras
+    key: intel-t265
+    title: Intel RealSense T265
+    description: Global-shutter fisheye stereo tracking camera with a BMI055 IMU, calibrated with MVIS on one recording of our rig.
+    lead: Tracking camera from Intel with two global-shutter fisheye cameras and a Bosch BMI055 IMU, solved here on its own IMU from one recording of our VI-Rig.
+    chips: [Global shutter, Stereo fisheye, 200 Hz IMU, CC BY-NC 4.0]
+    card: {name: "T265", tags: [Global shutter, 2 cameras, 200 Hz IMU], sensors: "Stereo global-shutter fisheye + BMI055 @ 200 Hz", format: "ROS bag", shows: "A low-cost IMU with a gyro-to-accel time offset"}
+    source: https://www.intelrealsense.com/tracking-camera-t265/
+    source_label: Intel RealSense T265 page
+    checked: 2026-11-03
+    company: {name: Intel RealSense, url: "https://www.intelrealsense.com/"}
+    hardware:
+      - [Cameras, "2 × OV9282, 848×800 at 30 Hz", Maker]
+      - [Shutter, Global, Maker]
+      - [Lens, "Fisheye, about 163°", Maker]
+      - [IMU, "Bosch BMI055, gyro at 200 Hz, accel at 62.5 Hz", Measured]
+    dataset:
+      - [Recording, "VI-Rig, recording 1, 80 s window chosen by motion"]
+      - [Format, ROS bag]
+      - [Board, "AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11"]
+      - [Configs and results, "__HUB:community/intel-t265/__"]
+    folder: virig-4imus-3cams/
+    method: "Fisheye stereo plus the T265's own IMU, camera intrinsics free, t_ga on. Batch of 2026-11-03."
+    limits:
+      - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+      - The T265 gyro-to-accel offset isn't a pure time shift. We measured about −6.8 ms at 2–4 Hz and −1.2 ms at 30–40 Hz, so a single t_ga is a compromise that depends on the motion.
+    demo: {from: "intel-t265-plain_small", note: "The 3D scene MVIS recovered from recording 1."}
+    header:
+      type: "Tracking camera: global-shutter fisheye stereo with a Bosch BMI055 IMU"
+      maker: {name: Intel RealSense, url: "https://www.intel.com/content/www/us/en/products/sku/192742/intel-realsense-tracking-camera-t265/specifications.html"}
+      links: {product: "https://www.intel.com/content/www/us/en/products/sku/192742/intel-realsense-tracking-camera-t265/specifications.html", product_label: "Intel specifications"}
+      image: {kind: photo, file: intel-t265.jpg, alt: "Intel RealSense T265, front view", credit: "Photo: Intel, T265 launch press release", url: "https://www.intc.com/news-events/press-releases/detail/97/intel-announces-new-class-of-realsense-stand-alone"}
+      foot: "Maker values checked 2026-11-03; Intel lists it as discontinued · 1 recording · CC BY-NC 4.0"
+      key_specs:
+        cameras: {v: "848 × 800 fisheye stereo", tag: maker, src: "https://www.intel.com/content/www/us/en/products/sku/192742/intel-realsense-tracking-camera-t265/specifications.html"}
+        shutter: {v: Global, tag: catalog}
+        fov: {auto: fov, also: {v: "163° diagonal", tag: maker, src: "https://www.intel.com/content/www/us/en/products/sku/192742/intel-realsense-tracking-camera-t265/specifications.html"}}
+        baseline: {auto: baseline}
+        imu: {v: "BMI055, gyro 200 Hz, accel 62.5 Hz"}
+        output: {v: USB 3, tag: maker, src: "https://www.intel.com/content/www/us/en/products/sku/192742/intel-realsense-tracking-camera-t265/specifications.html"}
+  looper-insight9:
+    group: cameras
+    title: LooperRobotics Insight 9
+    description: Two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU, calibrated with MVIS on 10 hand-held and 2 robot-arm recordings.
+    lead: Sensor head from Looper Robotics with two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU. Hand-held and robot-arm recordings are shown separately.
+    chips: [Global + rolling shutter, 3 cameras, 400 Hz IMU, Hand-held + robot arm, Hand-held data CC BY-NC 4.0]
+    example: {url: "/examples/looper-sa16/", label: "Looper SA16"}
+    thanks:
+      people:
+        - {name: Qinrui Yan, role: "COO & Co-Founder, DeepMirror; Head of LooperRobotics", url: "https://www.linkedin.com/in/qinrui-yan-3625aa90"}
+        - {name: Junjie Tang, role: DeepMirror, url: "https://www.linkedin.com/in/junjie-tang-271b8033a"}
+      note: They collected the hand-held and robot-arm recordings and supported sharing this work openly.
+    card: {name: "Insight 9", tags: [Global + rolling shutter, 3 cameras, 400 Hz IMU], sensors: "2 mono + 1 rolling-shutter colour + IMU @ 400 Hz", format: "ROS bag → EuRoC mav0", shows: "Repeatability across 10 hand-held and 2 robot-arm recordings"}
+    demo:
+      by_variant:
+        - {from: "looper-insight9-new_small", note: "The 3D scene MVIS recovered from hand-held recording 1."}
+        - {from: "looper-insight9-arm_small", note: "The 3D scene MVIS recovered from robot-arm recording 1."}
+        - {from: "looper-insight9-arm_small", note: "The 3D scene MVIS recovered from robot-arm recording 1."}
+    hardware:
+      - [Type, "Spatial AI camera", Maker]
+      - [Global-shutter cameras, "2 × 544×640 mono at 20 Hz, hardware-synced stereo", Catalog]
+      - [Rolling-shutter camera, "1 × 1088×1920 colour at about 4.3 Hz", Catalog]
+      - [Lens, "Wide field of view; pinhole-equidistant fit", Catalog]
+      - [IMU, "1 × 400 Hz, with stamps quantized to 2.5 ms", Catalog]
+      - [Sensor part numbers, Not recorded, Unknown]
+    dataset:
+      - [Hand-held, "10 of about 66 s, 15.0 GB in all"]
+      - [Hand-held data, "__LINK__. CC BY-NC 4.0, for the hand-held data, clip and figures; commercial use by request"]
+      - [Robot arm, "2 of about 58 s, same program in both"]
+      - [Robot-arm data, "__HUB:community/looper-insight9/data/__. Everything except the board is blurred. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
+      - [Board, "AprilGrid 6×6, tag 55 mm, spacing 0.3, t36h11"]
+      - [Configs and results, "__HUB:community/looper-insight9/__"]
+    folder: looper-insight9/
+    method: "Camera + IMU with camera intrinsics free, t_ga on and the cam2 rolling-shutter readout estimated. Hand-held batch of 2026-11-02; robot-arm batch of 2026-11-04."
+    limits:
+      - No reference exists for these recordings, so the tables show repeatability, not accuracy.
+      - Hand-held and robot-arm recordings are kept apart, not pooled. They were solved in different batches and may not come from the same unit.
+      - Lever arms differ by about 3 mm in y and z, 4.5 to 5 mm in all, between the two sets. The arm program rotates mostly about one axis, which leaves lever arms less well determined, so treat the arm's values with more caution.
+      - The colour camera's td differs by about 1.8 ms between the two sets, and the cause isn't established.
+      - Robot-arm repeatability rests on 2 recordings.
+    header:
+      type: "Spatial AI camera: stereo pair, rolling-shutter colour camera, 6-axis IMU, VIO"
+      maker: {name: LooperRobotics, url: "https://looper-robotics.com/"}
+      links: {product: "https://looper-robotics.com/home/product/insight-9/"}
+      image: {kind: photo, file: looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page", url: "https://looper-robotics.com/home/product/insight-9/"}
+      foot: "Maker values checked 2026-11-03 for the retail Insight 9 · 10 hand-held recordings of about 66 s, CC BY-NC 4.0 · 2 robot-arm recordings of about 58 s, blurred except the board"
+      key_specs:
+        cameras: {v: "2 mono 544×640, 1 colour 1920×1080", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
+        shutter: {v: "Mono global, colour rolling", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
+        fov: {auto: fov, cams: {mono: 0, colour: 2}, also: {v: "Colour 188° × 86° × 157° (D × H × V)", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}}
+        baseline: {v: 100 mm, tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
+        imu: {v: "BMI088, 6-axis, 400 Hz", tag: maker, src: "https://looper-robotics.com/home/developers/insight9-ros-native-bringup-guide/v2-1-4"}
+        output: {v: "USB-C 3.1; ROS 2 or UVC", tag: maker, src: "https://looper-robotics.com/home/developers/insight9-uvc-bringup-guide/v2-1-4"}
+  dibuli-prism-a4l:
+    group: cameras
+    title: Dibuli Prism-A4L
+    description: Multi-sensor capture box with four global-shutter fisheye cameras and a 6-axis IMU, calibrated with MVIS from the maker's public example data.
+    lead: Multi-sensor capture box from Dibuli with four global-shutter fisheye cameras and a 6-axis IMU, solved from the maker's public example data at two exposures.
+    chips: [Global shutter, 4 cameras, 798 Hz IMU, CC BY-NC 4.0]
+    card: {name: "Prism-A4L", maker: Dibuli, tags: [Global shutter, 4 cameras, 798 Hz IMU], sensors: "4 global-shutter fisheye + IMU @ 798 Hz", format: "Camera + IMU bags", shows: "Very wide lenses on an EUCM fit, at two exposures"}
+    demo: {from: "dibuli-prism-a4l-new_small", note: "The 3D scene MVIS recovered from the maker's example data, 1,000 µs exposure."}
+    hardware:
+      - [Cameras, "Up to 4 global-shutter, 1280×1024 MJPEG, 1 to 30 fps", Maker]
+      - [IMU, "6-axis at 797.7 Hz in these recordings", Measured]
+      - [Sync, PPS, Maker]
+      - [Lens, "Fisheye, EUCM fit", Measured]
+    dataset:
+      - [Recordings, "2 camera + IMU bags at 1,000 and 2,000 µs exposure, about 450 MB each"]
+      - [Source, "Maker's public download, files.dibuli.com"]
+      - [Board, "AprilGrid 8×8, tag 70 mm, spacing 0.3"]
+      - [Licence, "CC BY-NC 4.0; commercial use by request"]
+      - [Hosted, "__HUB:community/dibuli-prism-a4l/__"]
+    method: "EUCM camera model, Kalibr IMU model, t_ga on, camera intrinsics free, seeded from the camera-only fit. Batch of 2026-11-03. This solve uses physical camera 1 as its base, so cam0 and cam1 on this page are physical cam1 and cam0."
+    limits:
+      - No independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+      - td changes with exposure. The exact slope is still open.
+    header:
+      type: "Multi-sensor synchronized capture device: 1–4 global-shutter cameras, 6-axis IMU"
+      maker: {name: DIBULI, url: "https://dibuli.com"}
+      links: {product: "https://dibuli.com/index.html", more: [{label: Spec sheet, url: "https://dibuli.com/content/docs/Prism-A4L-product-specification.pdf"}, {label: Example data, url: "https://files.dibuli.com/sharing/public/Prism/datasets/"}, {label: SDK, url: "https://github.com/DIBULI/Prism-SDK"}]}
+      image: {kind: photo, file: dibuli-prism-a4l.jpg, alt: "Prism-A4L cameras around an optional LiDAR, beside the capture box", credit: "Photo: DIBULI, product page. LiDAR shown is optional", url: "https://dibuli.com/index.html"}
+      foot: "Maker values checked 2026-11-03 · 2 recordings · Data on Hugging Face"
+      key_specs:
+        cameras: {v: "1–4 × SC130GS, 1280×1024 MJPEG", tag: maker, src: "https://dibuli.com/content/docs/en/prism.md"}
+        shutter: {v: Global, tag: maker, src: "https://dibuli.com/content/docs/en/prism.md"}
+        fov: {auto: fov}
+        baseline: {auto: baseline}
+        imu: {v: "ICM-45686 by default, 6-axis", tag: maker, src: "https://dibuli.com/content/docs/en/prism.md"}
+        output: {v: "USB 3.x; TF card; ROS bag export", tag: maker, src: "https://dibuli.com/index.html"}
+  hampo:
+    group: cameras
+    key: hampo
+    title: Hampo stereo module
+    description: Stereo fisheye colour module from Hampo with a 500 Hz IMU, calibrated with MVIS as stereo and as cam0 alone.
+    lead: Stereo fisheye colour module from Dongguan Hampo Electronic Technology (翰普), with an IMU at about 500 Hz. One recording, solved as stereo and as cam0 alone.
+    chips: [Stereo, Colour, 505 Hz IMU, CC BY-NC 4.0]
+    card: {name: "Stereo module", maker: Hampo, tags: [2 cameras, 505 Hz IMU], sensors: "Stereo colour fisheye + IMU @ 505 Hz", format: "MP4 → EuRoC mav0", shows: "Stereo and single-camera solves of one recording"}
+    source: https://www.hampotech.com/3372-wifi-ego-camera-module-for-egocentric-data-collection-global-shutter-stereo-6-axis-imu-sd-recording-product/
+    source_label: Hampo USB-3372 product page
+    checked: 2026-11-03
+    company: {name: Dongguan Hampo Electronic Technology, url: "https://www.hampotech.com/"}
+    hardware:
+      - [Maker, Dongguan Hampo Electronic Technology, Owner]
+      - [Closest published model, "USB-3372-V1.0: dual 2MP global shutter, M12 fixed focus, IMU at 100, 200 or 500 Hz, SD storage. The exact model isn't confirmed", Maker]
+      - [Cameras, "2 × 1600×1200, H.264, 30 fps, colour", Measured]
+      - [Shutter, "Not confirmed on this unit; global on the USB-3372 sheet", Unknown]
+      - [IMU, "505 Hz measured, 500 Hz set", Measured]
+      - [Sync, "Both cameras share one frame time in the recorder log", Measured]
+    dataset:
+      - [Recordings, "1 recording. cam0 107.8 s, 3,235 frames. cam1 stops at 57.6 s, 1,728 frames"]
+      - [Format, "Unfinalised MP4s, rebuilt, then converted to EuRoC layout"]
+      - [Board, "AprilGrid 8×6, tag 50 mm, spacing 0.3"]
+      - [Licence, "CC BY-NC 4.0; commercial use by request"]
+      - [Hosted, "__HUB:community/hampo/__"]
+    method: "cam0 at 30 Hz, cam1 at 10 Hz, default IMU noise, t_ga on, camera intrinsics free. Batch of 2026-11-03."
+    limits:
+      - No independent reference, so this shows consistency between the two solves, not accuracy.
+      - The recording is H.264 and the USB-3372 sheet lists MJPG and YUY2, so the exact model stays open.
+      - Frame stamps fall about 5.2 ms after mid-exposure, so td here isn't a physical delay.
+    demo: {from: "hampo-plain_small", note: "The 3D scene MVIS recovered from this recording."}
+    header:
+      type: "Stereo colour camera with an IMU, recording to a memory card"
+      maker: {name: Dongguan Hampo Electronic Technology, url: "https://www.hampotech.com/"}
+      contact:
+        - {item: Name, v: "周宇华, sales manager"}
+        - {item: Email, v: cannychow@dghpdz.cn, url: "mailto:cannychow@dghpdz.cn"}
+        - {item: Office phone, v: "+86 769 8798 9852", url: "tel:+8676987989852"}
+      links: {product: "https://www.hampotech.com/3372-wifi-ego-camera-module-for-egocentric-data-collection-global-shutter-stereo-6-axis-imu-sd-recording-product/", product_label: "Closest model: 3372"}
+      image: {kind: photo, file: hampo.jpg, alt: "Hampo USB-3372 camera board", credit: "Photo: Hampo, USB-3372 launch note. Closest published model; exact model not confirmed", url: "https://www.hampotech.com/news/hampo-launches-wifi-and-bluetooth-enabled-ego-camera-module-for-untethered-embodied-ai-data-collection/"}
+      foot: "Values measured in this recording · Data on Hugging Face"
+      key_specs:
+        cameras: {v: "2 × 1600×1200, H.264, 30 fps, colour"}
+        shutter: {v: Not confirmed on this unit, tag: not_published}
+        fov: {auto: fov}
+        baseline: {auto: baseline}
+        imu: {v: 505 Hz}
+        output: {v: MP4 + IMU file}
+  gi-ego1:
+    group: head-worn
+    title: GI Ego1
+    description: Head-worn rolling-shutter fisheye stereo with a 200 Hz IMU, calibrated with MVIS on one recording.
+    lead: One 30-second recording of an AprilGrid, solved with MVIS for camera, IMU and time offsets, with the rolling-shutter readout estimated too.
+    chips: [Rolling shutter, Stereo, 200 Hz IMU, CC BY-NC 4.0]
+    card: {tags: [Rolling shutter, 2 cameras, 200 Hz IMU], sensors: "Stereo rolling-shutter fisheye + IMU @ 200 Hz", format: "MCAP → EuRoC mav0", shows: "Readout estimated with the rig, from one recording"}
+    source: https://www.gilabs.xyz/blog/ego1
+    demo: {from: "gi-ego1-blurred_small", note: "The 3D scene MVIS recovered from this recording. Everything except the board is blurred."}
+    hardware:
+      - [Shutter, "Rolling, readout about 26 ms (solved)", Measured]
+      - [Cameras, "2 × 1920×1080 at about 30 fps", Measured]
+      - [Field of view, "120° × 72°", Maker]
+      - [IMU, "200 Hz, 9-DoF", Maker]
+      - [Sensor part numbers, Not published, Unknown]
+    dataset:
+      - [Recording, "2026-07-17, 30.1 s"]
+      - [Format, "MCAP, H.265"]
+      - [Frames, "Everything except the board is blurred"]
+      - [Frames kept at decode, "cam0 889 of 900, cam1 about 859"]
+      - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
+      - ["Bags, configs and results", "__HUB:community/gi-ego1/__"]
+    folder: gilabs-examples/
+    method: "Recording converted to EuRoC layout, camera-only solve per camera, then camera + IMU with camera intrinsics free, t_ga on and the rolling-shutter readout estimated. Batch of 2026-11-03."
+    limits:
+      - One recording, with no independent reference. These values show what MVIS solved, not how close they are to the truth.
+      - Gyro scale solves 3 to 4 % below 1 on all axes. We have not confirmed the cause.
+    header:
+      type: "Head-worn stereo headset: colour rolling-shutter fisheye cameras, 9-DoF IMU"
+      maker: {name: General Intelligence Labs, url: "https://www.gilabs.xyz/"}
+      links: {product: "https://www.gilabs.xyz/products/ego1"}
+      image: {kind: photo, file: gi-ego1gs.jpg, alt: "GI headset on a mannequin head, three-quarter view", credit: "Photo: General Intelligence Labs, GI EGO1GS product page", url: "https://www.gilabs.xyz/products/ego1gs"}
+      foot: "Maker values checked 2026-11-03 · 1 recording, 30.1 s · CC BY-NC 4.0"
+      key_specs:
+        cameras: {v: "2× 1080p, 30 fps, colour", tag: maker, src: "https://www.gilabs.xyz/products/ego1"}
+        shutter: {v: Rolling, tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+        fov: {auto: fov, also: {v: "120° × 72°, fisheye", tag: maker, src: "https://www.gilabs.xyz/blog/ego1"}}
+        baseline: {v: 63 mm, tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+        imu: {v: "9-DoF, 200 Hz", tag: maker, src: "https://www.gilabs.xyz/products/ego1"}
+        output: {v: "One .mcap file, H.265", tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+  gi-ego1gs:
+    group: head-worn
+    title: GI EGO1GS
+    description: Head-worn global-shutter fisheye stereo with an IMU at about 470 Hz, calibrated with MVIS on one recording.
+    lead: "Two 30-second recordings of an AprilGrid, solved with MVIS for camera, IMU and time offsets."
+    chips: [Global shutter, Stereo, 400 Hz IMU, CC BY-NC 4.0]
+    card: {tags: [Global shutter, 2 cameras, 400 Hz IMU], sensors: "Stereo global-shutter fisheye + IMU @ 400 Hz", format: "MCAP → EuRoC mav0", shows: "Very wide lenses, and gaps from frames lost at decode"}
+    source: https://www.gilabs.xyz/products/ego1gs
+    demo: {from: "gi-ego1gs-rec2_small", note: "The 3D scene MVIS recovered from recording 2. Everything except the board is blurred."}
+    run_labels: [Recording 1, Recording 2]
+    hardware:
+      - [Shutter, Global, Maker]
+      - [Cameras, "2 × 1080p at 30 fps", Maker]
+      - [Field of view, "157° × 84°", Maker]
+      - [Baseline, 63 mm, Maker]
+      - [IMU rate, "400 Hz published, 470.9 Hz in this recording", Measured]
+      - [Audio, Stereo microphones, Maker]
+      - [Sensor part numbers, Not published, Unknown]
+    dataset:
+      - [Recording 1, "2026-07-23, 30.1 s. Frames kept: cam0 821 of 894, cam1 744 of 890"]
+      - [Recording 2, "2026-07-24, 30.1 s. Frames kept: 895 of 899 on each camera"]
+      - [Frames, "Everything except the board is blurred"]
+      - [Format, "MCAP, H.265, 61 MB"]
+      - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
+      - ["Bags, configs and results", "__HUB:community/gi-ego1gs/__"]
+    folder: gilabs-examples/
+    method: "Recording converted to EuRoC layout, camera-only solve per camera, then camera + IMU with camera intrinsics free and t_ga on. Batch of 2026-11-03."
+    limits:
+      - No independent reference. These values show what MVIS solved, not how close they are to the truth.
+      - Recording 1 lost frames on both cameras at decode, so it has gaps.
+      - Both recordings are solved from the blurred video. Blurring moved the lever arm by less than 0.1 mm.
+    header:
+      type: "Head-worn stereo headset: colour global-shutter cameras, 9-DoF IMU, stereo audio"
+      maker: {name: General Intelligence Labs, url: "https://www.gilabs.xyz/"}
+      links: {product: "https://www.gilabs.xyz/products/ego1gs"}
+      image: {kind: photo, file: gi-ego1gs-front.jpg, alt: "GI EGO1GS on a mannequin head, front view", credit: "Photo: General Intelligence Labs, GI EGO1GS product page", url: "https://www.gilabs.xyz/products/ego1gs"}
+      foot: "Maker values checked 2026-11-03 · 2 recordings, 30.1 s each · CC BY-NC 4.0"
+      key_specs:
+        cameras: {v: "Dual 1080p, 30 fps, colour", tag: maker, src: "https://www.gilabs.xyz/blog/ego1gs-vs-project-aria-vs-ego-oscar"}
+        shutter: {v: Global, tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+        fov: {auto: fov, cams: {cam0: 0, cam1: 1}, also: {v: "157° × 84°", tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}}
+        baseline: {v: 63 mm, tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+        imu: {v: "9-DoF, 400 Hz", tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+        output: {v: "One .mcap file, H.265", tag: maker, src: "https://www.gilabs.xyz/products/ego1gs"}
+      groups:
+        - title: Published by the maker
+          rows:
+            - {item: Audio, v: "Stereo, dual microphones", src: "https://www.gilabs.xyz/products/ego1gs"}
+            - {item: Synchronization, v: "All four streams on one hardware clock", src: "https://www.gilabs.xyz/products/ego1gs"}
+            - {item: Storage, v: "MicroSD, 128 GB card included", src: "https://www.gilabs.xyz/products/ego1gs"}
+            - {item: Connectivity, v: "Wi-Fi and USB", src: "https://www.gilabs.xyz/products/ego1gs"}
+            - {item: Power, v: "USB power bank; 12 to 16 hours on 10,000 mAh", src: "https://www.gilabs.xyz/blog/ego1gs-vs-project-aria-vs-ego-oscar"}
+            - {item: Weight, v: "About 200 g, headset only", src: "https://www.gilabs.xyz/products/ego1gs"}
+        - title: Measured in this recording
+          rows:
+            - {item: IMU rate, v: 470.9 Hz}
+        - title: Maker
+          rows:
+            - {item: Company, v: "General Intelligence Labs, San Francisco", url: "https://www.gilabs.xyz/"}
+        - title: Not published
+          rows:
+            - {item: Parts, v: "Sensor part numbers, lens model"}
+  xq20:
+    group: head-worn
+    title: XQ20 stereo headset
+    description: Head-worn stereo camera with a 300 Hz IMU, calibrated with MVIS on two units.
+    lead: Head-worn stereo fisheye camera with a 6-axis IMU, recording to a memory card. Borme, a brand of Shenzhen Feikasi Industrial Co., Ltd., sells it as the XQ20. Two units were calibrated.
+    chips: [Stereo, 300 Hz IMU, 2 units, CC BY-NC 4.0]
+    card: {tags: [Global shutter, 2 cameras, 300 Hz IMU], sensors: "Stereo fisheye + IMU @ 300 Hz", format: "MP4 + IMU CSV → EuRoC mav0", shows: "Two units of one headset, and a lever arm that's still open"}
+    hardware:
+      - [Cameras, "2 × 1920×1200, H.265 MP4", Supplier]
+      - [Frame rate, "30 or 60 fps on the sheet; about 30 Hz in these recordings", Supplier]
+      - [Field of view, "123.6° on the sheet; axis not stated", Supplier]
+      - [Model number, XQ20, Listing]
+      - [Cameras, "2, dual 1080P, 2 MP, MP4", Listing]
+      - [Lens, Fisheye, Listing]
+      - [Frame rate, "60 and 30 fps", Listing]
+      - [Field of view, "160°; axis not stated", Listing]
+      - [Shutter, "Global; not measured in these recordings", Listing]
+      - [IMU, "300 Hz; stamped at measurement end, 50 ppm, 32-bit µs", Listing]
+      - [IMU, "6-axis, 300 or 600 Hz on the sheet; 300.5 Hz measured", Supplier]
+      - [Storage and interface, "microSD up to 128 GB, or UVC; Type-C", Supplier]
+      - [Power, No battery, Supplier]
+      - [Weight, 180 g with strap, Supplier]
+      - [Sensor part numbers, Not given, Unknown]
+    dataset:
+      - [Recordings, "Unit A: 158 s, 4,736 frames. Unit B: 119 s, 3,573 frames"]
+      - [Format, "MP4 plus per-segment IMU CSV, converted to EuRoC layout"]
+      - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
+      - [Licence, "CC BY-NC 4.0; commercial use by request"]
+      - [Hosted, "__HUB:community/xq20/__"]
+    method: "cam0 at 30 Hz, cam1 at 10 Hz, t_ga on, camera intrinsics free. Batch of 2026-11-03."
+    limits:
+      - No independent reference. These values show what MVIS solved, not how close they are to the truth.
+      - Unit A lever z sits about 25 mm above unit B, beyond the roughly 10 mm uncertainty for this motion. This is still open.
+      - The listing says 1080P and 160°, and the supplier's sheet says 1920×1200 and 123.6°. These recordings are 1920×1200. The listing's shutter value wasn't tested here.
+      - Accel z scale stays near 0.93 to 0.94 because z barely sees gravity in this motion, so it isn't a sensor property.
+    demo: {from: "xq20-plain_small", note: "The 3D scene MVIS recovered from unit B."}
+    header:
+      type: "Head-worn stereo fisheye camera with a 6-axis IMU, recording to a memory card"
+      maker: {name: "Borme", url: "https://www.alibaba.com/product-detail/1080P-Global-Shutter-Binocular-IMU-Camera_1601882874490.html"}
+      links: {product: "https://www.alibaba.com/product-detail/1080P-Global-Shutter-Binocular-IMU-Camera_1601882874490.html", product_label: "Alibaba listing"}
+      image: {kind: photo, file: xq20.jpg, alt: "XQ20 head-worn stereo camera on its strap", credit: "Image: the supplier's XQ20 spec sheet"}
+      foot: "Supplier values from their spec sheet, received 2026-10-21 · Borme's listing, read 2026-11-04 · 2 units · Data on Hugging Face"
+      key_specs:
+        cameras: {v: "2 × 1920×1200, H.265", tag: supplier}
+        shutter: {v: "Global, not measured", tag: listing, src: "https://www.alibaba.com/product-detail/1080P-Global-Shutter-Binocular-IMU-Camera_1601882874490.html"}
+        fov: {auto: fov, also: {v: "160° on the listing, 123.6° on the sheet, axes not stated", tag: listing, src: "https://www.alibaba.com/product-detail/1080P-Global-Shutter-Binocular-IMU-Camera_1601882874490.html"}}
+        baseline: {auto: baseline}
+        imu: {v: "6-axis, 300 or 600 Hz", tag: supplier}
+        output: {v: "MP4 on microSD, or UVC", tag: supplier}
+  valve-index:
+    group: vr
+    key: valve-index
+    title: Valve Index
+    description: VR headset with a global-shutter fisheye stereo pair and a 1 kHz IMU, calibrated with MVIS on the Monado dataset.
+    lead: VR headset from Valve with a front global-shutter fisheye stereo pair and a 6-axis IMU at about 1 kHz, solved from the Monado SLAM calibration data.
+    chips: [Global shutter, Stereo fisheye, 1 kHz IMU, CC BY 4.0]
+    example: {url: "/examples/monado/", label: "Monado"}
+    card: {name: "Index", tags: [Global shutter, 2 cameras, 1 kHz IMU], sensors: "Stereo global-shutter fisheye + IMU @ 1 kHz", format: "EuRoC mav0", shows: "A consumer headset, from public data"}
+    source: https://www.valvesoftware.com/en/index
+    source_label: Valve Index page
+    checked: 2026-11-03
+    company: {name: Valve, url: "https://www.valvesoftware.com/"}
+    demo: {existing: "/media/hero/hero_mic_960", note: "Recovered by MVIS from the Monado calibration data."}
+    hardware:
+      - [Cameras, "2 × 960×960 at 54 Hz, grayscale", Dataset]
+      - [Shutter, Global, Dataset]
+      - [Lens, "Fisheye, about 120° (unofficial)", Dataset]
+      - [IMU, "6-axis, about 1 kHz", Dataset]
+      - [Sensor part numbers, Not published, Unknown]
+    dataset:
+      - [Recording, "Monado MIC, imucalib1"]
+      - [Source, "Monado SLAM Datasets, Collabora"]
+      - [Board, "AprilGrid 6×6, tag 30 mm, spacing 0.3, t36h11"]
+      - [Licence, CC BY 4.0]
+      - [Hosted copy, "__HUB:datasets/converted/tum_mic/__"]
+      - [Configs and results, "__HUB:community/valve-index/__"]
+    data_link: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: "Monado SLAM Datasets"}
+    method: "Camera + IMU with camera intrinsics free and t_ga on. Batch of 2026-11-02."
+    limits:
+      - One recording shown, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+    header:
+      type: "VR headset with a global-shutter fisheye stereo pair and a 1 kHz IMU"
+      maker: {name: Valve, url: "https://www.valvesoftware.com/"}
+      links: {product: "https://store.steampowered.com/app/1059530/"}
+      image: {kind: photo, file: valve-index.jpg, alt: "Valve Index headset", credit: "Image: Valve, Steam store page", url: "https://store.steampowered.com/app/1059530/"}
+      foot: "Values from the Monado SLAM Datasets · 1 recording shown · CC BY 4.0 data"
+      key_specs:
+        cameras: {v: "2 × 960×960, 54 Hz, grayscale", tag: dataset}
+        shutter: {v: Global, tag: dataset}
+        fov: {auto: fov}
+        baseline: {auto: baseline}
+        imu: {v: "6-axis, about 1 kHz", tag: dataset}
+        output: {v: "EuRoC layout, in the dataset", tag: dataset}
+  hp-reverb-g2:
+    group: vr
+    key: hp-reverb-g2
+    title: HP Reverb G2
+    description: VR headset with 640×480 tracking cameras and a 1 kHz IMU, calibrated with MVIS on the Monado dataset.
+    lead: VR headset from HP with four 640×480 grayscale tracking cameras and an IMU at about 1 kHz. All four are solved from the Monado SLAM calibration data, in three pair recordings stitched together.
+    chips: [4 cameras, Stitched from pairs, 1 kHz IMU, CC BY 4.0]
+    card: {name: "Reverb G2", tags: [4 cameras, 1 kHz IMU], sensors: "4 tracking cameras + IMU @ 1 kHz", format: "EuRoC mav0", shows: "Four cameras stitched from three pair recordings"}
+    company: {name: HP, url: "https://www.hp.com/"}
+    demo: {existing: "/media/hero/hero_mgc_960", note: "Recovered by MVIS from the Monado calibration data."}
+    hardware:
+      - [Cameras, "4 × 640×480 grayscale at 30 Hz", Dataset]
+      - [IMU, "About 1 kHz", Dataset]
+      - [Sensor part numbers, Not published, Unknown]
+    dataset:
+      - [Recordings, "Monado MGC round 1: imucalib01, 02 and 13, one for each camera pair"]
+      - [Source, "Monado SLAM Datasets, Collabora"]
+      - [Board, "AprilGrid 6×6, tag 30 mm, spacing 0.3, t36h11"]
+      - [Licence, CC BY 4.0]
+      - [Hosted copy, "__HUB:datasets/converted/monado_mgc/__"]
+      - [Configs and results, "__HUB:community/hp-reverb-g2/__"]
+    data_link: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: "Monado SLAM Datasets"}
+    method: "Each recording shows the board to one camera pair, so three pairs are solved: cam0 + cam1, cam0 + cam2, cam1 + cam3. Each is camera + IMU with camera intrinsics free and t_ga on, on current MVIS, 2026-11-03. cam0, cam1 and all IMU values come from the first pair. cam2 is attached through cam0 and cam3 through cam1."
+    limits:
+      - One recording shown, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+      - This rig is stitched from three solves, not one joint solve. Cameras seen in two pairs agree to 0.89 mm and 0.34° (cam0) and 0.54 mm and 0.15° (cam1). cam2 and cam3 move 0.79 and 0.52 mm depending on how they are attached.
+      - The process figure and values for the IMU show the cam0 + cam1 recording only.
+    header:
+      type: "VR headset with four tracking cameras and a 1 kHz IMU"
+      maker: {name: HP, url: "https://www.hp.com/"}
+      links: {product: "https://www.hp.com/us-en/newsroom/press-releases/2020/hp-valve-microsoft-next-gen-virtual-reality-headset.html", product_label: "HP announcement"}
+      image: {kind: photo, file: hp-reverb-g2.jpg, alt: "HP Reverb G2 headset, front view", credit: "Photo: HP, Reverb G2 press release", url: "https://www.hp.com/us-en/newsroom/press-releases/2020/hp-valve-microsoft-next-gen-virtual-reality-headset.html"}
+      foot: "Values from the Monado SLAM Datasets · 1 recording shown · CC BY 4.0 data"
+      key_specs:
+        cameras: {v: "4 × 640×480, 30 Hz, grayscale", tag: dataset}
+        shutter: {v: Not stated, tag: not_published}
+        fov: {auto: fov}
+        baseline: {auto: baseline}
+        imu: {v: About 1 kHz, tag: dataset}
+        output: {v: "EuRoC layout, in the dataset", tag: dataset}
+  samsung-odyssey-plus:
+    group: vr
+    key: samsung-odyssey-plus
+    title: Samsung Odyssey+
+    description: VR headset with two 640×480 tracking cameras and a 1 kHz IMU, calibrated with MVIS on the Monado dataset.
+    lead: VR headset from Samsung with two 640×480 grayscale tracking cameras and an IMU at about 1 kHz, solved from the Monado SLAM calibration data.
+    chips: [Stereo, 1 kHz IMU, CC BY 4.0]
+    card: {name: "Odyssey+", tags: [2 cameras, 1 kHz IMU], sensors: "2 tracking cameras + IMU @ 1 kHz", format: "EuRoC mav0", shows: "A consumer headset, and a recording set that's hard to solve"}
+    company: {name: Samsung, url: "https://www.samsung.com/"}
+    demo: {existing: "/media/hero/hero_moc_960", note: "Recovered by MVIS from the Monado calibration data."}
+    hardware:
+      - [Cameras, "2 × 640×480 grayscale at 30 Hz", Dataset]
+      - [IMU, "About 1 kHz", Dataset]
+      - [Sensor part numbers, Not published, Unknown]
+    dataset:
+      - [Recording, "Monado MOC, imucalib, round 4"]
+      - [Source, "Monado SLAM Datasets, Collabora"]
+      - [Board, "AprilGrid 6×6, tag 30 mm, spacing 0.3, t36h11"]
+      - [Licence, CC BY 4.0]
+      - [Hosted copy, "__HUB:datasets/converted/monado_moc/__"]
+      - [Configs and results, "__HUB:community/samsung-odyssey-plus/__"]
+    data_link: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: "Monado SLAM Datasets"}
+    method: "Camera + IMU with camera intrinsics free and t_ga on. Batch of 2026-11-02."
+    limits:
+      - One recording shown, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+      - In this batch, 2 of the 4 rounds on this headset didn't converge to a usable solve (rounds 1 and 3). Round 4 is shown. Treat these values with that in mind.
+    header:
+      type: "VR headset with two tracking cameras and a 1 kHz IMU"
+      maker: {name: Samsung, url: "https://www.samsung.com/"}
+      links: {product: "https://news.samsung.com/br/samsung-apresenta-o-novo-hmd-odyssey-no-brasil", product_label: "Samsung announcement"}
+      image: {kind: photo, file: samsung-odyssey-plus.jpg, alt: "Samsung HMD Odyssey+ headset", credit: "Photo: Samsung Newsroom Brasil", url: "https://news.samsung.com/br/samsung-apresenta-o-novo-hmd-odyssey-no-brasil"}
+      foot: "Values from the Monado SLAM Datasets · 1 recording shown · CC BY 4.0 data"
+      key_specs:
+        cameras: {v: "2 × 640×480, 30 Hz, grayscale", tag: dataset}
+        shutter: {v: Not stated, tag: not_published}
+        fov: {auto: fov}
+        baseline: {auto: baseline}
+        imu: {v: About 1 kHz, tag: dataset}
+        output: {v: "EuRoC layout, in the dataset", tag: dataset}

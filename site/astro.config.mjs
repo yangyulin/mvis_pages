@@ -4,7 +4,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { readFileSync } from 'node:fs';
 
-// Written by export_sensor.py with the Sensors overview, so both list sensors in one order.
+// Written by site/scripts/export_sensors.py (python/mvis_site) with the Sensors overview, so both list sensors in one order.
 const sensorNav = JSON.parse(readFileSync(new URL('./src/data/sensor-nav.json', import.meta.url), 'utf8'));
 
 // GitHub Pages serves `main:/docs`, so the build writes there. A build therefore

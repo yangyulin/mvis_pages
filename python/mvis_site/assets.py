@@ -1,0 +1,52 @@
+"""The only reader of files shipped with the lib, and of the site stylesheet the private pages follow; the extra colour tokens.
+
+progress.js is the `_PROGRESS_JS` player from openmvis src/mvis/analysis/report_shell.py at ec4475e (GPL-3.0-only),
+kept byte-exact so the site runs the same player as the MVIS report; tests/test_assets.py checks it against MVIS_SRC.
+"""
+from __future__ import annotations
+
+import json
+import re
+
+from . import ASSETS, SITE
+
+
+# Colours the site's stylesheet lacks (warnings, the reference overlay, cameras 2-3, axes), shared by the public
+# sensor.css and mira's private pages so the two can't drift apart. No trailing ";": each caller joins them.
+EXTRA_DARK = "--warn:#e0b25c;--warn-bg:#3a2f18;--ghost:#f59e0b;--c2:#34d399;--c3:#e879f9;--x:#f87171;--y:#4ade80;--z:#60a5fa"
+EXTRA_LIGHT = "--warn:#8a5a06;--warn-bg:#fdf3dc;--ghost:#b45309;--c2:#059669;--c3:#a21caf;--x:#dc2626;--y:#16a34a;--z:#2563eb"
+
+
+def _read(name: str) -> str:
+    return (ASSETS / name).read_text(encoding="utf-8")
+
+
+def page_css() -> str:
+    return _read("page.css")
+
+
+def page_js() -> str:
+    return _read("page.js")
+
+
+def header_css() -> str:
+    return _read("sensor_header.css")
+
+
+def progress_js() -> str:
+    return _read("progress.js")
+
+
+def apriltag() -> dict:
+    """AprilTag 36h11 bit rows by tag id, for board_svg."""
+    return json.loads(_read("apriltag36h11.json"))
+
+
+def custom_css() -> str:
+    return (SITE / "src/styles/custom.css").read_text(encoding="utf-8")
+
+
+def site_tokens(css: str) -> dict:
+    """Accent and slate values from the site's stylesheet, so private pages follow it."""
+    block = lambda sel: dict(re.findall(r"--([\w-]+):\s*([^;]+);", css[css.index(sel):css.index("}", css.index(sel))]))
+    return {"light": block(":root[data-theme='light']"), "dark": block(":root[data-theme='dark']")}

@@ -1,0 +1,13 @@
+# Test and coverage settings for the mvis_site lib. Not a package: the site scripts put python/ on sys.path.
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+markers = ["real_data: needs private results named by env (MVIS_SENSORS_CONFIG, MVIS_MEDIA, MVIS_LEADERBOARD, MVIS_UZH_ROOT, MVIS_SRC); skipped without them"]
+
+[tool.coverage.run]
+branch = true
+source = ["mvis_site"]
+
+[tool.coverage.report]
+show_missing = true

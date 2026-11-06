@@ -9,3 +9,7 @@ build
 MANIFEST
 jo
 stage/
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/

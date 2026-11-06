@@ -1,0 +1,5 @@
+.cb{--body-text-color:var(--sl-color-white);--border-color-primary:var(--sl-color-gray-5);
+--background-fill-primary:var(--sl-color-bg);--link-text-color:var(--sl-color-text-accent);
+--primary-700:#b8360f;--primary-400:#fb923c}
+.cb .x{color:blue}
+:root[data-theme='dark'] .cb .x{color:white}
