@@ -1,11 +1,11 @@
 ---
 title: Camera model
-description: The six projection and distortion models MVIS supports, and how to choose between them.
+description: The eight projection and distortion models MVIS supports, and how to choose between them.
 pageType: concept
 wide: true
 ---
 
-MVIS implements six distortion models. Each lives in one place —
+MVIS implements eight distortion models. Each lives in one place —
 `camera/CameraModel` holds its projection, Jacobians, and unprojection — so the
 same models are available in **camera-only and camera–IMU** calibration, in
 board and feature mode, and can be **mixed across cameras** in a single rig.
@@ -13,21 +13,23 @@ Models outside GTSAM's built-ins carry custom analytical Jacobians.
 
 Symbols follow [Notation & glossary](/concepts/notation/).
 
-## The six models
+## The eight models
 
 | Model | Config value | Origin | Suits |
 |---|---|---|---|
 | Pinhole + radial-tangential | `radtan` | Brown–Conrady | Normal lenses |
-| Equidistant (KB4) | `equidistant` | Kannala–Brandt | **Fisheye — recommended** |
+| Kannala–Brandt KB4 | `kb4` (also `fisheye`, `kannala_brandt`) | Kannala–Brandt, θ from atan2 | Fisheye, including corners past 90° |
+| Equidistant | `equidistant` | Kannala–Brandt on x/z | Fisheye with every corner under 90° (the same pixels as `kb4` there) |
 | FOV | `fov` | Devernay–Faugeras | Wide-angle, single parameter |
 | Double Sphere | `double_sphere` | Usenko / Basalt | Very wide FoV |
 | EUCM | `eucm` | Khomutenko | Very wide FoV |
+| UCM | `ucm` | Unified (Mei), α form | Very wide FoV; Kalibr `omni-none` |
 | Omni + radtan | `omni_radtan` | Mei — **experimental** | Catadioptric, ultra-wide |
 
 ```yaml title="config.yaml"
 cameras:
   - camera_id: 0
-    distortion_model: equidistant
+    distortion_model: kb4
 ```
 
 ## Choosing one
@@ -36,11 +38,17 @@ More parameters is not better. A model richer than the lens needs will fit
 noise, and on wide-FoV data it can slide into a basin that looks converged and
 is not.
 
+Choose by the largest incidence angle of the board corners off the optical axis,
+not by the lens's advertised field of view. Every result reports it, with any
+corners past the model's valid domain.
+
 - **Normal lens** → `radtan`.
-- **Fisheye** → `equidistant`. It is the recommended default for a reason: it is
-  the best-behaved of the wide-FoV models across the benchmark.
-- **Very wide FoV** → `double_sphere` or `eucm` if `equidistant` leaves
-  structure in the residuals.
+- **Fisheye** → `kb4`, which is what `fisheye` and `kannala_brandt` select. It
+  stays valid past 90° up to its first fold, and exports to Kalibr as
+  pinhole-equi (exact below 90°; MVIS warns when the fit used corners past it).
+- **Every corner under 90°, equidistant asked for** → `equidistant`. It gives the
+  same pixels as `kb4` there; name it explicitly.
+- **Very wide FoV, a different shape** → `eucm`, `ucm` or `double_sphere`.
 - **Catadioptric** → `omni_radtan`, with the caveat that it is experimental.
 
 :::caution[Wide-FoV models can diverge on stereo]
@@ -82,6 +90,8 @@ The models were compared over a 52-run benchmark across MVIS T265 and TUM-VI
 1024 (`doc/investigation_ds_convergence.md`). On the camera–IMU path, TUM-VI raw
 IMU bags show `omni_radtan` and `equidistant` reproducing the Kalibr cam-IMU
 extrinsics to **≤2 mm lever, ≤0.15 mm stereo baseline, ≤1 ms time offset**.
+On TUM-VI and T265, where no corner passes 90°, `kb4` and `equidistant` fits
+agree to 1e-6 px and their camera–IMU extrinsics to 1e-11 rad.
 
 Model choice does not change the geometry a good fit recovers — it changes
 whether you get a good fit at all.

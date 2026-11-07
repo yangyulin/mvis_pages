@@ -74,8 +74,8 @@ Also available: `timestamped_images` (folder + CSV) and `ros2bag`.
 ## 4. Pick a distortion model
 
 ```yaml title="config.yaml"
-    distortion_model: equidistant    # radtan | equidistant | fov
-                                     # double_sphere | eucm | omni_radtan
+    distortion_model: kb4            # radtan | kb4 | equidistant | fov
+                                     # double_sphere | eucm | ucm | omni_radtan
 ```
 
 `radtan` for normal lenses, `equidistant` for fisheye. Models can be **mixed

@@ -38,7 +38,7 @@
           <tr><th scope="col">Quantity</th><th scope="col">Symbol</th><th scope="col">Per</th><th scope="col">Unit</th><th scope="col">Notes</th></tr>
         </thead>
         <tbody>
-          <tr><td class="q">Intrinsics + distortion</td><td class="sym">f, c, k</td><td class="per">camera</td><td class="unit">px</td><td>Six models, mixable within one rig</td></tr>
+          <tr><td class="q">Intrinsics + distortion</td><td class="sym">f, c, k</td><td class="per">camera</td><td class="unit">px</td><td>Eight models, mixable within one rig</td></tr>
           <tr><td class="q">Camera–IMU extrinsics</td><td class="sym">T_CtoI</td><td class="per">camera</td><td class="unit">m · log(R) rad</td><td>Every camera to the base IMU</td></tr>
           <tr><td class="q">Camera time offset</td><td class="sym">t_d</td><td class="per">camera</td><td class="unit">ms</td><td>Recovers USB lag of −124 ms on the ELP stereo</td></tr>
           <tr><td class="q">Rolling-shutter readout</td><td class="sym">t_r</td><td class="per">camera</td><td class="unit">ms</td><td>Each corner projected at its own row time</td></tr>
@@ -56,13 +56,15 @@
     <div class="mhs-split">
       <div>
         <p class="mhs-kicker">Camera models</p>
-        <h2>Six projection models.</h2>
+        <h2>Eight projection models.</h2>
         <ul class="mhs-models">
           <li><code>radtan</code><span>Pinhole, radial–tangential</span></li>
-          <li><code>equidistant</code><span>Kannala–Brandt KB4 fisheye</span></li>
+          <li><code>kb4</code><span>Kannala–Brandt fisheye</span></li>
+          <li><code>equidistant</code><span>KB polynomial, under 90°</span></li>
           <li><code>fov</code><span>Field-of-view model</span></li>
           <li><code>double_sphere</code><span>Wide-angle fisheye</span></li>
           <li><code>eucm</code><span>Extended unified camera</span></li>
+          <li><code>ucm</code><span>Unified camera</span></li>
           <li class="exp"><code>omni_radtan</code><span>Omnidirectional</span></li>
         </ul>
       </div>

@@ -29,7 +29,7 @@ are in [Installation](/getting-started/installation/).
 
 | Quantity | Scope | Notes |
 |---|---|---|
-| Camera intrinsics + distortion | per camera | Six models, mixable across a rig |
+| Camera intrinsics + distortion | per camera | Eight models, mixable across a rig |
 | Camera extrinsics | per camera | Against `reference_camera` |
 | Camera–camera time offsets | pairwise | `optimize_time_offset` |
 | Rolling-shutter readout | per RS camera | Solved jointly, not corrected after |
@@ -42,8 +42,9 @@ are in [Installation](/getting-started/installation/).
 
 ## Camera models
 
-`radtan` · `equidistant` (KB4, **recommended for fisheye**) · `fov` ·
-`double_sphere` · `eucm` · `omni_radtan` (experimental). Details:
+`radtan` · `kb4` (fisheye; also `fisheye`, `kannala_brandt`) · `equidistant`
+(the same pixels as `kb4` when every corner is under 90°) · `fov` ·
+`double_sphere` · `eucm` · `ucm` · `omni_radtan` (experimental). Details:
 [Camera model](/concepts/camera-model/).
 
 ## IMU-intrinsics conventions
