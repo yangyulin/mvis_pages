@@ -287,7 +287,7 @@ def test_tie_top_and_its_words(built):
     c = cell(built, "TA", "distortion")
     assert c["state"] == "tie_top" and c["tools"] == ["MVIS", "Basalt"] and c["over"] == ["Kalibr"]
     assert c["chip"] == "Tie: MVIS = Basalt · both tighter than Kalibr" and "dist_tradeoff" in c["caveats"]
-    assert "Both scatter less than Kalibr" in c["sentence"] and c["strip"] == "Distortion MVIS = Basalt"
+    assert "Both scatter less than Kalibr" in c["sentence"] and c["strip"] == "Distortion MVIS = Basalt > Kalibr"
     assert "tie between MVIS and Basalt" in c["aria"]
 
 
@@ -537,3 +537,93 @@ def test_each_fragment_has_one_family_fold_per_family_in_the_json():
 def test_the_space_groups_match():
     app = env_path("MVIS_LEADERBOARD") / "app.py"
     assert R.check_groups(R.app_groups(app)) == []
+
+
+# ---------------------------------------------------------------- review fixes: other model rows, limits, notes
+def one(T, mode, rows, n, g, skip=()):
+    stats = {"families": {T: fam(mode, rows, n)}}
+    rec = records_for(stats, [("z", "Z", [T])], skip=skip)
+    return R.build(stats, rec, BATCH, SHA)["datasets"][0]["families"][0]["cells"][g]
+
+
+def test_rows_whose_models_differ_are_not_compared():
+    n8 = recs(8)
+    c = one("T2", "cam", [row("cam0 – ELP-L", "fx", mvis=series(1, 8, 0.1), kalibr=series(2, 8, 1.0), names=n8)], 8, "focal_pp")
+    assert c["state"] == "not_compared" and c["reason"] == R._T2_LENS and c["pairs"] == []
+    assert {"tool": "Kalibr", "role": "other_model", "reason": R._T2_LENS, "rows": 1} in c["excluded"]
+    assert c["rec_line"] == "MVIS 8 of 8 · Kalibr other model · Basalt not run"
+
+
+def test_t7_elp_l_timing_rows_leave_the_comparison_and_td_has_its_caveats():
+    n8 = recs(8)
+    rows = [row("cam0 – t265", "td_ms", mvis=series(1, 8, 0.1), calyx=series(2, 8, 0.1), kalibr=series(3, 8, 1.0), names=n8),
+            row("cam1 – ELP-L", "td_ms", mvis=series(4, 8, 0.1), calyx=series(5, 8, 0.1), kalibr=series(6, 8, 1.0), names=n8)]
+    c = one("T7", "camimu", rows, 8, "time_offset", skip={("Basalt", "T7")})
+    assert c["pairs"][0]["n_params"] == 1 and c["pairs"][0]["p"] is not None
+    assert {"tool": "Kalibr", "role": "other_model", "reason": R._T7_ELPL, "rows": 1} in c["excluded"]
+    assert {"mvis_tga", "kalibr_gs_elp", "settings_differ"} <= set(c["caveats"])
+    assert c["params"][0]["data_k"] == "c|cam0 – t265|td_ms" and c["mvis_variant"] == "default"
+
+
+def test_pairs_on_different_parameters_get_a_caveat():
+    n8 = recs(8)
+    t, l, m = (lambda s: series(s, 8, 0.1)), (lambda s: series(s, 8, 1.0)), (lambda s: series(s, 8, 0.35))
+    rows = [row("cam0 – A", "fx", mvis=t(1), kalibr=l(2), basalt=m(3), names=n8),
+            row("cam0 – A", "fy", mvis=t(4), kalibr=l(5), basalt=m(6), names=n8),
+            row("cam1 – B", "fx", mvis=t(7), kalibr=l(8), basalt=m(9), bkind="info", names=n8)]
+    c = one("TX", "cam", rows, 8, "focal_pp")
+    assert [q["n_params"] for q in c["pairs"]] == [3, 2, 2] and "pairs_differ" in c["caveats"]
+    assert c["params"][0]["data_k"] == "m|cam0 – A|fx"
+
+
+def test_a_matched_n_set_by_an_input_tool_is_explained():
+    n8 = recs(8)
+    r = row("cam0 – A", "fx", kind="fixed", mvis=series(1, 8, 0.1), calyx=series(1, 3, 0.1), kalibr=series(2, 3, 0.1),
+            basalt=series(3, 8, 1.0), names=n8)
+    c = one("TY", "camimu", [r], 8, "focal_pp")
+    assert c["state"] == "too_few" and c["n"] == 3 and c["calyx_limited"]
+    assert c["rec_line"] == "MVIS 3 of 8 · Kalibr input · Basalt 8 of 8" and c["unmatched"] == {"Basalt": 5}
+    assert c["limit_line"] == R.CALYX_NOTE.format(lo=3) and c["sentence"].startswith("Only 3 recordings hold values")
+
+
+def test_rec_line_ranges_and_unknown_roles():
+    c = {"n_range": {"MVIS": [13, 15]}, "excluded": [{"tool": "Kalibr", "role": "odd"}]}
+    recs_ = {t: {"of": 15} for t in R.TOOLS}
+    assert R.rec_line(c, recs_) == "MVIS 13–15 of 15 · Kalibr odd · Basalt –"
+
+
+@pytest.mark.parametrize("ci,decision,want", [([0.39, 0.97], "a", True), ([0.17, 0.45], "a", False), ([None, 0.5], "a", False),
+                                              ([1.6, None], "b", False), ([0.5, None], "b", True), ([0.5, 0.9], "tie", None),
+                                              (None, "a", None)])
+def test_an_interval_that_reaches_the_tie_band_is_flagged(ci, decision, want):
+    q = {"a": "MVIS", "b": "Kalibr", "n_params": 2, "R": 0.6, "k": 1.6, "ci": ci, "p": 0.01, "p_holm": 0.01,
+         "decision": decision, "tie_reason": None, "loo_stable": True, "exact": True}
+    pub = R._public_pair(q)
+    assert pub["ci_in_tie_band"] is want
+    lines = R.band_lines({"pairs": [pub]})
+    assert bool(lines) == bool(want) and (not lines or "MVIS ÷ Kalibr reaches into the tie band" in lines[0])
+
+
+def test_each_cell_jump_target_row_exists_in_its_fragment():
+    board = json.loads((REPO / "site/src/data/leaderboard/board.json").read_text())
+    rep = json.loads((REPO / "site/src/data/leaderboard/repeatability.json").read_text())
+    import html as H
+    for ds in rep["datasets"]:
+        frag = H.unescape(board["datasets"][ds["id"]])
+        for f in ds["families"]:
+            for g, c in f["cells"].items():
+                for p in c["params"]:
+                    assert f'data-k="{p["data_k"]}"' in frag or f"data-k='{p['data_k']}'" in frag, (f["id"], g, p["data_k"])
+
+
+@pytest.mark.real_data
+def test_the_space_model_differs_rows_match():
+    import ast
+    app = env_path("MVIS_LEADERBOARD") / "app.py"
+    for node in ast.parse(app.read_text()).body:
+        if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "MODEL_DIFFERS" for t in node.targets):
+            ns = {}
+            exec(compile(ast.Module([node], []), "app.py", "exec"), {}, ns)
+            assert ns["MODEL_DIFFERS"] == set(R.MODEL_DIFFERS)
+            return
+    raise AssertionError("app.py has no MODEL_DIFFERS")

@@ -12,7 +12,6 @@ const ROLE: Record<string, string> = { input: 'input, not compared', shown: 'sho
 const DEC = (q: any) => q.decision === 'a' ? `${q.a} tighter` : q.decision === 'b' ? `${q.b} tighter` : q.decision === 'tie' ? 'tie' : q.decision === 'too_few' ? 'too few recordings' : 'not compared';
 const TIE: Record<string, string> = { noise: 'gap within chance', small: 'gap under 20 %' };
 const ci = (q: any, n: number) => q.ci ? `${q.ci[0] ?? 'not bounded'} – ${q.ci[1] ?? 'not bounded'}` : `not bounded at n = ${n}`;
-const recs = (f: any) => ['MVIS', 'Kalibr', 'Basalt'].map((t) => f.recordings[t].reason ? `${t} not run` : `${t} ${f.recordings[t].n} of ${f.recordings[t].of}`).join(' · ');
 const loo = (q: any) => q.loo_stable === null ? '' : q.loo_stable ? 'holds with any one recording left out' : 'depends on one recording';
 const short = (s: string) => s.split(' – ').slice(-1)[0];
 ---
@@ -24,9 +23,10 @@ const short = (s: string) => s.split(' – ').slice(-1)[0];
       <details class="rp-detail" id={detailId(f.id, g)} data-fold={f.fold_index} data-k={c.params[0]?.data_k ?? ''}>
         <summary>
           <span class="rp-dh">{groupOf[g].label} · {f.id} · {tools.length ? `${c.n} matched recordings` : c.chip}</span>
-          <span class="rp-dn">({recs(f)}) · {f.title}, {mode(f)}</span>
+          <span class="rp-dn">({c.rec_line}) · {f.title}, {mode(f)}</span>
         </summary>
         <p class="rp-sent">{c.sentence}</p>
+        {c.limit_line && <p class="rp-var">{c.limit_line}</p>}
         {tools.includes('MVIS') && <p class="rp-var">{c.variant_line}</p>}
         {c.pairs.length > 0 && (
           <div class="rp-tw"><table class="rp-pairs">
@@ -42,6 +42,7 @@ const short = (s: string) => s.split(' – ').slice(-1)[0];
             </tbody>
           </table></div>
         )}
+        {c.band_lines.map((l: string) => <p class="rp-var">{l}</p>)}
         <RatioPlot pairs={c.pairs} />
         {c.params.length > 0 && (
           <div class="rp-tw"><table class="rp-params">
@@ -59,11 +60,12 @@ const short = (s: string) => s.split(' – ').slice(-1)[0];
             </tbody>
           </table></div>
         )}
-        {(c.excluded.length > 0 || c.dropped.length > 0) && (
+        {(c.excluded.length > 0 || c.dropped.length > 0 || Object.keys(c.unmatched).length > 0) && (
           <div class="rp-excl"><b>Not in this comparison</b>
             <ul>
               {c.excluded.map((e: any) => <li>{e.tool === 'all' ? 'All tools' : e.tool}{e.role !== 'not_run' && <> · {ROLE[e.role] ?? e.role}</>} · {e.rows} {e.rows === 1 ? 'row' : 'rows'}: {e.reason}</li>)}
               {c.dropped.map((d: any) => <li>{d.tool} · {short(d.sensor)} {d.key}: {d.reason}</li>)}
+              {Object.entries(c.unmatched).map(([t, k]: [string, any]) => <li>{t} · {k} {k === 1 ? 'recording' : 'recordings'} with values outside the matched set: another compared tool has no value there on some row</li>)}
             </ul>
           </div>
         )}

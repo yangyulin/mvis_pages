@@ -27,3 +27,8 @@ export const nMatched = (f: any) =>
   !f.n_matched ? 'no tool pair' : f.n_matched[0] === f.n_matched[1] ? `n = ${f.n_matched[0]} matched` : `n = ${f.n_matched[0]}–${f.n_matched[1]} matched`;
 export const mode = (f: any) => (f.mode === 'cam' ? 'camera' : 'cam+IMU');
 export const fmtSd = (x: number | null | undefined) => (x === null || x === undefined ? '–' : String(x));
+
+/** Cells with a test (n >= min_n and a pair with a p), and how many of them name a tool: the method fold's count. */
+const allCells = data.datasets.flatMap((d: any) => d.families.flatMap((f: any) => Object.values(f.cells))) as any[];
+const testedCells = allCells.filter((c) => c.n >= data.method.min_n && c.pairs.some((q: any) => q.p !== null));
+export const tested = { cells: testedCells.length, naming: testedCells.filter((c) => isVerdict(c.state)).length };

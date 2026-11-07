@@ -82,12 +82,13 @@
   "mvis_from_camimu": "MVIS values come from the T6 camera+IMU solve, not a camera-only run; not like-for-like.",
   "settings_differ": "Data settings still differ between the tools on this family.",
   "kalibr_seeded": "Kalibr starts from MVIS camera values for each recording; its spread here includes the spread of that input.",
-  "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera.",
+  "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera with its stamps shifted by the MVIS td of each recording, so the ELP-L rows are left out here.",
   "kalibr_old_seed": "Kalibr's t265 fisheye 1 intrinsics came from an older MVIS export.",
   "kalibr_view_filtered": "Kalibr ran on view-filtered bags (≤ 85°); MVIS and Basalt ran on the full bags.",
   "basalt_snapped": "Basalt's fisheye-2 frames are snapped onto fisheye-1 (1.8–5 ms apart).",
   "kimu": "MVIS here uses Kalibr's IMU model, so the gyro and accel terms mean the same thing in both tools.",
-  "lens_models_differ": "MVIS uses an equidistant lens model here, Kalibr radtan, so focal length and principal point are not quite the same quantity."
+  "mvis_tga": "MVIS also fits a gyro–accel delay (t_ga) that Kalibr and Basalt do not, so its td is not quite the same quantity.",
+  "pairs_differ": "The tool pairs here use different parameters, because one tool is not compared on every camera; the cell lists which."
  },
  "footer": "Repeatability only — a tool can repeat well and still be biased.",
  "datasets": [
@@ -145,6 +146,22 @@
         "Kalibr": 10,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -153,10 +170,12 @@
        "mvis_variant": "default",
        "caveats": [
         "mvis_from_camimu",
-        "basalt_snapped"
+        "basalt_snapped",
+        "pairs_differ"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
@@ -175,6 +194,7 @@
          "k_text": "4.2"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -193,6 +213,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": false,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -518,9 +539,12 @@
        "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
        "sentence": "The spreads of MVIS and Basalt differ by 1.2×, but a gap this size appears often by chance with 10 recordings (p = 0.57). Treated as a tie. Both scatter less than Kalibr: across the same 10 recordings Kalibr's estimates scatter about 4.2× more than MVIS's and 5.1× more than Basalt's. Holds with any one recording left out.",
        "aria": "Focal length + principal point, T6c: tie between MVIS and Basalt, both tighter than Kalibr, 10 matched recordings.",
-       "strip": "Focal + pp MVIS = Basalt",
+       "limit_line": null,
+       "band_lines": [],
+       "strip": "Focal + pp MVIS = Basalt > Kalibr",
        "variant_line": "MVIS here: the camera values of the T6 camera+IMU solve.",
-       "k_text": "4.2"
+       "k_text": "4.2",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "distortion": {
        "state": "most",
@@ -538,6 +562,22 @@
         "Kalibr": 10,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -547,10 +587,12 @@
        "caveats": [
         "dist_tradeoff",
         "mvis_from_camimu",
-        "basalt_snapped"
+        "basalt_snapped",
+        "pairs_differ"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
@@ -569,6 +611,7 @@
          "k_text": "6.3"
         },
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -587,6 +630,7 @@
          "k_text": "2.6"
         },
         {
+         "ci_in_tie_band": false,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -912,9 +956,12 @@
        "chip": "Most repeatable: Basalt",
        "sentence": "Across the same 10 recordings, MVIS's estimates scatter about 2.6× more than Basalt's (median over 8 parameters); Kalibr's about 19×. A gap this large appeared in 1.2 % (MVIS) and 0.2 % (Kalibr) of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Distortion coefficients, T6c: more repeatable Basalt, 2.6 times tighter than MVIS and Kalibr, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Distortion Basalt",
        "variant_line": "MVIS here: the camera values of the T6 camera+IMU solve.",
-       "k_text": "2.6"
+       "k_text": "2.6",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "baseline": {
        "state": "most",
@@ -930,6 +977,18 @@
         "MVIS": 10,
         "Kalibr": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -940,6 +999,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -1015,9 +1075,12 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 8.3× more than MVIS's (median over 2 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Camera–camera distance, T6c: more repeatable MVIS, 8.3 times tighter than Kalibr, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Distance MVIS",
        "variant_line": "MVIS here: the camera values of the T6 camera+IMU solve.",
-       "k_text": "8.3"
+       "k_text": "8.3",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt no value"
       }
      }
     },
@@ -1070,6 +1133,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -1096,9 +1167,12 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Focal length + principal point, T6: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr input · Basalt not run"
       },
       "distortion": {
        "state": "input",
@@ -1107,6 +1181,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -1133,9 +1215,12 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Distortion coefficients, T6: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr input · Basalt not run"
       },
       "baseline": {
        "state": "input",
@@ -1144,6 +1229,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -1170,9 +1263,12 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Camera–camera distance, T6: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr input · Basalt not run"
       },
       "time_offset": {
        "state": "tie",
@@ -1184,6 +1280,18 @@
         "MVIS": 10,
         "Kalibr": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -1191,10 +1299,12 @@
        "mvis_variant": "default",
        "caveats": [
         "settings_differ",
-        "kalibr_seeded"
+        "kalibr_seeded",
+        "mvis_tga"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -1233,7 +1343,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Blackfly|td_ms"
+         "data_k": "c|cam0 – Blackfly|td_ms"
         },
         {
          "sensor": "cam1 – t265 fisheye 1",
@@ -1254,7 +1364,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – t265 fisheye 1|td_ms"
+         "data_k": "c|cam1 – t265 fisheye 1|td_ms"
         },
         {
          "sensor": "cam2 – t265 fisheye 2",
@@ -1275,7 +1385,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam2 – t265 fisheye 2|td_ms"
+         "data_k": "c|cam2 – t265 fisheye 2|td_ms"
         },
         {
          "sensor": "aux IMU – GX3-25",
@@ -1296,7 +1406,7 @@
            "n": 10
           }
          },
-         "data_k": "m|aux IMU – GX3-25|td_ms"
+         "data_k": "c|aux IMU – GX3-25|td_ms"
         },
         {
          "sensor": "aux IMU – GX3-35",
@@ -1317,7 +1427,7 @@
            "n": 10
           }
          },
-         "data_k": "m|aux IMU – GX3-35|td_ms"
+         "data_k": "c|aux IMU – GX3-35|td_ms"
         },
         {
          "sensor": "aux IMU – t265 IMU",
@@ -1338,7 +1448,7 @@
            "n": 10
           }
          },
-         "data_k": "m|aux IMU – t265 IMU|td_ms"
+         "data_k": "c|aux IMU – t265 IMU|td_ms"
         }
        ],
        "excluded": [
@@ -1354,9 +1464,12 @@
        "chip": "Tie",
        "sentence": "The spreads of MVIS and Kalibr differ by 1.04×, but a gap this size appears often by chance with 10 recordings (p = 0.58). Treated as a tie.",
        "aria": "Camera–IMU time offset, T6: tie, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Time offset tie",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       },
       "lever": {
        "state": "most",
@@ -1372,6 +1485,18 @@
         "MVIS": 10,
         "Kalibr": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -1383,6 +1508,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -1421,7 +1547,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Blackfly|lever_mm"
+         "data_k": "c|cam0 – Blackfly|lever_mm"
         },
         {
          "sensor": "cam1 – t265 fisheye 1",
@@ -1442,7 +1568,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – t265 fisheye 1|lever_mm"
+         "data_k": "c|cam1 – t265 fisheye 1|lever_mm"
         },
         {
          "sensor": "cam2 – t265 fisheye 2",
@@ -1463,7 +1589,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam2 – t265 fisheye 2|lever_mm"
+         "data_k": "c|cam2 – t265 fisheye 2|lever_mm"
         },
         {
          "sensor": "aux IMU – GX3-25",
@@ -1484,7 +1610,7 @@
            "n": 10
           }
          },
-         "data_k": "m|aux IMU – GX3-25|lever_mm"
+         "data_k": "c|aux IMU – GX3-25|lever_mm"
         },
         {
          "sensor": "aux IMU – GX3-35",
@@ -1505,7 +1631,7 @@
            "n": 10
           }
          },
-         "data_k": "m|aux IMU – GX3-35|lever_mm"
+         "data_k": "c|aux IMU – GX3-35|lever_mm"
         },
         {
          "sensor": "aux IMU – t265 IMU",
@@ -1526,7 +1652,7 @@
            "n": 10
           }
          },
-         "data_k": "m|aux IMU – t265 IMU|lever_mm"
+         "data_k": "c|aux IMU – t265 IMU|lever_mm"
         }
        ],
        "excluded": [
@@ -1542,9 +1668,12 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 3.6× more than MVIS's (median over 6 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Camera–IMU distance, T6: more repeatable MVIS, 3.6 times tighter than Kalibr, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Cam–IMU distance MVIS",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": "3.6"
+       "k_text": "3.6",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       },
       "gyro": {
        "state": "most",
@@ -1560,6 +1689,18 @@
         "MVIS": 10,
         "Kalibr": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -1572,6 +1713,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 24,
@@ -2109,9 +2251,14 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 1.7× more than MVIS's (median over 24 parameters). A gap this large appeared in 0.98 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Gyro scale + cross-axis, T6: more repeatable MVIS, 1.7 times tighter than Kalibr, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Kalibr reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
        "strip": "Gyro MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "1.7"
+       "k_text": "1.7",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       },
       "accel": {
        "state": "most",
@@ -2127,6 +2274,18 @@
         "MVIS": 10,
         "Kalibr": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -2139,6 +2298,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
@@ -2424,9 +2584,12 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 2.7× more than MVIS's (median over 12 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Accel scale, T6: more repeatable MVIS, 2.7 times tighter than Kalibr, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Accel MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "2.7"
+       "k_text": "2.7",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       }
      }
     }
@@ -2487,6 +2650,22 @@
         "Kalibr": 15,
         "Basalt": 15
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         15,
+         15
+        ],
+        "Basalt": [
+         15,
+         15
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -2498,6 +2677,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -2516,6 +2696,7 @@
          "k_text": "2.9"
         },
         {
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -2534,6 +2715,7 @@
          "k_text": "1.4"
         },
         {
+         "ci_in_tie_band": true,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -2768,9 +2950,15 @@
        "chip": "Most repeatable: MVIS",
        "sentence": "Across the same 15 recordings, Kalibr's estimates scatter about 2.9× more than MVIS's (median over 8 parameters); Basalt's about 1.4×. A gap this large appeared in 0.073 % (Kalibr) and 2.6 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Focal length + principal point, T1: more repeatable MVIS, 1.4 times tighter than Kalibr and Basalt, 15 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value.",
+        "The 95 % interval of Kalibr ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
        "strip": "Focal + pp MVIS",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "1.4"
+       "k_text": "1.4",
+       "rec_line": "MVIS 15 of 15 · Kalibr 15 of 15 · Basalt 15 of 15"
       },
       "distortion": {
        "state": "tie_top",
@@ -2788,6 +2976,22 @@
         "Kalibr": 15,
         "Basalt": 15
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         15,
+         15
+        ],
+        "Basalt": [
+         15,
+         15
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -2800,6 +3004,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -2818,6 +3023,7 @@
          "k_text": "24"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -2836,6 +3042,7 @@
          "k_text": "1.3"
         },
         {
+         "ci_in_tie_band": false,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -3070,9 +3277,12 @@
        "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
        "sentence": "The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 15 recordings (p = 0.087). Treated as a tie. Both scatter less than Kalibr: across the same 15 recordings Kalibr's estimates scatter about 24× more than MVIS's and 20× more than Basalt's. Holds with any one recording left out.",
        "aria": "Distortion coefficients, T1: tie between MVIS and Basalt, both tighter than Kalibr, 15 matched recordings.",
-       "strip": "Distortion MVIS = Basalt",
+       "limit_line": null,
+       "band_lines": [],
+       "strip": "Distortion MVIS = Basalt > Kalibr",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "20"
+       "k_text": "20",
+       "rec_line": "MVIS 15 of 15 · Kalibr 15 of 15 · Basalt 15 of 15"
       },
       "baseline": {
        "state": "not_separated",
@@ -3085,6 +3295,22 @@
         "Kalibr": 15,
         "Basalt": 15
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         15,
+         15
+        ],
+        "Basalt": [
+         15,
+         15
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -3096,6 +3322,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
@@ -3114,6 +3341,7 @@
          "k_text": "1.9"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -3132,6 +3360,7 @@
          "k_text": "2.6"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 1,
@@ -3184,9 +3413,14 @@
        "chip": "Not separated",
        "sentence": "MVIS is tighter than Kalibr; the other pairs are not separated. No single tool is marked.",
        "aria": "Camera–camera distance, T1: not separated, 15 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Kalibr reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
        "strip": "Distance not separated",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 15 of 15 · Kalibr 15 of 15 · Basalt 15 of 15"
       }
      }
     },
@@ -3227,218 +3461,34 @@
      ],
      "cells": {
       "focal_pp": {
-       "state": "most",
-       "tools": [
+       "state": "not_compared",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
+       "compared": [
         "MVIS"
        ],
-       "over": [
-        "Kalibr"
-       ],
-       "k": 4.88,
-       "n": 13,
-       "n_all": {
-        "MVIS": 15,
-        "Kalibr": 15
-       },
-       "compared": [
-        "MVIS",
-        "Kalibr"
-       ],
        "mvis_variant": "default",
-       "caveats": [
-        "lens_models_differ"
-       ],
-       "pairs": [
-        {
-         "a": "MVIS",
-         "b": "Kalibr",
-         "n_params": 8,
-         "R": 0.2,
-         "k": 4.88,
-         "ci": [
-          0.11,
-          0.47
-         ],
-         "p": 0.00024,
-         "p_holm": 0.00024,
-         "decision": "a",
-         "tie_reason": null,
-         "loo_stable": true,
-         "exact": true,
-         "k_text": "4.9"
-        }
-       ],
-       "params": [
-        {
-         "sensor": "cam0 – ELP-L",
-         "key": "fx",
-         "label": "fx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.817,
-          "Kalibr": 7.02
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.764,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 6.59,
-           "n": 15
-          }
-         },
-         "data_k": "m|cam0 – ELP-L|fx"
-        },
-        {
-         "sensor": "cam0 – ELP-L",
-         "key": "fy",
-         "label": "fy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.817,
-          "Kalibr": 6.58
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.787,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 6.42,
-           "n": 15
-          }
-         },
-         "data_k": "m|cam0 – ELP-L|fy"
-        },
-        {
-         "sensor": "cam0 – ELP-L",
-         "key": "cx",
-         "label": "cx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.634,
-          "Kalibr": 3.17
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.614,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 2.94,
-           "n": 15
-          }
-         },
-         "data_k": "m|cam0 – ELP-L|cx"
-        },
-        {
-         "sensor": "cam0 – ELP-L",
-         "key": "cy",
-         "label": "cy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.866,
-          "Kalibr": 5.54
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.828,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 8.33,
-           "n": 15
-          }
-         },
-         "data_k": "m|cam0 – ELP-L|cy"
-        },
-        {
-         "sensor": "cam1 – ELP-R",
-         "key": "fx",
-         "label": "fx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.815,
-          "Kalibr": 3.89
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.772,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 3.89,
-           "n": 13
-          }
-         },
-         "data_k": "m|cam1 – ELP-R|fx"
-        },
-        {
-         "sensor": "cam1 – ELP-R",
-         "key": "fy",
-         "label": "fy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.831,
-          "Kalibr": 3.84
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.803,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 3.84,
-           "n": 13
-          }
-         },
-         "data_k": "m|cam1 – ELP-R|fy"
-        },
-        {
-         "sensor": "cam1 – ELP-R",
-         "key": "cx",
-         "label": "cx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.663,
-          "Kalibr": 2.34
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.641,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 2.34,
-           "n": 13
-          }
-         },
-         "data_k": "m|cam1 – ELP-R|cx"
-        },
-        {
-         "sensor": "cam1 – ELP-R",
-         "key": "cy",
-         "label": "cy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.846,
-          "Kalibr": 3.17
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.811,
-           "n": 15
-          },
-          "Kalibr": {
-           "sd": 3.17,
-           "n": 13
-          }
-         },
-         "data_k": "m|cam1 – ELP-R|cy"
-        }
-       ],
+       "caveats": [],
+       "pairs": [],
+       "params": [],
        "excluded": [
+        {
+         "tool": "Kalibr",
+         "role": "other_model",
+         "reason": "other camera model: MVIS equidistant, Kalibr and Basalt radtan",
+         "rows": 8
+        },
         {
          "tool": "Basalt",
          "role": "shown",
@@ -3447,13 +3497,16 @@
         }
        ],
        "dropped": [],
-       "reason": null,
-       "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 13 recordings, Kalibr's estimates scatter about 4.9× more than MVIS's (median over 8 parameters). A gap this large appeared in 0.024 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Focal length + principal point, T2: more repeatable MVIS, 4.9 times tighter than Kalibr, 13 matched recordings.",
-       "strip": "Focal + pp MVIS",
+       "reason": "other camera model: MVIS equidistant, Kalibr and Basalt radtan",
+       "chip": "Not compared",
+       "sentence": "other camera model: MVIS equidistant, Kalibr and Basalt radtan",
+       "aria": "Focal length + principal point, T2: other camera model: MVIS equidistant, Kalibr and Basalt radtan",
+       "limit_line": null,
+       "band_lines": [],
+       "strip": null,
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "4.9"
+       "k_text": null,
+       "rec_line": "MVIS 15 of 15 · Kalibr other model · Basalt shown only"
       },
       "distortion": {
        "state": "not_compared",
@@ -3462,6 +3515,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -3492,9 +3548,12 @@
        "chip": "Not compared",
        "sentence": "other camera model: MVIS equidistant, Kalibr and Basalt radtan",
        "aria": "Distortion coefficients, T2: other camera model: MVIS equidistant, Kalibr and Basalt radtan",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS only · Kalibr other model · Basalt other model"
       },
       "baseline": {
        "state": "not_compared",
@@ -3503,6 +3562,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -3521,9 +3583,12 @@
        "chip": "Not compared",
        "sentence": "kept as text: Kalibr's rolling-shutter runs solve one camera per run",
        "aria": "Camera–camera distance, T2: kept as text: Kalibr's rolling-shutter runs solve one camera per run",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS – · Kalibr – · Basalt –"
       },
       "readout": {
        "state": "most",
@@ -3539,6 +3604,21 @@
         "MVIS": 15,
         "Kalibr": 15
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         13,
+         15
+        ]
+       },
+       "unmatched": {
+        "MVIS": 2,
+        "Kalibr": 2
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -3547,6 +3627,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -3622,9 +3703,12 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 13 recordings, Kalibr's estimates scatter about 2.9× more than MVIS's (median over 2 parameters). A gap this large appeared in 0.39 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Rolling-shutter readout, T2: more repeatable MVIS, 2.9 times tighter than Kalibr, 13 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Readout MVIS",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "2.9"
+       "k_text": "2.9",
+       "rec_line": "MVIS 15 of 15 · Kalibr 13–15 of 15 · Basalt shown only"
       }
      }
     },
@@ -3677,6 +3761,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -3703,9 +3795,12 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Focal length + principal point, T7: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 14 of 15 · Kalibr input · Basalt not run"
       },
       "distortion": {
        "state": "input",
@@ -3714,6 +3809,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -3740,9 +3843,12 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Distortion coefficients, T7: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 14 of 15 · Kalibr input · Basalt not run"
       },
       "baseline": {
        "state": "input",
@@ -3751,6 +3857,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -3777,9 +3891,12 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Camera–camera distance, T7: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 14 of 15 · Kalibr input · Basalt not run"
       },
       "readout": {
        "state": "input",
@@ -3788,6 +3905,14 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {
+        "MVIS": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS"
        ],
@@ -3814,24 +3939,35 @@
        "chip": "Input, not compared",
        "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
        "aria": "Rolling-shutter readout, T7: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 14 of 15 · Kalibr input · Basalt not run"
       },
       "time_offset": {
-       "state": "most",
-       "tools": [
-        "MVIS"
-       ],
-       "over": [
-        "Kalibr"
-       ],
-       "k": 1.39,
+       "state": "tie",
+       "tools": [],
+       "over": [],
+       "k": null,
        "n": 14,
        "n_all": {
         "MVIS": 14,
         "Kalibr": 14
        },
+       "n_range": {
+        "MVIS": [
+         14,
+         14
+        ],
+        "Kalibr": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -3841,26 +3977,28 @@
         "settings_differ",
         "kalibr_seeded",
         "kalibr_gs_elp",
-        "kalibr_old_seed"
+        "kalibr_old_seed",
+        "mvis_tga"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
-         "n_params": 3,
-         "R": 0.72,
-         "k": 1.39,
+         "n_params": 2,
+         "R": 0.88,
+         "k": 1.13,
          "ci": [
-          0.55,
-          0.86
+          0.65,
+          1.18
          ],
-         "p": 0.0015,
-         "p_holm": 0.0015,
-         "decision": "a",
-         "tie_reason": null,
-         "loo_stable": true,
+         "p": 0.35,
+         "p_holm": 0.35,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
          "exact": true,
-         "k_text": "1.4"
+         "k_text": "1.1"
         }
        ],
        "params": [
@@ -3883,7 +4021,7 @@
            "n": 14
           }
          },
-         "data_k": "m|cam0 – t265 fisheye 1|td_ms"
+         "data_k": "c|cam0 – t265 fisheye 1|td_ms"
         },
         {
          "sensor": "cam1 – ELP-L",
@@ -3891,20 +4029,15 @@
          "label": "time offset td to base IMU",
          "unit": "ms",
          "sd": {
-          "MVIS": 0.64,
-          "Kalibr": 0.888
+          "MVIS": 0.64
          },
          "published": {
           "MVIS": {
            "sd": 0.64,
            "n": 14
-          },
-          "Kalibr": {
-           "sd": 0.888,
-           "n": 14
           }
          },
-         "data_k": "m|cam1 – ELP-L|td_ms"
+         "data_k": "c|cam1 – ELP-L|td_ms"
         },
         {
          "sensor": "aux IMU – Xsens MTi",
@@ -3925,7 +4058,7 @@
            "n": 14
           }
          },
-         "data_k": "m|aux IMU – Xsens MTi|td_ms"
+         "data_k": "c|aux IMU – Xsens MTi|td_ms"
         }
        ],
        "excluded": [
@@ -3934,16 +4067,25 @@
          "role": "not_run",
          "reason": "not run: one IMU per run and no rolling-shutter model; no run holds the whole rig",
          "rows": 3
+        },
+        {
+         "tool": "Kalibr",
+         "role": "other_model",
+         "reason": "Kalibr treats ELP-L as global shutter, and its ELP-L stamps were shifted by the MVIS td of each recording before its run",
+         "rows": 1
         }
        ],
        "dropped": [],
        "reason": null,
-       "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 1.4× more than MVIS's (median over 3 parameters). A gap this large appeared in 0.15 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Camera–IMU time offset, T7: more repeatable MVIS, 1.4 times tighter than Kalibr, 14 matched recordings.",
-       "strip": "Time offset MVIS",
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 14 recordings (p = 0.35). Treated as a tie.",
+       "aria": "Camera–IMU time offset, T7: tie, 14 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
+       "strip": "Time offset tie",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": "1.4"
+       "k_text": null,
+       "rec_line": "MVIS 14 of 15 · Kalibr 14 of 15 · Basalt not run"
       },
       "lever": {
        "state": "most",
@@ -3953,12 +4095,24 @@
        "over": [
         "Kalibr"
        ],
-       "k": 6.43,
+       "k": 7.61,
        "n": 14,
        "n_all": {
         "MVIS": 14,
         "Kalibr": 14
        },
+       "n_range": {
+        "MVIS": [
+         14,
+         14
+        ],
+        "Kalibr": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -3972,22 +4126,23 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
-         "n_params": 3,
-         "R": 0.16,
-         "k": 6.43,
+         "n_params": 2,
+         "R": 0.13,
+         "k": 7.61,
          "ci": [
           0.09,
-          0.28
+          0.24
          ],
-         "p": 0.00012,
-         "p_holm": 0.00012,
+         "p": 0.00024,
+         "p_holm": 0.00024,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "6.4"
+         "k_text": "7.6"
         }
        ],
        "params": [
@@ -4010,7 +4165,7 @@
            "n": 14
           }
          },
-         "data_k": "m|cam0 – t265 fisheye 1|lever_mm"
+         "data_k": "c|cam0 – t265 fisheye 1|lever_mm"
         },
         {
          "sensor": "cam1 – ELP-L",
@@ -4018,20 +4173,15 @@
          "label": "distance to base IMU ‖p‖",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.447,
-          "Kalibr": 2.21
+          "MVIS": 0.447
          },
          "published": {
           "MVIS": {
            "sd": 0.447,
            "n": 14
-          },
-          "Kalibr": {
-           "sd": 2.21,
-           "n": 14
           }
          },
-         "data_k": "m|cam1 – ELP-L|lever_mm"
+         "data_k": "c|cam1 – ELP-L|lever_mm"
         },
         {
          "sensor": "aux IMU – Xsens MTi",
@@ -4052,7 +4202,7 @@
            "n": 14
           }
          },
-         "data_k": "m|aux IMU – Xsens MTi|lever_mm"
+         "data_k": "c|aux IMU – Xsens MTi|lever_mm"
         }
        ],
        "excluded": [
@@ -4061,16 +4211,25 @@
          "role": "not_run",
          "reason": "not run: one IMU per run and no rolling-shutter model; no run holds the whole rig",
          "rows": 3
+        },
+        {
+         "tool": "Kalibr",
+         "role": "other_model",
+         "reason": "Kalibr treats ELP-L as global shutter, and its ELP-L stamps were shifted by the MVIS td of each recording before its run",
+         "rows": 1
         }
        ],
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 6.4× more than MVIS's (median over 3 parameters). A gap this large appeared in 0.012 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Camera–IMU distance, T7: more repeatable MVIS, 6.4 times tighter than Kalibr, 14 matched recordings.",
+       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 7.6× more than MVIS's (median over 2 parameters). A gap this large appeared in 0.024 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Camera–IMU distance, T7: more repeatable MVIS, 7.6 times tighter than Kalibr, 14 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Cam–IMU distance MVIS",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": "6.4"
+       "k_text": "7.6",
+       "rec_line": "MVIS 14 of 15 · Kalibr 14 of 15 · Basalt not run"
       },
       "gyro": {
        "state": "most",
@@ -4086,6 +4245,20 @@
         "MVIS": 15,
         "Kalibr": 14
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {
+        "MVIS": 1
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -4099,6 +4272,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
@@ -4384,9 +4558,12 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 2.9× more than MVIS's (median over 12 parameters). A gap this large appeared in 0.049 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Gyro scale + cross-axis, T7: more repeatable MVIS, 2.9 times tighter than Kalibr, 14 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Gyro MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "2.9"
+       "k_text": "2.9",
+       "rec_line": "MVIS 15 of 15 · Kalibr 14 of 15 · Basalt not run"
       },
       "accel": {
        "state": "most",
@@ -4402,6 +4579,20 @@
         "MVIS": 15,
         "Kalibr": 14
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         14,
+         14
+        ]
+       },
+       "unmatched": {
+        "MVIS": 1
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -4415,6 +4606,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -4574,9 +4766,12 @@
        "chip": "More repeatable: MVIS",
        "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 4.4× more than MVIS's (median over 6 parameters). A gap this large appeared in 0.012 % of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Accel scale, T7: more repeatable MVIS, 4.4 times tighter than Kalibr, 14 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Accel MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "4.4"
+       "k_text": "4.4",
+       "rec_line": "MVIS 15 of 15 · Kalibr 14 of 15 · Basalt not run"
       }
      }
     },
@@ -4691,6 +4886,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -4721,9 +4919,12 @@
        "chip": "MVIS only",
        "sentence": "MVIS only: no Kalibr rolling-shutter run",
        "aria": "Focal length + principal point, T8: MVIS only: no Kalibr rolling-shutter run",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS only · Kalibr no value · Basalt not run"
       },
       "distortion": {
        "state": "single",
@@ -4734,6 +4935,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -4764,9 +4968,12 @@
        "chip": "MVIS only",
        "sentence": "MVIS only: no Kalibr rolling-shutter run",
        "aria": "Distortion coefficients, T8: MVIS only: no Kalibr rolling-shutter run",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS only · Kalibr no value · Basalt not run"
       },
       "baseline": {
        "state": "single",
@@ -4777,6 +4984,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -4807,9 +5017,12 @@
        "chip": "MVIS only",
        "sentence": "MVIS only: no Kalibr rolling-shutter run",
        "aria": "Camera–camera distance, T8: MVIS only: no Kalibr rolling-shutter run",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS only · Kalibr no value · Basalt not run"
       },
       "readout": {
        "state": "single",
@@ -4820,6 +5033,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -4850,9 +5066,12 @@
        "chip": "MVIS only",
        "sentence": "MVIS only: no Kalibr rolling-shutter run",
        "aria": "Rolling-shutter readout, T8: MVIS only: no Kalibr rolling-shutter run",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS only · Kalibr no value · Basalt not run"
       },
       "time_offset": {
        "state": "too_few",
@@ -4864,16 +5083,30 @@
         "MVIS": 3,
         "Kalibr": 3
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Kalibr": [
+         3,
+         3
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
        ],
        "mvis_variant": "default",
        "caveats": [
-        "settings_differ"
+        "settings_differ",
+        "mvis_tga"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
@@ -4909,7 +5142,7 @@
            "n": 3
           }
          },
-         "data_k": "m|aux IMU – Xsens MTi|td_ms"
+         "data_k": "c|aux IMU – Xsens MTi|td_ms"
         }
        ],
        "excluded": [
@@ -4935,11 +5168,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU time offset, T8: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 15 · Kalibr 3 of 15 · Basalt not run"
       },
       "lever": {
        "state": "too_few",
@@ -4951,6 +5187,18 @@
         "MVIS": 3,
         "Kalibr": 3
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Kalibr": [
+         3,
+         3
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -4961,6 +5209,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
@@ -4996,7 +5245,7 @@
            "n": 3
           }
          },
-         "data_k": "m|aux IMU – Xsens MTi|lever_mm"
+         "data_k": "c|aux IMU – Xsens MTi|lever_mm"
         }
        ],
        "excluded": [
@@ -5022,11 +5271,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU distance, T8: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 15 · Kalibr 3 of 15 · Basalt not run"
       },
       "gyro": {
        "state": "too_few",
@@ -5038,6 +5290,20 @@
         "MVIS": 15,
         "Kalibr": 3
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         3,
+         3
+        ]
+       },
+       "unmatched": {
+        "MVIS": 12
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -5049,6 +5315,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
@@ -5329,11 +5596,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Gyro scale + cross-axis, T8: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 15 of 15 · Kalibr 3 of 15 · Basalt not run"
       },
       "accel": {
        "state": "too_few",
@@ -5345,6 +5615,20 @@
         "MVIS": 15,
         "Kalibr": 3
        },
+       "n_range": {
+        "MVIS": [
+         15,
+         15
+        ],
+        "Kalibr": [
+         3,
+         3
+        ]
+       },
+       "unmatched": {
+        "MVIS": 12
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr"
@@ -5356,6 +5640,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -5510,11 +5795,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Accel scale, T8: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 15 of 15 · Kalibr 3 of 15 · Basalt not run"
       }
      }
     }
@@ -5569,6 +5857,22 @@
         "Kalibr": 8,
         "Basalt": 8
        },
+       "n_range": {
+        "MVIS": [
+         8,
+         8
+        ],
+        "Kalibr": [
+         8,
+         8
+        ],
+        "Basalt": [
+         8,
+         8
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -5580,6 +5884,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -5598,6 +5903,7 @@
          "k_text": "1.7"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -5616,6 +5922,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": true,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -5850,9 +6157,14 @@
        "chip": "Not separated",
        "sentence": "Basalt is tighter than Kalibr; the other pairs are not separated. No single tool is marked.",
        "aria": "Focal length + principal point, T3: not separated, 8 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of Kalibr ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
        "strip": "Focal + pp not separated",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 8 of 8 · Kalibr 8 of 8 · Basalt 8 of 8"
       },
       "distortion": {
        "state": "tie_top",
@@ -5870,6 +6182,22 @@
         "Kalibr": 8,
         "Basalt": 8
        },
+       "n_range": {
+        "MVIS": [
+         8,
+         8
+        ],
+        "Kalibr": [
+         8,
+         8
+        ],
+        "Basalt": [
+         8,
+         8
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -5882,6 +6210,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -5900,6 +6229,7 @@
          "k_text": "4"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -5918,6 +6248,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": false,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -6152,9 +6483,12 @@
        "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
        "sentence": "The spreads of MVIS and Basalt differ by 1.2×, but a gap this size appears often by chance with 8 recordings (p = 0.59). Treated as a tie. Both scatter less than Kalibr: across the same 8 recordings Kalibr's estimates scatter about 4× more than MVIS's and 5.5× more than Basalt's. Holds with any one recording left out.",
        "aria": "Distortion coefficients, T3: tie between MVIS and Basalt, both tighter than Kalibr, 8 matched recordings.",
-       "strip": "Distortion MVIS = Basalt",
+       "limit_line": null,
+       "band_lines": [],
+       "strip": "Distortion MVIS = Basalt > Kalibr",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "4"
+       "k_text": "4",
+       "rec_line": "MVIS 8 of 8 · Kalibr 8 of 8 · Basalt 8 of 8"
       },
       "baseline": {
        "state": "tie",
@@ -6167,6 +6501,22 @@
         "Kalibr": 8,
         "Basalt": 8
        },
+       "n_range": {
+        "MVIS": [
+         8,
+         8
+        ],
+        "Kalibr": [
+         8,
+         8
+        ],
+        "Basalt": [
+         8,
+         8
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -6178,6 +6528,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
@@ -6196,6 +6547,7 @@
          "k_text": "1.7"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -6214,6 +6566,7 @@
          "k_text": "1.6"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 1,
@@ -6266,9 +6619,12 @@
        "chip": "Tie",
        "sentence": "The spreads of MVIS and Kalibr differ by 1.7×, but a gap this size appears often by chance with 8 recordings (p = 0.14). Treated as a tie. The spreads of MVIS and Basalt differ by 1.6×, but a gap this size appears often by chance with 8 recordings (p = 0.25). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.05×, but a gap this size appears often by chance with 8 recordings (p = 0.53). Treated as a tie.",
        "aria": "Camera–camera distance, T3: tie, 8 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Distance tie",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 8 of 8 · Kalibr 8 of 8 · Basalt 8 of 8"
       }
      }
     },
@@ -6323,6 +6679,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -6331,6 +6699,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -6366,7 +6735,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|fx"
+         "data_k": "c|cam0 – TUM-VI cam0|fx"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -6387,7 +6756,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|fy"
+         "data_k": "c|cam0 – TUM-VI cam0|fy"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -6408,7 +6777,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|cx"
+         "data_k": "c|cam0 – TUM-VI cam0|cx"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -6429,7 +6798,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|cy"
+         "data_k": "c|cam0 – TUM-VI cam0|cy"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6450,7 +6819,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|fx"
+         "data_k": "c|cam1 – TUM-VI cam1|fx"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6471,7 +6840,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|fy"
+         "data_k": "c|cam1 – TUM-VI cam1|fy"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6492,7 +6861,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|cx"
+         "data_k": "c|cam1 – TUM-VI cam1|cx"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6513,7 +6882,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|cy"
+         "data_k": "c|cam1 – TUM-VI cam1|cy"
         }
        ],
        "excluded": [
@@ -6527,11 +6896,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Focal length + principal point, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "distortion": {
        "state": "too_few",
@@ -6543,6 +6915,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -6553,6 +6937,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -6588,7 +6973,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[0]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[0]"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -6609,7 +6994,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[1]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[1]"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -6630,7 +7015,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[2]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[2]"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -6651,7 +7036,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[3]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[3]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6672,7 +7057,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[0]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[0]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6693,7 +7078,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[1]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[1]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6714,7 +7099,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[2]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[2]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6735,7 +7120,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[3]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[3]"
         }
        ],
        "excluded": [
@@ -6749,11 +7134,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Distortion coefficients, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "baseline": {
        "state": "too_few",
@@ -6765,6 +7153,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -6773,6 +7173,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -6808,7 +7209,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|baseline_mm"
+         "data_k": "c|cam1 – TUM-VI cam1|baseline_mm"
         }
        ],
        "excluded": [
@@ -6822,11 +7223,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–camera distance, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "time_offset": {
        "state": "too_few",
@@ -6839,15 +7243,34 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
         "Basalt"
        ],
        "mvis_variant": "default",
-       "caveats": [],
+       "caveats": [
+        "mvis_tga"
+       ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -6863,6 +7286,7 @@
          "k_text": "13"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -6878,6 +7302,7 @@
          "k_text": "8.9"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -6918,7 +7343,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|td_ms"
+         "data_k": "c|cam0 – TUM-VI cam0|td_ms"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -6944,18 +7369,21 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|td_ms"
+         "data_k": "c|cam1 – TUM-VI cam1|td_ms"
         }
        ],
        "excluded": [],
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU time offset, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "lever": {
        "state": "too_few",
@@ -6968,6 +7396,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -6977,6 +7421,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -6992,6 +7437,7 @@
          "k_text": "1.04"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -7007,6 +7453,7 @@
          "k_text": "1.4"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -7047,7 +7494,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|lever_mm"
+         "data_k": "c|cam0 – TUM-VI cam0|lever_mm"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7073,18 +7520,21 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|lever_mm"
+         "data_k": "c|cam1 – TUM-VI cam1|lever_mm"
         }
        ],
        "excluded": [],
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU distance, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "gyro": {
        "state": "too_few",
@@ -7097,6 +7547,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -7108,6 +7574,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -7123,6 +7590,7 @@
          "k_text": "1.8"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 6,
@@ -7138,6 +7606,7 @@
          "k_text": "1.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 6,
@@ -7315,11 +7784,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Gyro scale + cross-axis, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "accel": {
        "state": "too_few",
@@ -7332,6 +7804,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -7343,6 +7831,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 3,
@@ -7358,6 +7847,7 @@
          "k_text": "3.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 3,
@@ -7373,6 +7863,7 @@
          "k_text": "2.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 3,
@@ -7472,11 +7963,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Accel scale, T9: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       }
      }
     },
@@ -7531,6 +8025,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -7539,6 +8045,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -7574,7 +8081,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|fx"
+         "data_k": "c|cam0 – TUM-VI cam0|fx"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -7595,7 +8102,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|fy"
+         "data_k": "c|cam0 – TUM-VI cam0|fy"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -7616,7 +8123,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|cx"
+         "data_k": "c|cam0 – TUM-VI cam0|cx"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -7637,7 +8144,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|cy"
+         "data_k": "c|cam0 – TUM-VI cam0|cy"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7658,7 +8165,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|fx"
+         "data_k": "c|cam1 – TUM-VI cam1|fx"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7679,7 +8186,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|fy"
+         "data_k": "c|cam1 – TUM-VI cam1|fy"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7700,7 +8207,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|cx"
+         "data_k": "c|cam1 – TUM-VI cam1|cx"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7721,7 +8228,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|cy"
+         "data_k": "c|cam1 – TUM-VI cam1|cy"
         }
        ],
        "excluded": [
@@ -7735,11 +8242,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Focal length + principal point, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "distortion": {
        "state": "too_few",
@@ -7751,6 +8261,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -7761,6 +8283,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -7796,7 +8319,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[0]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[0]"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -7817,7 +8340,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[1]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[1]"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -7838,7 +8361,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[2]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[2]"
         },
         {
          "sensor": "cam0 – TUM-VI cam0",
@@ -7859,7 +8382,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|dist[3]"
+         "data_k": "c|cam0 – TUM-VI cam0|dist[3]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7880,7 +8403,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[0]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[0]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7901,7 +8424,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[1]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[1]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7922,7 +8445,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[2]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[2]"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -7943,7 +8466,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|dist[3]"
+         "data_k": "c|cam1 – TUM-VI cam1|dist[3]"
         }
        ],
        "excluded": [
@@ -7957,11 +8480,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Distortion coefficients, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "baseline": {
        "state": "too_few",
@@ -7973,6 +8499,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -7981,6 +8519,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -8016,7 +8555,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|baseline_mm"
+         "data_k": "c|cam1 – TUM-VI cam1|baseline_mm"
         }
        ],
        "excluded": [
@@ -8030,11 +8569,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–camera distance, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "time_offset": {
        "state": "too_few",
@@ -8047,15 +8589,34 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
         "Basalt"
        ],
        "mvis_variant": "default",
-       "caveats": [],
+       "caveats": [
+        "mvis_tga"
+       ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -8071,6 +8632,7 @@
          "k_text": "17"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -8086,6 +8648,7 @@
          "k_text": "13"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -8126,7 +8689,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|td_ms"
+         "data_k": "c|cam0 – TUM-VI cam0|td_ms"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -8152,18 +8715,21 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|td_ms"
+         "data_k": "c|cam1 – TUM-VI cam1|td_ms"
         }
        ],
        "excluded": [],
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU time offset, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "lever": {
        "state": "too_few",
@@ -8176,6 +8742,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -8185,6 +8767,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -8200,6 +8783,7 @@
          "k_text": "1.00"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -8215,6 +8799,7 @@
          "k_text": "1.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -8255,7 +8840,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – TUM-VI cam0|lever_mm"
+         "data_k": "c|cam0 – TUM-VI cam0|lever_mm"
         },
         {
          "sensor": "cam1 – TUM-VI cam1",
@@ -8281,18 +8866,21 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – TUM-VI cam1|lever_mm"
+         "data_k": "c|cam1 – TUM-VI cam1|lever_mm"
         }
        ],
        "excluded": [],
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU distance, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "gyro": {
        "state": "too_few",
@@ -8305,6 +8893,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -8316,6 +8920,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -8331,6 +8936,7 @@
          "k_text": "2.7"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 6,
@@ -8346,6 +8952,7 @@
          "k_text": "1.7"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 6,
@@ -8523,11 +9130,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Gyro scale + cross-axis, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "accel": {
        "state": "too_few",
@@ -8540,6 +9150,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -8551,6 +9177,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 3,
@@ -8566,6 +9193,7 @@
          "k_text": "1.6"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 3,
@@ -8581,6 +9209,7 @@
          "k_text": "1.9"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 3,
@@ -8680,11 +9309,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Accel scale, T10: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       }
      }
     }
@@ -8745,6 +9377,22 @@
         "Kalibr": 10,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -8754,6 +9402,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -8772,6 +9421,7 @@
          "k_text": "2.7"
         },
         {
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -8790,6 +9440,7 @@
          "k_text": "1.6"
         },
         {
+         "ci_in_tie_band": true,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -9024,9 +9675,15 @@
        "chip": "Most repeatable: Kalibr",
        "sentence": "Across the same 10 recordings, MVIS's estimates scatter about 2.7× more than Kalibr's (median over 8 parameters); Basalt's about 1.4×. A gap this large appeared in 0.39 % (MVIS) and 1.6 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Focal length + principal point, T4: more repeatable Kalibr, 1.4 times tighter than MVIS and Basalt, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value.",
+        "The 95 % interval of Kalibr ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
        "strip": "Focal + pp Kalibr",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "1.4"
+       "k_text": "1.4",
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "distortion": {
        "state": "tie",
@@ -9039,6 +9696,22 @@
         "Kalibr": 10,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -9050,6 +9723,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -9068,6 +9742,7 @@
          "k_text": "1.6"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -9086,6 +9761,7 @@
          "k_text": "1.3"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -9320,9 +9996,12 @@
        "chip": "Tie",
        "sentence": "The spreads of MVIS and Kalibr differ by 1.6×, but a gap this size appears often by chance with 10 recordings (p = 0.31). Treated as a tie. The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 0.31). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.8×, but a gap this size appears often by chance with 10 recordings (p = 0.24). Treated as a tie.",
        "aria": "Distortion coefficients, T4: tie, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Distortion tie",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "baseline": {
        "state": "tie",
@@ -9335,6 +10014,22 @@
         "Kalibr": 10,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         10,
+         10
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -9344,6 +10039,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
@@ -9362,6 +10058,7 @@
          "k_text": "1.5"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -9380,6 +10077,7 @@
          "k_text": "1.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 1,
@@ -9432,9 +10130,12 @@
        "chip": "Tie",
        "sentence": "The spreads of MVIS and Kalibr differ by 1.5×, but a gap this size appears often by chance with 10 recordings (p = 0.25). Treated as a tie. The spreads of MVIS and Basalt differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 0.63). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 0.63). Treated as a tie.",
        "aria": "Camera–camera distance, T4: tie, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": "Distance tie",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       }
      }
     },
@@ -9524,6 +10225,20 @@
         "MVIS": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "Basalt": 7
+       },
+       "calyx_limited": true,
        "compared": [
         "MVIS",
         "Basalt"
@@ -9532,6 +10247,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -9567,7 +10283,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|fx"
+         "data_k": "c|cam0 – Looper GS cam0|fx"
         },
         {
          "sensor": "cam0 – Looper GS cam0",
@@ -9588,7 +10304,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|fy"
+         "data_k": "c|cam0 – Looper GS cam0|fy"
         },
         {
          "sensor": "cam0 – Looper GS cam0",
@@ -9609,7 +10325,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|cx"
+         "data_k": "c|cam0 – Looper GS cam0|cx"
         },
         {
          "sensor": "cam0 – Looper GS cam0",
@@ -9630,7 +10346,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|cy"
+         "data_k": "c|cam0 – Looper GS cam0|cy"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9651,7 +10367,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|fx"
+         "data_k": "c|cam1 – Looper GS cam1|fx"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9672,7 +10388,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|fy"
+         "data_k": "c|cam1 – Looper GS cam1|fy"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9693,7 +10409,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|cx"
+         "data_k": "c|cam1 – Looper GS cam1|cx"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9714,7 +10430,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|cy"
+         "data_k": "c|cam1 – Looper GS cam1|cy"
         }
        ],
        "excluded": [
@@ -9746,11 +10462,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Focal length + principal point, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": "MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has 3 here although it ran more; Kalibr's own values are input in this group.",
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 10 · Kalibr input · Basalt 10 of 10"
       },
       "distortion": {
        "state": "too_few",
@@ -9762,6 +10481,20 @@
         "MVIS": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "Basalt": 7
+       },
+       "calyx_limited": true,
        "compared": [
         "MVIS",
         "Basalt"
@@ -9772,6 +10505,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -9807,7 +10541,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|dist[0]"
+         "data_k": "c|cam0 – Looper GS cam0|dist[0]"
         },
         {
          "sensor": "cam0 – Looper GS cam0",
@@ -9828,7 +10562,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|dist[1]"
+         "data_k": "c|cam0 – Looper GS cam0|dist[1]"
         },
         {
          "sensor": "cam0 – Looper GS cam0",
@@ -9849,7 +10583,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|dist[2]"
+         "data_k": "c|cam0 – Looper GS cam0|dist[2]"
         },
         {
          "sensor": "cam0 – Looper GS cam0",
@@ -9870,7 +10604,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|dist[3]"
+         "data_k": "c|cam0 – Looper GS cam0|dist[3]"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9891,7 +10625,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|dist[0]"
+         "data_k": "c|cam1 – Looper GS cam1|dist[0]"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9912,7 +10646,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|dist[1]"
+         "data_k": "c|cam1 – Looper GS cam1|dist[1]"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9933,7 +10667,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|dist[2]"
+         "data_k": "c|cam1 – Looper GS cam1|dist[2]"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -9954,7 +10688,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|dist[3]"
+         "data_k": "c|cam1 – Looper GS cam1|dist[3]"
         }
        ],
        "excluded": [
@@ -9986,11 +10720,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Distortion coefficients, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": "MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has 3 here although it ran more; Kalibr's own values are input in this group.",
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 10 · Kalibr input · Basalt 10 of 10"
       },
       "baseline": {
        "state": "too_few",
@@ -10002,6 +10739,20 @@
         "MVIS": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "Basalt": 7
+       },
+       "calyx_limited": true,
        "compared": [
         "MVIS",
         "Basalt"
@@ -10010,6 +10761,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -10045,7 +10797,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|baseline_mm"
+         "data_k": "c|cam1 – Looper GS cam1|baseline_mm"
         }
        ],
        "excluded": [
@@ -10077,11 +10829,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–camera distance, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": "MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has 3 here although it ran more; Kalibr's own values are input in this group.",
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 10 · Kalibr input · Basalt 10 of 10"
       },
       "readout": {
        "state": "single",
@@ -10092,6 +10847,9 @@
        "k": null,
        "n": 0,
        "n_all": {},
+       "n_range": {},
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [],
        "mvis_variant": "default",
        "caveats": [],
@@ -10122,9 +10880,12 @@
        "chip": "MVIS only",
        "sentence": "MVIS only: no Kalibr rolling-shutter run; Basalt has no rolling-shutter model",
        "aria": "Rolling-shutter readout, T11: MVIS only: no Kalibr rolling-shutter run; Basalt has no rolling-shutter model",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS only · Kalibr no value · Basalt no value"
       },
       "time_offset": {
        "state": "too_few",
@@ -10137,6 +10898,24 @@
         "Kalibr": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Kalibr": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "Basalt": 7
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -10144,10 +10923,12 @@
        ],
        "mvis_variant": "default",
        "caveats": [
-        "kalibr_seeded"
+        "kalibr_seeded",
+        "mvis_tga"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -10163,6 +10944,7 @@
          "k_text": "1.3"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -10178,6 +10960,7 @@
          "k_text": "1.3"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -10218,7 +11001,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|td_ms"
+         "data_k": "c|cam0 – Looper GS cam0|td_ms"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -10244,7 +11027,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|td_ms"
+         "data_k": "c|cam1 – Looper GS cam1|td_ms"
         }
        ],
        "excluded": [
@@ -10270,11 +11053,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU time offset, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
       },
       "lever": {
        "state": "too_few",
@@ -10287,6 +11073,24 @@
         "Kalibr": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         3,
+         3
+        ],
+        "Kalibr": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "Basalt": 7
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -10298,6 +11102,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -10313,6 +11118,7 @@
          "k_text": "1.5"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -10328,6 +11134,7 @@
          "k_text": "1.4"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -10368,7 +11175,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam0 – Looper GS cam0|lever_mm"
+         "data_k": "c|cam0 – Looper GS cam0|lever_mm"
         },
         {
          "sensor": "cam1 – Looper GS cam1",
@@ -10394,7 +11201,7 @@
            "n": 10
           }
          },
-         "data_k": "m|cam1 – Looper GS cam1|lever_mm"
+         "data_k": "c|cam1 – Looper GS cam1|lever_mm"
         }
        ],
        "excluded": [
@@ -10420,11 +11227,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU distance, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 3 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
       },
       "gyro": {
        "state": "too_few",
@@ -10437,6 +11247,25 @@
         "Kalibr": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "MVIS": 7,
+        "Basalt": 7
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -10449,6 +11278,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -10464,6 +11294,7 @@
          "k_text": "1.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 6,
@@ -10479,6 +11310,7 @@
          "k_text": "1.04"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 6,
@@ -10656,11 +11488,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Gyro scale + cross-axis, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
       },
       "accel": {
        "state": "too_few",
@@ -10673,6 +11508,25 @@
         "Kalibr": 3,
         "Basalt": 10
        },
+       "n_range": {
+        "MVIS": [
+         10,
+         10
+        ],
+        "Kalibr": [
+         3,
+         3
+        ],
+        "Basalt": [
+         10,
+         10
+        ]
+       },
+       "unmatched": {
+        "MVIS": 7,
+        "Basalt": 7
+       },
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -10685,6 +11539,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 3,
@@ -10700,6 +11555,7 @@
          "k_text": "1.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 3,
@@ -10715,6 +11571,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 3,
@@ -10814,11 +11671,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings were run by every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Accel scale, T11: too few recordings (n = 3), 3 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 10 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
       }
      }
     }
@@ -10873,6 +11733,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -10882,6 +11758,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -10897,6 +11774,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -10912,6 +11790,7 @@
          "k_text": "2.3"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -11141,11 +12020,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Focal length + principal point, T5: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "distortion": {
        "state": "too_few",
@@ -11158,6 +12040,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -11169,6 +12067,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
@@ -11184,6 +12083,7 @@
          "k_text": "4.7"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -11199,6 +12099,7 @@
          "k_text": "2.8"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
@@ -11428,11 +12329,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Distortion coefficients, T5: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "baseline": {
        "state": "too_few",
@@ -11445,6 +12349,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -11454,6 +12374,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
@@ -11469,6 +12390,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -11484,6 +12406,7 @@
          "k_text": "1.1"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 1,
@@ -11531,11 +12454,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–camera distance, T5: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       }
      }
     },
@@ -11590,6 +12516,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -11598,6 +12536,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -11633,7 +12572,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|fx"
+         "data_k": "c|cam0 – Reverb G2 cam0|fx"
         },
         {
          "sensor": "cam0 – Reverb G2 cam0",
@@ -11654,7 +12593,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|fy"
+         "data_k": "c|cam0 – Reverb G2 cam0|fy"
         },
         {
          "sensor": "cam0 – Reverb G2 cam0",
@@ -11675,7 +12614,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|cx"
+         "data_k": "c|cam0 – Reverb G2 cam0|cx"
         },
         {
          "sensor": "cam0 – Reverb G2 cam0",
@@ -11696,7 +12635,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|cy"
+         "data_k": "c|cam0 – Reverb G2 cam0|cy"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11717,7 +12656,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|fx"
+         "data_k": "c|cam1 – Reverb G2 cam1|fx"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11738,7 +12677,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|fy"
+         "data_k": "c|cam1 – Reverb G2 cam1|fy"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11759,7 +12698,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|cx"
+         "data_k": "c|cam1 – Reverb G2 cam1|cx"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11780,7 +12719,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|cy"
+         "data_k": "c|cam1 – Reverb G2 cam1|cy"
         }
        ],
        "excluded": [
@@ -11794,11 +12733,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Focal length + principal point, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "distortion": {
        "state": "too_few",
@@ -11810,6 +12752,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -11820,6 +12774,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
@@ -11855,7 +12810,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|dist[0]"
+         "data_k": "c|cam0 – Reverb G2 cam0|dist[0]"
         },
         {
          "sensor": "cam0 – Reverb G2 cam0",
@@ -11876,7 +12831,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|dist[1]"
+         "data_k": "c|cam0 – Reverb G2 cam0|dist[1]"
         },
         {
          "sensor": "cam0 – Reverb G2 cam0",
@@ -11897,7 +12852,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|dist[2]"
+         "data_k": "c|cam0 – Reverb G2 cam0|dist[2]"
         },
         {
          "sensor": "cam0 – Reverb G2 cam0",
@@ -11918,7 +12873,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|dist[3]"
+         "data_k": "c|cam0 – Reverb G2 cam0|dist[3]"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11939,7 +12894,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|dist[0]"
+         "data_k": "c|cam1 – Reverb G2 cam1|dist[0]"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11960,7 +12915,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|dist[1]"
+         "data_k": "c|cam1 – Reverb G2 cam1|dist[1]"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -11981,7 +12936,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|dist[2]"
+         "data_k": "c|cam1 – Reverb G2 cam1|dist[2]"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -12002,7 +12957,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|dist[3]"
+         "data_k": "c|cam1 – Reverb G2 cam1|dist[3]"
         }
        ],
        "excluded": [
@@ -12016,11 +12971,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Distortion coefficients, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "baseline": {
        "state": "too_few",
@@ -12032,6 +12990,18 @@
         "MVIS": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -12040,6 +13010,7 @@
        "caveats": [],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
@@ -12075,7 +13046,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|baseline_mm"
+         "data_k": "c|cam1 – Reverb G2 cam1|baseline_mm"
         }
        ],
        "excluded": [
@@ -12089,11 +13060,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–camera distance, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr input · Basalt 4 of 4"
       },
       "time_offset": {
        "state": "too_few",
@@ -12106,6 +13080,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -12113,10 +13103,12 @@
        ],
        "mvis_variant": "default",
        "caveats": [
-        "kalibr_seeded"
+        "kalibr_seeded",
+        "mvis_tga"
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -12132,6 +13124,7 @@
          "k_text": "2.2"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -12147,6 +13140,7 @@
          "k_text": "1.5"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -12187,7 +13181,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|td_ms"
+         "data_k": "c|cam0 – Reverb G2 cam0|td_ms"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -12213,18 +13207,21 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|td_ms"
+         "data_k": "c|cam1 – Reverb G2 cam1|td_ms"
         }
        ],
        "excluded": [],
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU time offset, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "lever": {
        "state": "too_few",
@@ -12237,6 +13234,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -12248,6 +13261,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
@@ -12263,6 +13277,7 @@
          "k_text": "4.4"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
@@ -12278,6 +13293,7 @@
          "k_text": "2.8"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
@@ -12318,7 +13334,7 @@
            "n": 4
           }
          },
-         "data_k": "m|cam0 – Reverb G2 cam0|lever_mm"
+         "data_k": "c|cam0 – Reverb G2 cam0|lever_mm"
         },
         {
          "sensor": "cam1 – Reverb G2 cam1",
@@ -12344,18 +13360,21 @@
            "n": 4
           }
          },
-         "data_k": "m|cam1 – Reverb G2 cam1|lever_mm"
+         "data_k": "c|cam1 – Reverb G2 cam1|lever_mm"
         }
        ],
        "excluded": [],
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Camera–IMU distance, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "gyro": {
        "state": "too_few",
@@ -12368,6 +13387,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -12380,6 +13415,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
@@ -12395,6 +13431,7 @@
          "k_text": "84"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 6,
@@ -12410,6 +13447,7 @@
          "k_text": "1.2"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 6,
@@ -12587,11 +13625,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Gyro scale + cross-axis, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       },
       "accel": {
        "state": "too_few",
@@ -12604,6 +13645,22 @@
         "Kalibr": 4,
         "Basalt": 4
        },
+       "n_range": {
+        "MVIS": [
+         4,
+         4
+        ],
+        "Kalibr": [
+         4,
+         4
+        ],
+        "Basalt": [
+         4,
+         4
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Kalibr",
@@ -12616,6 +13673,7 @@
        ],
        "pairs": [
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 3,
@@ -12631,6 +13689,7 @@
          "k_text": "51"
         },
         {
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 3,
@@ -12646,6 +13705,7 @@
          "k_text": "10"
         },
         {
+         "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 3,
@@ -12745,11 +13805,14 @@
        "dropped": [],
        "reason": null,
        "chip": "Too few recordings (n = 4)",
-       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "sentence": "Only 4 recordings hold values from every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
        "aria": "Accel scale, T12: too few recordings (n = 4), 4 matched recordings.",
+       "limit_line": null,
+       "band_lines": [],
        "strip": null,
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": null
+       "k_text": null,
+       "rec_line": "MVIS 4 of 4 · Kalibr 4 of 4 · Basalt 4 of 4"
       }
      }
     }

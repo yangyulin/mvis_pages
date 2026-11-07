@@ -76,6 +76,14 @@ SHOWN_DEFAULT = "other camera model"
 MISSING = {("T6c", "Basalt", "baseline"): "not in one run"}
 MISSING_DEFAULT = "no value for this tool"
 SINGLE_SEED = ("T9", "T10")
+# Rows the record marks comparable although the tools' models differ (the Space's app.MODEL_DIFFERS; a real-data test
+# compares the two). The non-MVIS tools are "other model" there.
+_T2_LENS = "other camera model: MVIS equidistant, Kalibr and Basalt radtan"
+_T7_ELPL = ("Kalibr treats ELP-L as global shutter, and its ELP-L stamps were shifted by the MVIS td of each recording "
+            "before its run")
+MODEL_DIFFERS = {**{("T2", s, k): _T2_LENS for s in ("cam0 – ELP-L", "cam1 – ELP-R")
+                    for k in ("fx", "fy", "cx", "cy", "dist[0]", "dist[1]", "dist[2]", "dist[3]")},
+                 **{("T7", "cam1 – ELP-L", k): _T7_ELPL for k in ("td_ms", "lever_mm")}}
 INPUT_TEXT = ("{tool}'s camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them "
               "fixed. Their spread copies the input, so it is not {tool}'s repeatability.")
 INPUT_TEXT_SEED = ("{tool}'s camera+IMU run starts from these values, from one MVIS export used for all recordings, and "
@@ -86,12 +94,13 @@ CAVEATS = {
     "mvis_from_camimu": "MVIS values come from the T6 camera+IMU solve, not a camera-only run; not like-for-like.",
     "settings_differ": "Data settings still differ between the tools on this family.",
     "kalibr_seeded": "Kalibr starts from MVIS camera values for each recording; its spread here includes the spread of that input.",
-    "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera.",
+    "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera with its stamps shifted by the MVIS td of each recording, so the ELP-L rows are left out here.",
     "kalibr_old_seed": "Kalibr's t265 fisheye 1 intrinsics came from an older MVIS export.",
     "kalibr_view_filtered": "Kalibr ran on view-filtered bags (≤ 85°); MVIS and Basalt ran on the full bags.",
     "basalt_snapped": "Basalt's fisheye-2 frames are snapped onto fisheye-1 (1.8–5 ms apart).",
     "kimu": "MVIS here uses Kalibr's IMU model, so the gyro and accel terms mean the same thing in both tools.",
-    "lens_models_differ": "MVIS uses an equidistant lens model here, Kalibr radtan, so focal length and principal point are not quite the same quantity.",
+    "mvis_tga": "MVIS also fits a gyro–accel delay (t_ga) that Kalibr and Basalt do not, so its td is not quite the same quantity.",
+    "pairs_differ": "The tool pairs here use different parameters, because one tool is not compared on every camera; the cell lists which.",
 }
 _ALL = tuple(g for g, *_ in GROUPS)
 _CAM_IMU = ("time_offset", "lever", "gyro", "accel")
@@ -106,7 +115,7 @@ CAVEAT_RULES = (
     ("kalibr_view_filtered", ("T3",), _ALL, False),
     ("basalt_snapped", ("T1", "T6c"), _ALL, True),
     ("kimu", "camimu", IMU_GROUPS, False),
-    ("lens_models_differ", ("T2",), ("focal_pp",), False),
+    ("mvis_tga", "camimu", ("time_offset",), False),
 )
 FOOTER = "Repeatability only — a tool can repeat well and still be biased."
 
@@ -262,6 +271,8 @@ def role(T: str, fam: dict, row: dict, tool: str, ran: dict, gid: str) -> tuple[
         return "input", input_reason(T, tool)
     if tool == "Basalt" and bk == "info":
         return "shown", SHOWN.get(T, SHOWN_DEFAULT)
+    if tool != "MVIS" and (T, row["sensor"], row["key"]) in MODEL_DIFFERS:
+        return "other_model", MODEL_DIFFERS[(T, row["sensor"], row["key"])]
     if not vals:
         return "missing", MISSING.get((T, tool, gid), MISSING_DEFAULT)
     return "compared", None
@@ -423,7 +434,8 @@ def cell(T: str, fam: dict, gid: str, ran: dict, records: dict) -> dict | None:
     rows = [r for r in fam["rows"] if GROUP_OF.get(base(r["key"])) == gid and r["kind"] in ("cmp", "fixed", "nok", "note")]
     if not rows:
         return None
-    out = {"state": None, "tools": [], "over": [], "k": None, "n": 0, "n_all": {}, "compared": [],
+    out = {"state": None, "tools": [], "over": [], "k": None, "n": 0, "n_all": {}, "n_range": {}, "unmatched": {},
+           "calyx_limited": False, "compared": [],
            "mvis_variant": "kalibr_imu" if camimu and gid in IMU_GROUPS else "default",
            "caveats": [], "pairs": [], "params": [], "excluded": [], "dropped": [], "reason": None}
     cols, excl, roles_seen = {}, {}, set()
@@ -441,6 +453,8 @@ def cell(T: str, fam: dict, gid: str, ran: dict, records: dict) -> dict | None:
     out["excluded"] = _excluded(excl)
     tools = [t for t in TOOLS if any(k[0] == t for k in cols)]
     out["compared"] = tools
+    out["n_range"] = {t: [min(len(v) for (tt, _), v in cols.items() if tt == t),
+                          max(len(v) for (tt, _), v in cols.items() if tt == t)] for t in tools}
     if len(tools) < 2:
         return dict(out, **_lone(est, tools, roles_seen, bool(excl.get(("all", "note", NOTE_REASON)))))
     out["caveats"] = caveats_for(T, gid, camimu, tools)
@@ -448,6 +462,12 @@ def cell(T: str, fam: dict, gid: str, ran: dict, records: dict) -> dict | None:
     n = len(M)
     out["n"] = n
     out["n_all"] = {t: max(len(v) for (tt, _), v in cols.items() if tt == t) for t in tools}
+    out["unmatched"] = {t: len(set().union(*(set(v) for (tt, _), v in cols.items() if tt == t)) - set(M)) for t in tools}
+    out["unmatched"] = {t: k for t, k in out["unmatched"].items() if k}
+    # Camera+IMU groups without Kalibr compared: the MVIS default-model column is held only on recordings Kalibr also
+    # solved, so the excluded tool sets the matched n.
+    out["calyx_limited"] = bool(camimu and gid not in IMU_GROUPS and "MVIS" in tools and "Kalibr" not in tools and any(
+        len(finite(est[i].get("mvis_all"))) > len(v) for (tt, i), v in cols.items() if tt == "MVIS"))
     X, dropped = {}, set()
     for (tool, i), v in cols.items():
         x = np.array([v[r] for r in M], float)
@@ -478,6 +498,8 @@ def cell(T: str, fam: dict, gid: str, ran: dict, records: dict) -> dict | None:
         if d == "tighter":
             q["loo_stable"] = loo(q["_XA"], q["_XB"])
     out.update(verdict(tools, pairs, n))
+    if len({q["n_params"] for q in tested}) > 1:
+        out["caveats"].append("pairs_differ")
     if n >= MIN_N and all(q["decision"] == "not_compared" for q in pairs):
         out.update(state="not_compared", reason="no parameter varies across the shared recordings")
     for i, row in enumerate(est):
@@ -487,7 +509,7 @@ def cell(T: str, fam: dict, gid: str, ran: dict, records: dict) -> dict | None:
         pub = {t: _published(records, T, t, camimu, gid).get((row["sensor"], row["key"])) for t in here}
         sd = {t: (None if (t, i) in dropped else sig(float(np.std(X[(t, i)], ddof=1)), 3)) for t in here}
         out["params"].append({"sensor": row["sensor"], "key": row["key"], "label": row["label"], "unit": row["unit"],
-                              "sd": sd, "published": pub, "data_k": f"m|{row['sensor']}|{row['key']}"})
+                              "sd": sd, "published": pub, "data_k": f"{'c' if camimu and gid not in IMU_GROUPS else 'm'}|{row['sensor']}|{row['key']}"})
     out["pairs"] = [_public_pair(q) for q in pairs]
     return out
 
@@ -510,7 +532,11 @@ def _lone(est: list[dict], tools: list[str], roles_seen: set, has_note: bool) ->
 
 def _public_pair(q: dict) -> dict:
     ci = q["ci"]
-    return {"a": q["a"], "b": q["b"], "n_params": q["n_params"], "R": r2(q["R"]), "k": r2(q["k"]),
+    band = None
+    if q["decision"] in ("a", "b") and ci is not None:
+        lo, hi = (-math.inf if ci[0] is None else ci[0]), (math.inf if ci[1] is None else ci[1])
+        band = lo < MIN_RATIO and hi > 1 / MIN_RATIO
+    return {"ci_in_tie_band": band, "a": q["a"], "b": q["b"], "n_params": q["n_params"], "R": r2(q["R"]), "k": r2(q["k"]),
             "ci": None if ci is None else [r2(ci[0]), r2(ci[1])], "p": sig(q["p"], 2), "p_holm": sig(q["p_holm"], 2),
             "decision": q["decision"], "tie_reason": q["tie_reason"], "loo_stable": q["loo_stable"], "exact": q["exact"],
             "k_text": None if q["k"] is None else fmt_k(q["k"]), "_k": q["k"], "_p": q["p"], "_ph": q["p_holm"]}
@@ -569,9 +595,42 @@ def sentence(c: dict) -> str:
         return "; ".join(dec) + "; the other pairs are not separated. No single tool is marked."
     if s == "too_few":
         tail = " Ratios are shown for reference only." if n > 1 else " Ratios cannot be computed."
-        return (f"Only {n} recordings were run by every compared tool. With {n} recordings the smallest possible p is "
+        return (f"Only {n} recordings hold values from every compared tool. With {n} recordings the smallest possible p is "
                 f"{fmt_p(2 / 2 ** n)}, so no gap can be decided.{tail}")
     return c["reason"]
+
+
+CALYX_NOTE = ("MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has "
+              "{lo} here although it ran more; Kalibr's own values are input in this group.")
+
+
+def limit_line(c: dict) -> str | None:
+    """Why the matched n is lower than a compared tool's runs, when an excluded tool sets it."""
+    if not c["calyx_limited"]:
+        return None
+    return CALYX_NOTE.format(lo=c["n_range"]["MVIS"][0])
+
+
+def band_lines(c: dict) -> list[str]:
+    return [f"The 95 % interval of {q['a']} ÷ {q['b']} reaches into the tie band (0.80–1.25): the ratio shown is a "
+            f"point value." for q in c["pairs"] if q.get("ci_in_tie_band")]
+
+
+ROLE_WORD = {"input": "input", "shown": "shown only", "not_run": "not run", "missing": "no value",
+             "other_model": "other model", "only": "only", "note": "text"}
+
+
+def rec_line(c: dict, recs: dict) -> str:
+    """Per tool in this group: n of N for a compared tool (a range when its rows differ), else its role."""
+    out = []
+    for t in TOOLS:
+        if t in c["n_range"]:
+            lo, hi = c["n_range"][t]
+            out.append(f"{t} {lo if lo == hi else f'{lo}–{hi}'} of {recs[t]['of']}")
+            continue
+        rl = [e["role"] for e in c["excluded"] if e["tool"] == t]
+        out.append(f"{t} {ROLE_WORD.get(rl[0], rl[0])}" if rl else f"{t} –")
+    return " · ".join(out)
 
 
 def variant_line(T: str, camimu: bool, gid: str) -> str:
@@ -605,7 +664,7 @@ def strip_line(c: dict, gid: str) -> str | None:
     if s == "most":
         return f"{g} {c['tools'][0]}{kimu}"
     if s == "tie_top":
-        return f"{g} {c['tools'][0]} = {c['tools'][1]}"
+        return f"{g} {c['tools'][0]} = {c['tools'][1]} > {c['over'][0]}"
     if s in ("tie", "not_separated"):
         return f"{g} {chip(c).lower()}"
     return None
@@ -652,6 +711,7 @@ def family(T: str, fam: dict, meta: dict, records: dict, fold_index: int) -> dic
         if c is None:
             continue
         c["chip"], c["sentence"], c["aria"] = chip(c), sentence(c), aria(c, T, gid)
+        c["limit_line"], c["band_lines"] = limit_line(c), band_lines(c)
         c["strip"], c["variant_line"] = strip_line(c, gid), variant_line(T, camimu, gid)
         c["k_text"] = None if c["k"] is None else fmt_k(c["k"])
         c["k"] = r2(c["k"])
@@ -660,9 +720,12 @@ def family(T: str, fam: dict, meta: dict, records: dict, fold_index: int) -> dic
                 q.pop(x)
         cells[gid] = c
     ns = sorted({c["n"] for c in cells.values() if c["compared"] and len(c["compared"]) > 1})
+    recs = recordings(records, T, meta.get("n_recordings") or len(fam.get("recs") or []))
+    for c in cells.values():
+        c["rec_line"] = rec_line(c, recs)
     return {"id": T, "fold_index": fold_index, "title": meta.get("title", T),
             "mode": "cam+imu" if camimu else "cam", "n_matched": [ns[0], ns[-1]] if ns else None,
-            "recordings": recordings(records, T, meta.get("n_recordings") or len(fam.get("recs") or [])),
+            "recordings": recs,
             "not_part": not_part(T, fam), "cells": cells}
 
 

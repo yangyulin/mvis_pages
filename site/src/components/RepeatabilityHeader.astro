@@ -18,6 +18,13 @@ const labels = Object.fromEntries(data.datasets.map((d: any) => [d.id, d.label])
   };
   const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h.startsWith('rp-')) open(h); };
   addEventListener('hashchange', fromHash);
+  // A second click on the same cell fires no hashchange: open the fold from the click too.
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element).closest?.('[data-rp-open]') as HTMLElement | null;
+    if (a?.dataset.rpOpen && location.hash.slice(1) === a.dataset.rpOpen) { e.preventDefault(); open(a.dataset.rpOpen); }
+  });
+  // The parameter tables live in a fold of their own; their family folds start closed there.
+  document.querySelectorAll<HTMLDetailsElement>('details.rp-tables details.fam[open]').forEach((d) => { d.open = false; });
   fromHash();
   document.addEventListener('click', (e) => {
     const b = (e.target as Element).closest?.('button.rp-open') as HTMLElement | null;
@@ -28,7 +35,9 @@ const labels = Object.fromEntries(data.datasets.map((d: any) => [d.id, d.label])
     const fam = wrap.querySelectorAll('details.fam')[Number(b.dataset.fold)] as HTMLDetailsElement | undefined;
     if (!fam) return;
     fam.open = true;
-    const row = b.dataset.k ? Array.from(fam.querySelectorAll('tr[data-k]')).find((r) => r.getAttribute('data-k') === b.dataset.k) : null;
+    const rows = Array.from(fam.querySelectorAll('tr[data-k]'));
+    const k = b.dataset.k ?? '';
+    const row = k ? rows.find((r) => r.getAttribute('data-k') === k) ?? rows.find((r) => r.getAttribute('data-k') === `m|${k.slice(2)}`) : null;
     const sn = row?.closest('details.sn') as HTMLDetailsElement | null;
     if (sn) sn.open = true;
     (row ?? fam).scrollIntoView({ block: 'center' });

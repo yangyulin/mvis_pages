@@ -321,3 +321,26 @@ section[data-rp-section] .sl-heading-wrapper + p { margin-top: 0.3rem; font-size
 }
 .rp th { background: none; }
 .rp-pairs thead th, .rp-params thead th { background: var(--sl-color-gray-6); }
+/* Review fixes: keep a tool's shape with its name and k with its sign; open/close cues on the folds; larger caveat links. */
+.rp-t, .rp-k, .rp-kimu { white-space: nowrap; }
+.rp-v { column-gap: 0.3rem; row-gap: 0.1rem; }
+.rp-notpart > summary, .rp-detail > summary, .rp-card > summary { position: relative; padding-left: 1.1rem; list-style: none; }
+.rp-notpart > summary::-webkit-details-marker, .rp-detail > summary::-webkit-details-marker, .rp-card > summary::-webkit-details-marker { display: none; }
+.rp-notpart > summary::before, .rp-detail > summary::before, .rp-card > summary::before {
+  content: '▸'; position: absolute; left: 0; top: 50%; transform: translateY(-50%); color: var(--sl-color-gray-3); transition: transform 0.15s; }
+.rp-notpart[open] > summary::before, .rp-detail[open] > summary::before, .rp-card[open] > summary::before { transform: translateY(-50%) rotate(90deg); }
+.rp-tables > summary { display: list-item; }
+.rp-sup a { display: inline-block; padding: 2px 3px; margin-left: 0; }
+.rp-sup a:focus-visible { outline: 2px solid var(--sl-color-accent); }
+.rp-card-rows li { display: flex; align-items: center; gap: 0.3rem; }
+.rp-card-rows li > a { flex: 1; }
+.rp-card-rows .rp-sup a { min-width: 24px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; }
+.rp-lone a { display: inline-flex; align-items: center; min-height: 44px; color: var(--sl-color-gray-2); }
+@container (max-width: 1100px) { .rp-matrix th:not(.rp-fam) { font-size: 0.78rem; } }
+.rp-dates { margin-block: 0.3rem; }
+.rp-dates > summary { cursor: pointer; min-height: 32px; display: list-item; }
+.rp-dates p { margin: 0.2rem 0 0; }
+.rp-card-rows .rp-chip { gap: 0.3rem; flex-wrap: wrap; }
+.rp-card-rows .rp-sup { display: flex; flex: none; white-space: nowrap; }
+.rp-card-rows .rp-sup a { min-width: 20px; padding: 0 2px; }
+.rp-card-rows .rp-g { flex: none; max-width: 6.5rem; }

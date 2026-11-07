@@ -10,12 +10,12 @@ const cellOf = (f: any, g: string) => f.cells[g];
 const sups = (c: any) => (c?.caveats ?? []).map((k: string) => letters[k]).join(',');
 const LONE: Record<string, string> = { input: 'input, not compared', not_compared: 'not compared' };
 const loneGroups = (f: any) => {
-  const by: Record<string, string[]> = {};
+  const by: Record<string, [string, string][]> = {};
   for (const g of ds.groups) {
     const c = f.cells[g];
     if (!c || ['most', 'tie_top', 'tie', 'not_separated', 'too_few'].includes(c.state)) continue;
     const word = c.state === 'single' ? `${c.tools[0]} only` : LONE[c.state];
-    (by[word] ??= []).push(groupOf[g].short);
+    (by[word] ??= []).push([g, groupOf[g].short]);
   }
   return Object.entries(by);
 };
@@ -24,6 +24,14 @@ const recLine = (f: any) => ['MVIS', 'Kalibr', 'Basalt'].map((t) => {
   const r = f.recordings[t];
   return r.reason ? `${t} not run` : `${t} ${r.n} of ${r.of}`;
 }).join(' · ');
+const kimu = (c: any) => c?.mvis_variant === 'kalibr_imu' && c?.tools?.[0] === 'MVIS';
+const verdictish = (s: string) => ['most', 'tie_top', 'tie', 'not_separated', 'too_few'].includes(s);
+const stripOf = (f: any) => {
+  const s = strip(f);
+  if (s) return `More repeatable or tie: ${s}`;
+  const few = ds.groups.map((g: string) => f.cells[g]).filter((c: any) => c?.state === 'too_few');
+  return few.length ? `Too few recordings (n = ${Math.max(...few.map((c: any) => c.n))})` : 'No comparison in this family';
+};
 const anyKimu = ds.families.some((f: any) => ds.groups.some((g: string) => f.cells[g]?.mvis_variant === 'kalibr_imu' && f.cells[g]?.tools?.includes('MVIS')));
 ---
 <div class="not-content rp" data-rp-dataset={ds.id}>
@@ -51,11 +59,11 @@ const anyKimu = ds.families.some((f: any) => ds.groups.some((g: string) => f.cel
               return (
                 <td class="rp-cell">
                   <a href={`#${detailId(f.id, g)}`} class={`rp-chip rp-${c.state} ${c.state === 'most' ? `rp-tint-${c.tools[0]}` : ''} ${c.state === 'tie_top' ? `rp-split rp-l-${c.tools[0]} rp-r-${c.tools[1]}` : ''}`} aria-label={c.aria} data-rp-open={detailId(f.id, g)}>
-                    {c.state === 'most' && <span class="rp-v"><RpShape tool={c.tools[0]} /> {c.tools[0]} <span class="rp-k">×{c.k_text}</span>{c.mvis_variant === 'kalibr_imu' && c.tools[0] === 'MVIS' && <span class="rp-kimu">K-IMU</span>}</span>}
-                    {c.state === 'tie_top' && <span class="rp-v"><RpShape tool={c.tools[0]} /> {c.tools[0]} = <RpShape tool={c.tools[1]} /> {c.tools[1]}<span class="rp-sub">&gt; {c.over[0]} <span class="rp-k">×{c.k_text}</span></span></span>}
+                    {c.state === 'most' && <span class="rp-v"><span class="rp-t"><RpShape tool={c.tools[0]} /> {c.tools[0]}</span> <span class="rp-k">×{c.k_text}</span>{kimu(c) && <span class="rp-kimu">K-IMU</span>}</span>}
+                    {c.state === 'tie_top' && <span class="rp-v"><span class="rp-t"><RpShape tool={c.tools[0]} /> {c.tools[0]}</span> <span class="rp-t">= <RpShape tool={c.tools[1]} /> {c.tools[1]}</span><span class="rp-sub"><span class="rp-t">&gt; {c.over[0]}</span> <span class="rp-k">×{c.k_text}</span></span></span>}
                     {c.state === 'tie' && <span class="rp-v">Tie</span>}
                     {c.state === 'not_separated' && <span class="rp-v">Not separated</span>}
-                    {c.state === 'too_few' && <span class="rp-v">n = {c.n} · too few</span>}
+                    {c.state === 'too_few' && <span class="rp-v"><span class="rp-t">n = {c.n} ·</span> <span class="rp-t">too few</span></span>}
                     {c.state === 'input' && <span class="rp-v">input, not compared</span>}
                     {c.state === 'single' && <span class="rp-v">{c.tools[0]} only</span>}
                     {c.state === 'not_compared' && <span class="rp-v">not compared</span>}
@@ -75,15 +83,15 @@ const anyKimu = ds.families.some((f: any) => ds.groups.some((g: string) => f.cel
       <details class="rp-card">
         <summary>
           <span class="rp-fam-id">{f.id} · {mode(f)} · {f.title}</span>
-          <span class="rp-strip">{strip(f) || 'no tool is marked'}</span>
+          <span class="rp-strip">{stripOf(f)}</span>
           <span class="rp-fam-n">{nMatched(f)} · {recLine(f)}</span>
         </summary>
         <ul class="rp-card-rows">
-          {ds.groups.filter((g: string) => f.cells[g] && ['most', 'tie_top', 'tie', 'not_separated', 'too_few'].includes(f.cells[g].state)).map((g: string) => {
+          {ds.groups.filter((g: string) => f.cells[g] && verdictish(f.cells[g].state)).map((g: string) => {
             const c = f.cells[g];
-            return <li><a href={`#${detailId(f.id, g)}`} data-rp-open={detailId(f.id, g)} aria-label={c.aria}><span class="rp-g">{groupOf[g].short}</span><span class={`rp-chip rp-${c.state} ${c.state === 'most' ? `rp-tint-${c.tools[0]}` : ''} ${c.state === 'tie_top' ? `rp-split rp-l-${c.tools[0]} rp-r-${c.tools[1]}` : ''}`}>{c.state === 'most' || c.state === 'tie_top' ? <>{c.tools.map((t: string, i: number) => <>{i ? ' = ' : ''}<RpShape tool={t} /> {t}</>)} <span class="rp-k">×{c.k_text}</span></> : c.chip}</span>{sups(c) && <sup class="rp-sup">{sups(c)}</sup>}</a></li>;
+            return <li><a href={`#${detailId(f.id, g)}`} data-rp-open={detailId(f.id, g)} aria-label={c.aria}><span class="rp-g">{groupOf[g].short}</span><span class={`rp-chip rp-${c.state} ${c.state === 'most' ? `rp-tint-${c.tools[0]}` : ''} ${c.state === 'tie_top' ? `rp-split rp-l-${c.tools[0]} rp-r-${c.tools[1]}` : ''}`}>{c.state === 'most' || c.state === 'tie_top' ? <>{c.tools.map((t: string, i: number) => <span class="rp-t">{i ? '= ' : ''}<RpShape tool={t} /> {t}</span>)}{c.state === 'tie_top' && <span class="rp-t"> &gt; {c.over[0]}</span>} <span class="rp-k">×{c.k_text}</span>{kimu(c) && <span class="rp-kimu">K-IMU</span>}</> : c.chip}</span></a>{sups(c) && <sup class="rp-sup">{sups(c).split(',').map((l: string) => <a href={`#rp-cav-${ds.id}-${l}`}>{l}</a>)}</sup>}</li>;
           })}
-          {loneGroups(f).map(([word, gs]) => <li class="rp-lone">{gs.join(' · ')}: <i>{word}</i></li>)}
+          {loneGroups(f).map(([word, gs]) => <li class="rp-lone">{gs.map(([g, s]: [string, string], i: number) => <>{i ? ' · ' : ''}<a href={`#${detailId(f.id, g)}`} data-rp-open={detailId(f.id, g)}>{s}</a></>)}: <i>{word}</i></li>)}
         </ul>
       </details>
     ))}

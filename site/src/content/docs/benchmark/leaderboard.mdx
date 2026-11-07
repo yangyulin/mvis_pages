@@ -11,6 +11,7 @@ import LeaderboardHowTo from '../../../components/LeaderboardHowTo.astro';
 import RepeatabilityHeader from '../../../components/RepeatabilityHeader.astro';
 import RepeatabilityMatrix from '../../../components/RepeatabilityMatrix.astro';
 import RepeatabilityDetails from '../../../components/RepeatabilityDetails.astro';
+import { tested } from '../../../components/rp';
 
 <RepeatabilityHeader />
 
@@ -18,7 +19,7 @@ import RepeatabilityDetails from '../../../components/RepeatabilityDetails.astro
   <p><b>This page shows repeatability, not accuracy.</b> Repeatability is how much each tool's estimates scatter when the same rig is calibrated from different recordings. These datasets have no ground truth, so no tool is the reference, and a tool can repeat well and still be biased. Tools are compared only on recordings that every compared tool ran. Reprojection error measures how well a model fits its own data; it is not used here. The MVIS authors run this board and made every run, including the Kalibr and Basalt runs.</p>
 </div>
 
-<p class="rp-dates">Kalibr on T7 was re-run on 2026-11-02. The Kalibr runs for T1 bag 09 were made on 2026-11-04. Other Kalibr and Basalt runs are from 2026-10-22 or earlier. Data settings still differ from MVIS on T6, T7 and T8.</p>
+<details class="not-content rp-dates"><summary>Run dates and data settings</summary><p>Kalibr on T7 was re-run on 2026-11-02. The Kalibr runs for T1 bag 09 were made on 2026-11-04. Other Kalibr and Basalt runs are from 2026-10-22 or earlier. Data settings still differ from MVIS on T6, T7 and T8.</p></details>
 
 <section id="ds-virig" data-rp-section="virig">
 
@@ -85,7 +86,7 @@ Reverb G2 headset calibration from the Monado SLAM Datasets. [Example](/examples
 <details class="rp-fold">
 <summary>How the verdicts are made</summary>
 
-For each family and group of parameters we take only the recordings every compared tool ran. For each tool we measure the scatter (standard deviation) of each parameter across those recordings, and compare two tools by the median ratio of their scatters. A tool is marked more repeatable only if its scatter is at least 20 % smaller and a gap that large would rarely appear (under 5 %, Holm-adjusted within the cell) if we swapped the two tools' results recording by recording. Otherwise it is a tie: either the gap is within chance, or it is under 20 %. With fewer than 6 shared recordings no gap can pass this test (the smallest possible p is 2/2ⁿ), so those cells say "too few recordings". Values a tool received as input are not compared. Distortion coefficients trade off against each other, so their scatter can overstate differences in the lens mapping. Each cell is a separate 5 % test; across about 30 decided cells, one or two calls may be chance. The intervals are not adjusted for multiple tests.
+For each family and group of parameters we take only the recordings every compared tool ran. For each tool we measure the scatter (standard deviation) of each parameter across those recordings, and compare two tools by the median ratio of their scatters. A tool is marked more repeatable only if its scatter is at least 20 % smaller and a gap that large would rarely appear (under 5 %, Holm-adjusted within the cell) if we swapped the two tools' results recording by recording. Otherwise it is a tie: either the gap is within chance, or it is under 20 %. With fewer than 6 shared recordings no gap can pass this test (the smallest possible p is 2/2ⁿ), so those cells say "too few recordings". Values a tool received as input, and rows where the tools' models differ, are not compared. Distortion coefficients trade off against each other, so their scatter can overstate differences in the lens mapping. Each cell is a separate 5 % test; across the {tested.cells} tested cells on this page, of which {tested.naming} name a tool, one or two calls may be chance. The intervals are not adjusted for multiple tests.
 
 </details>
 
