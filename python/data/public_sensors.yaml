@@ -168,7 +168,8 @@ sensors:
     method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga on, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-06."
     limits:
       - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
-      - The IMU runs at about 88 Hz with uneven spacing, and the motion is slow, so the lever arm is the least certain result.
+      - "A simulation of this recording, solved the same way, shows its IMU samples (about 88 Hz, unevenly spaced) can't pin the IMU scales, the lever arm or the gyro-to-accel offset t_ga, even without noise. Treat those values as unreliable. The camera intrinsics and the stereo baseline aren't affected."
+      - With evenly spaced IMU samples at 150 Hz or more, the same simulation recovers most of it. The gyro scale and lever arm also need faster rotation than this recording has.
       - The model is matched from resolution, baseline, field of view and shutter, not confirmed by the maker.
     header:
       type: "GMSL2 stereo camera module with a 6-axis IMU"
