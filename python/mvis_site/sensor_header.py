@@ -1,6 +1,8 @@
 """The datasheet header of a sensor page, its specifications table and the folded detail sections."""
 from __future__ import annotations
 
+import json
+
 import base64
 import re
 
@@ -102,16 +104,21 @@ def _decode(a):
 
 def proc_preview(v: dict) -> str:
     """A light static picture of the board and rig path, shown on phones before the 3D figure loads."""
-    p = v["process"]
+    p = v.get("views") or v["process"]
     eye = np.array([1.4, -1.4, 0.8])
     fw = -eye / np.linalg.norm(eye)
     rt = np.cross(fw, [0, 0, 1.0])
     rt = rt / np.linalg.norm(rt)
     up = np.cross(rt, fw)
     pr = lambda q: np.c_[q @ rt, q @ up]
-    path = pr(np.array(p["spec"]["xyz"], float)[::3])
-    out = next((t for t in p["data"] if t.get("name") == "Board Outline"), None)
-    board = pr(np.c_[_decode(out["x"]), _decode(out["y"]), _decode(out["z"])]) if out else path[:0]
+    if v.get("views"):   # the canvas player's spec
+        path = pr(np.array(p["xyz"], float)[::3])
+        ring = p.get("board", {}).get("outline")
+        board = pr(np.array(ring + ring[:1], float)) if ring else path[:0]
+    else:
+        path = pr(np.array(p["spec"]["xyz"], float)[::3])
+        out = next((t for t in p["data"] if t.get("name") == "Board Outline"), None)
+        board = pr(np.c_[_decode(out["x"]), _decode(out["y"]), _decode(out["z"])]) if out else path[:0]
     board = board[~np.isnan(board).any(axis=1)]
     allp = np.vstack([path, board])
     lo, hi = allp.min(0), allp.max(0)
@@ -120,6 +127,27 @@ def proc_preview(v: dict) -> str:
     S = lambda q: " ".join(f"{W / 2 + s * (x - (lo[0] + hi[0]) / 2):.1f},{H / 2 - s * (y - (lo[1] + hi[1]) / 2):.1f}" for x, y in q)
     return (f'<svg viewBox="0 0 {W} {H}" aria-hidden="true"><polygon points="{S(board)}" fill="var(--strong)" fill-opacity=".1" stroke="var(--muted)"/>'
             f'<polyline points="{S(path)}" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>')
+
+
+PROCESS_VIEWS_LEAD = ("<p>The solved path of the rig around the board. Press Play or drag the bar to follow it, use the buttons to change "
+                      "the view, and pick a camera on the right to put it on the frustum. Each camera card draws the board from the solved "
+                      "pose with the corners MVIS detected; no camera image is published.</p>")
+
+
+def views_mb(v: dict) -> str:
+    """The process spec's download size, for the phone opener."""
+    n = len(json.dumps(v["views"], separators=(",", ":"))) / 1e6
+    return f"about {n:.0f} MB" if n >= 1.5 else "about 1 MB" if n >= 0.5 else "under 1 MB"
+
+
+def process_block(slug: str, v: dict, i: int) -> str:
+    """One variant's calibration process: the MVIS canvas player (fetched when scrolled into view) when the run has
+    view data, else the older Plotly figure."""
+    if v.get("views"):
+        return (f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(v)}<span>Explore in 3D ({views_mb(v)})</span></button>'
+                f'<div class="mvv" data-mvv="scene" data-mode="site" data-src="/media/sensors/{slug}/views{i}.json"></div></div>')
+    return (f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(v)}<span>Explore in 3D (about 5 MB)</span></button>'
+            f'{proc_html(v, i).replace("▶ Play", "▶\ufe0e Play")}</div>')
 
 
 PCHIPS = ('<div class=pchips><span><i style="background:#9333ea"></i>Board corners</span><span><i class=ln style="background:#2563eb"></i>Rig path, darker is later</span>'
@@ -185,8 +213,11 @@ def header_parts(slug: str, p: dict, vs: list, parts: dict) -> dict:
     tabs = re.search(r'<div class=vtabs.*?</div>', parts["lead"], re.S)
     parts["glance"] = (tabs.group(0) if tabs else "") + f'<p>{e(p["lead"])}</p>' + band + f'<p class=sd-note>{e(p["limits"][0])}</p>'
     r0 = vs[0]["run"]
-    parts["process"] = ("<p>The solved path of the rig around the board. Press Play or drag the bar to follow it, and use the buttons to change the view.</p>"
-                        + each({"variants": vs}, lambda x, i: f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(x)}<span>Explore in 3D (about 5 MB)</span></button>{proc_html(x, i).replace("▶ Play", "▶\ufe0e Play")}</div>') + PCHIPS)
+    parts["process"] = (PROCESS_VIEWS_LEAD if any(x.get("views") for x in vs) else
+                        "<p>The solved path of the rig around the board. Press Play or drag the bar to follow it, and use the buttons to change the view.</p>")
+    parts["process"] += each({"variants": vs}, lambda x, i: process_block(slug, x, i))
+    if not all(x.get("views") for x in vs):
+        parts["process"] += PCHIPS
     parts["rig"] = (f'<p>The solved rig in 3D, to scale. Tap a sensor for its values. Full screen lets you rotate and zoom. Grid squares are 20 mm.</p>{MAP_STAGE}{map_panel()}'
                     '<h3 class=rig-h>To scale, from above and the front</h3>' + each({"variants": vs}, lambda x, i: rig_drawing(x) + rig_table(x))
                     + '<p class=rig-note>Solved by MVIS. Lever arms are in the IMU frame. Rotation is log(R), camera in the IMU frame.</p>')

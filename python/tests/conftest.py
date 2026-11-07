@@ -42,3 +42,12 @@ def real_cfg():
     """The private sensors.yaml, solve slice only."""
     from mvis_site.results import solve_config
     return solve_config(yaml.safe_load(env_path("MVIS_SENSORS_CONFIG").read_text()))
+
+
+@pytest.fixture(autouse=True)
+def _pinned_mvis_views(monkeypatch):
+    """MVIS's canvas player (views.js / views.css) is MVIS's to change and lives in its repo; tests pin it, so they
+    need no MVIS checkout and the goldens cover only the site's own output."""
+    from mvis_site import assets
+    monkeypatch.setattr(assets, "views_js", lambda: "/* mvis views.js */")
+    monkeypatch.setattr(assets, "views_css", lambda: "/* mvis views.css */")

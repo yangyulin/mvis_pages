@@ -182,3 +182,44 @@ def test_only_cuts_pub_to_one_sensor_and_refuses_unknown():
     assert list(pub["sensors"]) == ["a", "b"]
     with pytest.raises(SystemExit):
         X.only(pub, "c")
+
+
+def _views(**extra):
+    """A minimal v2 scene spec, as MVIS writes beside a report (cam_imu_views.json)."""
+    spec = {"v": 2, "t": [0.0, 1.0], "unit": "s", "xyz": [[0, 0, 0], [0.1, 0, 0]], "R": [[1, 0, 0, 0, 1, 0, 0, 0, 1]] * 2,
+            "board": {"pts": [[0, 0, 1]], "outline": [[0, 0, 1], [0.2, 0, 1], [0.2, 0.2, 1], [0, 0.2, 1]], "normal": [0, 0, 1], "center": [0.1, 0.1, 1]},
+            "cams": [{"name": "cam0", "uvb": "AAAA/9j/AAAA", "uvo": [0, 0, 0]}]}
+    spec["cams"][0].update(extra)
+    return spec
+
+
+def test_a_run_with_view_data_gets_the_canvas_player(world):
+    (world["root"] / "runs/c/cam_imu_views.json").write_text(json.dumps({"scene": _views(), "rig": None}))
+    plan = _plan(world)
+    out = "site/public/media/sensors/rig-groups"
+    assert f"{out}/views0.json" in plan.texts and f"{out}/process0.json" not in plan.texts
+    assert json.loads(plan.texts[f"{out}/views0.json"])["v"] == 2
+    page = json.loads(plan.texts["site/src/data/sensors/rig-groups.json"])
+    assert page["procs"] == [None]                                    # no Plotly figure to fetch
+    assert 'data-mvv="scene" data-mode="site" data-src="/media/sensors/rig-groups/views0.json"' in page["parts"]["process"]
+    assert "Explore in 3D (under 1 MB)" in page["parts"]["process"] and "no camera image is published" in page["parts"]["process"]
+    other = json.loads(plan.texts["site/src/data/sensors/rig-old.json"])  # runs without view data keep the Plotly figure
+    assert other["procs"][0].endswith("process0.json") and "procplot" in other["parts"]["process"]
+    assert "/* mvis views.js */" in plan.texts["site/src/scripts/sensor-page.js"]
+
+
+def test_view_data_with_a_camera_frame_is_refused(world):
+    (world["root"] / "runs/c/cam_imu_views.json").write_text(json.dumps({"scene": _views(jpg=["/9j/4AAQ"], jpg_idx=[0])}))
+    with pytest.raises(RuntimeError, match="views hold camera frames"):
+        X.collect(world["pub"], world["cfg"])
+    (world["root"] / "runs/c/cam_imu_views.json").write_text(json.dumps({"scene": _views(note="data:image/png;base64,iVBOR")}))
+    with pytest.raises(RuntimeError, match="views hold camera frames"):
+        X.collect(world["pub"], world["cfg"])
+
+
+def test_view_data_of_an_unknown_version_is_refused(world):
+    spec = _views()
+    spec["v"] = 3
+    (world["root"] / "runs/c/cam_imu_views.json").write_text(json.dumps({"scene": spec}))
+    with pytest.raises(RuntimeError, match="view spec v3"):
+        X.collect(world["pub"], world["cfg"])
