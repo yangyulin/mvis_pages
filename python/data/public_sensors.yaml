@@ -343,7 +343,7 @@ sensors:
     description: Head-worn stereo camera with a 300 Hz IMU, calibrated with MVIS on two units.
     lead: Head-worn stereo fisheye camera with a 6-axis IMU, recording to a memory card. Borme, a brand of Shenzhen Feikasi Industrial Co., Ltd., sells it as the XQ20. Two units were calibrated.
     chips: [Stereo, 300 Hz IMU, 2 units, CC BY-NC 4.0]
-    card: {tags: [Global shutter, 2 cameras, 300 Hz IMU], sensors: "Stereo fisheye + IMU @ 300 Hz", format: "MP4 + IMU CSV → EuRoC mav0", shows: "Two units of one headset, and a lever arm that's still open"}
+    card: {tags: [Global shutter, 2 cameras, 300 Hz IMU], sensors: "Stereo fisheye + IMU @ 300 Hz", format: "MP4 + IMU CSV → EuRoC mav0", shows: "Two units of one headset, and why a Kalibr noise file needs care in MVIS"}
     hardware:
       - [Cameras, "2 × 1920×1200, H.265 MP4", Supplier]
       - [Frame rate, "30 or 60 fps on the sheet; about 30 Hz in these recordings", Supplier]
@@ -366,12 +366,12 @@ sensors:
       - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
       - [Licence, "CC BY-NC 4.0; commercial use by request"]
       - [Hosted, "__HUB:community/xq20/__"]
-    method: "cam0 at 30 Hz, cam1 at 10 Hz, t_ga on, camera intrinsics free. Batch of 2026-11-03."
+    method: "cam0 at 30 Hz, cam1 at 10 Hz, t_ga on, camera intrinsics free, IMU intrinsics pinned. IMU noise padded from the measured noise: gyro 6e-4 rad/s/√Hz, accel 0.015 m/s²/√Hz. Batch of 2026-11-07."
     limits:
       - No independent reference. These values show what MVIS solved, not how close they are to the truth.
-      - Unit A lever z sits about 25 mm above unit B, beyond the roughly 10 mm uncertainty for this motion. This is still open.
+      - "The supplier's IMU noise file (gyro 0.002, accel 0.02) is tuned for Kalibr, about 10× and 3× the noise measured at rest. Used as is in MVIS, it put unit A's lever arm 20 to 45 mm too far forward. These results use the measured noise with a 2 to 3× margin."
+      - "The recordings barely rotate about x. With IMU intrinsics free, gyro misalignment absorbs the lever arm's y, so these results pin the IMU intrinsics."
       - The listing says 1080P and 160°, and the supplier's sheet says 1920×1200 and 123.6°. These recordings are 1920×1200. The listing's shutter value wasn't tested here.
-      - Accel z scale stays near 0.93 to 0.94 because z barely sees gravity in this motion, so it isn't a sensor property.
     demo: {from: "xq20-plain_small", note: "The 3D scene MVIS recovered from unit B."}
     header:
       type: "Head-worn stereo fisheye camera with a 6-axis IMU, recording to a memory card"

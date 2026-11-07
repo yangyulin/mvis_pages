@@ -108,3 +108,13 @@ def test_shared_section_builders():
 
 def test_process_section_puts_the_note_after_the_lead(variant):
     assert S.process_section("Note.", [variant]).startswith(f"<p>{S.PROCESS_LEAD} Note.</p><div class=v data-v=\"0\">")
+
+
+def test_imu_section_pinned_says_so():
+    from mvis_site.sensor_parts import imu_section
+    run = {"imu_model": "calyx", "Dw_diag": [1.0, 1.0, 1.0], "Da_diag": [1.0, 1.0, 1.0], "t_ga_ms": -1.0, "t_ga_sigma_ms": 0.5}
+    html = imu_section([{"label": "Unit A", "run": run}])
+    assert "pinned at identity" in html and "Gyro scale" not in html
+    run_free = dict(run, Dw_diag=[1.002, 1.0, 1.0])
+    html = imu_section([{"label": "Unit A", "run": run_free}])
+    assert "Model: calyx" in html and "Gyro scale" in html
