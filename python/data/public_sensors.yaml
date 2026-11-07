@@ -370,7 +370,7 @@ sensors:
     limits:
       - No independent reference. These values show what MVIS solved, not how close they are to the truth.
       - "The supplier's IMU noise file (gyro 0.002, accel 0.02) is tuned for Kalibr, about 10× and 3× the noise measured at rest. Used as is in MVIS, it put unit A's lever arm 20 to 45 mm too far forward. These results use the measured noise with a 2 to 3× margin."
-      - "The recordings barely rotate about x. With IMU intrinsics free, gyro misalignment absorbs the lever arm's y, so these results pin the IMU intrinsics."
+      - "With IMU intrinsics free, the lever arm's y shifts about 9 mm on both units, more than its 3.5 mm uncertainty. Pinned, it agrees with the supplier's Kalibr, so these results pin the IMU intrinsics."
       - The listing says 1080P and 160°, and the supplier's sheet says 1920×1200 and 123.6°. These recordings are 1920×1200. The listing's shutter value wasn't tested here.
     demo: {from: "xq20-plain_small", note: "The 3D scene MVIS recovered from unit B."}
     header:
