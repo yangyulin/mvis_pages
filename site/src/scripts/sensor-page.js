@@ -145,7 +145,8 @@
       Object.keys(card.cells).forEach(function (kc) { kc = +kc; g.fillRect((kc % 8) * w / 8, Math.floor(kc / 8) * h / 6, w / 8 - 1, h / 6 - 1); });
       g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(card.covCv, 0, 0);
       var cov = c.cov && c.cov[cur] != null ? c.cov[cur] : Object.keys(card.cells).length / 48 * 100, nn = c.n && c.n[cur] != null ? c.n[cur] : card.nAll;
-      card.note.textContent = (uv && uv.length ? (uv.length / 2) + ' corners now' : 'no detection now') + ' · ' + Math.round(cov) + ' % of the image · ' + nn.toLocaleString() + ' so far';
+      var nowN = c.ids && c.ids[cur] ? c.ids[cur].length : (uv ? uv.length / 2 : 0);   // the matched frame's corners; uv holds every frame since the last step
+      card.note.textContent = (nowN ? nowN + ' corners now' : 'no detection now') + ' · ' + Math.round(cov) + ' % of the image · ' + nn.toLocaleString() + ' so far';
     }
     // ---- 3D
     function draw3d() {
