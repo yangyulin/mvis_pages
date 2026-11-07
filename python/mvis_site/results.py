@@ -107,11 +107,39 @@ def process_has_no_frames(p: dict) -> bool:
     return not any("panel" in v for v in p["spec"].get("views", []))
 
 
+VIEWS_VERSION = 2
+
+
+def read_views(run_dir: Path) -> dict | None:
+    """The run's calibration-process spec for the MVIS canvas player, from `cam_imu_views.json` (written by MVIS
+    beside the report, frames already stripped; older runs get it from `mvis.analysis.views.legacy`). None if absent."""
+    f = Path(run_dir) / "cam_imu_views.json"
+    if not f.exists():
+        return None
+    scene = json.loads(f.read_text()).get("scene")
+    if scene is not None and scene.get("v") != VIEWS_VERSION:
+        raise RuntimeError(f"{f}: view spec v{scene.get('v')}, the site knows v{VIEWS_VERSION}")
+    return scene
+
+
+def views_have_no_frames(spec: dict) -> bool:
+    """No camera image in a view spec: no image keys, and no string that starts like a JPEG, a PNG or a data URL
+    (packed number arrays may contain those letters elsewhere)."""
+    if any(k in c for c in spec.get("cams", []) for k in ("jpg", "jpg_idx", "img")):
+        return False
+    return not any(s.startswith(("/9j/", "iVBOR", "data:image/")) for s in _strings(spec))
+
+
 def refuse_frames(key: str, variants: list, require_process: bool = True) -> None:
-    """Stop before any page is written when a process figure holds camera frames. Public pages also need the figure;
-    the private pages show older runs without one."""
+    """Stop before any page is written when a process figure holds camera frames. Public pages also need the figure
+    (the canvas views or the older Plotly one); the private pages show older runs without one."""
     for v in variants:
-        if (not v["process"] and require_process) or (v["process"] and not process_has_no_frames(v["process"])):
+        views, proc = v.get("views"), v["process"]
+        if not views and not proc and require_process:
+            raise RuntimeError(f"{key}: process figure missing or holds camera frames")
+        if views and not views_have_no_frames(views):
+            raise RuntimeError(f"{key}: process views hold camera frames")
+        if proc and not process_has_no_frames(proc):
             raise RuntimeError(f"{key}: process figure missing or holds camera frames")
 
 
@@ -147,11 +175,12 @@ def load_variant(v: dict, roots: dict) -> dict:
             sizes.append(sizes[0])
             readout.append(0.0)
     proc = extract_process(d / "cam_imu_report.html") if v.get("report") else None
+    views = read_views(d) if v.get("report") else None
     fov = [fov_deg(c["intr"], s, u) for c, s, u in zip(run["cams"], sizes, uvs)]
     if v.get("fov_past_fit"):  # the rules let this value through, but it conflicts with a published figure
         fov = [{**f, "h": None, "v": None, "h_ext": True, "v_ext": True} for f in fov]
     return {"label": v["label"], "run": run, "ref": ref, "sizes": sizes, "readout_ms": readout, "process": proc,
-            "fov": fov}
+            "views": views, "fov": fov}
 
 
 def load_series(cfg: dict, roots: dict) -> dict | None:

@@ -81,8 +81,9 @@ def render(pub: dict, collected: dict, media: Path, photos: Path) -> Plan:
         vs = c["variants"]
         if c["sha"]:
             p["sha"] = c["sha"]
-        procs = [json.dumps(v["process"], separators=(",", ":")) for v in vs]
-        plan.problems += [f"{slug} process: {x}" for t in procs for x in public_problems(process_strings(t))]
+        procs = [(f"views{i}.json", json.dumps(v["views"], separators=(",", ":"))) if v.get("views")
+                 else (f"process{i}.json", json.dumps(v["process"], separators=(",", ":"))) for i, v in enumerate(vs)]
+        plan.problems += [f"{slug} process: {x}" for _, t in procs for x in public_problems(process_strings(t))]
         if not p.get("header", {}).get("image", {}).get("file"):
             raise ValueError(f"{slug}: needs a header with an image file; the Sensors overview card shows it")
         parts = parts_for(slug, p, {"board": c["board"]}, vs, c["series"], pub["data_url"], f"/media/sensors/{slug}", tags)
@@ -92,8 +93,8 @@ def render(pub: dict, collected: dict, media: Path, photos: Path) -> Plan:
         plan.problems += [f"{slug}: {x}" for x in public_problems(strip_urls(txt)) + public_problems(m)]
         out = f"{MEDIA}/{slug}"
         plan.clear.append(out)
-        for i, t in enumerate(procs):
-            plan.texts[f"{out}/process{i}.json"] = t
+        for name, t in procs:
+            plan.texts[f"{out}/{name}"] = t
         plan.copies.append((photos / p["header"]["image"]["file"], f'{out}/{p["header"]["image"]["file"]}'))
         if p.get("image"):
             plan.copies.append((photos / p["image"]["file"], f'{out}/{p["image"]["file"]}'))
@@ -110,8 +111,8 @@ def render(pub: dict, collected: dict, media: Path, photos: Path) -> Plan:
     plan.problems += [f"sidebar: {x}" for x in public_problems(nav)]
     plan.texts["site/src/data/sensor-nav.json"] = nav
     plan.texts[f"{DOCS}/index.mdx"] = overview_mdx(pub)
-    plan.texts[f"{DATA_DIR}/sensor.css"] = site_css(assets.page_css(), assets.header_css())
-    plan.texts["site/src/scripts/sensor-page.js"] = site_js(assets.progress_js(), assets.page_js())
+    plan.texts[f"{DATA_DIR}/sensor.css"] = site_css(assets.page_css(), assets.header_css()) + "\n/* MVIS canvas views (mvis.analysis.views) */\n" + assets.views_css()
+    plan.texts["site/src/scripts/sensor-page.js"] = site_js(assets.progress_js(), assets.page_js(), assets.views_js())
     return plan
 
 
@@ -148,13 +149,27 @@ def only(pub: dict, slug: str) -> dict:
     return {**pub, "sensors": {slug: pub["sensors"][slug]}}
 
 
-def main(site: Path, private_config: Path, media: Path, slug: str | None = None) -> list[str]:
+def skipping(pub: dict, slugs: list[str]) -> dict:
+    """pub without these sensors, for a machine that lacks their results; their pages stay as they are."""
+    unknown = [x for x in slugs if x not in pub["sensors"]]
+    if unknown:
+        raise SystemExit(f"not in public_sensors.yaml: {', '.join(unknown)}")
+    return {**pub, "sensors": {k: v for k, v in pub["sensors"].items() if k not in slugs}}
+
+
+def main(site: Path, private_config: Path, media: Path, slug: str | None = None, skip: list[str] | None = None) -> list[str]:
     """Export every public sensor, or with slug only that one: its data, MDX and media, plus the sidebar and overview
-    built from the full list. The other sensors' files and the shared assets are left as they are."""
+    built from the full list. The other sensors' files and the shared assets are left as they are. With skip, export
+    all but those sensors, shared assets included; the skipped pages' files stay as they are."""
     pub = public_sensors()
     cfg = solve_config(yaml.safe_load(Path(private_config).read_text(encoding="utf-8")))
-    part = only(pub, slug) if slug else pub
+    part = only(pub, slug) if slug else skipping(pub, skip) if skip else pub
     plan = render(part, collect(part, cfg), Path(media), DATA / "photos")
+    if skip:
+        nav = json.dumps(sensor_nav(pub), indent=1) + "\n"
+        plan.problems += [f"sidebar: {x}" for x in public_problems(nav)]
+        plan.texts["site/src/data/sensor-nav.json"] = nav
+        plan.texts[f"{DOCS}/index.mdx"] = overview_mdx(pub)
     if slug:
         nav = json.dumps(sensor_nav(pub), indent=1) + "\n"
         plan.problems += [f"sidebar: {x}" for x in public_problems(nav)]

@@ -50,3 +50,22 @@ def site_tokens(css: str) -> dict:
     """Accent and slate values from the site's stylesheet, so private pages follow it."""
     block = lambda sel: dict(re.findall(r"--([\w-]+):\s*([^;]+);", css[css.index(sel):css.index("}", css.index(sel))]))
     return {"light": block(":root[data-theme='light']"), "dark": block(":root[data-theme='dark']")}
+
+
+def views_dir():
+    """MVIS's canvas-view assets (views.js, views.css): $MVIS_VIEWS_ASSETS, else the openmvis-internal checkout.
+    The site ships MVIS's own player, never a copy kept here."""
+    import os
+    from pathlib import Path
+    d = Path(os.environ.get("MVIS_VIEWS_ASSETS", "~/Project/openmvis-internal/src/mvis/analysis/views/assets")).expanduser()
+    if not (d / "views.js").exists():
+        raise FileNotFoundError(f"MVIS view assets not found in {d}; set MVIS_VIEWS_ASSETS or pass --mvis-views")
+    return d
+
+
+def views_js() -> str:
+    return (views_dir() / "views.js").read_text(encoding="utf-8")
+
+
+def views_css() -> str:
+    return (views_dir() / "views.css").read_text(encoding="utf-8")
