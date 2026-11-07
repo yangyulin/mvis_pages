@@ -13,7 +13,15 @@ from .geometry import fov_deg, rotvec
 
 
 def corner_uv(report: Path) -> list:
-    """Corner pixels per camera, from the report's process figure. Empty for a camera without them."""
+    """Corner pixels per camera: from the run's cam_imu_views.json when it has one (MVIS's canvas reports carry no
+    Plotly figure), else from the report's older process figure. Empty for a camera without them."""
+    side = Path(report).parent / "cam_imu_views.json"
+    if side.exists():
+        scene = json.loads(side.read_text()).get("scene") or {}
+        def pairs(b64: str) -> np.ndarray:
+            raw = base64.b64decode(b64)
+            return np.frombuffer(raw[:len(raw) // 4 * 4], np.int16).reshape(-1, 2).astype(float)
+        return [pairs(c["uvb"]) if c.get("uvb") else np.zeros((0, 2)) for c in scene.get("cams", [])]
     t = report.read_text()
     i = t.rindex('mvisProgress("')
     spec, _ = json.JSONDecoder().raw_decode(t[t.index(",", i) + 1:])

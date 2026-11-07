@@ -118,7 +118,9 @@
     function tlabel(k) { return T ? T[k].toFixed(1) + ' s of ' + T[N - 1].toFixed(1) + ' s' : 'step ' + (k + 1) + ' of ' + N; }
     function lerp(a, b, f) { return 'rgb(' + a.map(function (x, i) { return Math.round(x + (b[i] - x) * f); }).join(',') + ')'; }
     // ---- camera cards
-    function fitCanvas(card, c) { var bx = card.el.querySelector('.mv-pair').getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    function fitCanvas(card, c) {   // measure the free space with the images out of the way: a page's own canvas CSS must not size it
+      var pair = card.el.querySelector('.mv-pair'); card.view.style.display = card.cov.style.display = 'none';
+      var bx = pair.getBoundingClientRect(), d = window.devicePixelRatio || 1; card.view.style.display = card.cov.style.display = '';
       var bw = Math.max(40, (bx.width - 6) / 2), bh = Math.max(30, bx.height || 120), k = Math.min(bw / c.size[0], bh / c.size[1]);
       var w = Math.max(10, Math.round(c.size[0] * k)), h = Math.max(10, Math.round(c.size[1] * k));
       [card.view, card.cov].forEach(function (x) { if (x.width !== w * d || x.height !== h * d) { x.width = w * d; x.height = h * d; x.style.width = w + 'px'; x.style.height = h + 'px'; } });
@@ -228,7 +230,8 @@
     var nn = Infinity; cams.forEach(function (a, i) { cams.forEach(function (b2, j) { if (j > i) nn = Math.min(nn, norm(sub(a.p, b2.p))); }); });
     var FR = Math.max(8, Math.min(span * 0.42, isFinite(nn) ? nn * 0.85 : Infinity)), rext = span + FR * 0.45, floorY = Math.max.apply(null, all.map(function (p) { return p[1]; })) + FR * 0.85;
     var PRE = {iso: [0.65, -0.38], front: [Math.PI, 0], top: [Math.PI, -Math.PI / 2 + 1e-3], side: [Math.PI / 2, 0]};
-    var st = {yaw: PRE.iso[0], pitch: PRE.iso[1], zoom: 1, moved: 0, touched: false}, rsel = 'imu', hits = [], showSig = false, hover = null, noImu = !!R.origin;
+    var st = {yaw: PRE.iso[0], pitch: PRE.iso[1], zoom: 1, moved: 0, touched: false}, rsel = 'imu', hits = [], showSig = false, hover = null, noImu = !!R.origin, ref = R.ref || null, showRef = !!(R.ref && R.ref.cams);
+    var refCams = ref ? cams.map(function (c, i) { var q = ref.cams[i]; return q ? {p: q.p, Rm: q.R ? R9(q.R) : null} : null; }) : [];
     if (noImu) rsel = 0;   // camera-only rig: the reference camera is the origin
     var hasSig = cams.some(function (c) { return c.sig_p; });
     // ---- DOM: canvas, toolbar under it, pick panel beside
@@ -236,6 +239,7 @@
     cv.setAttribute('aria-label', 'Solved rig in 3D'); cv.tabIndex = 0;
     var vb = {}; ['3D', 'Front', 'Top', 'Side'].forEach(function (n, i) { var k = ['iso', 'front', 'top', 'side'][i]; vb[k] = btn(n, i === 0); bar.appendChild(vb[k]); });
     var sigB = btn('σ × 10', false); sigB.title = 'Draw each camera\'s 1σ lever and rotation uncertainty, scaled 10 times'; if (hasSig) bar.appendChild(sigB);
+    var refB = btn('Reference: ' + (ref ? esc(ref.label) : ''), showRef); refB.title = 'Overlay the reference rig: dashed bodies at its poses'; if (showRef) bar.appendChild(refB);
     var fsB = btn('Full screen'); fsB.className = 'mv-gap'; bar.appendChild(fsB);
     stage.appendChild(cv); stage.appendChild(key); main.appendChild(stage); main.appendChild(bar);
     var info = el('div', 'mv-info'), picks = el('div', 'mv-picks'), infoT = el('div'); info.appendChild(picks); info.appendChild(infoT);
@@ -263,6 +267,10 @@
             ring.push(P(add(o, Rr([Math.cos(t)*hy*0.78, Math.sin(t)*hy*0.78, hz])))); pup.push(P(add(o, Rr([Math.cos(t)*hy*0.34, Math.sin(t)*hy*0.34, hz])))); }
           poly(g, ring); g.fillStyle = '#10151d'; g.fill(); poly(g, pup); g.fillStyle = 'rgba(148,197,240,.75)'; g.fill(); } });
     }
+    function wire(g, o, Rm, sz, color) {   // a dashed wireframe body: the reference camera
+      var hx = sz[0] / 2, hy = sz[1] / 2, hz = sz[2] / 2, q = [];
+      [-1, 1].forEach(function (a) { [-1, 1].forEach(function (b2) { [-1, 1].forEach(function (d) { q.push(P(add(o, toRig(mv(Rm, [a*hx, b2*hy, d*hz]))))); }); }); });
+      [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(function (e) { line(g, q[e[0]], q[e[1]], color, 1.4, [3, 3]); }); }
     function arrow(g, a, b2, c, w) { line(g, a, b2, c, w); var d = Math.atan2(b2[1] - a[1], b2[0] - a[0]), l = Math.max(5, w * 2.8); g.fillStyle = c; g.beginPath();
       g.moveTo(b2[0] + Math.cos(d)*l*0.6, b2[1] + Math.sin(d)*l*0.6); g.lineTo(b2[0] + Math.cos(d + 2.5)*l, b2[1] + Math.sin(d + 2.5)*l); g.lineTo(b2[0] + Math.cos(d - 2.5)*l, b2[1] + Math.sin(d - 2.5)*l); g.closePath(); g.fill(); }
     function hull(pts) { pts = pts.slice().sort(function (a, b2) { return a[0] - b2[0] || a[1] - b2[1]; }); var cr = function (o, a, b2) { return (a[0]-o[0])*(b2[1]-o[1]) - (a[1]-o[1])*(b2[0]-o[0]); }, lo = [], up = [];
@@ -310,6 +318,10 @@
             poly(g, ring); g.strokeStyle = c.color; g.setLineDash([2, 2]); g.stroke(); g.setLineDash([]);
           }
           g.globalAlpha = 1; }});
+        var rc0 = showRef ? refCams[i] : null;
+        if (rc0) { var rp = toRig(rc0.p), ro = P(rp); items.push({d: ro[2] - 0.5, f: function () {
+          g.globalAlpha = dim ? 0.45 : 1; if (norm(sub(rp, p)) > 0.3) line(g, o, ro, alpha(tok(root, 'ink'), 0.55), 1.1, [2, 3]);
+          wire(g, rp, rc0.Rm || c.Rm, [body * 2.1, body, body * 0.9], alpha(c.color, 0.85)); g.globalAlpha = 1; }}); }
         labs.push({t: c.name, x: o[0], y: o[1], c: c.color, act: on, dim: dim}); hits.push({k: i, x: o[0], y: o[1]});
       });
       imus.forEach(function (m, i) { var p = toRig(m.p), o = P(p), on = rsel === 'a' + i;
@@ -345,7 +357,8 @@
         g.globalAlpha = L.dim ? 0.55 : 1; g.beginPath(); if (g.roundRect) g.roundRect(pick[0], pick[1], bw, bh, 6); else g.rect(pick[0], pick[1], bw, bh);
         g.fillStyle = alpha(bg, 0.88); g.fill(); g.strokeStyle = L.act || L.dimLabel ? L.c : alpha(ln, 0.9); g.lineWidth = L.act ? 1.4 : 1; g.stroke();
         g.fillStyle = L.dimLabel ? L.c : ink; g.fillText(L.t, pick[0] + 6, pick[1] + 14); g.globalAlpha = 1; });
-      key.textContent = 'Grid ' + stp + ' mm · ' + (noImu ? 'origin: ' + R.origin : 'arrows: IMU x y z') + ' · rig frame: forward along the cameras, right along the baseline' + (cams.some(function (c) { return c.reach != null || c.domain != null; }) ? ' · dashed rim: past the corners the solve used, or past the model’s 90° limit' : '');
+      key.textContent = 'Grid ' + stp + ' mm · ' + (noImu ? 'origin: ' + R.origin : 'arrows: IMU x y z') + ' · rig frame: forward along the cameras, right along the baseline' + (cams.some(function (c) { return c.reach != null || c.domain != null; }) ? ' · dashed rim: past the corners the solve used, or past the model’s 90° limit' : '')
+        + (showRef ? ' · dashed boxes: ' + ref.label + (ref.align === 'cam0_rotation' ? ' (aligned on cam0’s rotation)' : '') : '');
     }
     function showInfo() {
       Object.keys(pickB).forEach(function (k) { pickB[k].setAttribute('aria-pressed', String(k) === String(rsel)); });
@@ -359,10 +372,17 @@
         row('Field of view', (c.fov.h == null ? 'past the fit' : c.fov.h.toFixed(1) + '°') + ' × ' + (c.fov.v == null ? 'past the fit' : c.fov.v.toFixed(1) + '°') + (c.reach != null ? ' (corners to ' + c.reach.toFixed(0) + '° off axis)' : ''));
         row('Lever', c.p.map(function (x) { return sgn(x, 2); }).join(', ') + ' mm' + (sp ? ' ± ' + sp.map(function (x) { return x.toFixed(2); }).join(', ') : ''));
         row('Distance', norm(c.p).toFixed(1) + ' mm'); row('td', sgn(c.td, 3) + ' ms');
-        if (Math.abs(c.tr) > 0.01) row('Readout', sgn(c.tr, 2) + ' ms'); if (c.reproj != null) row('Reprojection', c.reproj.toFixed(3) + ' px'); }
+        if (Math.abs(c.tr) > 0.01) row('Readout', sgn(c.tr, 2) + ' ms'); if (c.reproj != null) row('Reprojection', c.reproj.toFixed(3) + ' px');
+        var rq = ref && refCams[rsel];
+        if (rq) { var dp = sub(c.p, rq.p); row(esc(ref.label) + ' lever', rq.p.map(function (x) { return sgn(x, 2); }).join(', ') + ' mm');
+          row('MVIS − ' + esc(ref.label), dp.map(function (x) { return sgn(x, 2); }).join(', ') + ' mm (|Δ| ' + norm(dp).toFixed(2) + ' mm)'
+              + (rq.Rm ? (ref.align === 'cam0_rotation' && rsel === 0 ? ', rotation aligned on this camera' : ', rotation ' + rotDiff(c.Rm, rq.Rm).toFixed(3) + '°') : '')); } }
       infoT.innerHTML = h + '</table>';
       [].forEach.call(tbl.querySelectorAll('tbody tr'), function (tr, k) { tr.style.background = kind === 'cam' && k === rsel ? alpha(tok(root, 'accent'), 0.08) : ''; });
     }
+    function rotDiff(A, B) {   // angle of A B^T in degrees
+      var M = mm(A, [[B[0][0], B[1][0], B[2][0]], [B[0][1], B[1][1], B[2][1]], [B[0][2], B[1][2], B[2][2]]]);
+      return Math.acos(Math.max(-1, Math.min(1, (M[0][0] + M[1][1] + M[2][2] - 1) / 2))) * 180 / Math.PI; }
     function select(k) { rsel = k; st.touched = true; showInfo(); draw(); }
     function svgs() {
       var ink = tok(root, 'ink'), mut = tok(root, 'muted'), rp = cams.map(function (c) { return toRig(c.p); });
@@ -398,15 +418,17 @@
         if (!noImu) g += '<rect x="' + (X(pts[0][0]) - 5) + '" y="' + (Y(pts[0][1]) - 5) + '" width="10" height="10" fill="' + ink + '"/><text x="' + X(pts[0][0]) + '" y="' + (Y(pts[0][1]) + (fans ? 20 : -10)) + '" text-anchor="middle" fill="' + ink + '">' + esc(R.origin || 'IMU') + '</text>';
         groups.forEach(function (q) { var p = q.p; q.idx.forEach(function (i, k) { g += '<circle cx="' + (X(p[0]) + (k - (q.idx.length - 1) / 2) * 9) + '" cy="' + Y(p[1]) + '" r="6" fill="' + cams[i].color + '" stroke="' + tok(root, 'card') + '"/>'; });
           g += '<text x="' + X(p[0]) + '" y="' + (Y(p[1]) + 20) + '" text-anchor="middle" fill="' + ink + '" font-weight="600">' + q.idx.map(function (i) { return esc(cams[i].name); }).join(' / ') + '</text>'; });
+        if (showRef) cams.forEach(function (c, i) { var q = refCams[i]; if (!q) return; var rp2 = toRig(q.p), qq = fans ? [rp2[0], -rp2[2]] : [-rp2[0], rp2[1]], p = pts[i + 1];
+          g += '<line x1="' + X(p[0]) + '" y1="' + Y(p[1]) + '" x2="' + X(qq[0]) + '" y2="' + Y(qq[1]) + '" stroke="' + mut + '" stroke-dasharray="2 2"/><circle cx="' + X(qq[0]) + '" cy="' + Y(qq[1]) + '" r="5" fill="none" stroke="' + c.color + '" stroke-width="1.5" stroke-dasharray="2 1.5"/>'; });
         var bar2 = Math.pow(10, Math.round(Math.log10(60 / s))); g += '<line x1="' + (Wd - 14 - bar2 * s) + '" y1="16" x2="' + (Wd - 14) + '" y2="16" stroke="' + ink + '" stroke-width="2"/><text x="' + (Wd - 14) + '" y="11" text-anchor="end" fill="' + mut + '">' + bar2 + ' mm</text></svg>';
         holder.innerHTML = g; }
       var hs = two.querySelectorAll('.mv-fig div');
       panel(hs[0], [[0, 0]].concat(rp.map(function (p) { return [p[0], -p[2]]; })), 0, true, false);
       panel(hs[1], [[0, 0]].concat(rp.map(function (p) { return [-p[0], p[1]]; })), 1, false, true);
-      var t = '<thead><tr><th>Camera</th><th>Lever x, y, z (mm)</th><th>Distance (mm)</th><th>td (ms)</th><th>Readout (ms)</th><th>Field of view</th><th>Reprojection (px)</th></tr></thead><tbody>';
+      var t = '<thead><tr><th>Camera</th><th>Lever x, y, z (mm)</th><th>Distance (mm)</th><th>td (ms)</th><th>Readout (ms)</th><th>Field of view</th><th>Reprojection (px)</th>' + (ref ? '<th>Δ ' + esc(ref.label) + '</th>' : '') + '</tr></thead><tbody>';
       cams.forEach(function (c) { t += '<tr><th>' + esc(c.name) + '</th><td>' + c.p.map(function (x) { return sgn(x, 1); }).join(', ') + '</td><td>' + norm(c.p).toFixed(1) + '</td><td>' + sgn(c.td, 2) + '</td><td>'
         + (Math.abs(c.tr) > 0.01 ? c.tr.toFixed(2) : '—') + '</td><td>' + (c.fov.h == null ? 'past the fit' : c.fov.h.toFixed(0) + '°') + ' × ' + (c.fov.v == null ? 'past the fit' : c.fov.v.toFixed(0) + '°') + '</td><td>'
-        + (c.reproj == null ? '—' : c.reproj.toFixed(3)) + '</td></tr>'; });
+        + (c.reproj == null ? '—' : c.reproj.toFixed(3)) + '</td>' + (ref ? '<td>' + (refCams[cams.indexOf(c)] ? norm(sub(c.p, refCams[cams.indexOf(c)].p)).toFixed(2) + ' mm' + (refCams[cams.indexOf(c)].Rm && !(ref.align === 'cam0_rotation' && cams.indexOf(c) === 0) ? ', ' + rotDiff(c.Rm, refCams[cams.indexOf(c)].Rm).toFixed(2) + '°' : '') : '—') + '</td>' : '') + '</tr>'; });
       tbl.querySelector('table').innerHTML = t + '</tbody>';
     }
     function near(e) { var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, best = null, bd = 26;
@@ -415,6 +437,7 @@
     cv.addEventListener('pointermove', function (e) { if (e.buttons) return; var b2 = near(e), k = b2 ? b2.k : null; if (k !== hover) { hover = k; cv.style.cursor = k != null ? 'pointer' : 'grab'; draw(); } });
     Object.keys(vb).forEach(function (k) { vb[k].onclick = function () { st.touched = true; st.yaw = PRE[k][0]; st.pitch = PRE[k][1]; st.zoom = 1; Object.keys(vb).forEach(function (x) { vb[x].setAttribute('aria-pressed', x === k); }); draw(); }; });
     sigB.onclick = function () { showSig = !showSig; sigB.setAttribute('aria-pressed', showSig); draw(); };
+    refB.onclick = function () { showRef = !showRef; refB.setAttribute('aria-pressed', showRef); draw(); svgs(); };
     orbit(cv, st, function () { st.touched = true; draw(); }); fullscreen(box, fsB, draw); showInfo();
     // idle sway while on screen and untouched; off for reduced motion
     if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) (function () {
