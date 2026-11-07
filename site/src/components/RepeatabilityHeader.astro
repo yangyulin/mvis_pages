@@ -1,0 +1,44 @@
+---
+// Provenance from repeatability.json and the sticky dataset bar, plus the small script that opens a cell's fold
+// from its link and jumps into the folded parameter tables. Without JS the anchors still work.
+import { data } from './rp';
+const RESULTS = 'https://huggingface.co/datasets/calibench-vi/results';
+const SPACE = 'https://huggingface.co/spaces/calibench-vi/leaderboard';
+const labels = Object.fromEntries(data.datasets.map((d: any) => [d.id, d.label]));
+---
+<p class="rp-prov">Batch <b>{data.batch}</b> · results commit <a href={`${RESULTS}/tree/${data.results_commit}`}><code>{data.results_commit.slice(0, 7)}</code></a> ·
+  records in <a href={RESULTS}>calibench-vi/results</a> · the <a href={SPACE}>Space</a> shows the same parameter tables.</p>
+<nav class="not-content rp-bar" aria-label="Datasets">
+  {data.datasets.map((d: any) => <a href={`#ds-${d.id}`} data-rp-bar={d.id}>{labels[d.id]}</a>)}
+</nav>
+<script>
+  const open = (id: string) => {
+    const d = document.getElementById(id);
+    if (d instanceof HTMLDetailsElement) { d.open = true; d.scrollIntoView({ block: 'start' }); }
+  };
+  const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h.startsWith('rp-')) open(h); };
+  addEventListener('hashchange', fromHash);
+  fromHash();
+  document.addEventListener('click', (e) => {
+    const b = (e.target as Element).closest?.('button.rp-open') as HTMLElement | null;
+    if (!b) return;
+    const wrap = document.querySelector(`details.rp-tables[data-rp-dataset="${b.dataset.rpTable}"]`) as HTMLDetailsElement | null;
+    if (!wrap) return;
+    wrap.open = true;
+    const fam = wrap.querySelectorAll('details.fam')[Number(b.dataset.fold)] as HTMLDetailsElement | undefined;
+    if (!fam) return;
+    fam.open = true;
+    const row = b.dataset.k ? Array.from(fam.querySelectorAll('tr[data-k]')).find((r) => r.getAttribute('data-k') === b.dataset.k) : null;
+    const sn = row?.closest('details.sn') as HTMLDetailsElement | null;
+    if (sn) sn.open = true;
+    (row ?? fam).scrollIntoView({ block: 'center' });
+  });
+  const links = new Map(Array.from(document.querySelectorAll<HTMLElement>('[data-rp-bar]')).map((a) => [a.dataset.rpBar, a]));
+  const io = new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) {
+      links.forEach((a) => a.removeAttribute('aria-current'));
+      links.get((e.target as HTMLElement).dataset.rpSection)?.setAttribute('aria-current', 'true');
+    }
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('[data-rp-section]').forEach((s) => io.observe(s));
+</script>

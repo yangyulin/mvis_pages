@@ -1,0 +1,1574 @@
+{
+ "version": 1,
+ "batch": "2026-01-01",
+ "results_commit": "0123456789abcdef0123456789abcdef01234567",
+ "method": {
+  "spread": "sample_sd_ddof1",
+  "pair": "median_log_sd_ratio",
+  "test": "paired_label_swap",
+  "exact": true,
+  "adjust": "holm_within_cell",
+  "alpha": 0.05,
+  "min_ratio": 1.25,
+  "min_n": 6,
+  "interval": "test_inversion_95_unadjusted"
+ },
+ "tools": [
+  {
+   "id": "MVIS",
+   "shape": "circle"
+  },
+  {
+   "id": "Kalibr",
+   "shape": "square"
+  },
+  {
+   "id": "Basalt",
+   "shape": "triangle"
+  }
+ ],
+ "groups": [
+  {
+   "id": "focal_pp",
+   "label": "Focal length + principal point",
+   "short": "Focal + pp",
+   "unit": "px"
+  },
+  {
+   "id": "distortion",
+   "label": "Distortion coefficients",
+   "short": "Distortion",
+   "unit": ""
+  },
+  {
+   "id": "baseline",
+   "label": "Camera–camera distance",
+   "short": "Distance",
+   "unit": "mm"
+  },
+  {
+   "id": "readout",
+   "label": "Rolling-shutter readout",
+   "short": "Readout",
+   "unit": "ms"
+  },
+  {
+   "id": "time_offset",
+   "label": "Camera–IMU time offset",
+   "short": "Time offset",
+   "unit": "ms"
+  },
+  {
+   "id": "lever",
+   "label": "Camera–IMU distance",
+   "short": "Cam–IMU distance",
+   "unit": "mm"
+  },
+  {
+   "id": "gyro",
+   "label": "Gyro scale + cross-axis",
+   "short": "Gyro",
+   "unit": ""
+  },
+  {
+   "id": "accel",
+   "label": "Accel scale",
+   "short": "Accel",
+   "unit": ""
+  }
+ ],
+ "caveats": {
+  "dist_tradeoff": "Coefficients trade off against each other, so their scatter can overstate differences in the lens mapping.",
+  "mvis_from_camimu": "MVIS values come from the T6 camera+IMU solve, not a camera-only run; not like-for-like.",
+  "settings_differ": "Data settings still differ between the tools on this family.",
+  "kalibr_seeded": "Kalibr starts from MVIS camera values for each recording; its spread here includes the spread of that input.",
+  "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera.",
+  "kalibr_old_seed": "Kalibr's t265 fisheye 1 intrinsics came from an older MVIS export.",
+  "kalibr_view_filtered": "Kalibr ran on view-filtered bags (≤ 85°); MVIS and Basalt ran on the full bags.",
+  "basalt_snapped": "Basalt's fisheye-2 frames are snapped onto fisheye-1 (1.8–5 ms apart).",
+  "kimu": "MVIS here uses Kalibr's IMU model, so the gyro and accel terms mean the same thing in both tools.",
+  "lens_models_differ": "MVIS uses an equidistant lens model here, Kalibr radtan, so focal length and principal point are not quite the same quantity."
+ },
+ "footer": "Repeatability only — a tool can repeat well and still be biased.",
+ "datasets": [
+  {
+   "id": "one",
+   "label": "One",
+   "groups": [
+    "focal_pp",
+    "distortion",
+    "baseline",
+    "readout"
+   ],
+   "families": [
+    {
+     "id": "TA",
+     "fold_index": 0,
+     "title": "title TA",
+     "mode": "cam",
+     "n_matched": [
+      6,
+      8
+     ],
+     "recordings": {
+      "MVIS": {
+       "n": 8,
+       "of": 8
+      },
+      "Kalibr": {
+       "n": 8,
+       "of": 8
+      },
+      "Basalt": {
+       "n": 8,
+       "of": 8
+      }
+     },
+     "not_part": [
+      {
+       "what": "reprojection error",
+       "reason": "fit quality, not repeatability and not accuracy",
+       "rows": 1
+      }
+     ],
+     "cells": {
+      "focal_pp": {
+       "state": "not_separated",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 8,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 8,
+        "Basalt": 8
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr",
+        "Basalt"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 2,
+         "R": 0.08,
+         "k": 11.77,
+         "ci": [
+          0.03,
+          0.21
+         ],
+         "p": 0.0078,
+         "p_holm": 0.023,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "12"
+        },
+        {
+         "a": "MVIS",
+         "b": "Basalt",
+         "n_params": 2,
+         "R": 0.17,
+         "k": 5.74,
+         "ci": [
+          0.06,
+          0.75
+         ],
+         "p": 0.031,
+         "p_holm": 0.062,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "5.7"
+        },
+        {
+         "a": "Kalibr",
+         "b": "Basalt",
+         "n_params": 2,
+         "R": 2.05,
+         "k": 2.05,
+         "ci": [
+          0.58,
+          9.49
+         ],
+         "p": 0.22,
+         "p_holm": 0.22,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "2.1"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "fx",
+         "label": "fx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.0749,
+          "Kalibr": 1.29,
+          "Basalt": 0.495
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.0749,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 1.29,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.495,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|fx"
+        },
+        {
+         "sensor": "cam0 – A",
+         "key": "fy",
+         "label": "fy",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.0979,
+          "Kalibr": 0.787,
+          "Basalt": 0.488
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.0979,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.787,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.488,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|fy"
+        }
+       ],
+       "excluded": [],
+       "dropped": [],
+       "reason": null,
+       "chip": "Not separated",
+       "sentence": "MVIS is tighter than Kalibr; the other pairs are not separated. No single tool is marked.",
+       "aria": "Focal length + principal point, TA: not separated, 8 matched recordings.",
+       "strip": "Focal + pp not separated",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": null
+      },
+      "distortion": {
+       "state": "tie_top",
+       "tools": [
+        "MVIS",
+        "Basalt"
+       ],
+       "over": [
+        "Kalibr"
+       ],
+       "k": 8.79,
+       "n": 8,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 8,
+        "Basalt": 8
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr",
+        "Basalt"
+       ],
+       "mvis_variant": "default",
+       "caveats": [
+        "dist_tradeoff"
+       ],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 2,
+         "R": 0.09,
+         "k": 11.69,
+         "ci": [
+          0.05,
+          0.13
+         ],
+         "p": 0.0078,
+         "p_holm": 0.023,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "12"
+        },
+        {
+         "a": "MVIS",
+         "b": "Basalt",
+         "n_params": 2,
+         "R": 0.75,
+         "k": 1.33,
+         "ci": [
+          0.35,
+          1.34
+         ],
+         "p": 0.34,
+         "p_holm": 0.34,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "1.3"
+        },
+        {
+         "a": "Kalibr",
+         "b": "Basalt",
+         "n_params": 2,
+         "R": 8.79,
+         "k": 8.79,
+         "ci": [
+          6.54,
+          12.06
+         ],
+         "p": 0.0078,
+         "p_holm": 0.023,
+         "decision": "b",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "8.8"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "dist[0]",
+         "label": "dist[0]",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.0741,
+          "Kalibr": 1.01,
+          "Basalt": 0.0897
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.0741,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 1.01,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.0897,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|dist[0]"
+        },
+        {
+         "sensor": "cam0 – A",
+         "key": "dist[1]",
+         "label": "dist[1]",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.0744,
+          "Kalibr": 0.747,
+          "Basalt": 0.109
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.0744,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.747,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.109,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|dist[1]"
+        }
+       ],
+       "excluded": [],
+       "dropped": [],
+       "reason": null,
+       "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
+       "sentence": "The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 8 recordings (p = 0.34). Treated as a tie. Both scatter less than Kalibr: across the same 8 recordings Kalibr's estimates scatter about 12× more than MVIS's and 8.8× more than Basalt's. Holds with any one recording left out.",
+       "aria": "Distortion coefficients, TA: tie between MVIS and Basalt, both tighter than Kalibr, 8 matched recordings.",
+       "strip": "Distortion MVIS = Basalt",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": "8.8"
+      },
+      "baseline": {
+       "state": "tie",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 6,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 6
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 1,
+         "R": 0.11,
+         "k": 8.73,
+         "ci": [
+          null,
+          1.0
+         ],
+         "p": 0.062,
+         "p_holm": 0.062,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "8.7"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "baseline_mm",
+         "label": "baseline_mm",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.175,
+          "Kalibr": 1.53
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.158,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 1.53,
+           "n": 6
+          }
+         },
+         "data_k": "m|cam0 – A|baseline_mm"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "all",
+         "role": "note",
+         "reason": "kept as text: Kalibr's rolling-shutter runs solve one camera per run",
+         "rows": 1
+        },
+        {
+         "tool": "Basalt",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": null,
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 8.7×, but a gap this size appears often by chance with 6 recordings (p = 0.062). Treated as a tie.",
+       "aria": "Camera–camera distance, TA: tie, 6 matched recordings.",
+       "strip": "Distance tie",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": null
+      },
+      "readout": {
+       "state": "tie",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 8,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 8
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 1,
+         "R": 1.13,
+         "k": 1.13,
+         "ci": [
+          0.64,
+          2.73
+         ],
+         "p": 0.57,
+         "p_holm": 0.57,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "1.1"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "tr_ms",
+         "label": "tr_ms",
+         "unit": "px",
+         "sd": {
+          "MVIS": 1.01,
+          "Kalibr": 0.892
+         },
+         "published": {
+          "MVIS": {
+           "sd": 1.01,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.892,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|tr_ms"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "Basalt",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": null,
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 8 recordings (p = 0.57). Treated as a tie.",
+       "aria": "Rolling-shutter readout, TA: tie, 8 matched recordings.",
+       "strip": "Readout tie",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": null
+      }
+     }
+    },
+    {
+     "id": "TB",
+     "fold_index": 1,
+     "title": "title TB",
+     "mode": "cam",
+     "n_matched": [
+      16,
+      16
+     ],
+     "recordings": {
+      "MVIS": {
+       "n": 16,
+       "of": 16
+      },
+      "Kalibr": {
+       "n": 16,
+       "of": 16
+      },
+      "Basalt": {
+       "n": 16,
+       "of": 16
+      }
+     },
+     "not_part": [],
+     "cells": {
+      "focal_pp": {
+       "state": "most",
+       "tools": [
+        "MVIS"
+       ],
+       "over": [
+        "Kalibr",
+        "Basalt"
+       ],
+       "k": 3.55,
+       "n": 16,
+       "n_all": {
+        "MVIS": 16,
+        "Kalibr": 16,
+        "Basalt": 16
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr",
+        "Basalt"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 2,
+         "R": 0.09,
+         "k": 11.11,
+         "ci": [
+          0.07,
+          0.12
+         ],
+         "p": 3.1e-05,
+         "p_holm": 9.2e-05,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "11"
+        },
+        {
+         "a": "MVIS",
+         "b": "Basalt",
+         "n_params": 2,
+         "R": 0.28,
+         "k": 3.55,
+         "ci": [
+          0.2,
+          0.45
+         ],
+         "p": 6.1e-05,
+         "p_holm": 9.2e-05,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "3.5"
+        },
+        {
+         "a": "Kalibr",
+         "b": "Basalt",
+         "n_params": 2,
+         "R": 3.13,
+         "k": 3.13,
+         "ci": [
+          2.38,
+          4.4
+         ],
+         "p": 3.1e-05,
+         "p_holm": 9.2e-05,
+         "decision": "b",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "3.1"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "fx",
+         "label": "fx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.119,
+          "Kalibr": 1.23,
+          "Basalt": 0.332
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.119,
+           "n": 16
+          },
+          "Kalibr": {
+           "sd": 1.23,
+           "n": 16
+          },
+          "Basalt": {
+           "sd": 0.332,
+           "n": 16
+          }
+         },
+         "data_k": "m|cam0 – A|fx"
+        },
+        {
+         "sensor": "cam0 – A",
+         "key": "cx",
+         "label": "cx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.0913,
+          "Kalibr": 1.08,
+          "Basalt": 0.411
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.0913,
+           "n": 16
+          },
+          "Kalibr": {
+           "sd": 1.08,
+           "n": 16
+          },
+          "Basalt": {
+           "sd": 0.411,
+           "n": 16
+          }
+         },
+         "data_k": "m|cam0 – A|cx"
+        }
+       ],
+       "excluded": [],
+       "dropped": [],
+       "reason": null,
+       "chip": "Most repeatable: MVIS",
+       "sentence": "Across the same 16 recordings, Kalibr's estimates scatter about 11× more than MVIS's (median over 2 parameters); Basalt's about 3.5×. A gap this large appeared in 0.0031 % (Kalibr) and 0.0061 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Focal length + principal point, TB: more repeatable MVIS, 3.5 times tighter than Kalibr and Basalt, 16 matched recordings.",
+       "strip": "Focal + pp MVIS",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": "3.5"
+      },
+      "distortion": {
+       "state": "tie",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 16,
+       "n_all": {
+        "MVIS": 16,
+        "Kalibr": 16
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "default",
+       "caveats": [
+        "dist_tradeoff"
+       ],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 1,
+         "R": 0.87,
+         "k": 1.15,
+         "ci": [
+          0.87,
+          0.87
+         ],
+         "p": 3.1e-05,
+         "p_holm": 3.1e-05,
+         "decision": "tie",
+         "tie_reason": "small",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "1.2"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "dist[0]",
+         "label": "dist[0]",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.845,
+          "Kalibr": 0.972
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.845,
+           "n": 16
+          },
+          "Kalibr": {
+           "sd": 0.972,
+           "n": 16
+          }
+         },
+         "data_k": "m|cam0 – A|dist[0]"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "Basalt",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": null,
+       "chip": "Tie",
+       "sentence": "The gap between MVIS and Kalibr is clear but under 20 % (1.2×), so it is treated as a tie.",
+       "aria": "Distortion coefficients, TB: tie, 16 matched recordings.",
+       "strip": "Distortion tie",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": null
+      },
+      "baseline": {
+       "state": "not_compared",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 16,
+       "n_all": {
+        "MVIS": 16,
+        "Kalibr": 16
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 0,
+         "R": null,
+         "k": null,
+         "ci": null,
+         "p": null,
+         "p_holm": null,
+         "decision": "not_compared",
+         "tie_reason": null,
+         "loo_stable": null,
+         "exact": true,
+         "k_text": null
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "baseline_mm",
+         "label": "baseline_mm",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.107,
+          "Kalibr": null
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.107,
+           "n": 16
+          },
+          "Kalibr": {
+           "sd": 0.0,
+           "n": 16
+          }
+         },
+         "data_k": "m|cam0 – A|baseline_mm"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "Basalt",
+         "role": "shown",
+         "reason": "other camera model",
+         "rows": 1
+        }
+       ],
+       "dropped": [
+        {
+         "tool": "Kalibr",
+         "sensor": "cam0 – A",
+         "key": "baseline_mm",
+         "reason": "constant over recordings"
+        }
+       ],
+       "reason": "no parameter varies across the shared recordings",
+       "chip": "Not compared",
+       "sentence": "no parameter varies across the shared recordings",
+       "aria": "Camera–camera distance, TB: no parameter varies across the shared recordings",
+       "strip": null,
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": null
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "two",
+   "label": "Two",
+   "groups": [
+    "focal_pp",
+    "distortion",
+    "readout",
+    "time_offset",
+    "lever",
+    "gyro",
+    "accel"
+   ],
+   "families": [
+    {
+     "id": "TC",
+     "fold_index": 0,
+     "title": "title TC",
+     "mode": "cam+imu",
+     "n_matched": [
+      8,
+      8
+     ],
+     "recordings": {
+      "MVIS": {
+       "n": 8,
+       "of": 8
+      },
+      "Kalibr": {
+       "n": 8,
+       "of": 8
+      },
+      "Basalt": {
+       "n": 0,
+       "of": 8,
+       "reason": "not run on this family"
+      }
+     },
+     "not_part": [
+      {
+       "what": "distortion coefficients of A",
+       "reason": "the tools' models differ here",
+       "rows": 1
+      },
+      {
+       "what": "IMU g-sensitivity Tg",
+       "reason": "Kalibr absorbs it in its IMU model",
+       "rows": 1
+      },
+      {
+       "what": "gyro–accel delay t_ga",
+       "reason": "MVIS only",
+       "rows": 1
+      },
+      {
+       "what": "rolling-shutter readout of RS",
+       "reason": "the tools' models differ here",
+       "rows": 1
+      },
+      {
+       "what": "camera–imu time offset of RS",
+       "reason": "the tools' models differ here",
+       "rows": 1
+      },
+      {
+       "what": "reproj_median of RS",
+       "reason": "the tools' models differ here",
+       "rows": 1
+      }
+     ],
+     "cells": {
+      "focal_pp": {
+       "state": "input",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
+       "compared": [
+        "MVIS"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [],
+       "params": [],
+       "excluded": [
+        {
+         "tool": "Kalibr",
+         "role": "input",
+         "reason": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+         "rows": 1
+        },
+        {
+         "tool": "Basalt",
+         "role": "not_run",
+         "reason": "not run on this family",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "chip": "Input, not compared",
+       "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "aria": "Focal length + principal point, TC: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "strip": null,
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": null
+      },
+      "distortion": {
+       "state": "not_compared",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
+       "compared": [],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [],
+       "params": [],
+       "excluded": [
+        {
+         "tool": "MVIS",
+         "role": "only",
+         "reason": "the tools' models differ here",
+         "rows": 1
+        },
+        {
+         "tool": "Kalibr",
+         "role": "other_model",
+         "reason": "the tools' models differ here",
+         "rows": 1
+        },
+        {
+         "tool": "Basalt",
+         "role": "not_run",
+         "reason": "not run on this family",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": "the tools' models differ here",
+       "chip": "Not compared",
+       "sentence": "the tools' models differ here",
+       "aria": "Distortion coefficients, TC: the tools' models differ here",
+       "strip": null,
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": null
+      },
+      "readout": {
+       "state": "single",
+       "tools": [
+        "MVIS"
+       ],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
+       "compared": [],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [],
+       "params": [],
+       "excluded": [
+        {
+         "tool": "MVIS",
+         "role": "only",
+         "reason": "the tools' models differ here",
+         "rows": 1
+        },
+        {
+         "tool": "Kalibr",
+         "role": "missing",
+         "reason": "the tools' models differ here",
+         "rows": 1
+        },
+        {
+         "tool": "Basalt",
+         "role": "not_run",
+         "reason": "not run on this family",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": "MVIS only: the tools' models differ here",
+       "chip": "MVIS only",
+       "sentence": "MVIS only: the tools' models differ here",
+       "aria": "Rolling-shutter readout, TC: MVIS only: the tools' models differ here",
+       "strip": null,
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": null
+      },
+      "time_offset": {
+       "state": "most",
+       "tools": [
+        "MVIS"
+       ],
+       "over": [
+        "Kalibr"
+       ],
+       "k": 6.1,
+       "n": 8,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 8
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 1,
+         "R": 0.16,
+         "k": 6.1,
+         "ci": [
+          0.12,
+          0.53
+         ],
+         "p": 0.0078,
+         "p_holm": 0.0078,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "6.1"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "td_ms",
+         "label": "td_ms",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.104,
+          "Kalibr": 0.636
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.104,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.636,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|td_ms"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "Basalt",
+         "role": "not_run",
+         "reason": "not run on this family",
+         "rows": 2
+        },
+        {
+         "tool": "MVIS",
+         "role": "only",
+         "reason": "the tools' models differ here",
+         "rows": 1
+        },
+        {
+         "tool": "Kalibr",
+         "role": "missing",
+         "reason": "the tools' models differ here",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": null,
+       "chip": "More repeatable: MVIS",
+       "sentence": "Across the same 8 recordings, Kalibr's estimates scatter about 6.1× more than MVIS's (median over 1 parameters). A gap this large appeared in 0.78 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Camera–IMU time offset, TC: more repeatable MVIS, 6.1 times tighter than Kalibr, 8 matched recordings.",
+       "strip": "Time offset MVIS",
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": "6.1"
+      },
+      "gyro": {
+       "state": "most",
+       "tools": [
+        "MVIS"
+       ],
+       "over": [
+        "Kalibr"
+       ],
+       "k": 6.49,
+       "n": 8,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 8
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "kalibr_imu",
+       "caveats": [
+        "kimu"
+       ],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 1,
+         "R": 0.15,
+         "k": 6.49,
+         "ci": [
+          0.12,
+          0.44
+         ],
+         "p": 0.016,
+         "p_holm": 0.016,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "6.5"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "Dw[0,0]",
+         "label": "Dw[0,0]",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.132,
+          "Kalibr": 0.859
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.132,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.859,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – A|Dw[0,0]"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "Basalt",
+         "role": "not_run",
+         "reason": "not run on this family",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": null,
+       "chip": "More repeatable: MVIS",
+       "sentence": "Across the same 8 recordings, Kalibr's estimates scatter about 6.5× more than MVIS's (median over 1 parameters). A gap this large appeared in 1.6 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Gyro scale + cross-axis, TC: more repeatable MVIS, 6.5 times tighter than Kalibr, 8 matched recordings.",
+       "strip": "Gyro MVIS K-IMU",
+       "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
+       "k_text": "6.5"
+      }
+     }
+    },
+    {
+     "id": "TD",
+     "fold_index": 1,
+     "title": "title TD",
+     "mode": "cam+imu",
+     "n_matched": [
+      0,
+      4
+     ],
+     "recordings": {
+      "MVIS": {
+       "n": 4,
+       "of": 4
+      },
+      "Kalibr": {
+       "n": 4,
+       "of": 4
+      },
+      "Basalt": {
+       "n": 4,
+       "of": 4
+      }
+     },
+     "not_part": [],
+     "cells": {
+      "focal_pp": {
+       "state": "input",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
+       "compared": [
+        "MVIS"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [],
+       "params": [],
+       "excluded": [
+        {
+         "tool": "Kalibr",
+         "role": "input",
+         "reason": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+         "rows": 1
+        },
+        {
+         "tool": "Basalt",
+         "role": "input",
+         "reason": "Basalt's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Basalt's repeatability.",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "chip": "Input, not compared",
+       "sentence": "Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "aria": "Focal length + principal point, TD: Kalibr's camera+IMU run starts from these values, exported from MVIS for each recording, and keeps them fixed. Their spread copies the input, so it is not Kalibr's repeatability.",
+       "strip": null,
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": null
+      },
+      "time_offset": {
+       "state": "too_few",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 4,
+       "n_all": {
+        "MVIS": 4,
+        "Kalibr": 4,
+        "Basalt": 4
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr",
+        "Basalt"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 1,
+         "R": 0.06,
+         "k": 15.56,
+         "ci": null,
+         "p": 0.25,
+         "p_holm": 0.75,
+         "decision": "too_few",
+         "tie_reason": null,
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "16"
+        },
+        {
+         "a": "MVIS",
+         "b": "Basalt",
+         "n_params": 1,
+         "R": 0.33,
+         "k": 3.07,
+         "ci": null,
+         "p": 0.38,
+         "p_holm": 0.75,
+         "decision": "too_few",
+         "tie_reason": null,
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "3.1"
+        },
+        {
+         "a": "Kalibr",
+         "b": "Basalt",
+         "n_params": 1,
+         "R": 5.07,
+         "k": 5.07,
+         "ci": null,
+         "p": 0.25,
+         "p_holm": 0.75,
+         "decision": "too_few",
+         "tie_reason": null,
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "5.1"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "td_ms",
+         "label": "td_ms",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.126,
+          "Kalibr": 1.96,
+          "Basalt": 0.386
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.126,
+           "n": 4
+          },
+          "Kalibr": {
+           "sd": 1.96,
+           "n": 4
+          },
+          "Basalt": {
+           "sd": 0.386,
+           "n": 4
+          }
+         },
+         "data_k": "m|cam0 – A|td_ms"
+        }
+       ],
+       "excluded": [],
+       "dropped": [],
+       "reason": null,
+       "chip": "Too few recordings (n = 4)",
+       "sentence": "Only 4 recordings were run by every compared tool. With 4 recordings the smallest possible p is 0.12, so no gap can be decided. Ratios are shown for reference only.",
+       "aria": "Camera–IMU time offset, TD: too few recordings (n = 4), 4 matched recordings.",
+       "strip": null,
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": null
+      },
+      "lever": {
+       "state": "not_compared",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
+       "compared": [],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [],
+       "params": [],
+       "excluded": [
+        {
+         "tool": "MVIS",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        },
+        {
+         "tool": "Kalibr",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        },
+        {
+         "tool": "Basalt",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        }
+       ],
+       "dropped": [],
+       "reason": "no value for this tool",
+       "chip": "Not compared",
+       "sentence": "no value for this tool",
+       "aria": "Camera–IMU distance, TD: no value for this tool",
+       "strip": null,
+       "variant_line": "MVIS here: its default IMU model.",
+       "k_text": null
+      },
+      "accel": {
+       "state": "too_few",
+       "tools": [],
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {
+        "MVIS": 1,
+        "Kalibr": 2
+       },
+       "compared": [
+        "MVIS",
+        "Kalibr"
+       ],
+       "mvis_variant": "kalibr_imu",
+       "caveats": [
+        "kimu"
+       ],
+       "pairs": [
+        {
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 0,
+         "R": null,
+         "k": null,
+         "ci": null,
+         "p": null,
+         "p_holm": null,
+         "decision": "not_compared",
+         "tie_reason": null,
+         "loo_stable": null,
+         "exact": true,
+         "k_text": null
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – A",
+         "key": "Da[0,0]",
+         "label": "Da[0,0]",
+         "unit": "px",
+         "sd": {
+          "MVIS": null,
+          "Kalibr": null
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.0,
+           "n": 1
+          },
+          "Kalibr": {
+           "sd": 0.0707,
+           "n": 2
+          }
+         },
+         "data_k": "m|cam0 – A|Da[0,0]"
+        }
+       ],
+       "excluded": [
+        {
+         "tool": "Basalt",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 1
+        }
+       ],
+       "dropped": [
+        {
+         "tool": "MVIS",
+         "sensor": "cam0 – A",
+         "key": "Da[0,0]",
+         "reason": "fewer than 2 shared recordings"
+        },
+        {
+         "tool": "Kalibr",
+         "sensor": "cam0 – A",
+         "key": "Da[0,0]",
+         "reason": "fewer than 2 shared recordings"
+        }
+       ],
+       "reason": null,
+       "chip": "Too few recordings (n = 0)",
+       "sentence": "Only 0 recordings were run by every compared tool. With 0 recordings the smallest possible p is 2, so no gap can be decided. Ratios cannot be computed.",
+       "aria": "Accel scale, TD: too few recordings (n = 0), 0 matched recordings.",
+       "strip": null,
+       "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
+       "k_text": null
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

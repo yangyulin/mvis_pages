@@ -21,6 +21,7 @@ python/
 | `sensor_rig`, `sensor_parts`, `sensor_header`, `site_files` | the parts of a sensor page and the site-wide files |
 | `export_sensors` | `collect` (reads results) → `render` (pure, returns a Plan) → `write` (the only step that touches the site) |
 | `leaderboard`, `space` | the results tables, made by the leaderboard Space's own renderer; `space.CONTRACT` lists the names it uses |
+| `repeatability` | per family x group of parameters, which tool scatters less on the recordings every compared tool ran (paired label-swap test, Holm within the cell, ties, too few); `gate` refuses records that are not the stats file's blocks; `check_public` keeps recording names and per-recording values out |
 | `checks`, `browser/` | rules and printed reports of the nav, layout and hero checks; `browser/` drives Chrome (`run()`) and ffprobe |
 | `assets` | the only reader of `mvis_site/assets/` and of `site/src/styles/custom.css` |
 
