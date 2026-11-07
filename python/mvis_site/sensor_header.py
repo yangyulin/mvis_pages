@@ -130,7 +130,7 @@ def proc_preview(v: dict) -> str:
 
 
 PROCESS_VIEWS_LEAD = ("<p>The solved path of the rig around the board. Press Play or drag the bar to follow it, use the buttons to change "
-                      "the view, and pick a camera on the right to put it on the frustum. Each camera card draws the board from the solved "
+                      "the view, and pick a camera card to put that camera on the frustum. Each card draws the board from the solved "
                       "pose with the corners MVIS detected; no camera image is published.</p>")
 
 

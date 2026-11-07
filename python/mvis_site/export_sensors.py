@@ -149,13 +149,27 @@ def only(pub: dict, slug: str) -> dict:
     return {**pub, "sensors": {slug: pub["sensors"][slug]}}
 
 
-def main(site: Path, private_config: Path, media: Path, slug: str | None = None) -> list[str]:
+def skipping(pub: dict, slugs: list[str]) -> dict:
+    """pub without these sensors, for a machine that lacks their results; their pages stay as they are."""
+    unknown = [x for x in slugs if x not in pub["sensors"]]
+    if unknown:
+        raise SystemExit(f"not in public_sensors.yaml: {', '.join(unknown)}")
+    return {**pub, "sensors": {k: v for k, v in pub["sensors"].items() if k not in slugs}}
+
+
+def main(site: Path, private_config: Path, media: Path, slug: str | None = None, skip: list[str] | None = None) -> list[str]:
     """Export every public sensor, or with slug only that one: its data, MDX and media, plus the sidebar and overview
-    built from the full list. The other sensors' files and the shared assets are left as they are."""
+    built from the full list. The other sensors' files and the shared assets are left as they are. With skip, export
+    all but those sensors, shared assets included; the skipped pages' files stay as they are."""
     pub = public_sensors()
     cfg = solve_config(yaml.safe_load(Path(private_config).read_text(encoding="utf-8")))
-    part = only(pub, slug) if slug else pub
+    part = only(pub, slug) if slug else skipping(pub, skip) if skip else pub
     plan = render(part, collect(part, cfg), Path(media), DATA / "photos")
+    if skip:
+        nav = json.dumps(sensor_nav(pub), indent=1) + "\n"
+        plan.problems += [f"sidebar: {x}" for x in public_problems(nav)]
+        plan.texts["site/src/data/sensor-nav.json"] = nav
+        plan.texts[f"{DOCS}/index.mdx"] = overview_mdx(pub)
     if slug:
         nav = json.dumps(sensor_nav(pub), indent=1) + "\n"
         plan.problems += [f"sidebar: {x}" for x in public_problems(nav)]
