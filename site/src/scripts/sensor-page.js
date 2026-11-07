@@ -224,9 +224,11 @@
     function toRig(p) { return [dot(p, Q[0]), dot(p, Q[1]), dot(p, Q[2])]; }
     var all = [[0, 0, 0]].concat(cams.map(function (c) { return toRig(c.p); }), imus.map(function (m) { return toRig(m.p); }));
     var rc = mean(all), span = 10; all.forEach(function (p) { span = Math.max(span, norm(sub(p, rc))); });
-    var FR = Math.max(14, span * 0.42), rext = span + FR * 0.45, floorY = Math.max.apply(null, all.map(function (p) { return p[1]; })) + FR * 0.85;
+    var nn = Infinity; cams.forEach(function (a, i) { cams.forEach(function (b2, j) { if (j > i) nn = Math.min(nn, norm(sub(a.p, b2.p))); }); });
+    var FR = Math.max(8, Math.min(span * 0.42, isFinite(nn) ? nn * 0.85 : Infinity)), rext = span + FR * 0.45, floorY = Math.max.apply(null, all.map(function (p) { return p[1]; })) + FR * 0.85;
     var PRE = {iso: [0.65, -0.38], front: [Math.PI, 0], top: [Math.PI, -Math.PI / 2 + 1e-3], side: [Math.PI / 2, 0]};
-    var st = {yaw: PRE.iso[0], pitch: PRE.iso[1], zoom: 1, moved: 0, touched: false}, rsel = 'imu', hits = [], showSig = false;
+    var st = {yaw: PRE.iso[0], pitch: PRE.iso[1], zoom: 1, moved: 0, touched: false}, rsel = 'imu', hits = [], showSig = false, hover = null, noImu = !!R.origin;
+    if (noImu) rsel = 0;   // camera-only rig: the reference camera is the origin
     var hasSig = cams.some(function (c) { return c.sig_p; });
     // ---- DOM: canvas, toolbar under it, pick panel beside
     var box = el('div', 'mv-box mv-rig'), main = el('div', 'mv-main'), stage = el('div', 'mv-stage'), cv = el('canvas'), bar = el('div', 'mv-bar'), key = el('div', 'mv-key');
@@ -240,7 +242,7 @@
     var two = el('div', 'mv-two', '<div class="mv-fig"><b>From above</b><div></div></div><div class="mv-fig"><b>From the front</b><div></div></div>');
     var tbl = el('div', 'mv-scroll', '<table></table>'); root.appendChild(two); root.appendChild(tbl);
     var pickB = {};
-    [['imu', 'IMU']].concat(cams.map(function (c, i) { return [i, c.name]; }), imus.map(function (m, i) { return ['a' + i, m.name]; })).forEach(function (x) {
+    (noImu ? [] : [['imu', 'IMU']]).concat(cams.map(function (c, i) { return [i, c.name]; }), imus.map(function (m, i) { return ['a' + i, m.name]; })).forEach(function (x) {
       var bb = btn(x[1], false); bb.onclick = function () { select(x[0]); }; picks.appendChild(bb); pickB[x[0]] = bb; });
     // ---- projection (rig frame -> screen), and rig-frame vectors -> view space for shading
     function V(q) { var ca = Math.cos(st.yaw), sa = Math.sin(st.yaw), x1 = ca*q[0] + sa*q[2], z1 = -sa*q[0] + ca*q[2], cb = Math.cos(st.pitch), sb = Math.sin(st.pitch);
@@ -277,14 +279,15 @@
         for (var s2 = 0; s2 < 8; s2++) { var u = a0.map(function (v, k) { return v + (a1[k] - v) * s2 / 8; }), w = a0.map(function (v, k) { return v + (a1[k] - v) * (s2 + 1) / 8; });
           var md = Math.hypot((u[0] + w[0]) / 2 - rc[0], (u[2] + w[2]) / 2 - rc[2]) / R0, al = Math.max(0, 0.75 * (1 - md * md)); if (al > 0.02) line(g, P(u), P(w), alpha(ln, al.toFixed(3)), 1); } }
       var shadow = function (p, c, rad) { var pts = []; for (var k = 0; k < 24; k++) { var t = k * Math.PI / 12; pts.push(P([p[0] + Math.cos(t)*rad, floorY, p[2] + Math.sin(t)*rad])); } poly(g, pts); g.fillStyle = alpha(c, 0.1); g.fill(); };
-      cams.forEach(function (c) { shadow(toRig(c.p), c.color, FR * 0.3); }); imus.forEach(function (m) { shadow(toRig(m.p), ink, FR * 0.2); }); shadow([0, 0, 0], ink, FR * 0.26);
+      cams.forEach(function (c) { shadow(toRig(c.p), c.color, FR * 0.3); }); imus.forEach(function (m) { shadow(toRig(m.p), ink, FR * 0.2); }); if (!noImu) shadow([0, 0, 0], ink, FR * 0.26);
       var O = P([0, 0, 0]), items = [], labs = [], kind = selKind();
       // lever lines: faint for all, strong for the selected sensor; the baseline solid
       cams.forEach(function (c, i) { var o = P(toRig(c.p)), on = kind === 'cam' && rsel === i; items.push({d: Math.max(O[2], o[2]) + 1e3, f: function () { line(g, O, o, alpha(on ? c.color : mut, on ? 0.95 : 0.35), on ? 1.6 : 1, [3, 4]); }}); });
       imus.forEach(function (m, i) { var o = P(toRig(m.p)), on = rsel === 'a' + i; items.push({d: Math.max(O[2], o[2]) + 1e3, f: function () { line(g, O, o, alpha(mut, on ? 0.95 : 0.35), on ? 1.6 : 1, [3, 4]); }}); });
       if (cams.length > 1) { var pa = P(toRig(cams[0].p)), pb = P(toRig(cams[1].p)); items.push({d: Math.max(pa[2], pb[2]) + 999, f: function () { line(g, pa, pb, alpha(ink, 0.7), 1.4); }}); }
       cams.forEach(function (c, i) {
-        var p = toRig(c.p), o = P(p), on = kind === 'cam' && rsel === i, dim = kind === 'cam' && !on, body = FR * 0.26, reach = c.reach;
+        var p = toRig(c.p), o = P(p), on = kind === 'cam' && rsel === i, dim = kind === 'cam' && !on, body = FR * 0.26,
+          reach = Math.min(c.reach != null ? c.reach : Infinity, c.domain != null ? c.domain : Infinity); if (!isFinite(reach)) reach = null;
         items.push({d: o[2] + FR * 0.5, f: function () {   // field-of-view rim: gradient fill, edge dashed past the fit
           if (!c.rim || c.rim.length < 4) return; g.globalAlpha = dim ? 0.4 : 1;
           var pts = c.rim.map(function (v) { return P(add(p, scl(camR(c, v), FR))); }), tip = P(add(p, scl(camR(c, [0, 0, 1]), FR)));
@@ -310,14 +313,14 @@
       });
       imus.forEach(function (m, i) { var p = toRig(m.p), o = P(p), on = rsel === 'a' + i;
         items.push({d: o[2], f: function () { box3(g, p, m.Rm, [FR * 0.16, FR * 0.16, FR * 0.16], ink, false); }});
-        labs.push({t: m.name, x: o[0], y: o[1], c: ink, act: on}); hits.push({k: 'a' + i, x: o[0], y: o[1]}); });
+        if (on || hover === 'a' + i) labs.push({t: m.name, x: o[0], y: o[1], c: ink, act: on}); hits.push({k: 'a' + i, x: o[0], y: o[1]}); });
       var I3 = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-      items.push({d: O[2] - 1, f: function () {
+      if (!noImu) items.push({d: O[2] - 1, f: function () {
         if (kind === 'imu') { g.beginPath(); g.arc(O[0], O[1], Math.max(13, FR * 0.24 * S * 1.1), 0, 7); g.fillStyle = alpha(ink, 0.14); g.fill(); }
         box3(g, [0, 0, 0], I3, [FR * 0.24, FR * 0.24, FR * 0.24], ink, false);
         [['x', 0, '#e11d48'], ['y', 1, '#16a34a'], ['z', 2, '#2563eb']].forEach(function (A) { var e = P(toRig(scl(I3[A[1]], FR * 0.62))); if (Math.hypot(e[0] - O[0], e[1] - O[1]) < 6) return;
           arrow(g, O, e, A[2], 2); labs.push({t: A[0], x: e[0] + (e[0] - O[0]) * 0.14, y: e[1] + (e[1] - O[1]) * 0.14, c: A[2], axis: true}); }); }});
-      hits.push({k: 'imu', x: O[0], y: O[1]}); labs.push({t: 'IMU', x: O[0], y: O[1], c: ink, act: kind === 'imu'});
+      if (!noImu) { hits.push({k: 'imu', x: O[0], y: O[1]}); labs.push({t: 'IMU', x: O[0], y: O[1], c: ink, act: kind === 'imu'}); }
       items.sort(function (a, b2) { return b2.d - a.d; }).forEach(function (it) { it.f(); });
       // selection: the lever as dimension leaders along the rig axes (right, down, forward), in mm
       if (kind !== 'imu') { var sp = kind === 'cam' ? toRig(cams[rsel].p) : toRig(imus[+String(rsel).slice(1)].p), cc = kind === 'cam' ? cams[rsel].color : ink;
@@ -329,17 +332,19 @@
       labs.sort(function (a, b2) { return (a.axis ? 0 : a.dimLabel ? 2 : 1) - (b2.axis ? 0 : b2.dimLabel ? 2 : 1); }).forEach(function (L) {
         g.font = (L.dimLabel ? '' : '600 ') + (L.dimLabel ? '11px' : '12px') + ' system-ui,-apple-system,"Segoe UI",sans-serif';
         var tw = g.measureText(L.t).width, bw = L.axis ? tw + 4 : tw + 12, bh = L.axis ? 14 : 20, pick = null;
-        var c0 = L.axis ? [[0, 0]] : [[0, -24], [0, 24], [28 + tw / 2, 0], [-28 - tw / 2, 0], [24, -22], [-24, -22], [24, 24], [-24, 24], [0, -40], [0, 40]];
+        var c0 = L.axis ? [[0, 0]] : [[0, -24], [0, 24], [28 + tw / 2, 0], [-28 - tw / 2, 0], [24, -22], [-24, -22], [24, 24], [-24, 24], [0, -40], [0, 40], [44 + tw / 2, -30], [-44 - tw / 2, -30], [44 + tw / 2, 30], [-44 - tw / 2, 30], [0, -60], [0, 60]];
         if (L.dimLabel) c0 = [[0, 0], [0, -14], [0, 14], [tw / 2 + 10, 0], [-tw / 2 - 10, 0]];
         c0.some(function (o) { var x = L.x + o[0] - bw / 2, y = L.y + o[1] - bh / 2; if (x < 2 || y < 2 || x + bw > W - 2 || y + bh > H - 2) return false;
           if (used.some(function (q) { return x < q[2] && q[0] < x + bw && y < q[3] && q[1] < y + bh; })) return false; pick = [x, y]; return true; });
         if (!pick) { if (L.dimLabel) return; pick = [Math.max(2, Math.min(W - bw - 2, L.x + c0[0][0] - bw / 2)), Math.max(2, Math.min(H - bh - 2, L.y + c0[0][1] - bh / 2))]; }
         used.push([pick[0], pick[1], pick[0] + bw, pick[1] + bh]);
+        if (!L.axis && !L.dimLabel) { var px = Math.max(pick[0], Math.min(L.x, pick[0] + bw)), py = Math.max(pick[1], Math.min(L.y, pick[1] + bh));
+          if (Math.hypot(px - L.x, py - L.y) > 18) line(g, [L.x, L.y], [px, py], alpha(L.c, 0.6), 1); }
         if (L.axis) { g.fillStyle = L.c; g.fillText(L.t, pick[0] + 2, pick[1] + 11); return; }
         g.globalAlpha = L.dim ? 0.55 : 1; g.beginPath(); if (g.roundRect) g.roundRect(pick[0], pick[1], bw, bh, 6); else g.rect(pick[0], pick[1], bw, bh);
         g.fillStyle = alpha(bg, 0.88); g.fill(); g.strokeStyle = L.act || L.dimLabel ? L.c : alpha(ln, 0.9); g.lineWidth = L.act ? 1.4 : 1; g.stroke();
         g.fillStyle = L.dimLabel ? L.c : ink; g.fillText(L.t, pick[0] + 6, pick[1] + 14); g.globalAlpha = 1; });
-      key.textContent = 'Grid ' + stp + ' mm · arrows: IMU x y z · rig frame: forward along the cameras, right along the baseline' + (cams.some(function (c) { return c.reach != null; }) ? ' · dashed rim: past the corners the solve used' : '');
+      key.textContent = 'Grid ' + stp + ' mm · ' + (noImu ? 'origin: ' + R.origin : 'arrows: IMU x y z') + ' · rig frame: forward along the cameras, right along the baseline' + (cams.some(function (c) { return c.reach != null || c.domain != null; }) ? ' · dashed rim: past the corners the solve used, or past the model’s 90° limit' : '');
     }
     function showInfo() {
       Object.keys(pickB).forEach(function (k) { pickB[k].setAttribute('aria-pressed', String(k) === String(rsel)); });
@@ -350,7 +355,7 @@
       else if (kind === 'aux') { var m = imus[+String(rsel).slice(1)]; row('Lever', m.p.map(function (x) { return sgn(x, 2); }).join(', ') + ' mm'); row('Distance', norm(m.p).toFixed(1) + ' mm'); row('td', sgn(m.td, 3) + ' ms'); }
       else { var c = cams[rsel], I = c.intr, sp = c.sig_p; row('Model', esc(c.model)); row('fx, fy', I[0].toFixed(2) + ', ' + I[1].toFixed(2) + ' px'); row('cx, cy', I[2].toFixed(2) + ', ' + I[3].toFixed(2) + ' px');
         if (I.length > 4) row('Distortion', I.slice(4).map(function (x) { return x.toFixed(5); }).join(', '));
-        row('Field of view', (c.fov.h == null ? 'n/a' : c.fov.h.toFixed(1) + '°') + ' × ' + (c.fov.v == null ? 'n/a' : c.fov.v.toFixed(1) + '°') + (c.reach != null ? ' (corners to ' + c.reach.toFixed(0) + '° off axis)' : ''));
+        row('Field of view', (c.fov.h == null ? 'past the fit' : c.fov.h.toFixed(1) + '°') + ' × ' + (c.fov.v == null ? 'past the fit' : c.fov.v.toFixed(1) + '°') + (c.reach != null ? ' (corners to ' + c.reach.toFixed(0) + '° off axis)' : ''));
         row('Lever', c.p.map(function (x) { return sgn(x, 2); }).join(', ') + ' mm' + (sp ? ' ± ' + sp.map(function (x) { return x.toFixed(2); }).join(', ') : ''));
         row('Distance', norm(c.p).toFixed(1) + ' mm'); row('td', sgn(c.td, 3) + ' ms');
         if (Math.abs(c.tr) > 0.01) row('Readout', sgn(c.tr, 2) + ' ms'); if (c.reproj != null) row('Reprojection', c.reproj.toFixed(3) + ' px'); }
@@ -360,35 +365,53 @@
     function select(k) { rsel = k; st.touched = true; showInfo(); draw(); }
     function svgs() {
       var ink = tok(root, 'ink'), mut = tok(root, 'muted'), rp = cams.map(function (c) { return toRig(c.p); });
-      function fan(c, ax) { var a = (c.rim || []).map(function (v) { var q = camR(c, v); return Math.atan2(q[ax], q[2]); }); return a.length ? [Math.min.apply(null, a), Math.max.apply(null, a)] : null; }
+      function fan(c, ax) {   // angles measured from the camera's own axis, so fields of view near 180 degrees don't wrap
+        var z = camR(c, [0, 0, 1]), a0 = Math.atan2(z[ax], z[2]), wrap = function (x) { while (x > Math.PI) x -= 2 * Math.PI; while (x <= -Math.PI) x += 2 * Math.PI; return x; };
+        // the field of view in this drawing's plane: where the rim crosses the plane (the out-of-plane rig axis is 0),
+        // whatever way the camera is turned about its own axis
+        var rr = (c.rim || []).map(function (v) { return camR(c, v); }), out = ax === 0 ? 1 : 0, a = [];
+        for (var k = 0; k < rr.length; k++) { var q0 = rr[k], q1 = rr[(k + 1) % rr.length];
+          if ((q0[out] <= 0) !== (q1[out] <= 0)) { var t = q0[out] / (q0[out] - q1[out]), q = add(q0, scl(sub(q1, q0), t)); a.push(wrap(Math.atan2(q[ax], q[2]) - a0)); } }
+        return a.length >= 2 ? [a0 + Math.min.apply(null, a), a0 + Math.max.apply(null, a)] : null; }
       function panel(holder, pts, ax, fans, flip) {
         var Wd = 420, Hd = 300, xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
         var cx = (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, cy = (Math.min.apply(null, ys) + Math.max.apply(null, ys)) / 2;
         var s = Math.min(330 / Math.max(Math.max.apply(null, xs) - Math.min.apply(null, xs), 40), 150 / Math.max(Math.max.apply(null, ys) - Math.min.apply(null, ys), 20));
         var X = function (x) { return Wd / 2 + (x - cx) * s; }, Y = function (y) { return Hd / 2 + 30 + (y - cy) * s; }, g = '<svg viewBox="0 0 ' + Wd + ' ' + Hd + '" role="img" font-family="system-ui,sans-serif" font-size="11">';
+        var fanLab = {}, fanAt = {};
         if (fans) cams.forEach(function (c, i) { var a = fan(c, ax); if (!a) return; var p = pts[i + 1], Lr = 38, sx = flip ? -1 : 1;
+          var lim = Math.min(c.reach != null ? c.reach : Infinity, c.domain != null ? c.domain : Infinity), z0 = camR(c, [0, 0, 1]), ac = Math.atan2(z0[ax], z0[2]);
+          var past = isFinite(lim) && Math.max(Math.abs(a[0] - ac), Math.abs(a[1] - ac)) * 180 / Math.PI > lim + 0.5;
           var pa = [X(p[0]) + Lr * Math.sin(a[0]) * sx, Y(p[1]) - Lr * Math.cos(a[0])], pb = [X(p[0]) + Lr * Math.sin(a[1]) * sx, Y(p[1]) - Lr * Math.cos(a[1])];
-          g += '<path d="M' + X(p[0]) + ',' + Y(p[1]) + ' L' + pa[0] + ',' + pa[1] + ' A' + Lr + ',' + Lr + ' 0 ' + (a[1] - a[0] > Math.PI ? 1 : 0) + ',' + (flip ? 0 : 1) + ' ' + pb[0] + ',' + pb[1] + ' Z" fill="' + c.color + '" fill-opacity=".16" stroke="' + c.color + '"/>';
-          g += '<text x="' + X(p[0]) + '" y="' + (Y(p[1]) - Lr - 4) + '" text-anchor="middle" fill="' + mut + '">' + ((a[1] - a[0]) * 180 / Math.PI).toFixed(0) + '°</text>'; });
-        cams.forEach(function (c, i) { var p = pts[i + 1]; g += '<line x1="' + X(pts[0][0]) + '" y1="' + Y(pts[0][1]) + '" x2="' + X(p[0]) + '" y2="' + Y(p[1]) + '" stroke="' + mut + '" stroke-dasharray="3 3"/>';
-          if (fans) g += '<text x="' + X(p[0]) + '" y="' + (Y(p[1]) + 33) + '" text-anchor="middle" fill="' + mut + '">' + Math.hypot(p[0] - pts[0][0], p[1] - pts[0][1]).toFixed(1) + ' mm in plane</text>'; });
+          g += '<path d="M' + X(p[0]) + ',' + Y(p[1]) + ' L' + pa[0] + ',' + pa[1] + ' A' + Lr + ',' + Lr + ' 0 ' + (a[1] - a[0] > Math.PI ? 1 : 0) + ',' + (flip ? 0 : 1) + ' ' + pb[0] + ',' + pb[1] + ' Z" fill="' + c.color + '" fill-opacity=".16" stroke="' + c.color + '"' + (past ? ' stroke-dasharray="4 3"' : '') + '/>';
+          var lab = past ? 'past the fit' : ((a[1] - a[0]) * 180 / Math.PI).toFixed(0) + '°', key = Math.round(X(p[0]) / 10) + ',' + Math.round(Y(p[1]) / 10); fanLab[key] = fanLab[key] && fanLab[key].split(' / ').indexOf(lab) < 0 ? fanLab[key] + ' / ' + lab : (fanLab[key] || lab); fanAt[key] = [X(p[0]), Y(p[1]) - Lr - 4]; });
+        Object.keys(fanLab).sort(function (a, b) { return fanAt[a][0] - fanAt[b][0]; }).forEach(function (k, n) { g += '<text x="' + fanAt[k][0] + '" y="' + (fanAt[k][1] - (n % 2) * 13) + '" text-anchor="middle" fill="' + mut + '">' + fanLab[k] + '</text>'; });
+        // cameras at the same spot in this view (a stacked pair) share one label
+        var groups = []; cams.forEach(function (c, i) { var p = pts[i + 1], gg = groups.find(function (q) { return Math.hypot(X(q.p[0]) - X(p[0]), Y(q.p[1]) - Y(p[1])) < 10; });
+          if (gg) gg.idx.push(i); else groups.push({p: p, idx: [i]}); });
+        groups.sort(function (a, b) { return X(a.p[0]) - X(b.p[0]); });
+        groups.forEach(function (q, n) { var p = q.p; g += '<line x1="' + X(pts[0][0]) + '" y1="' + Y(pts[0][1]) + '" x2="' + X(p[0]) + '" y2="' + Y(p[1]) + '" stroke="' + mut + '" stroke-dasharray="3 3"/>';
+          if (fans && !(noImu && Math.hypot(p[0] - pts[0][0], p[1] - pts[0][1]) < 0.5)) g += '<text x="' + X(p[0]) + '" y="' + (Y(p[1]) + 33 + (n % 2) * 13) + '" text-anchor="middle" fill="' + mut + '">' + Math.hypot(p[0] - pts[0][0], p[1] - pts[0][1]).toFixed(1) + ' mm in plane</text>'; });
         if (cams.length > 1) { var b0 = pts[1], b1 = pts[2], yb = Math.max.apply(null, pts.map(function (q) { return Y(q[1]); })) + 52;
           g += '<line x1="' + X(b0[0]) + '" y1="' + yb + '" x2="' + X(b1[0]) + '" y2="' + yb + '" stroke="' + ink + '"/><text x="' + (X(b0[0]) + X(b1[0])) / 2 + '" y="' + (yb + 15) + '" text-anchor="middle" fill="' + ink + '" font-weight="600">' + norm(sub(cams[1].p, cams[0].p)).toFixed(2) + ' mm baseline (cam0–cam1)</text>'; }
-        g += '<rect x="' + (X(pts[0][0]) - 5) + '" y="' + (Y(pts[0][1]) - 5) + '" width="10" height="10" fill="' + ink + '"/><text x="' + X(pts[0][0]) + '" y="' + (Y(pts[0][1]) + (fans ? 20 : -10)) + '" text-anchor="middle" fill="' + ink + '">IMU</text>';
-        cams.forEach(function (c, i) { var p = pts[i + 1]; g += '<circle cx="' + X(p[0]) + '" cy="' + Y(p[1]) + '" r="6" fill="' + c.color + '"/><text x="' + X(p[0]) + '" y="' + (Y(p[1]) + 20) + '" text-anchor="middle" fill="' + ink + '" font-weight="600">' + esc(c.name) + '</text>'; });
-        var bar2 = Math.pow(10, Math.round(Math.log10(60 / s))); g += '<line x1="' + (Wd - 80) + '" y1="' + (Hd - 14) + '" x2="' + (Wd - 80 + bar2 * s) + '" y2="' + (Hd - 14) + '" stroke="' + ink + '" stroke-width="2"/><text x="' + (Wd - 80) + '" y="' + (Hd - 20) + '" fill="' + mut + '">' + bar2 + ' mm</text></svg>';
+        if (!noImu) g += '<rect x="' + (X(pts[0][0]) - 5) + '" y="' + (Y(pts[0][1]) - 5) + '" width="10" height="10" fill="' + ink + '"/><text x="' + X(pts[0][0]) + '" y="' + (Y(pts[0][1]) + (fans ? 20 : -10)) + '" text-anchor="middle" fill="' + ink + '">' + esc(R.origin || 'IMU') + '</text>';
+        groups.forEach(function (q) { var p = q.p; q.idx.forEach(function (i, k) { g += '<circle cx="' + (X(p[0]) + (k - (q.idx.length - 1) / 2) * 9) + '" cy="' + Y(p[1]) + '" r="6" fill="' + cams[i].color + '" stroke="' + tok(root, 'card') + '"/>'; });
+          g += '<text x="' + X(p[0]) + '" y="' + (Y(p[1]) + 20) + '" text-anchor="middle" fill="' + ink + '" font-weight="600">' + q.idx.map(function (i) { return esc(cams[i].name); }).join(' / ') + '</text>'; });
+        var bar2 = Math.pow(10, Math.round(Math.log10(60 / s))); g += '<line x1="' + (Wd - 14 - bar2 * s) + '" y1="16" x2="' + (Wd - 14) + '" y2="16" stroke="' + ink + '" stroke-width="2"/><text x="' + (Wd - 14) + '" y="11" text-anchor="end" fill="' + mut + '">' + bar2 + ' mm</text></svg>';
         holder.innerHTML = g; }
       var hs = two.querySelectorAll('.mv-fig div');
       panel(hs[0], [[0, 0]].concat(rp.map(function (p) { return [p[0], -p[2]]; })), 0, true, false);
       panel(hs[1], [[0, 0]].concat(rp.map(function (p) { return [-p[0], p[1]]; })), 1, false, true);
       var t = '<thead><tr><th>Camera</th><th>Lever x, y, z (mm)</th><th>Distance (mm)</th><th>td (ms)</th><th>Readout (ms)</th><th>Field of view</th><th>Reprojection (px)</th></tr></thead><tbody>';
       cams.forEach(function (c) { t += '<tr><th>' + esc(c.name) + '</th><td>' + c.p.map(function (x) { return sgn(x, 1); }).join(', ') + '</td><td>' + norm(c.p).toFixed(1) + '</td><td>' + sgn(c.td, 2) + '</td><td>'
-        + (Math.abs(c.tr) > 0.01 ? c.tr.toFixed(2) : '—') + '</td><td>' + (c.fov.h == null ? 'n/a' : c.fov.h.toFixed(0) + '°') + ' × ' + (c.fov.v == null ? 'n/a' : c.fov.v.toFixed(0) + '°') + '</td><td>'
+        + (Math.abs(c.tr) > 0.01 ? c.tr.toFixed(2) : '—') + '</td><td>' + (c.fov.h == null ? 'past the fit' : c.fov.h.toFixed(0) + '°') + ' × ' + (c.fov.v == null ? 'past the fit' : c.fov.v.toFixed(0) + '°') + '</td><td>'
         + (c.reproj == null ? '—' : c.reproj.toFixed(3)) + '</td></tr>'; });
       tbl.querySelector('table').innerHTML = t + '</tbody>';
     }
-    cv.addEventListener('click', function (e) { if (st.moved > 3) return; var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, best = null, bd = 26;
-      hits.forEach(function (h) { var d = Math.hypot(h.x - x, h.y - y); if (d < bd) { bd = d; best = h; } }); if (best) select(best.k); });
+    function near(e) { var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, best = null, bd = 26;
+      hits.forEach(function (h) { var d = Math.hypot(h.x - x, h.y - y); if (d < bd) { bd = d; best = h; } }); return best; }
+    cv.addEventListener('click', function (e) { if (st.moved > 3) return; var b2 = near(e); if (b2) select(b2.k); });
+    cv.addEventListener('pointermove', function (e) { if (e.buttons) return; var b2 = near(e), k = b2 ? b2.k : null; if (k !== hover) { hover = k; cv.style.cursor = k != null ? 'pointer' : 'grab'; draw(); } });
     Object.keys(vb).forEach(function (k) { vb[k].onclick = function () { st.touched = true; st.yaw = PRE[k][0]; st.pitch = PRE[k][1]; st.zoom = 1; Object.keys(vb).forEach(function (x) { vb[x].setAttribute('aria-pressed', x === k); }); draw(); }; });
     sigB.onclick = function () { showSig = !showSig; sigB.setAttribute('aria-pressed', showSig); draw(); };
     orbit(cv, st, function () { st.touched = true; draw(); }); fullscreen(box, fsB, draw); showInfo();
