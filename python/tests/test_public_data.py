@@ -133,6 +133,10 @@ def test_looper_limits_keep_the_two_sets_apart_and_clips_follow_the_tabs(pub):
     limits = " ".join(p["limits"])
     for phrase in ("not pooled", "may not come from the same unit", "about 3 mm in y and z, 4.5 to 5 mm in all", "about 1.8 ms", "2 recordings"):
         assert phrase in limits
-    assert [x["from"] for x in p["demo"]["by_variant"]] == ["looper-insight9-new_small", "looper-insight9-arm_small", "looper-insight9-arm_small"]
+    # first tab: the chessboard recording of our own unit (user, 2026-11-07), its clip from the copy blurred outside the board
+    assert [x["from"] for x in p["demo"]["by_variant"]] == ["looper-insight9-chessboard_small", "looper-insight9-arm_small", "looper-insight9-arm_small"]
+    assert "blurred" in p["demo"]["by_variant"][0]["note"] and "our own unit" in limits
+    rows = dict(p["dataset"])
+    assert rows["Chessboard data"].startswith("Not hosted") and "blurred outside the board" in rows["Chessboard data"]
     text = strip_urls(yaml.safe_dump(p, allow_unicode=True))
     assert public_problems(text) == [] and "firmware" not in text.lower()
