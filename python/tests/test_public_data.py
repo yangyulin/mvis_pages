@@ -121,18 +121,28 @@ def test_looper_licence_is_scoped_to_hand_held(pub):
     assert "not hosted" not in p["header"]["foot"] and "blurred except the board" in p["header"]["foot"]
     rows = dict(p["dataset"])
     assert rows["Robot-arm data"].startswith("__HUB:community/looper-insight9/data/__")
-    assert "blurred" in rows["Robot-arm data"] and "CC BY-NC 4.0" in rows["Robot-arm data"]
+    # arm bags on the Hub were replaced with the unblurred frames (Hub a2a09ebc, 2026-11-07)
+    assert "Normal frames" in rows["Robot-arm data"] and "blurred" not in rows["Robot-arm data"] and "CC BY-NC 4.0" in rows["Robot-arm data"]
     assert "__LINK__" in rows["Hand-held data"] and "CC BY-NC 4.0" in rows["Hand-held data"] and p["folder"] == "looper-insight9/"
     html = dataset_rows(p, "https://x")
-    assert html.count("<a href") == 3 and "<td>Licence</td>" not in html and "<td>Hosted</td>" not in html
+    assert html.count("<a href") == 4 and "<td>Licence</td>" not in html and "<td>Hosted</td>" not in html
     assert "for the hand-held data, clip and figures" in html
 
 
 def test_looper_limits_keep_the_two_sets_apart_and_clips_follow_the_tabs(pub):
     p = pub["sensors"]["looper-insight9"]
     limits = " ".join(p["limits"])
-    for phrase in ("not pooled", "may not come from the same unit", "about 3 mm in y and z, 4.5 to 5 mm in all", "about 1.8 ms", "2 recordings"):
+    for phrase in ("not pooled", "may not come from the same unit", "less well determined"):
         assert phrase in limits
-    assert [x["from"] for x in p["demo"]["by_variant"]] == ["looper-insight9-new_small", "looper-insight9-arm_small", "looper-insight9-arm_small"]
+    # no hand-held vs arm tables on the page for now (user, 2026-11-08), so no limits about them
+    for phrase in ("repeatability rests", "between the two sets", "tables show"):
+        assert phrase not in limits
+    # first tab: the chessboard recording of our own unit (user, 2026-11-07), its clip from the copy blurred outside the board
+    assert [x["from"] for x in p["demo"]["by_variant"]] == ["looper-insight9-chessboard_small", "looper-insight9-arm_small", "looper-insight9-arm_small"]
+    assert "blurred" in p["demo"]["by_variant"][0]["note"] and "our own unit" in limits
+    rows = dict(p["dataset"])
+    # chessboard takes 01 to 04 hosted, blurred except the board (2026-11-07)
+    assert rows["Chessboard data"].startswith("__HUB:community/looper-insight9/data/__") and "takes 01 to 04" in rows["Chessboard data"]
+    assert "Everything except the board is blurred" in rows["Chessboard data"] and "CC BY-NC 4.0" in rows["Chessboard data"]
     text = strip_urls(yaml.safe_dump(p, allow_unicode=True))
     assert public_problems(text) == [] and "firmware" not in text.lower()

@@ -187,3 +187,16 @@ def test_refuse_frames_needs_a_clean_figure_and_by_default_one_at_all():
     for vs, need in (([{"process": None}], True), ([{"process": dirty}], True), ([{"process": None}, {"process": dirty}], False)):
         with pytest.raises(RuntimeError, match="^k: process figure missing or holds camera frames$"):
             R.refuse_frames("k", vs, require_process=need)
+
+
+def test_corner_uv_prefers_the_view_data_beside_the_report(tmp_path):
+    import base64
+    import json
+    import numpy as np
+    from mvis_site.results import corner_uv
+    uv = np.array([[10, 20], [30, 40]], np.int16)
+    (tmp_path / "cam_imu_views.json").write_text(json.dumps({"scene": {"v": 2, "cams": [
+        {"name": "cam0", "uvb": base64.b64encode(uv.tobytes()).decode()}, {"name": "cam1"}]}}))
+    (tmp_path / "cam_imu_report.html").write_text("<html>canvas report, no Plotly figure</html>")
+    got = corner_uv(tmp_path / "cam_imu_report.html")
+    assert np.array_equal(got[0], [[10, 20], [30, 40]]) and got[1].shape == (0, 2)

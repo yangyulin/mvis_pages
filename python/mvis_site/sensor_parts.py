@@ -84,9 +84,20 @@ def lens_section(vs) -> str:
             + f'<p class=legend>{legend}</p><p class=note>{LENS_NOTE}</p>')
 
 
+def imu_pinned(r) -> bool:
+    """IMU intrinsics held at identity in the solve: every gyro and accel scale is exactly 1."""
+    vals = list(r.get("Dw_diag") or []) + list(r.get("Da_diag") or [])
+    return bool(vals) and all(v == 1.0 for v in vals)
+
+
 def imu_section(vs) -> str:
-    return each({"variants": vs}, lambda v, i: f'<p>Scale as deviation from 1. Model: {e(v["run"]["imu_model"])}. Gyro-to-accel time offset <code>t_ga</code>: '
-                f'{num(v["run"].get("t_ga_ms"), 2, True)} ± {num(v["run"].get("t_ga_sigma_ms"), 2)} ms.</p>{imu_bars(v["run"])}')
+    def one(v, i):
+        r = v["run"]
+        tga = f'Gyro-to-accel time offset <code>t_ga</code>: {num(r.get("t_ga_ms"), 2, True)} ± {num(r.get("t_ga_sigma_ms"), 2)} ms.'
+        if imu_pinned(r):
+            return f'<p>IMU intrinsics pinned at identity in this solve, so no scales were estimated. {tga}</p>'
+        return f'<p>Scale as deviation from 1. Model: {e(r["imu_model"])}. {tga}</p>{imu_bars(r)}'
+    return each({"variants": vs}, one)
 
 
 def timing_section(vs) -> str:
