@@ -62,7 +62,7 @@ sensors:
         - {name: Qinrui Yan, role: "COO & Co-Founder, DeepMirror; Head of LooperRobotics", url: "https://www.linkedin.com/in/qinrui-yan-3625aa90"}
         - {name: Junjie Tang, role: DeepMirror, url: "https://www.linkedin.com/in/junjie-tang-271b8033a"}
       note: They collected the hand-held and robot-arm recordings and supported sharing this work openly.
-    card: {name: "Insight 9", tags: [Global + rolling shutter, 3 cameras, 400 Hz IMU], sensors: "2 mono + 1 rolling-shutter colour + IMU @ 400 Hz", format: "ROS bag → EuRoC mav0", shows: "Repeatability across 10 hand-held and 2 robot-arm recordings"}
+    card: {name: "Insight 9", tags: [Global + rolling shutter, 3 cameras, 400 Hz IMU], sensors: "2 mono + 1 rolling-shutter colour + IMU @ 400 Hz", format: "ROS bag → EuRoC mav0", shows: "Camera + IMU solves of our own unit on a chessboard and of 2 robot-arm recordings"}
     demo:
       by_variant:
         - {from: "looper-insight9-chessboard_small", note: "The 3D scene MVIS recovered from chessboard take 04 of our own unit. Everything except the board is blurred."}
@@ -87,11 +87,9 @@ sensors:
     folder: looper-insight9/
     method: "Camera + IMU with camera intrinsics free, t_ga on and the cam2 rolling-shutter readout estimated. Chessboard recordings of 2026-11-07; hand-held batch of 2026-11-02; robot-arm batch of 2026-11-04."
     limits:
-      - No reference exists for these recordings, so the tables show repeatability, not accuracy.
+      - No reference exists for these recordings, so the values can't be checked for accuracy.
       - Hand-held and robot-arm recordings are kept apart, not pooled. They were solved in different batches and may not come from the same unit.
-      - Lever arms differ by about 3 mm in y and z, 4.5 to 5 mm in all, between the two sets. The arm program rotates mostly about one axis, which leaves lever arms less well determined, so treat the arm's values with more caution.
-      - The colour camera's td differs by about 1.8 ms between the two sets, and the cause isn't established.
-      - Robot-arm repeatability rests on 2 recordings.
+      - The arm program rotates mostly about one axis, which leaves lever arms less well determined, so treat the arm's values with more caution.
       - The chessboard recordings come from our own unit, not the partner's, and are shown on their own. The values shown come from take 04 alone, so they show no repeatability; all 4 takes are in the hosted data.
     header:
       type: "Spatial AI camera: stereo pair, rolling-shutter colour camera, 6-axis IMU, VIO"

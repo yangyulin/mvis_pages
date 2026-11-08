@@ -68,21 +68,10 @@ def test_hp_has_four_cameras_and_t265_no_fov_value(collected):
 
 def test_looper_tabs_and_sets(collected):
     c = collected[0]["looper-insight9"]
-    assert [v["label"] for v in c["variants"]] == ["Hand-held 1", "Robot arm 1", "Robot arm 2"]
+    assert [v["label"] for v in c["variants"]] == ["Chessboard", "Robot arm 1", "Robot arm 2"]
     for v in c["variants"]:
         assert [x["name"] for x in v["run"]["cams"]] == ["cam0", "cam1", "cam2"] and v["readout_ms"][2] > 25
-    assert [(s["label"], len(s["runs"])) for s in c["series"]] == [("10 hand-held recordings", 10), ("2 robot-arm recordings", 2)]
-
-
-def test_looper_limits_match_the_results(collected):
-    hand, arm = collected[0]["looper-insight9"]["series"]
-    mean = lambda s, f: float(np.mean([f(r) for r in s["runs"]]))
-    for axis in (1, 2):
-        assert 2.5 < abs(mean(arm, lambda r: r["cams"][0]["p_CinI_mm"][axis]) - mean(hand, lambda r: r["cams"][0]["p_CinI_mm"][axis])) < 4
-    for cam in range(3):
-        gaps = [np.median([r["cams"][cam]["p_CinI_mm"][k] for r in arm["runs"]]) - np.median([r["cams"][cam]["p_CinI_mm"][k] for r in hand["runs"]]) for k in range(3)]
-        assert 4.5 <= np.linalg.norm(gaps) <= 5
-    assert 1.5 < abs(mean(arm, lambda r: r["cams"][2]["td_ms"]) - mean(hand, lambda r: r["cams"][2]["td_ms"])) < 2.1
+    assert c["series"] == []   # hand-held and arm tables left off the page for now (user, 2026-11-08)
 
 
 def test_the_real_export_passes_the_lint_and_writes(collected, tmp_path):
