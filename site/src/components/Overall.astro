@@ -1,0 +1,149 @@
+---
+// The Overall tab: tier cards, project facts, derived total, head to head, the aspect matrix and the reader presets.
+// Every number and sentence comes from overall.json (site/scripts/export_overall.py, python/mvis_site/overall.py),
+// where the export lints it; this file only arranges it. The repeatability matrix and the tables carry no points.
+import RpShape from './RpShape.astro';
+import ov from '../data/leaderboard/overall.json';
+const o = ov as any;
+const tools: string[] = o.tools;
+const fmt = (x: number | null | undefined) => (x === null || x === undefined ? '–' : x.toFixed(2));
+const GLYPH: Record<string, string> = { '1': '●', '0.5': '◐', '0': '○' };
+const glyph = (x: number | null) => (x === null ? null : GLYPH[String(x)] ?? null);
+const tierA = o.tiers.find((t: any) => t.id === 'A');
+const pts = (x: number | null) => (x === null ? 'no points' : `${fmt(x)} points`);
+---
+<section class="not-content ov" id="ds-overall" data-rp-section="overall" aria-labelledby="ov-h">
+  <h2 id="ov-h">Overall</h2>
+  <p class="ov-banner">{o.wording.banner} <a href={o.wording.challenge_url}>open a challenge</a>. Batch <b>{o.batch}</b>.</p>
+  <p class="ov-truth">{o.wording.truth}</p>
+
+  <div class="ov-cards">
+    {o.tiers.map((t: any) => (
+      <div class="ov-card">
+        <h3>{t.label} <span class="ov-tid">tier {t.id}</span></h3>
+        <ul>
+          {tools.map((tool) => (
+            <li>
+              <span class="ov-tool"><RpShape tool={tool} /> {tool}</span>
+              <span class="ov-bar" aria-hidden="true"><span class={`ov-fill rp-tint-${tool}`} style={`width:${(t.values[tool] ?? 0) * 100}%`}></span></span>
+              <span class="ov-num">{fmt(t.values[tool])}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="ov-cov">{t.coverage}</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="ov-facts" role="group" aria-label="Project facts, no points">
+    <p class="ov-facts-h">Project facts <span class="ov-tid">no points</span></p>
+    <div class="ov-scroll">
+      <table class="ov-table">
+        <thead><tr><th scope="col">Fact</th>{tools.map((t) => <th scope="col"><RpShape tool={t} /> {t}</th>)}</tr></thead>
+        <tbody>
+          {o.facts.map((f: any) => (
+            <tr><th scope="row">{f.label}</th>{tools.map((t) => <td>{f.values[t]}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    {o.facts.filter((f: any) => f.note).map((f: any) => <p class="ov-small">{f.label}: {f.note}</p>)}
+  </div>
+
+  <div class="ov-total">
+    <h3>Derived total <span class="ov-tid">derived</span></h3>
+    <ul class="ov-total-row">
+      {tools.map((t) => <li><span class="ov-tool"><RpShape tool={t} /> {t}</span> <span class="ov-big">{fmt(o.total.values[t])}</span></li>)}
+    </ul>
+    <p class="ov-small">{o.wording.total_note} Sum of points over the {o.total.n_aspects} aspects that have points: {tools.map((t) => `${t} ${fmt(o.total.sum[t])}`).join(', ')}.</p>
+    <p class="ov-small">{o.wording.disclosure}</p>
+    <p class="ov-badge">{o.badge}</p>
+  </div>
+
+  <h3>Head to head (measured)</h3>
+  {o.head_to_head.map((h: any) => (
+    <div class="ov-h2h">
+      <p class="ov-line">{h.line}</p>
+      <div class="ov-scroll">
+        <table class="ov-table">
+          <caption class="rp-sr">{h.label}: points per pair of tools and family</caption>
+          <thead><tr><th scope="col">Pair</th><th scope="col">Families (points)</th><th scope="col">Points</th></tr></thead>
+          <tbody>
+            {h.pairs.map((p: any) => (
+              <tr>
+                <th scope="row">{p.a} vs {p.b}</th>
+                <td>{p.families.map((f: any, i: number) => <>{i > 0 && ', '}<a href={f.href}>{f.id}</a> <span class="ov-mut">{fmt(f.points[p.a])} / {fmt(f.points[p.b])}</span></>)}</td>
+                <td class="ov-num">{fmt(p.points[p.a])} / {fmt(p.points[p.b])}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ))}
+
+  <h3>Aspects</h3>
+  <p class="ov-small">● 1 · ◐ ½ · ○ 0; other values are means of sub-checks, which open under the aspect name. – = no points, with the reason.</p>
+  {o.tiers.map((t: any) => (
+    <div class="ov-scroll">
+      <table class="ov-table ov-aspects">
+        <caption>{t.label} <span class="ov-mut">· {t.coverage}</span></caption>
+        <thead><tr><th scope="col">Aspect</th><th scope="col">Home</th>{tools.map((tool) => <th scope="col"><RpShape tool={tool} /> {tool}</th>)}</tr></thead>
+        <tbody>
+          {t.aspects.map((a: any) => {
+            const subs = a.cells[tools[0]]?.subs;
+            return (
+              <tr>
+                <th scope="row">
+                  <span class="ov-aid">{a.id}</span> {a.label}
+                  {(a.rule || a.why || subs) && (
+                    <details class="ov-sub"><summary>Rule{subs ? ' and sub-checks' : ''}</summary>
+                      {a.rule && <p>{a.rule}</p>}
+                      {a.why && <p>{a.why}</p>}
+                      {subs && (
+                        <table class="ov-subt">
+                          <thead><tr><th scope="col">Sub-check</th>{tools.map((tool) => <th scope="col">{tool}</th>)}</tr></thead>
+                          <tbody>{subs.map((s: any, i: number) => <tr><th scope="row">{s.label}</th>{tools.map((tool) => <td>{a.cells[tool].subs[i].points}</td>)}</tr>)}</tbody>
+                        </table>
+                      )}
+                    </details>
+                  )}
+                </th>
+                <td class="ov-home">{a.home ?? '–'}</td>
+                {tools.map((tool) => {
+                  const c = a.cells[tool];
+                  const g = glyph(c.points);
+                  return c.points === null
+                    ? <td class="ov-pt ov-na" aria-label={`${tool}: no points, ${c.na}`}>–<span class="ov-why">{c.na}</span></td>
+                    : <td class="ov-pt" aria-label={`${tool}: ${pts(c.points)}${c.text ? `, ${c.text}` : ''}`}>{g ? <span aria-hidden="true">{g}</span> : null} <span class="ov-num">{fmt(c.points)}</span>{c.text && <span class="ov-why">{c.text}</span>}</td>;
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  ))}
+
+  <h3>Reader presets</h3>
+  <div class="ov-scroll">
+    <table class="ov-table">
+      <caption class="rp-sr">The derived total under other weightings; no preset replaces the tier cards</caption>
+      <thead><tr><th scope="col">Preset</th>{tools.map((t) => <th scope="col"><RpShape tool={t} /> {t}</th>)}<th scope="col">Leads</th></tr></thead>
+      <tbody>
+        {o.presets.map((p: any) => (
+          <tr><th scope="row">{p.label}</th>{tools.map((t) => <td class="ov-num">{fmt(p.values[t])}</td>)}<td>{p.leader ?? 'level'}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <details class="rp-fold">
+    <summary>Columns, rules and what has no points</summary>
+    <ul>
+      {tools.filter((t) => o.wording.columns[t]).map((t) => <li>{o.wording.columns[t]}</li>)}
+      {o.rules.map((r: string) => <li>{r}</li>)}
+      {o.not_counted.map((r: string) => <li>{r}</li>)}
+    </ul>
+  </details>
+</section>

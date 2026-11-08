@@ -344,3 +344,52 @@ section[data-rp-section] .sl-heading-wrapper + p { margin-top: 0.3rem; font-size
 .rp-card-rows .rp-sup { display: flex; flex: none; white-space: nowrap; }
 .rp-card-rows .rp-sup a { min-width: 20px; padding: 0 2px; }
 .rp-card-rows .rp-g { flex: none; max-width: 6.5rem; }
+
+/* Overall tab (Overall.astro): tier cards, derived total, aspect tables. Tables scroll in their box on phones, the
+   first column stays put and numbers never wrap. */
+.ov { margin-block: 1rem 2rem; }
+.ov h3 { font-size: 1.05rem; margin: 1.4rem 0 0.5rem; }
+.ov-banner { font-size: 0.9rem; color: var(--sl-color-gray-2); }
+.ov-truth { font-weight: 600; border-left: 3px solid var(--sl-color-accent); padding-left: 0.6rem; }
+.ov-tid { font-size: 0.75rem; font-weight: 400; color: var(--rp-mut); border: 1px solid var(--rp-line); border-radius: 999px; padding: 0 0.45rem; margin-left: 0.3rem; }
+.ov-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.75rem; margin-block: 1rem; }
+.ov-card { border: 1px solid var(--rp-line); border-radius: 0.5rem; padding: 0.75rem 0.9rem; }
+.ov-card h3 { margin: 0 0 0.5rem; }
+.ov-card ul, .ov-total-row { list-style: none; padding: 0; margin: 0; }
+.ov-card li { display: grid; grid-template-columns: 5.5rem 1fr 2.8rem; align-items: center; gap: 0.5rem; min-height: 1.8rem; }
+.ov-tool { white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem; }
+.ov-bar { height: 0.5rem; background: var(--sl-color-gray-6); border-radius: 999px; overflow: hidden; }
+.ov-fill { display: block; height: 100%; background: var(--rp-c); }
+.ov-num { font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.ov-cov, .ov-small, .ov-mut, .ov-why { font-size: 0.82rem; color: var(--rp-mut); }
+.ov-cov { margin: 0.4rem 0 0; }
+.ov-total { border: 1px solid var(--rp-line); border-radius: 0.5rem; padding: 0.75rem 0.9rem; margin-block: 1rem; }
+.ov-total h3 { margin-top: 0; }
+.ov-total-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; }
+.ov-big { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ov-badge { font-size: 0.85rem; font-weight: 600; }
+.ov-facts { margin-block: 1rem; }
+.ov-facts-h { font-weight: 600; margin-bottom: 0.3rem; }
+.ov-line { font-weight: 600; }
+.ov-scroll { overflow-x: auto; max-width: 100%; margin-block: 0.5rem 1rem; -webkit-overflow-scrolling: touch; }
+.ov-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.ov-table caption { text-align: left; font-weight: 600; padding-bottom: 0.3rem; }
+.ov-table th, .ov-table td { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--rp-line); vertical-align: top; text-align: left; }
+.ov-table thead th { font-size: 0.82rem; color: var(--sl-color-gray-2); white-space: nowrap; }
+.ov-table tbody th { font-weight: 500; }
+.ov-table tbody th:first-child, .ov-table thead th:first-child { position: sticky; left: 0; background: var(--sl-color-bg); z-index: 1; }
+.ov-aspects tbody th:first-child { min-width: 12rem; max-width: 22rem; }
+.ov-aid { font-weight: 700; margin-right: 0.2rem; }
+.ov-home { font-size: 0.82rem; color: var(--sl-color-gray-2); white-space: nowrap; }
+.ov-pt { white-space: nowrap; }
+.ov-pt .ov-why { display: block; white-space: normal; max-width: 11rem; }
+.ov-na { color: var(--rp-mut); }
+.ov-sub summary { font-size: 0.8rem; color: var(--sl-color-accent-high); cursor: pointer; min-height: 24px; }
+.ov-sub p { font-size: 0.82rem; font-weight: 400; margin: 0.3rem 0; }
+.ov-subt { font-size: 0.8rem; border-collapse: collapse; margin-top: 0.3rem; }
+.ov-subt th, .ov-subt td { padding: 0.15rem 0.4rem; font-weight: 400; border-bottom: 1px solid var(--rp-line); }
+@media (max-width: 640px) {
+  .ov-table { width: max-content; min-width: 100%; }
+  .ov-aspects tbody th:first-child { min-width: 10rem; max-width: 12rem; }
+  .ov-card li { grid-template-columns: 5rem 1fr 2.6rem; }
+}

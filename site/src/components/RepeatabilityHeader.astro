@@ -9,6 +9,7 @@ const labels = Object.fromEntries(data.datasets.map((d: any) => [d.id, d.label])
 <p class="rp-prov">Batch <b>{data.batch}</b> · results commit <a href={`${RESULTS}/tree/${data.results_commit}`}><code>{data.results_commit.slice(0, 7)}</code></a> ·
   records in <a href={RESULTS}>calibench-vi/results</a> · the <a href={SPACE}>Space</a> shows the same parameter tables.</p>
 <nav class="not-content rp-bar" aria-label="Datasets">
+  <a href="#ds-overall" data-rp-bar="overall">Overall</a>
   {data.datasets.map((d: any) => <a href={`#ds-${d.id}`} data-rp-bar={d.id}>{labels[d.id]}</a>)}
 </nav>
 <script>

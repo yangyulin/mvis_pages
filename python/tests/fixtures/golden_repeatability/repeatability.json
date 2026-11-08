@@ -79,12 +79,10 @@
  ],
  "caveats": {
   "dist_tradeoff": "Coefficients trade off against each other, so their scatter can overstate differences in the lens mapping.",
-  "mvis_from_camimu": "MVIS values come from the T6 camera+IMU solve, not a camera-only run; not like-for-like.",
   "settings_differ": "Data settings still differ between the tools on this family.",
   "kalibr_seeded": "Kalibr starts from MVIS camera values for each recording; its spread here includes the spread of that input.",
   "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera with its stamps shifted by the MVIS td of each recording, so the ELP-L rows are left out here.",
   "kalibr_old_seed": "Kalibr's t265 fisheye 1 intrinsics came from an older MVIS export.",
-  "kalibr_view_filtered": "Kalibr ran on view-filtered bags (≤ 85°); MVIS and Basalt ran on the full bags.",
   "basalt_snapped": "Basalt's fisheye-2 frames are snapped onto fisheye-1 (1.8–5 ms apart).",
   "kimu": "MVIS here uses Kalibr's IMU model, so the gyro and accel terms mean the same thing in both tools.",
   "mvis_tga": "MVIS also fits a gyro–accel delay (t_ga) that Kalibr and Basalt do not, so its td is not quite the same quantity.",

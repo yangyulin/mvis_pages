@@ -1,7 +1,7 @@
 {
  "version": 1,
- "batch": "2026-11-04a",
- "results_commit": "a41819731643f918c7c4f24558c5ebee1f123a37",
+ "batch": "2026-11-07a",
+ "results_commit": "0000000000000000000000000000000000000000",
  "method": {
   "spread": "sample_sd_ddof1",
   "pair": "median_log_sd_ratio",
@@ -79,12 +79,10 @@
  ],
  "caveats": {
   "dist_tradeoff": "Coefficients trade off against each other, so their scatter can overstate differences in the lens mapping.",
-  "mvis_from_camimu": "MVIS values come from the T6 camera+IMU solve, not a camera-only run; not like-for-like.",
   "settings_differ": "Data settings still differ between the tools on this family.",
   "kalibr_seeded": "Kalibr starts from MVIS camera values for each recording; its spread here includes the spread of that input.",
   "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera with its stamps shifted by the MVIS td of each recording, so the ELP-L rows are left out here.",
   "kalibr_old_seed": "Kalibr's t265 fisheye 1 intrinsics came from an older MVIS export.",
-  "kalibr_view_filtered": "Kalibr ran on view-filtered bags (≤ 85°); MVIS and Basalt ran on the full bags.",
   "basalt_snapped": "Basalt's fisheye-2 frames are snapped onto fisheye-1 (1.8–5 ms apart).",
   "kimu": "MVIS here uses Kalibr's IMU model, so the gyro and accel terms mean the same thing in both tools.",
   "mvis_tga": "MVIS also fits a gyro–accel delay (t_ga) that Kalibr and Basalt do not, so its td is not quite the same quantity.",
@@ -139,7 +137,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 4.21,
+       "k": 4.56,
        "n": 10,
        "n_all": {
         "MVIS": 10,
@@ -169,7 +167,6 @@
        ],
        "mvis_variant": "default",
        "caveats": [
-        "mvis_from_camimu",
         "basalt_snapped",
         "pairs_differ"
        ],
@@ -179,38 +176,38 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
-         "R": 0.24,
-         "k": 4.21,
+         "R": 0.22,
+         "k": 4.56,
          "ci": [
-          0.12,
-          0.54
+          0.13,
+          0.39
          ],
-         "p": 0.0078,
-         "p_holm": 0.016,
+         "p": 0.002,
+         "p_holm": 0.0059,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "4.2"
+         "k_text": "4.6"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 1.19,
-         "k": 1.19,
+         "R": 1.0,
+         "k": 1.0,
          "ci": [
-          0.66,
-          3.03
+          0.83,
+          1.74
          ],
-         "p": 0.57,
-         "p_holm": 0.57,
+         "p": 0.99,
+         "p_holm": 0.99,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.2"
+         "k_text": "1.00"
         },
         {
          "ci_in_tie_band": false,
@@ -239,12 +236,12 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.484,
+          "MVIS": 0.983,
           "Kalibr": 2.17
          },
          "published": {
           "MVIS": {
-           "sd": 0.484,
+           "sd": 0.983,
            "n": 10
           },
           "Kalibr": {
@@ -260,12 +257,12 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.36,
+          "MVIS": 1.12,
           "Kalibr": 2.5
          },
          "published": {
           "MVIS": {
-           "sd": 0.36,
+           "sd": 1.12,
            "n": 10
           },
           "Kalibr": {
@@ -281,12 +278,12 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.871,
+          "MVIS": 0.551,
           "Kalibr": 3.28
          },
          "published": {
           "MVIS": {
-           "sd": 0.871,
+           "sd": 0.551,
            "n": 10
           },
           "Kalibr": {
@@ -302,12 +299,12 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.762,
+          "MVIS": 0.661,
           "Kalibr": 1.44
          },
          "published": {
           "MVIS": {
-           "sd": 0.762,
+           "sd": 0.661,
            "n": 10
           },
           "Kalibr": {
@@ -323,13 +320,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.314,
+          "MVIS": 0.392,
           "Kalibr": 1.61,
           "Basalt": 0.403
          },
          "published": {
           "MVIS": {
-           "sd": 0.314,
+           "sd": 0.392,
            "n": 10
           },
           "Kalibr": {
@@ -349,13 +346,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.297,
+          "MVIS": 0.316,
           "Kalibr": 1.69,
           "Basalt": 0.332
          },
          "published": {
           "MVIS": {
-           "sd": 0.297,
+           "sd": 0.316,
            "n": 10
           },
           "Kalibr": {
@@ -375,13 +372,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.369,
+          "MVIS": 0.205,
           "Kalibr": 0.553,
           "Basalt": 0.204
          },
          "published": {
           "MVIS": {
-           "sd": 0.369,
+           "sd": 0.205,
            "n": 10
           },
           "Kalibr": {
@@ -401,13 +398,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.275,
+          "MVIS": 0.207,
           "Kalibr": 1.09,
           "Basalt": 0.175
          },
          "published": {
           "MVIS": {
-           "sd": 0.275,
+           "sd": 0.207,
            "n": 10
           },
           "Kalibr": {
@@ -427,13 +424,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.313,
+          "MVIS": 0.395,
           "Kalibr": 1.99,
           "Basalt": 0.395
          },
          "published": {
           "MVIS": {
-           "sd": 0.313,
+           "sd": 0.395,
            "n": 10
           },
           "Kalibr": {
@@ -453,13 +450,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.282,
+          "MVIS": 0.317,
           "Kalibr": 2.08,
           "Basalt": 0.333
          },
          "published": {
           "MVIS": {
-           "sd": 0.282,
+           "sd": 0.317,
            "n": 10
           },
           "Kalibr": {
@@ -479,13 +476,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.421,
+          "MVIS": 0.217,
           "Kalibr": 0.589,
           "Basalt": 0.204
          },
          "published": {
           "MVIS": {
-           "sd": 0.421,
+           "sd": 0.217,
            "n": 10
           },
           "Kalibr": {
@@ -505,13 +502,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.298,
+          "MVIS": 0.164,
           "Kalibr": 1.01,
           "Basalt": 0.135
          },
          "published": {
           "MVIS": {
-           "sd": 0.298,
+           "sd": 0.164,
            "n": 10
           },
           "Kalibr": {
@@ -537,25 +534,25 @@
        "dropped": [],
        "reason": null,
        "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
-       "sentence": "The spreads of MVIS and Basalt differ by 1.2×, but a gap this size appears often by chance with 10 recordings (p = 0.57). Treated as a tie. Both scatter less than Kalibr: across the same 10 recordings Kalibr's estimates scatter about 4.2× more than MVIS's and 5.1× more than Basalt's. Holds with any one recording left out.",
+       "sentence": "The spreads of MVIS and Basalt differ by 1.00×, but a gap this size appears often by chance with 10 recordings (p = 0.99). Treated as a tie. Both scatter less than Kalibr: across the same 10 recordings Kalibr's estimates scatter about 4.6× more than MVIS's and 5.1× more than Basalt's. Holds with any one recording left out.",
        "aria": "Focal length + principal point, T6c: tie between MVIS and Basalt, both tighter than Kalibr, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
        "strip": "Focal + pp MVIS = Basalt > Kalibr",
        "variant_line": "MVIS here: the camera values of the T6 camera+IMU solve.",
-       "k_text": "4.2",
+       "k_text": "4.6",
        "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "distortion": {
-       "state": "most",
+       "state": "tie_top",
        "tools": [
+        "MVIS",
         "Basalt"
        ],
        "over": [
-        "MVIS",
         "Kalibr"
        ],
-       "k": 2.64,
+       "k": 9.87,
        "n": 10,
        "n_all": {
         "MVIS": 10,
@@ -586,7 +583,6 @@
        "mvis_variant": "default",
        "caveats": [
         "dist_tradeoff",
-        "mvis_from_camimu",
         "basalt_snapped",
         "pairs_differ"
        ],
@@ -596,10 +592,10 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
-         "R": 0.16,
-         "k": 6.3,
+         "R": 0.1,
+         "k": 9.87,
          "ci": [
-          0.09,
+          0.05,
           0.32
          ],
          "p": 0.002,
@@ -608,26 +604,26 @@
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "6.3"
+         "k_text": "9.9"
         },
         {
-         "ci_in_tie_band": false,
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 2.64,
-         "k": 2.64,
+         "R": 1.47,
+         "k": 1.47,
          "ci": [
-          1.35,
-          8.61
+          1.0,
+          2.74
          ],
-         "p": 0.012,
-         "p_holm": 0.012,
-         "decision": "b",
-         "tie_reason": null,
-         "loo_stable": true,
+         "p": 0.055,
+         "p_holm": 0.055,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
          "exact": true,
-         "k_text": "2.6"
+         "k_text": "1.5"
         },
         {
          "ci_in_tie_band": false,
@@ -656,12 +652,12 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00272,
+          "MVIS": 0.00256,
           "Kalibr": 0.00996
          },
          "published": {
           "MVIS": {
-           "sd": 0.00272,
+           "sd": 0.00256,
            "n": 10
           },
           "Kalibr": {
@@ -677,12 +673,12 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00241,
+          "MVIS": 0.00261,
           "Kalibr": 0.00889
          },
          "published": {
           "MVIS": {
-           "sd": 0.00241,
+           "sd": 0.00261,
            "n": 10
           },
           "Kalibr": {
@@ -698,12 +694,12 @@
          "label": "dist p1",
          "unit": "",
          "sd": {
-          "MVIS": 0.000139,
+          "MVIS": 0.000167,
           "Kalibr": 0.000385
          },
          "published": {
           "MVIS": {
-           "sd": 0.000139,
+           "sd": 0.000167,
            "n": 10
           },
           "Kalibr": {
@@ -719,12 +715,12 @@
          "label": "dist p2",
          "unit": "",
          "sd": {
-          "MVIS": 0.000126,
+          "MVIS": 0.000185,
           "Kalibr": 0.000954
          },
          "published": {
           "MVIS": {
-           "sd": 0.000126,
+           "sd": 0.000185,
            "n": 10
           },
           "Kalibr": {
@@ -740,13 +736,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00291,
+          "MVIS": 0.00155,
           "Kalibr": 0.0188,
           "Basalt": 0.00115
          },
          "published": {
           "MVIS": {
-           "sd": 0.00291,
+           "sd": 0.00155,
            "n": 10
           },
           "Kalibr": {
@@ -766,13 +762,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00683,
+          "MVIS": 0.0037,
           "Kalibr": 0.042,
           "Basalt": 0.00248
          },
          "published": {
           "MVIS": {
-           "sd": 0.00683,
+           "sd": 0.0037,
            "n": 10
           },
           "Kalibr": {
@@ -792,13 +788,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00703,
+          "MVIS": 0.00435,
           "Kalibr": 0.0373,
           "Basalt": 0.00239
          },
          "published": {
           "MVIS": {
-           "sd": 0.00703,
+           "sd": 0.00435,
            "n": 10
           },
           "Kalibr": {
@@ -818,13 +814,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00245,
+          "MVIS": 0.0017,
           "Kalibr": 0.011,
           "Basalt": 0.000761
          },
          "published": {
           "MVIS": {
-           "sd": 0.00245,
+           "sd": 0.0017,
            "n": 10
           },
           "Kalibr": {
@@ -844,13 +840,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00265,
+          "MVIS": 0.0013,
           "Kalibr": 0.0324,
           "Basalt": 0.00104
          },
          "published": {
           "MVIS": {
-           "sd": 0.00265,
+           "sd": 0.0013,
            "n": 10
           },
           "Kalibr": {
@@ -870,13 +866,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00661,
+          "MVIS": 0.00336,
           "Kalibr": 0.0785,
           "Basalt": 0.00276
          },
          "published": {
           "MVIS": {
-           "sd": 0.00661,
+           "sd": 0.00336,
            "n": 10
           },
           "Kalibr": {
@@ -896,13 +892,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00728,
+          "MVIS": 0.00419,
           "Kalibr": 0.073,
           "Basalt": 0.00289
          },
          "published": {
           "MVIS": {
-           "sd": 0.00728,
+           "sd": 0.00419,
            "n": 10
           },
           "Kalibr": {
@@ -922,13 +918,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00272,
+          "MVIS": 0.00171,
           "Kalibr": 0.0224,
           "Basalt": 0.001
          },
          "published": {
           "MVIS": {
-           "sd": 0.00272,
+           "sd": 0.00171,
            "n": 10
           },
           "Kalibr": {
@@ -953,35 +949,26 @@
        ],
        "dropped": [],
        "reason": null,
-       "chip": "Most repeatable: Basalt",
-       "sentence": "Across the same 10 recordings, MVIS's estimates scatter about 2.6× more than Basalt's (median over 8 parameters); Kalibr's about 19×. A gap this large appeared in 1.2 % (MVIS) and 0.2 % (Kalibr) of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Distortion coefficients, T6c: more repeatable Basalt, 2.6 times tighter than MVIS and Kalibr, 10 matched recordings.",
+       "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
+       "sentence": "The spreads of MVIS and Basalt differ by 1.5×, but a gap this size appears often by chance with 10 recordings (p = 0.055). Treated as a tie. Both scatter less than Kalibr: across the same 10 recordings Kalibr's estimates scatter about 9.9× more than MVIS's and 19× more than Basalt's. Holds with any one recording left out.",
+       "aria": "Distortion coefficients, T6c: tie between MVIS and Basalt, both tighter than Kalibr, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
-       "strip": "Distortion Basalt",
+       "strip": "Distortion MVIS = Basalt > Kalibr",
        "variant_line": "MVIS here: the camera values of the T6 camera+IMU solve.",
-       "k_text": "2.6",
+       "k_text": "9.9",
        "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "baseline": {
-       "state": "most",
+       "state": "single",
        "tools": [
-        "MVIS"
-       ],
-       "over": [
         "Kalibr"
        ],
-       "k": 8.32,
-       "n": 10,
-       "n_all": {
-        "MVIS": 10,
-        "Kalibr": 10
-       },
+       "over": [],
+       "k": null,
+       "n": 0,
+       "n_all": {},
        "n_range": {
-        "MVIS": [
-         10,
-         10
-        ],
         "Kalibr": [
          10,
          10
@@ -990,79 +977,19 @@
        "unmatched": {},
        "calyx_limited": false,
        "compared": [
-        "MVIS",
         "Kalibr"
        ],
        "mvis_variant": "default",
-       "caveats": [
-        "mvis_from_camimu"
-       ],
-       "pairs": [
-        {
-         "ci_in_tie_band": false,
-         "a": "MVIS",
-         "b": "Kalibr",
-         "n_params": 2,
-         "R": 0.12,
-         "k": 8.32,
-         "ci": [
-          0.08,
-          0.27
-         ],
-         "p": 0.002,
-         "p_holm": 0.002,
-         "decision": "a",
-         "tie_reason": null,
-         "loo_stable": true,
-         "exact": true,
-         "k_text": "8.3"
-        }
-       ],
-       "params": [
-        {
-         "sensor": "cam1 – t265 fisheye 1",
-         "key": "baseline_mm",
-         "label": "baseline to Blackfly",
-         "unit": "mm",
-         "sd": {
-          "MVIS": 0.198,
-          "Kalibr": 1.46
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.198,
-           "n": 10
-          },
-          "Kalibr": {
-           "sd": 1.46,
-           "n": 10
-          }
-         },
-         "data_k": "m|cam1 – t265 fisheye 1|baseline_mm"
-        },
-        {
-         "sensor": "cam2 – t265 fisheye 2",
-         "key": "baseline_mm",
-         "label": "baseline to Blackfly",
-         "unit": "mm",
-         "sd": {
-          "MVIS": 0.261,
-          "Kalibr": 2.45
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.261,
-           "n": 10
-          },
-          "Kalibr": {
-           "sd": 2.45,
-           "n": 10
-          }
-         },
-         "data_k": "m|cam2 – t265 fisheye 2|baseline_mm"
-        }
-       ],
+       "caveats": [],
+       "pairs": [],
+       "params": [],
        "excluded": [
+        {
+         "tool": "MVIS",
+         "role": "missing",
+         "reason": "no value for this tool",
+         "rows": 2
+        },
         {
          "tool": "Basalt",
          "role": "missing",
@@ -1071,16 +998,16 @@
         }
        ],
        "dropped": [],
-       "reason": null,
-       "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 8.3× more than MVIS's (median over 2 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Camera–camera distance, T6c: more repeatable MVIS, 8.3 times tighter than Kalibr, 10 matched recordings.",
+       "reason": "Kalibr only: no value for this tool",
+       "chip": "Kalibr only",
+       "sentence": "Kalibr only: no value for this tool",
+       "aria": "Camera–camera distance, T6c: Kalibr only: no value for this tool",
        "limit_line": null,
        "band_lines": [],
-       "strip": "Distance MVIS",
+       "strip": null,
        "variant_line": "MVIS here: the camera values of the T6 camera+IMU solve.",
-       "k_text": "8.3",
-       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt no value"
+       "k_text": null,
+       "rec_line": "MVIS no value · Kalibr 10 of 10 · Basalt no value"
       }
      }
     },
@@ -1299,7 +1226,6 @@
        "mvis_variant": "default",
        "caveats": [
         "settings_differ",
-        "kalibr_seeded",
         "mvis_tga"
        ],
        "pairs": [
@@ -1312,10 +1238,10 @@
          "k": 1.04,
          "ci": [
           0.88,
-          1.44
+          1.51
          ],
-         "p": 0.58,
-         "p_holm": 0.58,
+         "p": 0.67,
+         "p_holm": 0.67,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
@@ -1331,7 +1257,7 @@
          "unit": "ms",
          "sd": {
           "MVIS": 0.0918,
-          "Kalibr": 0.135
+          "Kalibr": 0.153
          },
          "published": {
           "MVIS": {
@@ -1339,7 +1265,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.135,
+           "sd": 0.153,
            "n": 10
           }
          },
@@ -1352,7 +1278,7 @@
          "unit": "ms",
          "sd": {
           "MVIS": 0.178,
-          "Kalibr": 0.125
+          "Kalibr": 0.241
          },
          "published": {
           "MVIS": {
@@ -1360,7 +1286,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.125,
+           "sd": 0.241,
            "n": 10
           }
          },
@@ -1373,7 +1299,7 @@
          "unit": "ms",
          "sd": {
           "MVIS": 0.28,
-          "Kalibr": 0.285
+          "Kalibr": 0.212
          },
          "published": {
           "MVIS": {
@@ -1381,7 +1307,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.285,
+           "sd": 0.212,
            "n": 10
           }
          },
@@ -1462,7 +1388,7 @@
        "dropped": [],
        "reason": null,
        "chip": "Tie",
-       "sentence": "The spreads of MVIS and Kalibr differ by 1.04×, but a gap this size appears often by chance with 10 recordings (p = 0.58). Treated as a tie.",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.04×, but a gap this size appears often by chance with 10 recordings (p = 0.67). Treated as a tie.",
        "aria": "Camera–IMU time offset, T6: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
@@ -1479,7 +1405,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 3.62,
+       "k": 7.48,
        "n": 10,
        "n_all": {
         "MVIS": 10,
@@ -1503,8 +1429,7 @@
        ],
        "mvis_variant": "default",
        "caveats": [
-        "settings_differ",
-        "kalibr_seeded"
+        "settings_differ"
        ],
        "pairs": [
         {
@@ -1512,11 +1437,11 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
-         "R": 0.28,
-         "k": 3.62,
+         "R": 0.13,
+         "k": 7.48,
          "ci": [
-          0.13,
-          0.55
+          0.06,
+          0.3
          ],
          "p": 0.002,
          "p_holm": 0.002,
@@ -1524,7 +1449,7 @@
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "3.6"
+         "k_text": "7.5"
         }
        ],
        "params": [
@@ -1535,7 +1460,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 1.39,
-          "Kalibr": 2.14
+          "Kalibr": 4.0
          },
          "published": {
           "MVIS": {
@@ -1543,7 +1468,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 2.14,
+           "sd": 4.0,
            "n": 10
           }
          },
@@ -1556,7 +1481,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 1.43,
-          "Kalibr": 2.53
+          "Kalibr": 4.13
          },
          "published": {
           "MVIS": {
@@ -1564,7 +1489,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 2.53,
+           "sd": 4.13,
            "n": 10
           }
          },
@@ -1577,7 +1502,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 1.36,
-          "Kalibr": 2.43
+          "Kalibr": 4.8
          },
          "published": {
           "MVIS": {
@@ -1585,7 +1510,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 2.43,
+           "sd": 4.8,
            "n": 10
           }
          },
@@ -1598,7 +1523,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 0.189,
-          "Kalibr": 1.39
+          "Kalibr": 3.21
          },
          "published": {
           "MVIS": {
@@ -1606,7 +1531,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 1.39,
+           "sd": 3.21,
            "n": 10
           }
          },
@@ -1619,7 +1544,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 0.176,
-          "Kalibr": 1.35
+          "Kalibr": 2.8
          },
          "published": {
           "MVIS": {
@@ -1627,7 +1552,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 1.35,
+           "sd": 2.8,
            "n": 10
           }
          },
@@ -1640,7 +1565,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 0.161,
-          "Kalibr": 1.5
+          "Kalibr": 5.02
          },
          "published": {
           "MVIS": {
@@ -1648,7 +1573,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 1.5,
+           "sd": 5.02,
            "n": 10
           }
          },
@@ -1666,13 +1591,13 @@
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 3.6× more than MVIS's (median over 6 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Camera–IMU distance, T6: more repeatable MVIS, 3.6 times tighter than Kalibr, 10 matched recordings.",
+       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 7.5× more than MVIS's (median over 6 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Camera–IMU distance, T6: more repeatable MVIS, 7.5 times tighter than Kalibr, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
        "strip": "Cam–IMU distance MVIS",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": "3.6",
+       "k_text": "7.5",
        "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       },
       "gyro": {
@@ -1683,7 +1608,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 1.65,
+       "k": 2.53,
        "n": 10,
        "n_all": {
         "MVIS": 10,
@@ -1708,28 +1633,27 @@
        "mvis_variant": "kalibr_imu",
        "caveats": [
         "settings_differ",
-        "kalibr_seeded",
         "kimu"
        ],
        "pairs": [
         {
-         "ci_in_tie_band": true,
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 24,
-         "R": 0.61,
-         "k": 1.65,
+         "R": 0.4,
+         "k": 2.53,
          "ci": [
-          0.47,
-          0.85
+          0.26,
+          0.76
          ],
-         "p": 0.0098,
-         "p_holm": 0.0098,
+         "p": 0.0039,
+         "p_holm": 0.0039,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "1.7"
+         "k_text": "2.5"
         }
        ],
        "params": [
@@ -1740,7 +1664,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00162,
-          "Kalibr": 0.00162
+          "Kalibr": 0.00665
          },
          "published": {
           "MVIS": {
@@ -1748,7 +1672,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00162,
+           "sd": 0.00665,
            "n": 10
           }
          },
@@ -1761,7 +1685,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000465,
-          "Kalibr": 0.00063
+          "Kalibr": 0.00117
          },
          "published": {
           "MVIS": {
@@ -1769,7 +1693,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00063,
+           "sd": 0.00117,
            "n": 10
           }
          },
@@ -1782,7 +1706,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00176,
-          "Kalibr": 0.00151
+          "Kalibr": 0.00268
          },
          "published": {
           "MVIS": {
@@ -1790,7 +1714,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00151,
+           "sd": 0.00268,
            "n": 10
           }
          },
@@ -1803,7 +1727,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00122,
-          "Kalibr": 0.00246
+          "Kalibr": 0.00372
          },
          "published": {
           "MVIS": {
@@ -1811,7 +1735,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00246,
+           "sd": 0.00372,
            "n": 10
           }
          },
@@ -1824,7 +1748,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.0017,
-          "Kalibr": 0.00258
+          "Kalibr": 0.00306
          },
          "published": {
           "MVIS": {
@@ -1832,7 +1756,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00258,
+           "sd": 0.00306,
            "n": 10
           }
          },
@@ -1845,7 +1769,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000843,
-          "Kalibr": 0.00163
+          "Kalibr": 0.00216
          },
          "published": {
           "MVIS": {
@@ -1853,7 +1777,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00163,
+           "sd": 0.00216,
            "n": 10
           }
          },
@@ -1866,7 +1790,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00056,
-          "Kalibr": 0.000636
+          "Kalibr": 0.00125
          },
          "published": {
           "MVIS": {
@@ -1874,7 +1798,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000636,
+           "sd": 0.00125,
            "n": 10
           }
          },
@@ -1887,7 +1811,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00113,
-          "Kalibr": 0.0018
+          "Kalibr": 0.00618
          },
          "published": {
           "MVIS": {
@@ -1895,7 +1819,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.0018,
+           "sd": 0.00618,
            "n": 10
           }
          },
@@ -1908,7 +1832,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00216,
-          "Kalibr": 0.00177
+          "Kalibr": 0.0019
          },
          "published": {
           "MVIS": {
@@ -1916,7 +1840,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00177,
+           "sd": 0.0019,
            "n": 10
           }
          },
@@ -1929,7 +1853,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00102,
-          "Kalibr": 0.00139
+          "Kalibr": 0.00278
          },
          "published": {
           "MVIS": {
@@ -1937,7 +1861,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00139,
+           "sd": 0.00278,
            "n": 10
           }
          },
@@ -1950,7 +1874,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000907,
-          "Kalibr": 0.0018
+          "Kalibr": 0.00228
          },
          "published": {
           "MVIS": {
@@ -1958,7 +1882,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.0018,
+           "sd": 0.00228,
            "n": 10
           }
          },
@@ -1971,7 +1895,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00136,
-          "Kalibr": 0.00273
+          "Kalibr": 0.00279
          },
          "published": {
           "MVIS": {
@@ -1979,7 +1903,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00273,
+           "sd": 0.00279,
            "n": 10
           }
          },
@@ -1992,7 +1916,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000424,
-          "Kalibr": 0.000594
+          "Kalibr": 0.00106
          },
          "published": {
           "MVIS": {
@@ -2000,7 +1924,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000594,
+           "sd": 0.00106,
            "n": 10
           }
          },
@@ -2013,7 +1937,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00105,
-          "Kalibr": 0.00193
+          "Kalibr": 0.00641
          },
          "published": {
           "MVIS": {
@@ -2021,7 +1945,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00193,
+           "sd": 0.00641,
            "n": 10
           }
          },
@@ -2034,7 +1958,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00213,
-          "Kalibr": 0.00168
+          "Kalibr": 0.00203
          },
          "published": {
           "MVIS": {
@@ -2042,7 +1966,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00168,
+           "sd": 0.00203,
            "n": 10
           }
          },
@@ -2055,7 +1979,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.0012,
-          "Kalibr": 0.00183
+          "Kalibr": 0.00313
          },
          "published": {
           "MVIS": {
@@ -2063,7 +1987,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00183,
+           "sd": 0.00313,
            "n": 10
           }
          },
@@ -2076,7 +2000,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000875,
-          "Kalibr": 0.0015
+          "Kalibr": 0.00206
          },
          "published": {
           "MVIS": {
@@ -2084,7 +2008,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.0015,
+           "sd": 0.00206,
            "n": 10
           }
          },
@@ -2097,7 +2021,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00164,
-          "Kalibr": 0.0029
+          "Kalibr": 0.00307
          },
          "published": {
           "MVIS": {
@@ -2105,7 +2029,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.0029,
+           "sd": 0.00307,
            "n": 10
           }
          },
@@ -2118,7 +2042,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00108,
-          "Kalibr": 0.00209
+          "Kalibr": 0.00698
          },
          "published": {
           "MVIS": {
@@ -2126,7 +2050,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00209,
+           "sd": 0.00698,
            "n": 10
           }
          },
@@ -2139,7 +2063,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00195,
-          "Kalibr": 0.00133
+          "Kalibr": 0.00262
          },
          "published": {
           "MVIS": {
@@ -2147,7 +2071,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00133,
+           "sd": 0.00262,
            "n": 10
           }
          },
@@ -2160,7 +2084,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00045,
-          "Kalibr": 0.000875
+          "Kalibr": 0.00138
          },
          "published": {
           "MVIS": {
@@ -2168,7 +2092,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000875,
+           "sd": 0.00138,
            "n": 10
           }
          },
@@ -2181,7 +2105,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00139,
-          "Kalibr": 0.00282
+          "Kalibr": 0.00354
          },
          "published": {
           "MVIS": {
@@ -2189,7 +2113,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00282,
+           "sd": 0.00354,
            "n": 10
           }
          },
@@ -2202,7 +2126,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000981,
-          "Kalibr": 0.00327
+          "Kalibr": 0.0046
          },
          "published": {
           "MVIS": {
@@ -2210,7 +2134,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00327,
+           "sd": 0.0046,
            "n": 10
           }
          },
@@ -2223,7 +2147,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000722,
-          "Kalibr": 0.00188
+          "Kalibr": 0.00226
          },
          "published": {
           "MVIS": {
@@ -2231,7 +2155,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00188,
+           "sd": 0.00226,
            "n": 10
           }
          },
@@ -2249,15 +2173,13 @@
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 1.7× more than MVIS's (median over 24 parameters). A gap this large appeared in 0.98 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Gyro scale + cross-axis, T6: more repeatable MVIS, 1.7 times tighter than Kalibr, 10 matched recordings.",
+       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 2.5× more than MVIS's (median over 24 parameters). A gap this large appeared in 0.39 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Gyro scale + cross-axis, T6: more repeatable MVIS, 2.5 times tighter than Kalibr, 10 matched recordings.",
        "limit_line": null,
-       "band_lines": [
-        "The 95 % interval of MVIS ÷ Kalibr reaches into the tie band (0.80–1.25): the ratio shown is a point value."
-       ],
+       "band_lines": [],
        "strip": "Gyro MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "1.7",
+       "k_text": "2.5",
        "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       },
       "accel": {
@@ -2268,7 +2190,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 2.73,
+       "k": 3.03,
        "n": 10,
        "n_all": {
         "MVIS": 10,
@@ -2293,7 +2215,6 @@
        "mvis_variant": "kalibr_imu",
        "caveats": [
         "settings_differ",
-        "kalibr_seeded",
         "kimu"
        ],
        "pairs": [
@@ -2302,11 +2223,11 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
-         "R": 0.37,
-         "k": 2.73,
+         "R": 0.33,
+         "k": 3.03,
          "ci": [
-          0.25,
-          0.5
+          0.19,
+          0.47
          ],
          "p": 0.002,
          "p_holm": 0.002,
@@ -2314,7 +2235,7 @@
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "2.7"
+         "k_text": "3"
         }
        ],
        "params": [
@@ -2325,7 +2246,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000269,
-          "Kalibr": 0.00079
+          "Kalibr": 0.00052
          },
          "published": {
           "MVIS": {
@@ -2333,7 +2254,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00079,
+           "sd": 0.00052,
            "n": 10
           }
          },
@@ -2346,7 +2267,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.0013,
-          "Kalibr": 0.00125
+          "Kalibr": 0.0029
          },
          "published": {
           "MVIS": {
@@ -2354,7 +2275,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00125,
+           "sd": 0.0029,
            "n": 10
           }
          },
@@ -2367,7 +2288,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00101,
-          "Kalibr": 0.00329
+          "Kalibr": 0.00334
          },
          "published": {
           "MVIS": {
@@ -2375,7 +2296,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00329,
+           "sd": 0.00334,
            "n": 10
           }
          },
@@ -2388,7 +2309,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.0013,
-          "Kalibr": 0.00399
+          "Kalibr": 0.00533
          },
          "published": {
           "MVIS": {
@@ -2396,7 +2317,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00399,
+           "sd": 0.00533,
            "n": 10
           }
          },
@@ -2409,7 +2330,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000275,
-          "Kalibr": 0.00104
+          "Kalibr": 0.00124
          },
          "published": {
           "MVIS": {
@@ -2417,7 +2338,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00104,
+           "sd": 0.00124,
            "n": 10
           }
          },
@@ -2430,7 +2351,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00117,
-          "Kalibr": 0.00214
+          "Kalibr": 0.00301
          },
          "published": {
           "MVIS": {
@@ -2438,7 +2359,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00214,
+           "sd": 0.00301,
            "n": 10
           }
          },
@@ -2451,7 +2372,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00134,
-          "Kalibr": 0.00279
+          "Kalibr": 0.00432
          },
          "published": {
           "MVIS": {
@@ -2459,7 +2380,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00279,
+           "sd": 0.00432,
            "n": 10
           }
          },
@@ -2472,7 +2393,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000248,
-          "Kalibr": 0.000886
+          "Kalibr": 0.00105
          },
          "published": {
           "MVIS": {
@@ -2480,7 +2401,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000886,
+           "sd": 0.00105,
            "n": 10
           }
          },
@@ -2493,7 +2414,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00113,
-          "Kalibr": 0.00249
+          "Kalibr": 0.00284
          },
          "published": {
           "MVIS": {
@@ -2501,7 +2422,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00249,
+           "sd": 0.00284,
            "n": 10
           }
          },
@@ -2514,7 +2435,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000468,
-          "Kalibr": 0.00507
+          "Kalibr": 0.00489
          },
          "published": {
           "MVIS": {
@@ -2522,7 +2443,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00507,
+           "sd": 0.00489,
            "n": 10
           }
          },
@@ -2535,7 +2456,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00154,
-          "Kalibr": 0.00392
+          "Kalibr": 0.0044
          },
          "published": {
           "MVIS": {
@@ -2543,7 +2464,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00392,
+           "sd": 0.0044,
            "n": 10
           }
          },
@@ -2556,7 +2477,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00154,
-          "Kalibr": 0.00238
+          "Kalibr": 0.0022
          },
          "published": {
           "MVIS": {
@@ -2564,7 +2485,7 @@
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00238,
+           "sd": 0.0022,
            "n": 10
           }
          },
@@ -2582,13 +2503,13 @@
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 2.7× more than MVIS's (median over 12 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Accel scale, T6: more repeatable MVIS, 2.7 times tighter than Kalibr, 10 matched recordings.",
+       "sentence": "Across the same 10 recordings, Kalibr's estimates scatter about 3× more than MVIS's (median over 12 parameters). A gap this large appeared in 0.2 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Accel scale, T6: more repeatable MVIS, 3 times tighter than Kalibr, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
        "strip": "Accel MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "2.7",
+       "k_text": "3",
        "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run"
       }
      }
@@ -2643,7 +2564,7 @@
         "Kalibr",
         "Basalt"
        ],
-       "k": 1.45,
+       "k": 1.61,
        "n": 15,
        "n_all": {
         "MVIS": 15,
@@ -2681,38 +2602,38 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 0.35,
-         "k": 2.87,
+         "R": 0.31,
+         "k": 3.21,
          "ci": [
-          0.17,
-          0.55
+          0.15,
+          0.5
          ],
-         "p": 0.00073,
-         "p_holm": 0.0022,
+         "p": 0.00049,
+         "p_holm": 0.00098,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "2.9"
+         "k_text": "3.2"
         },
         {
          "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 0.69,
-         "k": 1.45,
+         "R": 0.62,
+         "k": 1.61,
          "ci": [
-          0.39,
-          0.97
+          0.36,
+          0.83
          ],
-         "p": 0.026,
-         "p_holm": 0.026,
+         "p": 6.1e-05,
+         "p_holm": 0.00018,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "1.4"
+         "k_text": "1.6"
         },
         {
          "ci_in_tie_band": true,
@@ -2726,7 +2647,7 @@
           2.92
          ],
          "p": 0.0055,
-         "p_holm": 0.011,
+         "p_holm": 0.0055,
          "decision": "b",
          "tie_reason": null,
          "loo_stable": true,
@@ -2741,13 +2662,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.752,
+          "MVIS": 0.646,
           "Kalibr": 2.4,
           "Basalt": 0.65
          },
          "published": {
           "MVIS": {
-           "sd": 0.752,
+           "sd": 0.646,
            "n": 15
           },
           "Kalibr": {
@@ -2767,13 +2688,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.839,
+          "MVIS": 0.722,
           "Kalibr": 2.59,
           "Basalt": 0.791
          },
          "published": {
           "MVIS": {
-           "sd": 0.839,
+           "sd": 0.722,
            "n": 15
           },
           "Kalibr": {
@@ -2793,13 +2714,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.278,
+          "MVIS": 0.253,
           "Kalibr": 0.652,
           "Basalt": 0.677
          },
          "published": {
           "MVIS": {
-           "sd": 0.278,
+           "sd": 0.253,
            "n": 15
           },
           "Kalibr": {
@@ -2819,13 +2740,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.337,
+          "MVIS": 0.336,
           "Kalibr": 0.849,
           "Basalt": 0.799
          },
          "published": {
           "MVIS": {
-           "sd": 0.337,
+           "sd": 0.336,
            "n": 15
           },
           "Kalibr": {
@@ -2845,13 +2766,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.737,
+          "MVIS": 0.63,
           "Kalibr": 2.42,
           "Basalt": 0.593
          },
          "published": {
           "MVIS": {
-           "sd": 0.737,
+           "sd": 0.63,
            "n": 15
           },
           "Kalibr": {
@@ -2871,13 +2792,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.824,
+          "MVIS": 0.707,
           "Kalibr": 2.57,
           "Basalt": 0.746
          },
          "published": {
           "MVIS": {
-           "sd": 0.824,
+           "sd": 0.707,
            "n": 15
           },
           "Kalibr": {
@@ -2897,13 +2818,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.251,
+          "MVIS": 0.234,
           "Kalibr": 0.669,
           "Basalt": 0.646
          },
          "published": {
           "MVIS": {
-           "sd": 0.251,
+           "sd": 0.234,
            "n": 15
           },
           "Kalibr": {
@@ -2923,13 +2844,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.354,
+          "MVIS": 0.329,
           "Kalibr": 0.839,
           "Basalt": 0.784
          },
          "published": {
           "MVIS": {
-           "sd": 0.354,
+           "sd": 0.329,
            "n": 15
           },
           "Kalibr": {
@@ -2948,8 +2869,8 @@
        "dropped": [],
        "reason": null,
        "chip": "Most repeatable: MVIS",
-       "sentence": "Across the same 15 recordings, Kalibr's estimates scatter about 2.9× more than MVIS's (median over 8 parameters); Basalt's about 1.4×. A gap this large appeared in 0.073 % (Kalibr) and 2.6 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Focal length + principal point, T1: more repeatable MVIS, 1.4 times tighter than Kalibr and Basalt, 15 matched recordings.",
+       "sentence": "Across the same 15 recordings, Kalibr's estimates scatter about 3.2× more than MVIS's (median over 8 parameters); Basalt's about 1.6×. A gap this large appeared in 0.049 % (Kalibr) and 0.0061 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Focal length + principal point, T1: more repeatable MVIS, 1.6 times tighter than Kalibr and Basalt, 15 matched recordings.",
        "limit_line": null,
        "band_lines": [
         "The 95 % interval of MVIS ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value.",
@@ -2957,19 +2878,19 @@
        ],
        "strip": "Focal + pp MVIS",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "1.4",
+       "k_text": "1.6",
        "rec_line": "MVIS 15 of 15 · Kalibr 15 of 15 · Basalt 15 of 15"
       },
       "distortion": {
-       "state": "tie_top",
+       "state": "most",
        "tools": [
-        "MVIS",
-        "Basalt"
+        "MVIS"
        ],
        "over": [
-        "Kalibr"
+        "Kalibr",
+        "Basalt"
        ],
-       "k": 19.97,
+       "k": 1.64,
        "n": 15,
        "n_all": {
         "MVIS": 15,
@@ -3008,11 +2929,11 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 0.04,
-         "k": 24.31,
+         "R": 0.03,
+         "k": 34.33,
          "ci": [
-          0.02,
-          0.14
+          0.01,
+          0.11
          ],
          "p": 6.1e-05,
          "p_holm": 0.00018,
@@ -3020,26 +2941,26 @@
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "24"
+         "k_text": "34"
         },
         {
-         "ci_in_tie_band": null,
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 0.76,
-         "k": 1.31,
+         "R": 0.61,
+         "k": 1.64,
          "ci": [
-          0.49,
-          1.04
+          0.4,
+          0.91
          ],
-         "p": 0.087,
-         "p_holm": 0.087,
-         "decision": "tie",
-         "tie_reason": "noise",
-         "loo_stable": null,
+         "p": 0.023,
+         "p_holm": 0.023,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
          "exact": true,
-         "k_text": "1.3"
+         "k_text": "1.6"
         },
         {
          "ci_in_tie_band": false,
@@ -3068,13 +2989,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00191,
+          "MVIS": 0.00199,
           "Kalibr": 0.0482,
           "Basalt": 0.00332
          },
          "published": {
           "MVIS": {
-           "sd": 0.00191,
+           "sd": 0.00199,
            "n": 15
           },
           "Kalibr": {
@@ -3094,13 +3015,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00415,
+          "MVIS": 0.00337,
           "Kalibr": 0.127,
           "Basalt": 0.00651
          },
          "published": {
           "MVIS": {
-           "sd": 0.00415,
+           "sd": 0.00337,
            "n": 15
           },
           "Kalibr": {
@@ -3120,13 +3041,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00545,
+          "MVIS": 0.00416,
           "Kalibr": 0.13,
           "Basalt": 0.00637
          },
          "published": {
           "MVIS": {
-           "sd": 0.00545,
+           "sd": 0.00416,
            "n": 15
           },
           "Kalibr": {
@@ -3146,13 +3067,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00246,
+          "MVIS": 0.00157,
           "Kalibr": 0.0441,
           "Basalt": 0.00198
          },
          "published": {
           "MVIS": {
-           "sd": 0.00246,
+           "sd": 0.00157,
            "n": 15
           },
           "Kalibr": {
@@ -3172,13 +3093,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.0022,
+          "MVIS": 0.00211,
           "Kalibr": 0.0535,
           "Basalt": 0.00325
          },
          "published": {
           "MVIS": {
-           "sd": 0.0022,
+           "sd": 0.00211,
            "n": 15
           },
           "Kalibr": {
@@ -3198,13 +3119,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00566,
+          "MVIS": 0.00336,
           "Kalibr": 0.158,
           "Basalt": 0.00889
          },
          "published": {
           "MVIS": {
-           "sd": 0.00566,
+           "sd": 0.00336,
            "n": 15
           },
           "Kalibr": {
@@ -3224,13 +3145,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00743,
+          "MVIS": 0.00403,
           "Kalibr": 0.181,
           "Basalt": 0.00823
          },
          "published": {
           "MVIS": {
-           "sd": 0.00743,
+           "sd": 0.00403,
            "n": 15
           },
           "Kalibr": {
@@ -3250,13 +3171,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00318,
+          "MVIS": 0.00155,
           "Kalibr": 0.0691,
           "Basalt": 0.0025
          },
          "published": {
           "MVIS": {
-           "sd": 0.00318,
+           "sd": 0.00155,
            "n": 15
           },
           "Kalibr": {
@@ -3274,14 +3195,16 @@
        "excluded": [],
        "dropped": [],
        "reason": null,
-       "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
-       "sentence": "The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 15 recordings (p = 0.087). Treated as a tie. Both scatter less than Kalibr: across the same 15 recordings Kalibr's estimates scatter about 24× more than MVIS's and 20× more than Basalt's. Holds with any one recording left out.",
-       "aria": "Distortion coefficients, T1: tie between MVIS and Basalt, both tighter than Kalibr, 15 matched recordings.",
+       "chip": "Most repeatable: MVIS",
+       "sentence": "Across the same 15 recordings, Kalibr's estimates scatter about 34× more than MVIS's (median over 8 parameters); Basalt's about 1.6×. A gap this large appeared in 0.0061 % (Kalibr) and 2.3 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Distortion coefficients, T1: more repeatable MVIS, 1.6 times tighter than Kalibr and Basalt, 15 matched recordings.",
        "limit_line": null,
-       "band_lines": [],
-       "strip": "Distortion MVIS = Basalt > Kalibr",
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
+       "strip": "Distortion MVIS",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "20",
+       "k_text": "1.6",
        "rec_line": "MVIS 15 of 15 · Kalibr 15 of 15 · Basalt 15 of 15"
       },
       "baseline": {
@@ -3322,42 +3245,42 @@
        ],
        "pairs": [
         {
-         "ci_in_tie_band": true,
+         "ci_in_tie_band": false,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
-         "R": 0.53,
-         "k": 1.88,
+         "R": 0.34,
+         "k": 2.93,
          "ci": [
-          0.3,
-          0.83
+          0.23,
+          0.53
          ],
-         "p": 0.013,
-         "p_holm": 0.038,
+         "p": 0.00055,
+         "p_holm": 0.0016,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "1.9"
+         "k_text": "2.9"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
-         "R": 0.39,
-         "k": 2.57,
+         "R": 0.25,
+         "k": 4.01,
          "ci": [
-          0.16,
-          1.61
+          0.13,
+          0.95
          ],
-         "p": 0.29,
-         "p_holm": 0.57,
+         "p": 0.04,
+         "p_holm": 0.08,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "2.6"
+         "k_text": "4"
         },
         {
          "ci_in_tie_band": null,
@@ -3386,13 +3309,13 @@
          "label": "baseline to t265 fisheye 1",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.0528,
+          "MVIS": 0.0338,
           "Kalibr": 0.0991,
           "Basalt": 0.135
          },
          "published": {
           "MVIS": {
-           "sd": 0.0528,
+           "sd": 0.0338,
            "n": 15
           },
           "Kalibr": {
@@ -3414,9 +3337,7 @@
        "sentence": "MVIS is tighter than Kalibr; the other pairs are not separated. No single tool is marked.",
        "aria": "Camera–camera distance, T1: not separated, 15 matched recordings.",
        "limit_line": null,
-       "band_lines": [
-        "The 95 % interval of MVIS ÷ Kalibr reaches into the tie band (0.80–1.25): the ratio shown is a point value."
-       ],
+       "band_lines": [],
        "strip": "Distance not separated",
        "variant_line": "MVIS here: its camera-only run.",
        "k_text": null,
@@ -3986,19 +3907,19 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
-         "R": 0.88,
-         "k": 1.13,
+         "R": 0.64,
+         "k": 1.57,
          "ci": [
-          0.65,
-          1.18
+          0.41,
+          1.11
          ],
-         "p": 0.35,
-         "p_holm": 0.35,
+         "p": 0.13,
+         "p_holm": 0.13,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.1"
+         "k_text": "1.6"
         }
        ],
        "params": [
@@ -4009,7 +3930,7 @@
          "unit": "ms",
          "sd": {
           "MVIS": 0.188,
-          "Kalibr": 0.301
+          "Kalibr": 0.576
          },
          "published": {
           "MVIS": {
@@ -4017,7 +3938,7 @@
            "n": 14
           },
           "Kalibr": {
-           "sd": 0.301,
+           "sd": 0.576,
            "n": 14
           }
          },
@@ -4078,7 +3999,7 @@
        "dropped": [],
        "reason": null,
        "chip": "Tie",
-       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 14 recordings (p = 0.35). Treated as a tie.",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.6×, but a gap this size appears often by chance with 14 recordings (p = 0.13). Treated as a tie.",
        "aria": "Camera–IMU time offset, T7: tie, 14 matched recordings.",
        "limit_line": null,
        "band_lines": [],
@@ -4095,7 +4016,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 7.61,
+       "k": 19.11,
        "n": 14,
        "n_all": {
         "MVIS": 14,
@@ -4130,19 +4051,19 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
-         "R": 0.13,
-         "k": 7.61,
+         "R": 0.05,
+         "k": 19.11,
          "ci": [
-          0.09,
-          0.24
+          0.03,
+          0.12
          ],
-         "p": 0.00024,
-         "p_holm": 0.00024,
+         "p": 0.00012,
+         "p_holm": 0.00012,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "7.6"
+         "k_text": "19"
         }
        ],
        "params": [
@@ -4153,7 +4074,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 0.44,
-          "Kalibr": 2.83
+          "Kalibr": 10.5
          },
          "published": {
           "MVIS": {
@@ -4161,7 +4082,7 @@
            "n": 14
           },
           "Kalibr": {
-           "sd": 2.83,
+           "sd": 10.5,
            "n": 14
           }
          },
@@ -4190,7 +4111,7 @@
          "unit": "mm",
          "sd": {
           "MVIS": 0.329,
-          "Kalibr": 2.96
+          "Kalibr": 5.06
          },
          "published": {
           "MVIS": {
@@ -4198,7 +4119,7 @@
            "n": 14
           },
           "Kalibr": {
-           "sd": 2.96,
+           "sd": 5.06,
            "n": 14
           }
          },
@@ -4222,13 +4143,13 @@
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 7.6× more than MVIS's (median over 2 parameters). A gap this large appeared in 0.024 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Camera–IMU distance, T7: more repeatable MVIS, 7.6 times tighter than Kalibr, 14 matched recordings.",
+       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 19× more than MVIS's (median over 2 parameters). A gap this large appeared in 0.012 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Camera–IMU distance, T7: more repeatable MVIS, 19 times tighter than Kalibr, 14 matched recordings.",
        "limit_line": null,
        "band_lines": [],
        "strip": "Cam–IMU distance MVIS",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": "7.6",
+       "k_text": "19",
        "rec_line": "MVIS 14 of 15 · Kalibr 14 of 15 · Basalt not run"
       },
       "gyro": {
@@ -4239,7 +4160,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 2.9,
+       "k": 7.15,
        "n": 14,
        "n_all": {
         "MVIS": 15,
@@ -4276,19 +4197,19 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 12,
-         "R": 0.35,
-         "k": 2.9,
+         "R": 0.14,
+         "k": 7.15,
          "ci": [
-          0.26,
-          0.47
+          0.1,
+          0.19
          ],
-         "p": 0.00049,
-         "p_holm": 0.00049,
+         "p": 0.00012,
+         "p_holm": 0.00012,
          "decision": "a",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "2.9"
+         "k_text": "7.1"
         }
        ],
        "params": [
@@ -4299,7 +4220,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00113,
-          "Kalibr": 0.00365
+          "Kalibr": 0.00708
          },
          "published": {
           "MVIS": {
@@ -4307,7 +4228,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00365,
+           "sd": 0.00708,
            "n": 14
           }
          },
@@ -4320,7 +4241,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00145,
-          "Kalibr": 0.00268
+          "Kalibr": 0.007
          },
          "published": {
           "MVIS": {
@@ -4328,7 +4249,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00268,
+           "sd": 0.007,
            "n": 14
           }
          },
@@ -4341,7 +4262,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000256,
-          "Kalibr": 0.00049
+          "Kalibr": 0.00207
          },
          "published": {
           "MVIS": {
@@ -4349,7 +4270,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00049,
+           "sd": 0.00207,
            "n": 14
           }
          },
@@ -4362,7 +4283,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00132,
-          "Kalibr": 0.0028
+          "Kalibr": 0.00684
          },
          "published": {
           "MVIS": {
@@ -4370,7 +4291,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.0028,
+           "sd": 0.00684,
            "n": 14
           }
          },
@@ -4383,7 +4304,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00068,
-          "Kalibr": 0.00327
+          "Kalibr": 0.00409
          },
          "published": {
           "MVIS": {
@@ -4391,7 +4312,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00327,
+           "sd": 0.00409,
            "n": 14
           }
          },
@@ -4404,7 +4325,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000481,
-          "Kalibr": 0.00274
+          "Kalibr": 0.00582
          },
          "published": {
           "MVIS": {
@@ -4412,7 +4333,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00274,
+           "sd": 0.00582,
            "n": 14
           }
          },
@@ -4425,7 +4346,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00114,
-          "Kalibr": 0.00356
+          "Kalibr": 0.00719
          },
          "published": {
           "MVIS": {
@@ -4433,7 +4354,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00356,
+           "sd": 0.00719,
            "n": 14
           }
          },
@@ -4446,7 +4367,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00021,
-          "Kalibr": 0.000437
+          "Kalibr": 0.00205
          },
          "published": {
           "MVIS": {
@@ -4454,7 +4375,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.000437,
+           "sd": 0.00205,
            "n": 14
           }
          },
@@ -4467,7 +4388,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00119,
-          "Kalibr": 0.00274
+          "Kalibr": 0.00681
          },
          "published": {
           "MVIS": {
@@ -4475,7 +4396,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00274,
+           "sd": 0.00681,
            "n": 14
           }
          },
@@ -4488,7 +4409,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000406,
-          "Kalibr": 0.00283
+          "Kalibr": 0.00404
          },
          "published": {
           "MVIS": {
@@ -4496,7 +4417,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00283,
+           "sd": 0.00404,
            "n": 14
           }
          },
@@ -4509,7 +4430,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000864,
-          "Kalibr": 0.00232
+          "Kalibr": 0.00732
          },
          "published": {
           "MVIS": {
@@ -4517,7 +4438,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00232,
+           "sd": 0.00732,
            "n": 14
           }
          },
@@ -4530,7 +4451,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000605,
-          "Kalibr": 0.00264
+          "Kalibr": 0.00544
          },
          "published": {
           "MVIS": {
@@ -4538,7 +4459,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00264,
+           "sd": 0.00544,
            "n": 14
           }
          },
@@ -4556,13 +4477,13 @@
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 2.9× more than MVIS's (median over 12 parameters). A gap this large appeared in 0.049 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Gyro scale + cross-axis, T7: more repeatable MVIS, 2.9 times tighter than Kalibr, 14 matched recordings.",
+       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 7.1× more than MVIS's (median over 12 parameters). A gap this large appeared in 0.012 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Gyro scale + cross-axis, T7: more repeatable MVIS, 7.1 times tighter than Kalibr, 14 matched recordings.",
        "limit_line": null,
        "band_lines": [],
        "strip": "Gyro MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "2.9",
+       "k_text": "7.1",
        "rec_line": "MVIS 15 of 15 · Kalibr 14 of 15 · Basalt not run"
       },
       "accel": {
@@ -4573,7 +4494,7 @@
        "over": [
         "Kalibr"
        ],
-       "k": 4.41,
+       "k": 4.92,
        "n": 14,
        "n_all": {
         "MVIS": 15,
@@ -4610,11 +4531,11 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
-         "R": 0.23,
-         "k": 4.41,
+         "R": 0.2,
+         "k": 4.92,
          "ci": [
-          0.15,
-          0.3
+          0.13,
+          0.31
          ],
          "p": 0.00012,
          "p_holm": 0.00012,
@@ -4622,7 +4543,7 @@
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "4.4"
+         "k_text": "4.9"
         }
        ],
        "params": [
@@ -4633,7 +4554,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.00037,
-          "Kalibr": 0.00143
+          "Kalibr": 0.00158
          },
          "published": {
           "MVIS": {
@@ -4641,7 +4562,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00143,
+           "sd": 0.00158,
            "n": 14
           }
          },
@@ -4654,7 +4575,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000715,
-          "Kalibr": 0.00177
+          "Kalibr": 0.0027
          },
          "published": {
           "MVIS": {
@@ -4662,7 +4583,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00177,
+           "sd": 0.0027,
            "n": 14
           }
          },
@@ -4675,7 +4596,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000947,
-          "Kalibr": 0.00221
+          "Kalibr": 0.00316
          },
          "published": {
           "MVIS": {
@@ -4683,7 +4604,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00221,
+           "sd": 0.00316,
            "n": 14
           }
          },
@@ -4696,7 +4617,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000336,
-          "Kalibr": 0.0052
+          "Kalibr": 0.00388
          },
          "published": {
           "MVIS": {
@@ -4704,7 +4625,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.0052,
+           "sd": 0.00388,
            "n": 14
           }
          },
@@ -4717,7 +4638,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000762,
-          "Kalibr": 0.00478
+          "Kalibr": 0.00432
          },
          "published": {
           "MVIS": {
@@ -4725,7 +4646,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00478,
+           "sd": 0.00432,
            "n": 14
           }
          },
@@ -4738,7 +4659,7 @@
          "unit": "",
          "sd": {
           "MVIS": 0.000628,
-          "Kalibr": 0.00316
+          "Kalibr": 0.00387
          },
          "published": {
           "MVIS": {
@@ -4746,7 +4667,7 @@
            "n": 15
           },
           "Kalibr": {
-           "sd": 0.00316,
+           "sd": 0.00387,
            "n": 14
           }
          },
@@ -4764,13 +4685,13 @@
        "dropped": [],
        "reason": null,
        "chip": "More repeatable: MVIS",
-       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 4.4× more than MVIS's (median over 6 parameters). A gap this large appeared in 0.012 % of recording-by-recording swaps. Holds with any one recording left out.",
-       "aria": "Accel scale, T7: more repeatable MVIS, 4.4 times tighter than Kalibr, 14 matched recordings.",
+       "sentence": "Across the same 14 recordings, Kalibr's estimates scatter about 4.9× more than MVIS's (median over 6 parameters). A gap this large appeared in 0.012 % of recording-by-recording swaps. Holds with any one recording left out.",
+       "aria": "Accel scale, T7: more repeatable MVIS, 4.9 times tighter than Kalibr, 14 matched recordings.",
        "limit_line": null,
        "band_lines": [],
        "strip": "Accel MVIS K-IMU",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
-       "k_text": "4.4",
+       "k_text": "4.9",
        "rec_line": "MVIS 15 of 15 · Kalibr 14 of 15 · Basalt not run"
       }
      }
@@ -5847,6 +5768,330 @@
      "not_part": [],
      "cells": {
       "focal_pp": {
+       "state": "tie_top",
+       "tools": [
+        "MVIS",
+        "Basalt"
+       ],
+       "over": [
+        "Kalibr"
+       ],
+       "k": 1.49,
+       "n": 8,
+       "n_all": {
+        "MVIS": 8,
+        "Kalibr": 8,
+        "Basalt": 8
+       },
+       "n_range": {
+        "MVIS": [
+         8,
+         8
+        ],
+        "Kalibr": [
+         8,
+         8
+        ],
+        "Basalt": [
+         8,
+         8
+        ]
+       },
+       "unmatched": {},
+       "calyx_limited": false,
+       "compared": [
+        "MVIS",
+        "Kalibr",
+        "Basalt"
+       ],
+       "mvis_variant": "default",
+       "caveats": [],
+       "pairs": [
+        {
+         "ci_in_tie_band": true,
+         "a": "MVIS",
+         "b": "Kalibr",
+         "n_params": 8,
+         "R": 0.67,
+         "k": 1.49,
+         "ci": [
+          0.42,
+          0.84
+         ],
+         "p": 0.016,
+         "p_holm": 0.031,
+         "decision": "a",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "1.5"
+        },
+        {
+         "ci_in_tie_band": null,
+         "a": "MVIS",
+         "b": "Basalt",
+         "n_params": 8,
+         "R": 1.1,
+         "k": 1.1,
+         "ci": [
+          0.83,
+          2.11
+         ],
+         "p": 0.44,
+         "p_holm": 0.44,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
+         "exact": true,
+         "k_text": "1.1"
+        },
+        {
+         "ci_in_tie_band": true,
+         "a": "Kalibr",
+         "b": "Basalt",
+         "n_params": 8,
+         "R": 1.55,
+         "k": 1.55,
+         "ci": [
+          1.21,
+          2.94
+         ],
+         "p": 0.0078,
+         "p_holm": 0.023,
+         "decision": "b",
+         "tie_reason": null,
+         "loo_stable": true,
+         "exact": true,
+         "k_text": "1.5"
+        }
+       ],
+       "params": [
+        {
+         "sensor": "cam0 – TUM-VI cam0",
+         "key": "fx",
+         "label": "fx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.375,
+          "Kalibr": 0.643,
+          "Basalt": 0.401
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.375,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.643,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.401,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – TUM-VI cam0|fx"
+        },
+        {
+         "sensor": "cam0 – TUM-VI cam0",
+         "key": "fy",
+         "label": "fy",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.409,
+          "Kalibr": 0.656,
+          "Basalt": 0.411
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.409,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.656,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.411,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – TUM-VI cam0|fy"
+        },
+        {
+         "sensor": "cam0 – TUM-VI cam0",
+         "key": "cx",
+         "label": "cx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.286,
+          "Kalibr": 0.196,
+          "Basalt": 0.236
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.286,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.196,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.236,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – TUM-VI cam0|cx"
+        },
+        {
+         "sensor": "cam0 – TUM-VI cam0",
+         "key": "cy",
+         "label": "cy",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.165,
+          "Kalibr": 0.236,
+          "Basalt": 0.11
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.165,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.236,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.11,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam0 – TUM-VI cam0|cy"
+        },
+        {
+         "sensor": "cam1 – TUM-VI cam1",
+         "key": "fx",
+         "label": "fx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.404,
+          "Kalibr": 0.672,
+          "Basalt": 0.435
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.404,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.672,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.435,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam1 – TUM-VI cam1|fx"
+        },
+        {
+         "sensor": "cam1 – TUM-VI cam1",
+         "key": "fy",
+         "label": "fy",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.426,
+          "Kalibr": 0.666,
+          "Basalt": 0.428
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.426,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.666,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.428,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam1 – TUM-VI cam1|fy"
+        },
+        {
+         "sensor": "cam1 – TUM-VI cam1",
+         "key": "cx",
+         "label": "cx",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.285,
+          "Kalibr": 0.186,
+          "Basalt": 0.211
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.285,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.186,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.211,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam1 – TUM-VI cam1|cx"
+        },
+        {
+         "sensor": "cam1 – TUM-VI cam1",
+         "key": "cy",
+         "label": "cy",
+         "unit": "px",
+         "sd": {
+          "MVIS": 0.379,
+          "Kalibr": 0.324,
+          "Basalt": 0.306
+         },
+         "published": {
+          "MVIS": {
+           "sd": 0.379,
+           "n": 8
+          },
+          "Kalibr": {
+           "sd": 0.324,
+           "n": 8
+          },
+          "Basalt": {
+           "sd": 0.306,
+           "n": 8
+          }
+         },
+         "data_k": "m|cam1 – TUM-VI cam1|cy"
+        }
+       ],
+       "excluded": [],
+       "dropped": [],
+       "reason": null,
+       "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
+       "sentence": "The spreads of MVIS and Basalt differ by 1.1×, but a gap this size appears often by chance with 8 recordings (p = 0.44). Treated as a tie. Both scatter less than Kalibr: across the same 8 recordings Kalibr's estimates scatter about 1.5× more than MVIS's and 1.5× more than Basalt's. Holds with any one recording left out.",
+       "aria": "Focal length + principal point, T3: tie between MVIS and Basalt, both tighter than Kalibr, 8 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Kalibr reaches into the tie band (0.80–1.25): the ratio shown is a point value.",
+        "The 95 % interval of Kalibr ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
+       "strip": "Focal + pp MVIS = Basalt > Kalibr",
+       "variant_line": "MVIS here: its camera-only run.",
+       "k_text": "1.5",
+       "rec_line": "MVIS 8 of 8 · Kalibr 8 of 8 · Basalt 8 of 8"
+      },
+      "distortion": {
        "state": "not_separated",
        "tools": [],
        "over": [],
@@ -5880,7 +6125,7 @@
        ],
        "mvis_variant": "default",
        "caveats": [
-        "kalibr_view_filtered"
+        "dist_tradeoff"
        ],
        "pairs": [
         {
@@ -5888,11 +6133,11 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 0.6,
-         "k": 1.66,
+         "R": 0.42,
+         "k": 2.41,
          "ci": [
-          0.46,
-          0.9
+          0.13,
+          0.95
          ],
          "p": 0.039,
          "p_holm": 0.078,
@@ -5900,363 +6145,37 @@
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.7"
+         "k_text": "2.4"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 0.83,
-         "k": 1.2,
+         "R": 1.38,
+         "k": 1.38,
          "ci": [
-          0.55,
-          1.85
+          0.72,
+          2.34
          ],
-         "p": 0.38,
-         "p_holm": 0.38,
+         "p": 0.16,
+         "p_holm": 0.16,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.2"
-        },
-        {
-         "ci_in_tie_band": true,
-         "a": "Kalibr",
-         "b": "Basalt",
-         "n_params": 8,
-         "R": 1.63,
-         "k": 1.63,
-         "ci": [
-          1.13,
-          4.52
-         ],
-         "p": 0.016,
-         "p_holm": 0.047,
-         "decision": "b",
-         "tie_reason": null,
-         "loo_stable": true,
-         "exact": true,
-         "k_text": "1.6"
-        }
-       ],
-       "params": [
-        {
-         "sensor": "cam0 – TUM-VI cam0",
-         "key": "fx",
-         "label": "fx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.281,
-          "Kalibr": 0.643,
-          "Basalt": 0.367
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.281,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.643,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.367,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam0 – TUM-VI cam0|fx"
-        },
-        {
-         "sensor": "cam0 – TUM-VI cam0",
-         "key": "fy",
-         "label": "fy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.274,
-          "Kalibr": 0.656,
-          "Basalt": 0.375
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.274,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.656,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.375,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam0 – TUM-VI cam0|fy"
-        },
-        {
-         "sensor": "cam0 – TUM-VI cam0",
-         "key": "cx",
-         "label": "cx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.317,
-          "Kalibr": 0.196,
-          "Basalt": 0.27
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.317,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.196,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.27,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam0 – TUM-VI cam0|cx"
-        },
-        {
-         "sensor": "cam0 – TUM-VI cam0",
-         "key": "cy",
-         "label": "cy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.167,
-          "Kalibr": 0.236,
-          "Basalt": 0.134
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.167,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.236,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.134,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam0 – TUM-VI cam0|cy"
-        },
-        {
-         "sensor": "cam1 – TUM-VI cam1",
-         "key": "fx",
-         "label": "fx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.343,
-          "Kalibr": 0.672,
-          "Basalt": 0.406
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.343,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.672,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.406,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam1 – TUM-VI cam1|fx"
-        },
-        {
-         "sensor": "cam1 – TUM-VI cam1",
-         "key": "fy",
-         "label": "fy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.34,
-          "Kalibr": 0.666,
-          "Basalt": 0.413
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.34,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.666,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.413,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam1 – TUM-VI cam1|fy"
-        },
-        {
-         "sensor": "cam1 – TUM-VI cam1",
-         "key": "cx",
-         "label": "cx",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.296,
-          "Kalibr": 0.186,
-          "Basalt": 0.231
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.296,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.186,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.231,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam1 – TUM-VI cam1|cx"
-        },
-        {
-         "sensor": "cam1 – TUM-VI cam1",
-         "key": "cy",
-         "label": "cy",
-         "unit": "px",
-         "sd": {
-          "MVIS": 0.245,
-          "Kalibr": 0.324,
-          "Basalt": 0.356
-         },
-         "published": {
-          "MVIS": {
-           "sd": 0.245,
-           "n": 8
-          },
-          "Kalibr": {
-           "sd": 0.324,
-           "n": 8
-          },
-          "Basalt": {
-           "sd": 0.356,
-           "n": 8
-          }
-         },
-         "data_k": "m|cam1 – TUM-VI cam1|cy"
-        }
-       ],
-       "excluded": [],
-       "dropped": [],
-       "reason": null,
-       "chip": "Not separated",
-       "sentence": "Basalt is tighter than Kalibr; the other pairs are not separated. No single tool is marked.",
-       "aria": "Focal length + principal point, T3: not separated, 8 matched recordings.",
-       "limit_line": null,
-       "band_lines": [
-        "The 95 % interval of Kalibr ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
-       ],
-       "strip": "Focal + pp not separated",
-       "variant_line": "MVIS here: its camera-only run.",
-       "k_text": null,
-       "rec_line": "MVIS 8 of 8 · Kalibr 8 of 8 · Basalt 8 of 8"
-      },
-      "distortion": {
-       "state": "tie_top",
-       "tools": [
-        "MVIS",
-        "Basalt"
-       ],
-       "over": [
-        "Kalibr"
-       ],
-       "k": 4.0,
-       "n": 8,
-       "n_all": {
-        "MVIS": 8,
-        "Kalibr": 8,
-        "Basalt": 8
-       },
-       "n_range": {
-        "MVIS": [
-         8,
-         8
-        ],
-        "Kalibr": [
-         8,
-         8
-        ],
-        "Basalt": [
-         8,
-         8
-        ]
-       },
-       "unmatched": {},
-       "calyx_limited": false,
-       "compared": [
-        "MVIS",
-        "Kalibr",
-        "Basalt"
-       ],
-       "mvis_variant": "default",
-       "caveats": [
-        "dist_tradeoff",
-        "kalibr_view_filtered"
-       ],
-       "pairs": [
-        {
-         "ci_in_tie_band": false,
-         "a": "MVIS",
-         "b": "Kalibr",
-         "n_params": 8,
-         "R": 0.25,
-         "k": 4.0,
-         "ci": [
-          0.12,
-          0.79
-         ],
-         "p": 0.016,
-         "p_holm": 0.031,
-         "decision": "a",
-         "tie_reason": null,
-         "loo_stable": true,
-         "exact": true,
-         "k_text": "4"
-        },
-        {
-         "ci_in_tie_band": null,
-         "a": "MVIS",
-         "b": "Basalt",
-         "n_params": 8,
-         "R": 1.15,
-         "k": 1.15,
-         "ci": [
-          0.7,
-          1.94
-         ],
-         "p": 0.59,
-         "p_holm": 0.59,
-         "decision": "tie",
-         "tie_reason": "noise",
-         "loo_stable": null,
-         "exact": true,
-         "k_text": "1.2"
+         "k_text": "1.4"
         },
         {
          "ci_in_tie_band": false,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 8,
-         "R": 5.51,
-         "k": 5.51,
+         "R": 3.35,
+         "k": 3.35,
          "ci": [
-          1.69,
-          15.31
+          1.6,
+          11.12
          ],
          "p": 0.0078,
          "p_holm": 0.023,
@@ -6264,7 +6183,7 @@
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "5.5"
+         "k_text": "3.4"
         }
        ],
        "params": [
@@ -6274,13 +6193,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.000763,
+          "MVIS": 0.00167,
           "Kalibr": 0.00392,
-          "Basalt": 0.000955
+          "Basalt": 0.00143
          },
          "published": {
           "MVIS": {
-           "sd": 0.000763,
+           "sd": 0.00167,
            "n": 8
           },
           "Kalibr": {
@@ -6288,7 +6207,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.000955,
+           "sd": 0.00143,
            "n": 8
           }
          },
@@ -6300,13 +6219,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00132,
+          "MVIS": 0.00284,
           "Kalibr": 0.00685,
-          "Basalt": 0.00109
+          "Basalt": 0.00203
          },
          "published": {
           "MVIS": {
-           "sd": 0.00132,
+           "sd": 0.00284,
            "n": 8
           },
           "Kalibr": {
@@ -6314,7 +6233,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.00109,
+           "sd": 0.00203,
            "n": 8
           }
          },
@@ -6326,13 +6245,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00111,
+          "MVIS": 0.00201,
           "Kalibr": 0.00488,
-          "Basalt": 0.00101
+          "Basalt": 0.00147
          },
          "published": {
           "MVIS": {
-           "sd": 0.00111,
+           "sd": 0.00201,
            "n": 8
           },
           "Kalibr": {
@@ -6340,7 +6259,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.00101,
+           "sd": 0.00147,
            "n": 8
           }
          },
@@ -6352,13 +6271,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.000313,
+          "MVIS": 0.000498,
           "Kalibr": 0.00118,
-          "Basalt": 0.000328
+          "Basalt": 0.00039
          },
          "published": {
           "MVIS": {
-           "sd": 0.000313,
+           "sd": 0.000498,
            "n": 8
           },
           "Kalibr": {
@@ -6366,7 +6285,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.000328,
+           "sd": 0.00039,
            "n": 8
           }
          },
@@ -6378,13 +6297,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.000776,
+          "MVIS": 0.00126,
           "Kalibr": 0.00318,
-          "Basalt": 0.000775
+          "Basalt": 0.00105
          },
          "published": {
           "MVIS": {
-           "sd": 0.000776,
+           "sd": 0.00126,
            "n": 8
           },
           "Kalibr": {
@@ -6392,7 +6311,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.000775,
+           "sd": 0.00105,
            "n": 8
           }
          },
@@ -6404,13 +6323,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00146,
+          "MVIS": 0.0022,
           "Kalibr": 0.00568,
-          "Basalt": 0.00066
+          "Basalt": 0.0015
          },
          "published": {
           "MVIS": {
-           "sd": 0.00146,
+           "sd": 0.0022,
            "n": 8
           },
           "Kalibr": {
@@ -6418,7 +6337,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.00066,
+           "sd": 0.0015,
            "n": 8
           }
          },
@@ -6430,13 +6349,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00117,
+          "MVIS": 0.0016,
           "Kalibr": 0.00384,
-          "Basalt": 0.000337
+          "Basalt": 0.000984
          },
          "published": {
           "MVIS": {
-           "sd": 0.00117,
+           "sd": 0.0016,
            "n": 8
           },
           "Kalibr": {
@@ -6444,7 +6363,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.000337,
+           "sd": 0.000984,
            "n": 8
           }
          },
@@ -6456,13 +6375,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.000286,
+          "MVIS": 0.000389,
           "Kalibr": 0.000883,
-          "Basalt": 9.72e-05
+          "Basalt": 0.000242
          },
          "published": {
           "MVIS": {
-           "sd": 0.000286,
+           "sd": 0.000389,
            "n": 8
           },
           "Kalibr": {
@@ -6470,7 +6389,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 9.72e-05,
+           "sd": 0.000242,
            "n": 8
           }
          },
@@ -6480,14 +6399,14 @@
        "excluded": [],
        "dropped": [],
        "reason": null,
-       "chip": "Tie: MVIS = Basalt · both tighter than Kalibr",
-       "sentence": "The spreads of MVIS and Basalt differ by 1.2×, but a gap this size appears often by chance with 8 recordings (p = 0.59). Treated as a tie. Both scatter less than Kalibr: across the same 8 recordings Kalibr's estimates scatter about 4× more than MVIS's and 5.5× more than Basalt's. Holds with any one recording left out.",
-       "aria": "Distortion coefficients, T3: tie between MVIS and Basalt, both tighter than Kalibr, 8 matched recordings.",
+       "chip": "Not separated",
+       "sentence": "Basalt is tighter than Kalibr; the other pairs are not separated. No single tool is marked.",
+       "aria": "Distortion coefficients, T3: not separated, 8 matched recordings.",
        "limit_line": null,
        "band_lines": [],
-       "strip": "Distortion MVIS = Basalt > Kalibr",
+       "strip": "Distortion not separated",
        "variant_line": "MVIS here: its camera-only run.",
-       "k_text": "4",
+       "k_text": null,
        "rec_line": "MVIS 8 of 8 · Kalibr 8 of 8 · Basalt 8 of 8"
       },
       "baseline": {
@@ -6523,66 +6442,64 @@
         "Basalt"
        ],
        "mvis_variant": "default",
-       "caveats": [
-        "kalibr_view_filtered"
-       ],
+       "caveats": [],
        "pairs": [
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
-         "R": 0.6,
-         "k": 1.67,
+         "R": 0.82,
+         "k": 1.22,
          "ci": [
-          0.34,
-          0.89
+          0.27,
+          1.06
          ],
-         "p": 0.047,
-         "p_holm": 0.14,
+         "p": 0.086,
+         "p_holm": 0.26,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.7"
+         "k_text": "1.2"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
-         "R": 0.63,
-         "k": 1.6,
+         "R": 0.98,
+         "k": 1.02,
          "ci": [
-          0.32,
-          1.37
+          0.45,
+          1.2
          ],
-         "p": 0.12,
-         "p_holm": 0.25,
+         "p": 0.88,
+         "p_holm": 0.88,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.6"
+         "k_text": "1.02"
         },
         {
          "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 1,
-         "R": 1.05,
-         "k": 1.05,
+         "R": 1.2,
+         "k": 1.2,
          "ci": [
-          0.87,
-          1.6
+          0.93,
+          1.83
          ],
-         "p": 0.53,
-         "p_holm": 0.53,
+         "p": 0.11,
+         "p_holm": 0.26,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.05"
+         "k_text": "1.2"
         }
        ],
        "params": [
@@ -6592,13 +6509,13 @@
          "label": "baseline to TUM-VI cam0",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.0584,
+          "MVIS": 0.0804,
           "Kalibr": 0.0978,
-          "Basalt": 0.0932
+          "Basalt": 0.0818
          },
          "published": {
           "MVIS": {
-           "sd": 0.0584,
+           "sd": 0.0804,
            "n": 8
           },
           "Kalibr": {
@@ -6606,7 +6523,7 @@
            "n": 8
           },
           "Basalt": {
-           "sd": 0.0932,
+           "sd": 0.0818,
            "n": 8
           }
          },
@@ -6617,7 +6534,7 @@
        "dropped": [],
        "reason": null,
        "chip": "Tie",
-       "sentence": "The spreads of MVIS and Kalibr differ by 1.7×, but a gap this size appears often by chance with 8 recordings (p = 0.14). Treated as a tie. The spreads of MVIS and Basalt differ by 1.6×, but a gap this size appears often by chance with 8 recordings (p = 0.25). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.05×, but a gap this size appears often by chance with 8 recordings (p = 0.53). Treated as a tie.",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.2×, but a gap this size appears often by chance with 8 recordings (p = 0.26). Treated as a tie. The spreads of MVIS and Basalt differ by 1.02×, but a gap this size appears often by chance with 8 recordings (p = 0.88). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.2×, but a gap this size appears often by chance with 8 recordings (p = 0.26). Treated as a tie.",
        "aria": "Camera–camera distance, T3: tie, 8 matched recordings.",
        "limit_line": null,
        "band_lines": [],
@@ -9402,42 +9319,42 @@
        "caveats": [],
        "pairs": [
         {
-         "ci_in_tie_band": false,
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 2.67,
-         "k": 2.67,
+         "R": 1.68,
+         "k": 1.68,
          "ci": [
-          1.76,
-          4.24
+          1.24,
+          2.3
          ],
-         "p": 0.0039,
-         "p_holm": 0.012,
+         "p": 0.0059,
+         "p_holm": 0.018,
          "decision": "b",
          "tie_reason": null,
          "loo_stable": true,
          "exact": true,
-         "k_text": "2.7"
+         "k_text": "1.7"
         },
         {
-         "ci_in_tie_band": true,
+         "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 1.6,
-         "k": 1.6,
+         "R": 1.04,
+         "k": 1.04,
          "ci": [
-          1.02,
-          1.94
+          0.85,
+          1.22
          ],
-         "p": 0.047,
-         "p_holm": 0.047,
-         "decision": "b",
-         "tie_reason": null,
-         "loo_stable": true,
+         "p": 0.56,
+         "p_holm": 0.56,
+         "decision": "tie",
+         "tie_reason": "noise",
+         "loo_stable": null,
          "exact": true,
-         "k_text": "1.6"
+         "k_text": "1.04"
         },
         {
          "ci_in_tie_band": true,
@@ -9466,13 +9383,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.591,
+          "MVIS": 0.379,
           "Kalibr": 0.187,
           "Basalt": 0.383
          },
          "published": {
           "MVIS": {
-           "sd": 0.591,
+           "sd": 0.379,
            "n": 10
           },
           "Kalibr": {
@@ -9492,13 +9409,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.582,
+          "MVIS": 0.374,
           "Kalibr": 0.186,
           "Basalt": 0.38
          },
          "published": {
           "MVIS": {
-           "sd": 0.582,
+           "sd": 0.374,
            "n": 10
           },
           "Kalibr": {
@@ -9518,13 +9435,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.0805,
+          "MVIS": 0.106,
           "Kalibr": 0.169,
           "Basalt": 0.109
          },
          "published": {
           "MVIS": {
-           "sd": 0.0805,
+           "sd": 0.106,
            "n": 10
           },
           "Kalibr": {
@@ -9544,13 +9461,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.1,
+          "MVIS": 0.0451,
           "Kalibr": 0.0548,
           "Basalt": 0.0321
          },
          "published": {
           "MVIS": {
-           "sd": 0.1,
+           "sd": 0.0451,
            "n": 10
           },
           "Kalibr": {
@@ -9570,13 +9487,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.609,
+          "MVIS": 0.398,
           "Kalibr": 0.202,
           "Basalt": 0.382
          },
          "published": {
           "MVIS": {
-           "sd": 0.609,
+           "sd": 0.398,
            "n": 10
           },
           "Kalibr": {
@@ -9596,13 +9513,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.608,
+          "MVIS": 0.399,
           "Kalibr": 0.197,
           "Basalt": 0.381
          },
          "published": {
           "MVIS": {
-           "sd": 0.608,
+           "sd": 0.399,
            "n": 10
           },
           "Kalibr": {
@@ -9622,13 +9539,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.17,
+          "MVIS": 0.117,
           "Kalibr": 0.162,
           "Basalt": 0.0915
          },
          "published": {
           "MVIS": {
-           "sd": 0.17,
+           "sd": 0.117,
            "n": 10
           },
           "Kalibr": {
@@ -9648,13 +9565,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.116,
+          "MVIS": 0.0701,
           "Kalibr": 0.0489,
           "Basalt": 0.0516
          },
          "published": {
           "MVIS": {
-           "sd": 0.116,
+           "sd": 0.0701,
            "n": 10
           },
           "Kalibr": {
@@ -9673,11 +9590,11 @@
        "dropped": [],
        "reason": null,
        "chip": "Most repeatable: Kalibr",
-       "sentence": "Across the same 10 recordings, MVIS's estimates scatter about 2.7× more than Kalibr's (median over 8 parameters); Basalt's about 1.4×. A gap this large appeared in 0.39 % (MVIS) and 1.6 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
+       "sentence": "Across the same 10 recordings, MVIS's estimates scatter about 1.7× more than Kalibr's (median over 8 parameters); Basalt's about 1.4×. A gap this large appeared in 0.59 % (MVIS) and 1.6 % (Basalt) of recording-by-recording swaps. Holds with any one recording left out.",
        "aria": "Focal length + principal point, T4: more repeatable Kalibr, 1.4 times tighter than MVIS and Basalt, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [
-        "The 95 % interval of MVIS ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value.",
+        "The 95 % interval of MVIS ÷ Kalibr reaches into the tie band (0.80–1.25): the ratio shown is a point value.",
         "The 95 % interval of Kalibr ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
        ],
        "strip": "Focal + pp Kalibr",
@@ -9727,14 +9644,14 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 0.64,
-         "k": 1.56,
+         "R": 0.62,
+         "k": 1.62,
          "ci": [
-          0.33,
-          1.43
+          0.39,
+          1.13
          ],
-         "p": 0.16,
-         "p_holm": 0.31,
+         "p": 0.068,
+         "p_holm": 0.21,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
@@ -9746,19 +9663,19 @@
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 1.26,
-         "k": 1.26,
+         "R": 1.22,
+         "k": 1.22,
          "ci": [
-          0.67,
-          1.93
+          0.94,
+          1.52
          ],
-         "p": 0.29,
-         "p_holm": 0.31,
+         "p": 0.11,
+         "p_holm": 0.21,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.3"
+         "k_text": "1.2"
         },
         {
          "ci_in_tie_band": null,
@@ -9772,7 +9689,7 @@
           2.62
          ],
          "p": 0.08,
-         "p_holm": 0.24,
+         "p_holm": 0.21,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
@@ -9787,13 +9704,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00113,
+          "MVIS": 0.00109,
           "Kalibr": 0.00139,
           "Basalt": 0.000789
          },
          "published": {
           "MVIS": {
-           "sd": 0.00113,
+           "sd": 0.00109,
            "n": 10
           },
           "Kalibr": {
@@ -9813,13 +9730,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00193,
+          "MVIS": 0.00284,
           "Kalibr": 0.00481,
           "Basalt": 0.00156
          },
          "published": {
           "MVIS": {
-           "sd": 0.00193,
+           "sd": 0.00284,
            "n": 10
           },
           "Kalibr": {
@@ -9839,13 +9756,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00261,
+          "MVIS": 0.00381,
           "Kalibr": 0.00588,
           "Basalt": 0.00177
          },
          "published": {
           "MVIS": {
-           "sd": 0.00261,
+           "sd": 0.00381,
            "n": 10
           },
           "Kalibr": {
@@ -9865,13 +9782,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00128,
+          "MVIS": 0.0017,
           "Kalibr": 0.00244,
           "Basalt": 0.000639
          },
          "published": {
           "MVIS": {
-           "sd": 0.00128,
+           "sd": 0.0017,
            "n": 10
           },
           "Kalibr": {
@@ -9891,13 +9808,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00122,
+          "MVIS": 0.0011,
           "Kalibr": 0.00095,
           "Basalt": 0.00103
          },
          "published": {
           "MVIS": {
-           "sd": 0.00122,
+           "sd": 0.0011,
            "n": 10
           },
           "Kalibr": {
@@ -9917,13 +9834,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00243,
+          "MVIS": 0.00224,
           "Kalibr": 0.00393,
           "Basalt": 0.00226
          },
          "published": {
           "MVIS": {
-           "sd": 0.00243,
+           "sd": 0.00224,
            "n": 10
           },
           "Kalibr": {
@@ -9943,13 +9860,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00342,
+          "MVIS": 0.00259,
           "Kalibr": 0.00515,
           "Basalt": 0.00288
          },
          "published": {
           "MVIS": {
-           "sd": 0.00342,
+           "sd": 0.00259,
            "n": 10
           },
           "Kalibr": {
@@ -9969,13 +9886,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00161,
+          "MVIS": 0.00103,
           "Kalibr": 0.00219,
           "Basalt": 0.00126
          },
          "published": {
           "MVIS": {
-           "sd": 0.00161,
+           "sd": 0.00103,
            "n": 10
           },
           "Kalibr": {
@@ -9994,7 +9911,7 @@
        "dropped": [],
        "reason": null,
        "chip": "Tie",
-       "sentence": "The spreads of MVIS and Kalibr differ by 1.6×, but a gap this size appears often by chance with 10 recordings (p = 0.31). Treated as a tie. The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 0.31). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.8×, but a gap this size appears often by chance with 10 recordings (p = 0.24). Treated as a tie.",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.6×, but a gap this size appears often by chance with 10 recordings (p = 0.21). Treated as a tie. The spreads of MVIS and Basalt differ by 1.2×, but a gap this size appears often by chance with 10 recordings (p = 0.21). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.8×, but a gap this size appears often by chance with 10 recordings (p = 0.21). Treated as a tie.",
        "aria": "Distortion coefficients, T4: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
@@ -10043,38 +9960,38 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
-         "R": 0.68,
-         "k": 1.47,
+         "R": 0.74,
+         "k": 1.35,
          "ci": [
-          0.52,
-          1.1
+          0.56,
+          1.31
          ],
-         "p": 0.082,
-         "p_holm": 0.25,
+         "p": 0.24,
+         "p_holm": 0.72,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.5"
+         "k_text": "1.4"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
-         "R": 0.88,
-         "k": 1.13,
+         "R": 0.96,
+         "k": 1.04,
          "ci": [
-          0.6,
-          1.32
+          0.72,
+          1.57
          ],
-         "p": 0.62,
-         "p_holm": 0.63,
+         "p": 0.79,
+         "p_holm": 0.79,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.1"
+         "k_text": "1.04"
         },
         {
          "ci_in_tie_band": null,
@@ -10088,7 +10005,7 @@
           1.72
          ],
          "p": 0.32,
-         "p_holm": 0.63,
+         "p_holm": 0.72,
          "decision": "tie",
          "tie_reason": "noise",
          "loo_stable": null,
@@ -10103,13 +10020,13 @@
          "label": "baseline to Looper GS cam0",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.162,
+          "MVIS": 0.176,
           "Kalibr": 0.238,
           "Basalt": 0.183
          },
          "published": {
           "MVIS": {
-           "sd": 0.162,
+           "sd": 0.176,
            "n": 10
           },
           "Kalibr": {
@@ -10128,7 +10045,7 @@
        "dropped": [],
        "reason": null,
        "chip": "Tie",
-       "sentence": "The spreads of MVIS and Kalibr differ by 1.5×, but a gap this size appears often by chance with 10 recordings (p = 0.25). Treated as a tie. The spreads of MVIS and Basalt differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 0.63). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 0.63). Treated as a tie.",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.4×, but a gap this size appears often by chance with 10 recordings (p = 0.72). Treated as a tie. The spreads of MVIS and Basalt differ by 1.04×, but a gap this size appears often by chance with 10 recordings (p = 0.79). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 0.72). Treated as a tie.",
        "aria": "Camera–camera distance, T4: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
@@ -10145,8 +10062,8 @@
      "title": "3-cam + IMU",
      "mode": "cam+imu",
      "n_matched": [
-      3,
-      3
+      10,
+      10
      ],
      "recordings": {
       "MVIS": {
@@ -10154,7 +10071,7 @@
        "of": 10
       },
       "Kalibr": {
-       "n": 3,
+       "n": 10,
        "of": 10
       },
       "Basalt": {
@@ -10216,29 +10133,27 @@
      ],
      "cells": {
       "focal_pp": {
-       "state": "too_few",
+       "state": "tie",
        "tools": [],
        "over": [],
        "k": null,
-       "n": 3,
+       "n": 10,
        "n_all": {
-        "MVIS": 3,
+        "MVIS": 10,
         "Basalt": 10
        },
        "n_range": {
         "MVIS": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "Basalt": 7
-       },
-       "calyx_limited": true,
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -10251,13 +10166,16 @@
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 0.84,
-         "k": 1.19,
-         "ci": null,
-         "p": 0.75,
-         "p_holm": 0.75,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 0.86,
+         "k": 1.17,
+         "ci": [
+          0.68,
+          0.96
+         ],
+         "p": 0.0039,
+         "p_holm": 0.0039,
+         "decision": "tie",
+         "tie_reason": "small",
          "loo_stable": null,
          "exact": true,
          "k_text": "1.2"
@@ -10270,13 +10188,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.314,
-          "Basalt": 0.374
+          "MVIS": 0.298,
+          "Basalt": 0.347
          },
          "published": {
           "MVIS": {
-           "sd": 0.314,
-           "n": 3
+           "sd": 0.298,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.347,
@@ -10291,13 +10209,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.314,
-          "Basalt": 0.373
+          "MVIS": 0.294,
+          "Basalt": 0.343
          },
          "published": {
           "MVIS": {
-           "sd": 0.314,
-           "n": 3
+           "sd": 0.294,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.343,
@@ -10312,13 +10230,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.0965,
-          "Basalt": 0.0314
+          "MVIS": 0.0898,
+          "Basalt": 0.105
          },
          "published": {
           "MVIS": {
-           "sd": 0.0965,
-           "n": 3
+           "sd": 0.0898,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.105,
@@ -10333,13 +10251,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.049,
-          "Basalt": 0.0151
+          "MVIS": 0.0445,
+          "Basalt": 0.0332
          },
          "published": {
           "MVIS": {
-           "sd": 0.049,
-           "n": 3
+           "sd": 0.0445,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.0332,
@@ -10354,13 +10272,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.304,
-          "Basalt": 0.434
+          "MVIS": 0.293,
+          "Basalt": 0.346
          },
          "published": {
           "MVIS": {
-           "sd": 0.304,
-           "n": 3
+           "sd": 0.293,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.346,
@@ -10375,13 +10293,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.29,
-          "Basalt": 0.446
+          "MVIS": 0.278,
+          "Basalt": 0.343
          },
          "published": {
           "MVIS": {
-           "sd": 0.29,
-           "n": 3
+           "sd": 0.278,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.343,
@@ -10396,13 +10314,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.0429,
-          "Basalt": 0.109
+          "MVIS": 0.123,
+          "Basalt": 0.095
          },
          "published": {
           "MVIS": {
-           "sd": 0.0429,
-           "n": 3
+           "sd": 0.123,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.095,
@@ -10417,13 +10335,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.0456,
-          "Basalt": 0.0229
+          "MVIS": 0.0497,
+          "Basalt": 0.055
          },
          "published": {
           "MVIS": {
-           "sd": 0.0456,
-           "n": 3
+           "sd": 0.0497,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.055,
@@ -10461,40 +10379,38 @@
        ],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Focal length + principal point, T11: too few recordings (n = 3), 3 matched recordings.",
-       "limit_line": "MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has 3 here although it ran more; Kalibr's own values are input in this group.",
+       "chip": "Tie",
+       "sentence": "The gap between MVIS and Basalt is clear but under 20 % (1.2×), so it is treated as a tie.",
+       "aria": "Focal length + principal point, T11: tie, 10 matched recordings.",
+       "limit_line": null,
        "band_lines": [],
-       "strip": null,
+       "strip": "Focal + pp tie",
        "variant_line": "MVIS here: its default IMU model.",
        "k_text": null,
-       "rec_line": "MVIS 3 of 10 · Kalibr input · Basalt 10 of 10"
+       "rec_line": "MVIS 10 of 10 · Kalibr input · Basalt 10 of 10"
       },
       "distortion": {
-       "state": "too_few",
+       "state": "tie",
        "tools": [],
        "over": [],
        "k": null,
-       "n": 3,
+       "n": 10,
        "n_all": {
-        "MVIS": 3,
+        "MVIS": 10,
         "Basalt": 10
        },
        "n_range": {
         "MVIS": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "Basalt": 7
-       },
-       "calyx_limited": true,
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -10509,16 +10425,19 @@
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 1.35,
-         "k": 1.35,
-         "ci": null,
-         "p": 0.5,
-         "p_holm": 0.5,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 1.49,
+         "k": 1.49,
+         "ci": [
+          0.82,
+          2.41
+         ],
+         "p": 0.16,
+         "p_holm": 0.16,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.4"
+         "k_text": "1.5"
         }
        ],
        "params": [
@@ -10528,13 +10447,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.000705,
-          "Basalt": 0.000389
+          "MVIS": 0.00108,
+          "Basalt": 0.000831
          },
          "published": {
           "MVIS": {
-           "sd": 0.000705,
-           "n": 3
+           "sd": 0.00108,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000831,
@@ -10549,13 +10468,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.0014,
-          "Basalt": 0.00132
+          "MVIS": 0.00349,
+          "Basalt": 0.00221
          },
          "published": {
           "MVIS": {
-           "sd": 0.0014,
-           "n": 3
+           "sd": 0.00349,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.00221,
@@ -10570,13 +10489,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00204,
-          "Basalt": 0.00213
+          "MVIS": 0.00413,
+          "Basalt": 0.00272
          },
          "published": {
           "MVIS": {
-           "sd": 0.00204,
-           "n": 3
+           "sd": 0.00413,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.00272,
@@ -10591,13 +10510,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.000835,
-          "Basalt": 0.000878
+          "MVIS": 0.00156,
+          "Basalt": 0.00105
          },
          "published": {
           "MVIS": {
-           "sd": 0.000835,
-           "n": 3
+           "sd": 0.00156,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.00105,
@@ -10612,13 +10531,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00157,
-          "Basalt": 0.00147
+          "MVIS": 0.000968,
+          "Basalt": 0.000916
          },
          "published": {
           "MVIS": {
-           "sd": 0.00157,
-           "n": 3
+           "sd": 0.000968,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000916,
@@ -10633,13 +10552,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00507,
-          "Basalt": 0.00297
+          "MVIS": 0.0028,
+          "Basalt": 0.00187
          },
          "published": {
           "MVIS": {
-           "sd": 0.00507,
-           "n": 3
+           "sd": 0.0028,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.00187,
@@ -10654,13 +10573,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.00635,
-          "Basalt": 0.00356
+          "MVIS": 0.00348,
+          "Basalt": 0.00233
          },
          "published": {
           "MVIS": {
-           "sd": 0.00635,
-           "n": 3
+           "sd": 0.00348,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.00233,
@@ -10675,13 +10594,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00254,
-          "Basalt": 0.00147
+          "MVIS": 0.00139,
+          "Basalt": 0.000991
          },
          "published": {
           "MVIS": {
-           "sd": 0.00254,
-           "n": 3
+           "sd": 0.00139,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000991,
@@ -10719,40 +10638,42 @@
        ],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Distortion coefficients, T11: too few recordings (n = 3), 3 matched recordings.",
-       "limit_line": "MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has 3 here although it ran more; Kalibr's own values are input in this group.",
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Basalt differ by 1.5×, but a gap this size appears often by chance with 10 recordings (p = 0.16). Treated as a tie.",
+       "aria": "Distortion coefficients, T11: tie, 10 matched recordings.",
+       "limit_line": null,
        "band_lines": [],
-       "strip": null,
+       "strip": "Distortion tie",
        "variant_line": "MVIS here: its default IMU model.",
        "k_text": null,
-       "rec_line": "MVIS 3 of 10 · Kalibr input · Basalt 10 of 10"
+       "rec_line": "MVIS 10 of 10 · Kalibr input · Basalt 10 of 10"
       },
       "baseline": {
-       "state": "too_few",
-       "tools": [],
-       "over": [],
-       "k": null,
-       "n": 3,
+       "state": "most",
+       "tools": [
+        "Basalt"
+       ],
+       "over": [
+        "MVIS"
+       ],
+       "k": 1.31,
+       "n": 10,
        "n_all": {
-        "MVIS": 3,
+        "MVIS": 10,
         "Basalt": 10
        },
        "n_range": {
         "MVIS": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "Basalt": 7
-       },
-       "calyx_limited": true,
+       "unmatched": {},
+       "calyx_limited": false,
        "compared": [
         "MVIS",
         "Basalt"
@@ -10761,20 +10682,23 @@
        "caveats": [],
        "pairs": [
         {
-         "ci_in_tie_band": null,
+         "ci_in_tie_band": true,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
-         "R": 0.57,
-         "k": 1.75,
-         "ci": null,
-         "p": 0.5,
-         "p_holm": 0.5,
-         "decision": "too_few",
+         "R": 1.31,
+         "k": 1.31,
+         "ci": [
+          1.07,
+          2.08
+         ],
+         "p": 0.012,
+         "p_holm": 0.012,
+         "decision": "b",
          "tie_reason": null,
-         "loo_stable": null,
+         "loo_stable": false,
          "exact": true,
-         "k_text": "1.7"
+         "k_text": "1.3"
         }
        ],
        "params": [
@@ -10784,13 +10708,13 @@
          "label": "baseline to Looper GS cam0",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.0535,
-          "Basalt": 0.0936
+          "MVIS": 0.225,
+          "Basalt": 0.171
          },
          "published": {
           "MVIS": {
-           "sd": 0.0535,
-           "n": 3
+           "sd": 0.225,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.171,
@@ -10828,15 +10752,17 @@
        ],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Camera–camera distance, T11: too few recordings (n = 3), 3 matched recordings.",
-       "limit_line": "MVIS default-IMU-model values are held only for the recordings Kalibr also solved, so MVIS has 3 here although it ran more; Kalibr's own values are input in this group.",
-       "band_lines": [],
-       "strip": null,
+       "chip": "More repeatable: Basalt",
+       "sentence": "Across the same 10 recordings, MVIS's estimates scatter about 1.3× more than Basalt's (median over 1 parameters). A gap this large appeared in 1.2 % of recording-by-recording swaps. Depends on one recording.",
+       "aria": "Camera–camera distance, T11: more repeatable Basalt, 1.3 times tighter than MVIS, 10 matched recordings.",
+       "limit_line": null,
+       "band_lines": [
+        "The 95 % interval of MVIS ÷ Basalt reaches into the tie band (0.80–1.25): the ratio shown is a point value."
+       ],
+       "strip": "Distance Basalt",
        "variant_line": "MVIS here: its default IMU model.",
-       "k_text": null,
-       "rec_line": "MVIS 3 of 10 · Kalibr input · Basalt 10 of 10"
+       "k_text": "1.3",
+       "rec_line": "MVIS 10 of 10 · Kalibr input · Basalt 10 of 10"
       },
       "readout": {
        "state": "single",
@@ -10888,33 +10814,31 @@
        "rec_line": "MVIS only · Kalibr no value · Basalt no value"
       },
       "time_offset": {
-       "state": "too_few",
+       "state": "tie",
        "tools": [],
        "over": [],
        "k": null,
-       "n": 3,
+       "n": 10,
        "n_all": {
-        "MVIS": 3,
-        "Kalibr": 3,
+        "MVIS": 10,
+        "Kalibr": 10,
         "Basalt": 10
        },
        "n_range": {
         "MVIS": [
-         3,
-         3
+         10,
+         10
         ],
         "Kalibr": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "Basalt": 7
-       },
+       "unmatched": {},
        "calyx_limited": false,
        "compared": [
         "MVIS",
@@ -10923,7 +10847,6 @@
        ],
        "mvis_variant": "default",
        "caveats": [
-        "kalibr_seeded",
         "mvis_tga"
        ],
        "pairs": [
@@ -10932,29 +10855,35 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
-         "R": 0.76,
-         "k": 1.32,
-         "ci": null,
-         "p": 0.5,
-         "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 0.93,
+         "k": 1.08,
+         "ci": [
+          0.32,
+          1.9
+         ],
+         "p": 0.77,
+         "p_holm": 0.9,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.3"
+         "k_text": "1.1"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
-         "R": 0.77,
-         "k": 1.29,
-         "ci": null,
-         "p": 0.5,
-         "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 1.3,
+         "k": 1.3,
+         "ci": [
+          0.6,
+          2.15
+         ],
+         "p": 0.45,
+         "p_holm": 0.9,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
          "k_text": "1.3"
@@ -10964,16 +10893,19 @@
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
-         "R": 1.02,
-         "k": 1.02,
-         "ci": null,
-         "p": 0.25,
-         "p_holm": 0.75,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 1.4,
+         "k": 1.4,
+         "ci": [
+          0.94,
+          2.06
+         ],
+         "p": 0.059,
+         "p_holm": 0.18,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.02"
+         "k_text": "1.4"
         }
        ],
        "params": [
@@ -10983,18 +10915,18 @@
          "label": "time offset td to base IMU",
          "unit": "ms",
          "sd": {
-          "MVIS": 0.102,
-          "Kalibr": 0.143,
-          "Basalt": 0.145
+          "MVIS": 0.134,
+          "Kalibr": 0.138,
+          "Basalt": 0.1
          },
          "published": {
           "MVIS": {
-           "sd": 0.102,
-           "n": 3
+           "sd": 0.134,
+           "n": 10
           },
           "Kalibr": {
-           "sd": 0.143,
-           "n": 3
+           "sd": 0.138,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.1,
@@ -11009,18 +10941,18 @@
          "label": "time offset td to base IMU",
          "unit": "ms",
          "sd": {
-          "MVIS": 0.124,
-          "Kalibr": 0.154,
-          "Basalt": 0.145
+          "MVIS": 0.127,
+          "Kalibr": 0.144,
+          "Basalt": 0.1
          },
          "published": {
           "MVIS": {
-           "sd": 0.124,
-           "n": 3
+           "sd": 0.127,
+           "n": 10
           },
           "Kalibr": {
-           "sd": 0.154,
-           "n": 3
+           "sd": 0.144,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.1,
@@ -11052,44 +10984,42 @@
        ],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Camera–IMU time offset, T11: too few recordings (n = 3), 3 matched recordings.",
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 0.9). Treated as a tie. The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 0.9). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.4×, but a gap this size appears often by chance with 10 recordings (p = 0.18). Treated as a tie.",
+       "aria": "Camera–IMU time offset, T11: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
-       "strip": null,
+       "strip": "Time offset tie",
        "variant_line": "MVIS here: its default IMU model.",
        "k_text": null,
-       "rec_line": "MVIS 3 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "lever": {
-       "state": "too_few",
+       "state": "tie",
        "tools": [],
        "over": [],
        "k": null,
-       "n": 3,
+       "n": 10,
        "n_all": {
-        "MVIS": 3,
-        "Kalibr": 3,
+        "MVIS": 10,
+        "Kalibr": 10,
         "Basalt": 10
        },
        "n_range": {
         "MVIS": [
-         3,
-         3
+         10,
+         10
         ],
         "Kalibr": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "Basalt": 7
-       },
+       "unmatched": {},
        "calyx_limited": false,
        "compared": [
         "MVIS",
@@ -11097,54 +11027,61 @@
         "Basalt"
        ],
        "mvis_variant": "default",
-       "caveats": [
-        "kalibr_seeded"
-       ],
+       "caveats": [],
        "pairs": [
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 2,
-         "R": 0.68,
-         "k": 1.48,
-         "ci": null,
-         "p": 1.0,
+         "R": 1.12,
+         "k": 1.12,
+         "ci": [
+          0.55,
+          1.81
+         ],
+         "p": 0.76,
          "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.5"
+         "k_text": "1.1"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 2,
-         "R": 0.74,
-         "k": 1.36,
-         "ci": null,
-         "p": 1.0,
+         "R": 1.28,
+         "k": 1.28,
+         "ci": [
+          0.54,
+          2.27
+         ],
+         "p": 0.56,
          "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.4"
+         "k_text": "1.3"
         },
         {
          "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 2,
-         "R": 1.09,
-         "k": 1.09,
-         "ci": null,
-         "p": 0.75,
+         "R": 1.15,
+         "k": 1.15,
+         "ci": [
+          0.77,
+          1.82
+         ],
+         "p": 0.43,
          "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
          "k_text": "1.1"
@@ -11157,18 +11094,18 @@
          "label": "distance to base IMU ‖p‖",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.075,
-          "Kalibr": 0.38,
-          "Basalt": 0.294
+          "MVIS": 0.386,
+          "Kalibr": 0.472,
+          "Basalt": 0.318
          },
          "published": {
           "MVIS": {
-           "sd": 0.075,
-           "n": 3
+           "sd": 0.386,
+           "n": 10
           },
           "Kalibr": {
-           "sd": 0.38,
-           "n": 3
+           "sd": 0.472,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.318,
@@ -11183,18 +11120,18 @@
          "label": "distance to base IMU ‖p‖",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.417,
-          "Kalibr": 0.18,
-          "Basalt": 0.197
+          "MVIS": 0.352,
+          "Kalibr": 0.23,
+          "Basalt": 0.26
          },
          "published": {
           "MVIS": {
-           "sd": 0.417,
-           "n": 3
+           "sd": 0.352,
+           "n": 10
           },
           "Kalibr": {
-           "sd": 0.18,
-           "n": 3
+           "sd": 0.23,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.26,
@@ -11226,25 +11163,25 @@
        ],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Camera–IMU distance, T11: too few recordings (n = 3), 3 matched recordings.",
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 1). Treated as a tie. The spreads of MVIS and Basalt differ by 1.3×, but a gap this size appears often by chance with 10 recordings (p = 1). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 1). Treated as a tie.",
+       "aria": "Camera–IMU distance, T11: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
-       "strip": null,
+       "strip": "Cam–IMU distance tie",
        "variant_line": "MVIS here: its default IMU model.",
        "k_text": null,
-       "rec_line": "MVIS 3 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "gyro": {
-       "state": "too_few",
+       "state": "tie",
        "tools": [],
        "over": [],
        "k": null,
-       "n": 3,
+       "n": 10,
        "n_all": {
         "MVIS": 10,
-        "Kalibr": 3,
+        "Kalibr": 10,
         "Basalt": 10
        },
        "n_range": {
@@ -11253,18 +11190,15 @@
          10
         ],
         "Kalibr": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "MVIS": 7,
-        "Basalt": 7
-       },
+       "unmatched": {},
        "calyx_limited": false,
        "compared": [
         "MVIS",
@@ -11273,7 +11207,6 @@
        ],
        "mvis_variant": "kalibr_imu",
        "caveats": [
-        "kalibr_seeded",
         "kimu"
        ],
        "pairs": [
@@ -11282,13 +11215,16 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 6,
-         "R": 0.9,
-         "k": 1.11,
-         "ci": null,
-         "p": 0.25,
-         "p_holm": 0.75,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 1.05,
+         "k": 1.05,
+         "ci": [
+          0.69,
+          1.45
+         ],
+         "p": 0.78,
+         "p_holm": 1.0,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
          "k_text": "1.1"
@@ -11298,32 +11234,38 @@
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 6,
-         "R": 1.04,
-         "k": 1.04,
-         "ci": null,
-         "p": 1.0,
+         "R": 1.08,
+         "k": 1.08,
+         "ci": [
+          0.72,
+          1.49
+         ],
+         "p": 0.59,
          "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.04"
+         "k_text": "1.1"
         },
         {
          "ci_in_tie_band": null,
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 6,
-         "R": 0.93,
-         "k": 1.07,
-         "ci": null,
-         "p": 1.0,
+         "R": 1.0,
+         "k": 1.0,
+         "ci": [
+          0.88,
+          1.15
+         ],
+         "p": 0.97,
          "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.1"
+         "k_text": "1.00"
         }
        ],
        "params": [
@@ -11333,18 +11275,18 @@
          "label": "gyro Dw[0,0] scale x",
          "unit": "",
          "sd": {
-          "MVIS": 0.000465,
-          "Kalibr": 0.000731,
-          "Basalt": 0.000872
+          "MVIS": 0.00119,
+          "Kalibr": 0.00117,
+          "Basalt": 0.0011
          },
          "published": {
           "MVIS": {
-           "sd": 0.00133,
+           "sd": 0.00119,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000731,
-           "n": 3
+           "sd": 0.00117,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.0011,
@@ -11359,18 +11301,18 @@
          "label": "gyro Dw[1,1] scale y",
          "unit": "",
          "sd": {
-          "MVIS": 0.00112,
-          "Kalibr": 0.0012,
-          "Basalt": 0.000917
+          "MVIS": 0.000848,
+          "Kalibr": 0.000612,
+          "Basalt": 0.000653
          },
          "published": {
           "MVIS": {
-           "sd": 0.0014,
+           "sd": 0.000848,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.0012,
-           "n": 3
+           "sd": 0.000612,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000653,
@@ -11385,18 +11327,18 @@
          "label": "gyro Dw[2,2] scale z",
          "unit": "",
          "sd": {
-          "MVIS": 0.000362,
-          "Kalibr": 0.000214,
-          "Basalt": 0.000253
+          "MVIS": 0.000307,
+          "Kalibr": 0.000313,
+          "Basalt": 0.000284
          },
          "published": {
           "MVIS": {
-           "sd": 0.000367,
+           "sd": 0.000307,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000214,
-           "n": 3
+           "sd": 0.000313,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000284,
@@ -11411,18 +11353,18 @@
          "label": "gyro Dw[1,0] cross",
          "unit": "",
          "sd": {
-          "MVIS": 0.00158,
-          "Kalibr": 0.0013,
-          "Basalt": 0.000881
+          "MVIS": 0.00108,
+          "Kalibr": 0.000721,
+          "Basalt": 0.000641
          },
          "published": {
           "MVIS": {
-           "sd": 0.00123,
+           "sd": 0.00108,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.0013,
-           "n": 3
+           "sd": 0.000721,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000641,
@@ -11437,18 +11379,18 @@
          "label": "gyro Dw[2,0] cross",
          "unit": "",
          "sd": {
-          "MVIS": 0.000137,
-          "Kalibr": 0.000513,
-          "Basalt": 0.000603
+          "MVIS": 0.000321,
+          "Kalibr": 0.000638,
+          "Basalt": 0.000924
          },
          "published": {
           "MVIS": {
-           "sd": 0.000888,
+           "sd": 0.000321,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000513,
-           "n": 3
+           "sd": 0.000638,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000924,
@@ -11463,18 +11405,18 @@
          "label": "gyro Dw[2,1] cross",
          "unit": "",
          "sd": {
-          "MVIS": 0.000889,
-          "Kalibr": 0.00102,
-          "Basalt": 0.000996
+          "MVIS": 0.000723,
+          "Kalibr": 0.000669,
+          "Basalt": 0.000731
          },
          "published": {
           "MVIS": {
-           "sd": 0.00165,
+           "sd": 0.000723,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.00102,
-           "n": 3
+           "sd": 0.000669,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000731,
@@ -11487,25 +11429,25 @@
        "excluded": [],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Gyro scale + cross-axis, T11: too few recordings (n = 3), 3 matched recordings.",
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 1). Treated as a tie. The spreads of MVIS and Basalt differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 1). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.00×, but a gap this size appears often by chance with 10 recordings (p = 1). Treated as a tie.",
+       "aria": "Gyro scale + cross-axis, T11: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
-       "strip": null,
+       "strip": "Gyro tie",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
        "k_text": null,
-       "rec_line": "MVIS 10 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       },
       "accel": {
-       "state": "too_few",
+       "state": "tie",
        "tools": [],
        "over": [],
        "k": null,
-       "n": 3,
+       "n": 10,
        "n_all": {
         "MVIS": 10,
-        "Kalibr": 3,
+        "Kalibr": 10,
         "Basalt": 10
        },
        "n_range": {
@@ -11514,18 +11456,15 @@
          10
         ],
         "Kalibr": [
-         3,
-         3
+         10,
+         10
         ],
         "Basalt": [
          10,
          10
         ]
        },
-       "unmatched": {
-        "MVIS": 7,
-        "Basalt": 7
-       },
+       "unmatched": {},
        "calyx_limited": false,
        "compared": [
         "MVIS",
@@ -11534,7 +11473,6 @@
        ],
        "mvis_variant": "kalibr_imu",
        "caveats": [
-        "kalibr_seeded",
         "kimu"
        ],
        "pairs": [
@@ -11543,13 +11481,16 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 3,
-         "R": 1.13,
-         "k": 1.13,
-         "ci": null,
-         "p": 1.0,
-         "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 0.93,
+         "k": 1.07,
+         "ci": [
+          0.73,
+          1.28
+         ],
+         "p": 0.47,
+         "p_holm": 0.73,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
          "k_text": "1.1"
@@ -11559,13 +11500,16 @@
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 3,
-         "R": 0.83,
-         "k": 1.2,
-         "ci": null,
-         "p": 0.25,
-         "p_holm": 0.75,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 0.84,
+         "k": 1.19,
+         "ci": [
+          0.49,
+          1.17
+         ],
+         "p": 0.35,
+         "p_holm": 0.73,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
          "k_text": "1.2"
@@ -11575,16 +11519,19 @@
          "a": "Kalibr",
          "b": "Basalt",
          "n_params": 3,
-         "R": 0.82,
-         "k": 1.21,
-         "ci": null,
-         "p": 0.5,
-         "p_holm": 1.0,
-         "decision": "too_few",
-         "tie_reason": null,
+         "R": 0.95,
+         "k": 1.05,
+         "ci": [
+          0.83,
+          1.12
+         ],
+         "p": 0.24,
+         "p_holm": 0.73,
+         "decision": "tie",
+         "tie_reason": "noise",
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.2"
+         "k_text": "1.1"
         }
        ],
        "params": [
@@ -11594,18 +11541,18 @@
          "label": "accel Da[0,0] scale x",
          "unit": "",
          "sd": {
-          "MVIS": 0.000332,
-          "Kalibr": 0.000199,
-          "Basalt": 0.000119
+          "MVIS": 0.000387,
+          "Kalibr": 0.000413,
+          "Basalt": 0.000459
          },
          "published": {
           "MVIS": {
-           "sd": 0.000464,
+           "sd": 0.000387,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000199,
-           "n": 3
+           "sd": 0.000413,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000459,
@@ -11620,18 +11567,18 @@
          "label": "accel Da[1,1] scale y",
          "unit": "",
          "sd": {
-          "MVIS": 0.000209,
-          "Kalibr": 0.000398,
-          "Basalt": 0.000483
+          "MVIS": 0.000326,
+          "Kalibr": 0.000479,
+          "Basalt": 0.000504
          },
          "published": {
           "MVIS": {
-           "sd": 0.000208,
+           "sd": 0.000326,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000398,
-           "n": 3
+           "sd": 0.000479,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.000504,
@@ -11646,18 +11593,18 @@
          "label": "accel Da[2,2] scale z",
          "unit": "",
          "sd": {
-          "MVIS": 0.000267,
-          "Kalibr": 0.000236,
-          "Basalt": 0.00032
+          "MVIS": 0.00155,
+          "Kalibr": 0.0016,
+          "Basalt": 0.00128
          },
          "published": {
           "MVIS": {
-           "sd": 0.00176,
+           "sd": 0.00155,
            "n": 10
           },
           "Kalibr": {
-           "sd": 0.000236,
-           "n": 3
+           "sd": 0.0016,
+           "n": 10
           },
           "Basalt": {
            "sd": 0.00128,
@@ -11670,15 +11617,15 @@
        "excluded": [],
        "dropped": [],
        "reason": null,
-       "chip": "Too few recordings (n = 3)",
-       "sentence": "Only 3 recordings hold values from every compared tool. With 3 recordings the smallest possible p is 0.25, so no gap can be decided. Ratios are shown for reference only.",
-       "aria": "Accel scale, T11: too few recordings (n = 3), 3 matched recordings.",
+       "chip": "Tie",
+       "sentence": "The spreads of MVIS and Kalibr differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 0.73). Treated as a tie. The spreads of MVIS and Basalt differ by 1.2×, but a gap this size appears often by chance with 10 recordings (p = 0.73). Treated as a tie. The spreads of Kalibr and Basalt differ by 1.1×, but a gap this size appears often by chance with 10 recordings (p = 0.73). Treated as a tie.",
+       "aria": "Accel scale, T11: tie, 10 matched recordings.",
        "limit_line": null,
        "band_lines": [],
-       "strip": null,
+       "strip": "Accel tie",
        "variant_line": "MVIS here: its run with Kalibr's IMU model (K-IMU).",
        "k_text": null,
-       "rec_line": "MVIS 10 of 10 · Kalibr 3 of 10 · Basalt 10 of 10"
+       "rec_line": "MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10"
       }
      }
     }
@@ -11762,32 +11709,32 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 1.25,
-         "k": 1.25,
+         "R": 0.69,
+         "k": 1.46,
          "ci": null,
-         "p": 0.62,
+         "p": 0.38,
          "p_holm": 1.0,
          "decision": "too_few",
          "tie_reason": null,
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.2"
+         "k_text": "1.5"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 2.27,
-         "k": 2.27,
+         "R": 0.72,
+         "k": 1.39,
          "ci": null,
-         "p": 0.12,
-         "p_holm": 0.38,
+         "p": 0.38,
+         "p_holm": 1.0,
          "decision": "too_few",
          "tie_reason": null,
          "loo_stable": null,
          "exact": true,
-         "k_text": "2.3"
+         "k_text": "1.4"
         },
         {
          "ci_in_tie_band": null,
@@ -11813,13 +11760,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.562,
+          "MVIS": 0.0452,
           "Kalibr": 0.803,
           "Basalt": 0.175
          },
          "published": {
           "MVIS": {
-           "sd": 0.562,
+           "sd": 0.0452,
            "n": 4
           },
           "Kalibr": {
@@ -11839,13 +11786,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.565,
+          "MVIS": 0.0771,
           "Kalibr": 0.758,
           "Basalt": 0.154
          },
          "published": {
           "MVIS": {
-           "sd": 0.565,
+           "sd": 0.0771,
            "n": 4
           },
           "Kalibr": {
@@ -11865,13 +11812,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.24,
+          "MVIS": 0.225,
           "Kalibr": 0.329,
           "Basalt": 0.334
          },
          "published": {
           "MVIS": {
-           "sd": 0.24,
+           "sd": 0.225,
            "n": 4
           },
           "Kalibr": {
@@ -11891,13 +11838,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.439,
+          "MVIS": 0.187,
           "Kalibr": 0.186,
           "Basalt": 0.221
          },
          "published": {
           "MVIS": {
-           "sd": 0.439,
+           "sd": 0.187,
            "n": 4
           },
           "Kalibr": {
@@ -11917,13 +11864,13 @@
          "label": "fx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.436,
+          "MVIS": 0.176,
           "Kalibr": 0.096,
           "Basalt": 0.167
          },
          "published": {
           "MVIS": {
-           "sd": 0.436,
+           "sd": 0.176,
            "n": 4
           },
           "Kalibr": {
@@ -11943,13 +11890,13 @@
          "label": "fy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.463,
+          "MVIS": 0.152,
           "Kalibr": 0.112,
           "Basalt": 0.163
          },
          "published": {
           "MVIS": {
-           "sd": 0.463,
+           "sd": 0.152,
            "n": 4
           },
           "Kalibr": {
@@ -11969,13 +11916,13 @@
          "label": "cx",
          "unit": "px",
          "sd": {
-          "MVIS": 0.363,
+          "MVIS": 0.235,
           "Kalibr": 0.341,
           "Basalt": 0.306
          },
          "published": {
           "MVIS": {
-           "sd": 0.363,
+           "sd": 0.235,
            "n": 4
           },
           "Kalibr": {
@@ -11995,13 +11942,13 @@
          "label": "cy",
          "unit": "px",
          "sd": {
-          "MVIS": 0.421,
+          "MVIS": 0.159,
           "Kalibr": 0.288,
           "Basalt": 0.275
          },
          "published": {
           "MVIS": {
-           "sd": 0.421,
+           "sd": 0.159,
            "n": 4
           },
           "Kalibr": {
@@ -12071,8 +12018,8 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 8,
-         "R": 0.21,
-         "k": 4.71,
+         "R": 0.23,
+         "k": 4.38,
          "ci": null,
          "p": 0.12,
          "p_holm": 0.38,
@@ -12080,15 +12027,15 @@
          "tie_reason": null,
          "loo_stable": null,
          "exact": true,
-         "k_text": "4.7"
+         "k_text": "4.4"
         },
         {
          "ci_in_tie_band": null,
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 8,
-         "R": 2.84,
-         "k": 2.84,
+         "R": 2.55,
+         "k": 2.55,
          "ci": null,
          "p": 0.12,
          "p_holm": 0.38,
@@ -12096,7 +12043,7 @@
          "tie_reason": null,
          "loo_stable": null,
          "exact": true,
-         "k_text": "2.8"
+         "k_text": "2.5"
         },
         {
          "ci_in_tie_band": null,
@@ -12122,13 +12069,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00179,
+          "MVIS": 0.00215,
           "Kalibr": 0.0313,
           "Basalt": 0.00202
          },
          "published": {
           "MVIS": {
-           "sd": 0.00179,
+           "sd": 0.00215,
            "n": 4
           },
           "Kalibr": {
@@ -12148,13 +12095,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.00783,
+          "MVIS": 0.00772,
           "Kalibr": 0.111,
           "Basalt": 0.00381
          },
          "published": {
           "MVIS": {
-           "sd": 0.00783,
+           "sd": 0.00772,
            "n": 4
           },
           "Kalibr": {
@@ -12174,13 +12121,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.0122,
+          "MVIS": 0.0113,
           "Kalibr": 0.15,
           "Basalt": 0.00445
          },
          "published": {
           "MVIS": {
-           "sd": 0.0122,
+           "sd": 0.0113,
            "n": 4
           },
           "Kalibr": {
@@ -12200,13 +12147,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.00619,
+          "MVIS": 0.00538,
           "Kalibr": 0.0678,
           "Basalt": 0.0021
          },
          "published": {
           "MVIS": {
-           "sd": 0.00619,
+           "sd": 0.00538,
            "n": 4
           },
           "Kalibr": {
@@ -12226,13 +12173,13 @@
          "label": "dist k1",
          "unit": "",
          "sd": {
-          "MVIS": 0.00234,
+          "MVIS": 0.0031,
           "Kalibr": 0.00473,
           "Basalt": 0.00125
          },
          "published": {
           "MVIS": {
-           "sd": 0.00234,
+           "sd": 0.0031,
            "n": 4
           },
           "Kalibr": {
@@ -12252,13 +12199,13 @@
          "label": "dist k2",
          "unit": "",
          "sd": {
-          "MVIS": 0.0145,
+          "MVIS": 0.0136,
           "Kalibr": 0.0166,
           "Basalt": 0.00323
          },
          "published": {
           "MVIS": {
-           "sd": 0.0145,
+           "sd": 0.0136,
            "n": 4
           },
           "Kalibr": {
@@ -12278,13 +12225,13 @@
          "label": "dist k3",
          "unit": "",
          "sd": {
-          "MVIS": 0.024,
+          "MVIS": 0.0201,
           "Kalibr": 0.022,
           "Basalt": 0.00457
          },
          "published": {
           "MVIS": {
-           "sd": 0.024,
+           "sd": 0.0201,
            "n": 4
           },
           "Kalibr": {
@@ -12304,13 +12251,13 @@
          "label": "dist k4",
          "unit": "",
          "sd": {
-          "MVIS": 0.0122,
+          "MVIS": 0.00944,
           "Kalibr": 0.00978,
           "Basalt": 0.00224
          },
          "published": {
           "MVIS": {
-           "sd": 0.0122,
+           "sd": 0.00944,
            "n": 4
           },
           "Kalibr": {
@@ -12378,11 +12325,11 @@
          "a": "MVIS",
          "b": "Kalibr",
          "n_params": 1,
-         "R": 0.87,
-         "k": 1.16,
+         "R": 1.19,
+         "k": 1.19,
          "ci": null,
-         "p": 0.38,
-         "p_holm": 0.75,
+         "p": 0.62,
+         "p_holm": 1.0,
          "decision": "too_few",
          "tie_reason": null,
          "loo_stable": null,
@@ -12394,16 +12341,16 @@
          "a": "MVIS",
          "b": "Basalt",
          "n_params": 1,
-         "R": 0.92,
-         "k": 1.08,
+         "R": 1.28,
+         "k": 1.28,
          "ci": null,
-         "p": 0.75,
-         "p_holm": 0.75,
+         "p": 0.5,
+         "p_holm": 1.0,
          "decision": "too_few",
          "tie_reason": null,
          "loo_stable": null,
          "exact": true,
-         "k_text": "1.1"
+         "k_text": "1.3"
         },
         {
          "ci_in_tie_band": null,
@@ -12429,13 +12376,13 @@
          "label": "baseline to Reverb G2 cam0",
          "unit": "mm",
          "sd": {
-          "MVIS": 0.0371,
+          "MVIS": 0.0513,
           "Kalibr": 0.0429,
           "Basalt": 0.0402
          },
          "published": {
           "MVIS": {
-           "sd": 0.0371,
+           "sd": 0.0513,
            "n": 4
           },
           "Kalibr": {

@@ -91,12 +91,10 @@ INPUT_TEXT_SEED = ("{tool}'s camera+IMU run starts from these values, from one M
 
 CAVEATS = {
     "dist_tradeoff": "Coefficients trade off against each other, so their scatter can overstate differences in the lens mapping.",
-    "mvis_from_camimu": "MVIS values come from the T6 camera+IMU solve, not a camera-only run; not like-for-like.",
     "settings_differ": "Data settings still differ between the tools on this family.",
     "kalibr_seeded": "Kalibr starts from MVIS camera values for each recording; its spread here includes the spread of that input.",
     "kalibr_gs_elp": "Kalibr ran ELP-L as a global-shutter camera with its stamps shifted by the MVIS td of each recording, so the ELP-L rows are left out here.",
     "kalibr_old_seed": "Kalibr's t265 fisheye 1 intrinsics came from an older MVIS export.",
-    "kalibr_view_filtered": "Kalibr ran on view-filtered bags (≤ 85°); MVIS and Basalt ran on the full bags.",
     "basalt_snapped": "Basalt's fisheye-2 frames are snapped onto fisheye-1 (1.8–5 ms apart).",
     "kimu": "MVIS here uses Kalibr's IMU model, so the gyro and accel terms mean the same thing in both tools.",
     "mvis_tga": "MVIS also fits a gyro–accel delay (t_ga) that Kalibr and Basalt do not, so its td is not quite the same quantity.",
@@ -105,14 +103,14 @@ CAVEATS = {
 _ALL = tuple(g for g, *_ in GROUPS)
 _CAM_IMU = ("time_offset", "lever", "gyro", "accel")
 # (caveat, families, groups, needs Basalt compared); a test checks every family and group named here exists.
+# Since batch 2026-11-07a: T3 all tools on the ≤ 85° bags, Kalibr T6 + T11 from its own camera calibration, T6c MVIS
+# camera-only (so kalibr_view_filtered, kalibr_seeded on T6 / T11 and mvis_from_camimu no longer apply).
 CAVEAT_RULES = (
     ("dist_tradeoff", None, ("distortion",), False),
-    ("mvis_from_camimu", ("T6c",), _ALL, False),
     ("settings_differ", ("T6", "T7", "T8"), _ALL, False),
-    ("kalibr_seeded", ("T6", "T7", "T11", "T12"), _CAM_IMU, False),
+    ("kalibr_seeded", ("T7", "T12"), _CAM_IMU, False),
     ("kalibr_gs_elp", ("T7",), ("time_offset", "lever"), False),
     ("kalibr_old_seed", ("T7",), _CAM_IMU, False),
-    ("kalibr_view_filtered", ("T3",), _ALL, False),
     ("basalt_snapped", ("T1", "T6c"), _ALL, True),
     ("kimu", "camimu", IMU_GROUPS, False),
     ("mvis_tga", "camimu", ("time_offset",), False),
