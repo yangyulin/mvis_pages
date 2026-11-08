@@ -53,7 +53,7 @@ sensors:
   looper-insight9:
     group: cameras
     title: LooperRobotics Insight 9
-    description: Two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU, calibrated with MVIS on a chessboard recording of our own unit and on 10 hand-held and 2 robot-arm recordings.
+    description: Two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU, calibrated with MVIS on 4 chessboard recordings of our own unit and on 10 hand-held and 2 robot-arm recordings.
     lead: Sensor head from Looper Robotics with two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU. Our own unit on a chessboard, and the hand-held and robot-arm recordings, are shown separately.
     chips: [Global + rolling shutter, 3 cameras, 400 Hz IMU, Chessboard + hand-held + robot arm, Hand-held data CC BY-NC 4.0]
     example: {url: "/examples/looper-sa16/", label: "Looper SA16"}
@@ -65,7 +65,7 @@ sensors:
     card: {name: "Insight 9", tags: [Global + rolling shutter, 3 cameras, 400 Hz IMU], sensors: "2 mono + 1 rolling-shutter colour + IMU @ 400 Hz", format: "ROS bag → EuRoC mav0", shows: "Repeatability across 10 hand-held and 2 robot-arm recordings"}
     demo:
       by_variant:
-        - {from: "looper-insight9-chessboard_small", note: "The 3D scene MVIS recovered from the chessboard recording of our own unit. Everything except the board is blurred."}
+        - {from: "looper-insight9-chessboard_small", note: "The 3D scene MVIS recovered from chessboard take 04 of our own unit. Everything except the board is blurred."}
         - {from: "looper-insight9-arm_small", note: "The 3D scene MVIS recovered from robot-arm recording 1."}
         - {from: "looper-insight9-arm_small", note: "The 3D scene MVIS recovered from robot-arm recording 1."}
     hardware:
@@ -76,7 +76,7 @@ sensors:
       - [IMU, "1 × 400 Hz, with stamps quantized to 2.5 ms", Catalog]
       - [Sensor part numbers, Not recorded, Unknown]
     dataset:
-      - [Chessboard, "1 recording of 42 s, our own unit, taken warm (55 °C)"]
+      - [Chessboard, "4 recordings of 36 to 61 s, our own unit: takes 01 to 03 warm (41 to 43 °C), take 04 at 55 °C. This page shows take 04"]
       - [Chessboard data, "__HUB:community/looper-insight9/data/__, takes 01 to 04 (this page shows take 04). Everything except the board is blurred. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
       - [Hand-held, "10 of about 66 s, 15.0 GB in all"]
       - [Hand-held data, "__LINK__. CC BY-NC 4.0, for the hand-held data, clip and figures; commercial use by request"]
@@ -85,20 +85,20 @@ sensors:
       - [Board, "Chessboard: 10×7 squares (9×6 inner corners), 43.47 mm, shown on a monitor. Hand-held and robot arm: AprilGrid 6×6, tag 55 mm, spacing 0.3, t36h11"]
       - [Configs and results, "__HUB:community/looper-insight9/__"]
     folder: looper-insight9/
-    method: "Camera + IMU with camera intrinsics free, t_ga on and the cam2 rolling-shutter readout estimated. Chessboard recording of 2026-11-07; hand-held batch of 2026-11-02; robot-arm batch of 2026-11-04."
+    method: "Camera + IMU with camera intrinsics free, t_ga on and the cam2 rolling-shutter readout estimated. Chessboard recordings of 2026-11-07; hand-held batch of 2026-11-02; robot-arm batch of 2026-11-04."
     limits:
       - No reference exists for these recordings, so the tables show repeatability, not accuracy.
       - Hand-held and robot-arm recordings are kept apart, not pooled. They were solved in different batches and may not come from the same unit.
       - Lever arms differ by about 3 mm in y and z, 4.5 to 5 mm in all, between the two sets. The arm program rotates mostly about one axis, which leaves lever arms less well determined, so treat the arm's values with more caution.
       - The colour camera's td differs by about 1.8 ms between the two sets, and the cause isn't established.
       - Robot-arm repeatability rests on 2 recordings.
-      - The chessboard recording comes from our own unit, not the partner's, and is shown on its own. It is one warm recording, so it shows no repeatability.
+      - The chessboard recordings come from our own unit, not the partner's, and are shown on their own. The values shown come from take 04 alone, so they show no repeatability; all 4 takes are in the hosted data.
     header:
       type: "Spatial AI camera: stereo pair, rolling-shutter colour camera, 6-axis IMU, VIO"
       maker: {name: LooperRobotics, url: "https://looper-robotics.com/"}
       links: {product: "https://looper-robotics.com/home/product/insight-9/"}
       image: {kind: photo, file: looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page", url: "https://looper-robotics.com/home/product/insight-9/"}
-      foot: "Maker values checked 2026-11-03 for the retail Insight 9 · 1 chessboard recording of our own unit, 42 s, blurred except the board · 10 hand-held recordings of about 66 s, CC BY-NC 4.0 · 2 robot-arm recordings of about 58 s, CC BY-NC 4.0"
+      foot: "Maker values checked 2026-11-03 for the retail Insight 9 · 4 chessboard recordings of our own unit, 36 to 61 s, blurred except the board · 10 hand-held recordings of about 66 s, CC BY-NC 4.0 · 2 robot-arm recordings of about 58 s, CC BY-NC 4.0"
       key_specs:
         cameras: {v: "2 mono 544×640, 1 colour 1920×1080", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
         shutter: {v: "Mono global, colour rolling", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
