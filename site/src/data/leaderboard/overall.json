@@ -3,7 +3,7 @@
  "rubric": "v1",
  "date": "2026-11-08",
  "batch": "2026-11-08a",
- "results_commit": "0000000000000000000000000000000000000000",
+ "results_commit": "e893730bcb6e8ffa83484ca01265e5f744c1f9ed",
  "tools": [
   "MVIS",
   "Kalibr",
