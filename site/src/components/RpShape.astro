@@ -1,0 +1,10 @@
+---
+// A tool's shape: MVIS circle, Kalibr square, Basalt triangle. The tool name is always written beside it.
+interface Props { tool: string }
+const { tool } = Astro.props;
+---
+<svg class={`rp-shape rp-t-${tool}`} viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+  {tool === 'MVIS' && <circle cx="5" cy="5" r="4.2" />}
+  {tool === 'Kalibr' && <rect x="1" y="1" width="8" height="8" rx="1" />}
+  {tool === 'Basalt' && <path d="M5 0.8 L9.4 9 L0.6 9 Z" />}
+</svg>

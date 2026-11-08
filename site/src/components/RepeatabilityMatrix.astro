@@ -1,0 +1,124 @@
+---
+// One dataset's answer: a cell per family x group of parameters, each a separate comparison on matched recordings.
+// Desktop: a table. Phone (container under 640px): one folded card per family with a one-line verdict strip.
+import RpShape from './RpShape.astro';
+import { data, dataset, groupOf, caveatLetters, detailId, nMatched, mode } from './rp';
+interface Props { id: string }
+const ds = dataset(Astro.props.id);
+const letters = caveatLetters(ds);
+const cellOf = (f: any, g: string) => f.cells[g];
+const sups = (c: any) => (c?.caveats ?? []).map((k: string) => letters[k]).join(',');
+const LONE: Record<string, string> = { input: 'input, not compared', not_compared: 'not compared' };
+const loneGroups = (f: any) => {
+  const by: Record<string, [string, string][]> = {};
+  for (const g of ds.groups) {
+    const c = f.cells[g];
+    if (!c || ['most', 'tie_top', 'tie', 'not_separated', 'too_few'].includes(c.state)) continue;
+    const word = c.state === 'single' ? `${c.tools[0]} only` : LONE[c.state];
+    (by[word] ??= []).push([g, groupOf[g].short]);
+  }
+  return Object.entries(by);
+};
+const strip = (f: any) => ds.groups.map((g: string) => f.cells[g]?.strip).filter(Boolean).join(' · ');
+const recLine = (f: any) => ['MVIS', 'Kalibr', 'Basalt'].map((t) => {
+  const r = f.recordings[t];
+  return r.reason ? `${t} not run` : `${t} ${r.n} of ${r.of}`;
+}).join(' · ');
+const kimu = (c: any) => c?.mvis_variant === 'kalibr_imu' && c?.tools?.[0] === 'MVIS';
+const verdictish = (s: string) => ['most', 'tie_top', 'tie', 'not_separated', 'too_few'].includes(s);
+const stripOf = (f: any) => {
+  const s = strip(f);
+  if (s) return `More repeatable or tie: ${s}`;
+  const few = ds.groups.map((g: string) => f.cells[g]).filter((c: any) => c?.state === 'too_few');
+  return few.length ? `Too few recordings (n = ${Math.max(...few.map((c: any) => c.n))})` : 'No comparison in this family';
+};
+const anyKimu = ds.families.some((f: any) => ds.groups.some((g: string) => f.cells[g]?.mvis_variant === 'kalibr_imu' && f.cells[g]?.tools?.includes('MVIS')));
+---
+<div class="not-content rp" data-rp-dataset={ds.id}>
+  <div class="rp-desk">
+    <table class="rp-matrix">
+      <caption class="rp-sr">{ds.label}: which tool repeats more tightly, per family and group of parameters</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="rp-fam-h">Family</th>
+          {ds.groups.map((g: string) => <th scope="col">{groupOf[g].short}{groupOf[g].unit && <span class="rp-unit"> {groupOf[g].unit}</span>}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {ds.families.map((f: any) => (
+          <tr>
+            <th scope="row" class="rp-fam">
+              <span class="rp-fam-id">{f.id} · {mode(f)}</span>
+              <span class="rp-fam-n">{nMatched(f)}</span>
+              <span class="rp-fam-t">{f.title}</span>
+            </th>
+            {ds.groups.map((g: string) => {
+              const c = cellOf(f, g);
+              if (!c) return <td class="rp-cell rp-na" aria-label={`${groupOf[g].label}, ${f.id}: not in this family`}>—</td>;
+              const s = sups(c);
+              return (
+                <td class="rp-cell">
+                  <a href={`#${detailId(f.id, g)}`} class={`rp-chip rp-${c.state} ${c.state === 'most' ? `rp-tint-${c.tools[0]}` : ''} ${c.state === 'tie_top' ? `rp-split rp-l-${c.tools[0]} rp-r-${c.tools[1]}` : ''}`} aria-label={c.aria} data-rp-open={detailId(f.id, g)}>
+                    {c.state === 'most' && <span class="rp-v"><span class="rp-t"><RpShape tool={c.tools[0]} /> {c.tools[0]}</span> <span class="rp-k">×{c.k_text}</span>{kimu(c) && <span class="rp-kimu">K-IMU</span>}</span>}
+                    {c.state === 'tie_top' && <span class="rp-v"><span class="rp-t"><RpShape tool={c.tools[0]} /> {c.tools[0]}</span> <span class="rp-t">= <RpShape tool={c.tools[1]} /> {c.tools[1]}</span><span class="rp-sub"><span class="rp-t">&gt; {c.over[0]}</span> <span class="rp-k">×{c.k_text}</span></span></span>}
+                    {c.state === 'tie' && <span class="rp-v">Tie</span>}
+                    {c.state === 'not_separated' && <span class="rp-v">Not separated</span>}
+                    {c.state === 'too_few' && <span class="rp-v"><span class="rp-t">n = {c.n} ·</span> <span class="rp-t">too few</span></span>}
+                    {c.state === 'input' && <span class="rp-v">input, not compared</span>}
+                    {c.state === 'single' && <span class="rp-v">{c.tools[0]} only</span>}
+                    {c.state === 'not_compared' && <span class="rp-v">not compared</span>}
+                  </a>
+                  {s && <sup class="rp-sup">{s.split(',').map((l: string) => <a href={`#rp-cav-${ds.id}-${l}`}>{l}</a>)}</sup>}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rp-phone">
+    {ds.families.map((f: any) => (
+      <details class="rp-card">
+        <summary>
+          <span class="rp-fam-id">{f.id} · {mode(f)} · {f.title}</span>
+          <span class="rp-strip">{stripOf(f)}</span>
+          <span class="rp-fam-n">{nMatched(f)} · {recLine(f)}</span>
+        </summary>
+        <ul class="rp-card-rows">
+          {ds.groups.filter((g: string) => f.cells[g] && verdictish(f.cells[g].state)).map((g: string) => {
+            const c = f.cells[g];
+            return <li><a href={`#${detailId(f.id, g)}`} data-rp-open={detailId(f.id, g)} aria-label={c.aria}><span class="rp-g">{groupOf[g].short}</span><span class={`rp-chip rp-${c.state} ${c.state === 'most' ? `rp-tint-${c.tools[0]}` : ''} ${c.state === 'tie_top' ? `rp-split rp-l-${c.tools[0]} rp-r-${c.tools[1]}` : ''}`}>{c.state === 'most' || c.state === 'tie_top' ? <>{c.tools.map((t: string, i: number) => <span class="rp-t">{i ? '= ' : ''}<RpShape tool={t} /> {t}</span>)}{c.state === 'tie_top' && <span class="rp-t"> &gt; {c.over[0]}</span>} <span class="rp-k">×{c.k_text}</span>{kimu(c) && <span class="rp-kimu">K-IMU</span>}</> : c.chip}</span></a>{sups(c) && <sup class="rp-sup">{sups(c).split(',').map((l: string) => <a href={`#rp-cav-${ds.id}-${l}`}>{l}</a>)}</sup>}</li>;
+          })}
+          {loneGroups(f).map(([word, gs]) => <li class="rp-lone">{gs.map(([g, s]: [string, string], i: number) => <>{i ? ' · ' : ''}<a href={`#${detailId(f.id, g)}`} data-rp-open={detailId(f.id, g)}>{s}</a></>)}: <i>{word}</i></li>)}
+        </ul>
+      </details>
+    ))}
+  </div>
+
+  <div class="rp-legend">
+    <p>
+      {data.tools.map((t: any) => <span class="rp-leg"><RpShape tool={t.id} /> {t.id}</span>)}
+      <span class="rp-leg"><span class="rp-chip rp-most rp-tint-MVIS rp-sw">tool ×k</span> more repeatable: the other tools' typical scatter is k times larger</span>
+      <span class="rp-leg"><span class="rp-chip rp-tie rp-sw">Tie</span> gap within chance or under 20 %</span>
+      <span class="rp-leg"><span class="rp-chip rp-too_few rp-sw">too few</span> under 6 shared recordings</span>
+      <span class="rp-leg"><span class="rp-chip rp-input rp-sw">input</span> no comparison, reason in the cell</span>
+      {anyKimu && <span class="rp-leg"><span class="rp-kimu">K-IMU</span> MVIS run with Kalibr's IMU model</span>}
+    </p>
+    <p class="rp-kdef">k = the looser tool's typical scatter divided by the tighter tool's (median over the group's parameters, on the recordings every compared tool ran). Click a cell for its numbers.</p>
+    {Object.keys(letters).length > 0 && (
+      <ol class="rp-cavs">
+        {Object.entries(letters).map(([id, l]) => <li id={`rp-cav-${ds.id}-${l}`}><b>{l}</b> {data.caveats[id]}</li>)}
+      </ol>
+    )}
+    <p class="rp-sep">Each cell is a separate comparison on the recordings every compared tool ran. Cells are not added up and nothing is ordered across datasets.</p>
+    <details class="rp-notpart">
+      <summary>Not part of this comparison</summary>
+      <ul>
+        {ds.families.map((f: any) => f.not_part.map((x: any) => <li><b>{f.id}</b> {x.what} ({x.rows} {x.rows === 1 ? 'row' : 'rows'}): {x.reason}</li>))}
+        {ds.families.map((f: any) => ['MVIS', 'Kalibr', 'Basalt'].filter((t) => f.recordings[t].reason).map((t) => <li><b>{f.id}</b> {t}: {f.recordings[t].reason}</li>))}
+      </ul>
+    </details>
+  </div>
+</div>

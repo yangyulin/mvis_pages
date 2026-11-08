@@ -1,6 +1,6 @@
 ---
-title: Leaderboard
-description: MVIS, Kalibr and Basalt calibration results side by side on the same datasets, parameter by parameter.
+title: Results — repeatability across recordings
+description: How much MVIS, Kalibr and Basalt estimates scatter when the same rig is calibrated from different recordings, per dataset family and group of parameters. Repeatability, not accuracy.
 pageType: embed
 wide: true
 tableOfContents: false
@@ -8,60 +8,112 @@ tableOfContents: false
 
 import DatasetLeaderboard from '../../../components/DatasetLeaderboard.astro';
 import LeaderboardHowTo from '../../../components/LeaderboardHowTo.astro';
+import RepeatabilityHeader from '../../../components/RepeatabilityHeader.astro';
+import RepeatabilityMatrix from '../../../components/RepeatabilityMatrix.astro';
+import RepeatabilityDetails from '../../../components/RepeatabilityDetails.astro';
+import Overall from '../../../components/Overall.astro';
+import { tested } from '../../../components/rp';
 
-The calibration results of MVIS, [Kalibr](https://github.com/ethz-asl/kalibr) and
-[Basalt](https://gitlab.com/VladyslavUsenko/basalt) on the same datasets: every parameter as median ± sd (n) across
-recordings, with the differences between tools. This is batch **2026-11-04a**. The records live in
-[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results), and the
-[Space](https://huggingface.co/spaces/calibench-vi/leaderboard) shows the same tables.
+<RepeatabilityHeader />
 
-**There is no ground truth.** Differences show where tools disagree, not who is right. Spread shows repeatability
-across recordings, not accuracy. The MVIS authors run this board and made every run, including Kalibr and Basalt.
+<div class="not-content rp-honest">
+  <p><b>This page shows repeatability, not accuracy.</b> Repeatability is how much each tool's estimates scatter when the same rig is calibrated from different recordings. These datasets have no ground truth, so no tool is the reference, and a tool can repeat well and still be biased. Tools are compared only on recordings that every compared tool ran. Reprojection error measures how well a model fits its own data; it is not used here. The MVIS authors run this board and made every run, including the Kalibr and Basalt runs.</p>
+</div>
 
-Kalibr on T7 was re-run on 2026-11-02 on the corrected bags; T1 bag 09's were run on 2026-11-04; the other Kalibr and Basalt runs are from 2026-10-22 or earlier. Data settings still differ from MVIS on T6, T7 and T8, so read those three with care. More in
-[Methodology](/benchmark/methodology/).
+<details class="not-content rp-dates"><summary>Run dates and data settings</summary><p>Kalibr camera + IMU on T6 and T11 was re-run on 2026-11-07 from its own camera calibration. On 2026-11-08 MVIS and Kalibr on T6 and T11, and Basalt on T11, were re-run with IMU noise measured at rest (white-noise density × 2.5, the same values for every tool; bias walks at the defaults). MVIS on T2 and T12 was re-run on 2026-11-08 with the current MVIS code. On T3 every tool ran on the same view-filtered bags (≤ 85°) on 2026-11-07, and the T6c MVIS values come from camera-only runs. Kalibr on T7 was re-run on 2026-11-02, and the Kalibr runs for T1 bag 09 on 2026-11-04. Other Kalibr and Basalt runs are from 2026-10-22 or earlier. Data settings still differ from MVIS on T6, T7 and T8.</p></details>
 
-<LeaderboardHowTo />
+<Overall />
 
-Datasets: [VI-Rig 3 cameras](#vi-rig-4-imus--3-cameras) · [VI-Rig 4 cameras](#vi-rig-4-imus--4-cameras) · [TUM-VI](#tum-vi) · [Looper Insight-9](#looper-insight-9) · [Monado MGC](#monado-mgc)
+<section id="ds-virig" data-rp-section="virig">
 
 ## VI-Rig: 4 IMUs + 3 cameras
 
 Our flagship rig. [Dataset page](/reference/datasets/virig-4imus-3cams/).
 
-<DatasetLeaderboard id="virig" />
+<RepeatabilityMatrix id="virig" />
+<RepeatabilityDetails id="virig" />
+<details class="rp-tables" data-rp-dataset="virig"><summary>Parameter tables, tool differences and run configs (VI-Rig 3 cams)</summary><DatasetLeaderboard id="virig" /></details>
+
+</section>
+
+<section id="ds-mvis_rig" data-rp-section="mvis_rig">
 
 ## VI-Rig: 4 IMUs + 4 cameras
 
 Our rig with T265 and ELP cameras, global and rolling shutter. [Dataset page](/reference/datasets/virig-4imus-4cams/).
 
-<DatasetLeaderboard id="mvis_rig" />
+<RepeatabilityMatrix id="mvis_rig" />
+<RepeatabilityDetails id="mvis_rig" />
+<details class="rp-tables" data-rp-dataset="mvis_rig"><summary>Parameter tables, tool differences and run configs (VI-Rig 4 cams)</summary><DatasetLeaderboard id="mvis_rig" /></details>
+
+</section>
+
+<section id="ds-tum_vi" data-rp-section="tum_vi">
 
 ## TUM-VI
 
 Calibration bags from TUM. [Example](/examples/tum-vi/).
 
-<DatasetLeaderboard id="tum_vi" />
+<RepeatabilityMatrix id="tum_vi" />
+<RepeatabilityDetails id="tum_vi" />
+<details class="rp-tables" data-rp-dataset="tum_vi"><summary>Parameter tables, tool differences and run configs (TUM-VI)</summary><DatasetLeaderboard id="tum_vi" /></details>
+
+</section>
+
+<section id="ds-looper_insight9" data-rp-section="looper_insight9">
 
 ## Looper Insight-9
 
 Two global-shutter cameras, one rolling-shutter camera and a MEMS IMU, from Looper Robotics. [Example](/examples/looper-sa16/).
 
-<DatasetLeaderboard id="looper_insight9" />
+<RepeatabilityMatrix id="looper_insight9" />
+<RepeatabilityDetails id="looper_insight9" />
+<details class="rp-tables" data-rp-dataset="looper_insight9"><summary>Parameter tables, tool differences and run configs (Looper Insight-9)</summary><DatasetLeaderboard id="looper_insight9" /></details>
+
+</section>
+
+<section id="ds-monado_msd" data-rp-section="monado_msd">
 
 ## Monado MGC
 
 Reverb G2 headset calibration from the Monado SLAM Datasets. [Example](/examples/monado/).
 
-<DatasetLeaderboard id="monado_msd" />
+<RepeatabilityMatrix id="monado_msd" />
+<RepeatabilityDetails id="monado_msd" />
+<details class="rp-tables" data-rp-dataset="monado_msd"><summary>Parameter tables, tool differences and run configs (Monado MGC)</summary><DatasetLeaderboard id="monado_msd" /></details>
 
-## Family numbers
+</section>
+
+## About these results
+
+<details class="rp-fold">
+<summary>How the verdicts are made</summary>
+
+For each family and group of parameters we take only the recordings every compared tool ran. For each tool we measure the scatter (standard deviation) of each parameter across those recordings, and compare two tools by the median ratio of their scatters. A tool is marked more repeatable only if its scatter is at least 20 % smaller and a gap that large would rarely appear (under 5 %, Holm-adjusted within the cell) if we swapped the two tools' results recording by recording. Otherwise it is a tie: either the gap is within chance, or it is under 20 %. With fewer than 6 shared recordings no gap can pass this test (the smallest possible p is 2/2ⁿ), so those cells say "too few recordings". Values a tool received as input, and rows where the tools' models differ, are not compared. Distortion coefficients trade off against each other, so their scatter can overstate differences in the lens mapping. Each cell is a separate 5 % test; across the {tested.cells} tested cells on this page, of which {tested.naming} name a tool, one or two calls may be chance. The intervals are not adjusted for multiple tests.
+
+</details>
+
+<details class="rp-fold">
+<summary>Agreement between tools</summary>
+
+The parameter tables also show the differences between the tools' medians. Where two tools' medians differ by more than either tool's scatter, they disagree. ◆ marks disagreement, not an error in either tool. No tool is the reference. ‡ on a time offset: MVIS splits the gyro (td) and accel (td + t_ga) timelines, so Basalt − Kalibr is the like-for-like check there.
+
+</details>
+
+<details class="rp-fold">
+<summary>How to read the parameter tables</summary>
+
+<LeaderboardHowTo />
+
+</details>
+
+<details class="rp-fold">
+<summary>Family numbers</summary>
 
 Each family is one test in the MVIS regression suite. The numbers changed on 2026-11-02 so the VI-Rig datasets come
 first, and older material uses the old ones. New (old): T1 (T3), T2 (T4), T3 (T1), T4 (T2), T5 (T5), T6 (T11), T7 (T8),
 T8 (T12), T9 (T6), T10 (T7), T11 (T10), T12 (T9).
 
-## Submit
+</details>
 
-The board is built from the maintainers' runs of each tool. To add a method, see
-[Submit results](/contribute/submit-results/).
+[Methodology](/benchmark/methodology/) · [Submit results](/contribute/submit-results/) · [HF dataset](https://huggingface.co/datasets/calibench-vi/results) · [Space](https://huggingface.co/spaces/calibench-vi/leaderboard)

@@ -1,0 +1,96 @@
+name: Challenge a rubric cell
+description: Dispute the points one tool gets on one aspect of the Overall tab (openmvis.com results page).
+title: "[rubric] <aspect id> <tool>: "
+labels: [rubric-challenge]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The Overall tab is derived from rubric v1: measured points come from the repeatability verdicts,
+        capability and usability points from the rubric cells. The MVIS authors ran every tool, including Kalibr and
+        Basalt, so a second pair of eyes is welcome. One issue per cell, please. A change that holds up goes into
+        the next rubric version and the change log on the results page.
+  - type: dropdown
+    id: aspect
+    attributes:
+      label: Aspect
+      description: The id shown in the Aspects tables of the Overall tab.
+      options:
+        - A1 Camera-only repeatability
+        - A2 Camera-IMU repeatability
+        - A3 Rolling-shutter readout repeatability
+        - A4 Accuracy against known truth
+        - A5 Solve robustness
+        - A6 Runtime
+        - C1 Lens models, fisheye included
+        - C2 Calibration targets
+        - C3 Board model
+        - C4 Rolling shutter
+        - C5 Time offsets and clocks
+        - C6 IMU intrinsic model
+        - C7 Multi-sensor rigs
+        - C8 Trajectory model
+        - C9 Mocap-to-IMU
+        - C10 Vignetting
+        - C11 Calibration simulation
+        - U1 Install and platforms
+        - U2 Public docs per feature
+        - U3 Reports and diagnostics
+        - U4 Export formats
+        - Project facts (no points)
+        - The rules themselves (weights, presets, pair rule)
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Tool
+      options: [MVIS, Kalibr, Basalt, All three]
+    validations:
+      required: true
+  - type: input
+    id: subcheck
+    attributes:
+      label: Sub-check (if any)
+      description: For aspects with sub-checks, the letter or label, e.g. "C5 (d) host-clock sync".
+  - type: input
+    id: version
+    attributes:
+      label: Rubric version and batch
+      description: From the banner of the Overall tab.
+      placeholder: rubric v1, batch 2026-11-07a
+    validations:
+      required: true
+  - type: input
+    id: shown
+    attributes:
+      label: Points shown now
+      placeholder: "0.5"
+    validations:
+      required: true
+  - type: input
+    id: proposed
+    attributes:
+      label: Points you propose
+      placeholder: "1"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: >-
+        What the tool does or does not do, and where to check it: a link to the docs, a source file at a fixed commit or
+        tag, a paper, or a reproducible run (command, data, output). For measured aspects, which family and parameter
+        group, and what in the run differs.
+    validations:
+      required: true
+  - type: checkboxes
+    id: read
+    attributes:
+      label: Before you send
+      options:
+        - label: I read the aspect's rule on the Overall tab (open "Rule" under the aspect name).
+          required: true
+        - label: I am an author or maintainer of the tool concerned.
+          required: false

@@ -1,0 +1,78 @@
+---
+// Each matrix cell's numbers, one fold per cell: matched n, pairs (R, interval, Holm p, decision), the ratio plot,
+// per-parameter spreads, what is left out and why. "Open the parameter table" jumps into the folded original tables.
+import RatioPlot from './RatioPlot.astro';
+import RpShape from './RpShape.astro';
+import { data, dataset, groupOf, caveatLetters, detailId, hasDetail, mode, fmtSd } from './rp';
+interface Props { id: string }
+const ds = dataset(Astro.props.id);
+const letters = caveatLetters(ds);
+const ROLE: Record<string, string> = { input: 'input, not compared', shown: 'shown only', not_run: 'not run', missing: 'missing',
+  other_model: 'other model', only: 'only this tool', note: 'text note' };
+const DEC = (q: any) => q.decision === 'a' ? `${q.a} tighter` : q.decision === 'b' ? `${q.b} tighter` : q.decision === 'tie' ? 'tie' : q.decision === 'too_few' ? 'too few recordings' : 'not compared';
+const TIE: Record<string, string> = { noise: 'gap within chance', small: 'gap under 20 %' };
+const ci = (q: any, n: number) => q.ci ? `${q.ci[0] ?? 'not bounded'} – ${q.ci[1] ?? 'not bounded'}` : `not bounded at n = ${n}`;
+const loo = (q: any) => q.loo_stable === null ? '' : q.loo_stable ? 'holds with any one recording left out' : 'depends on one recording';
+const short = (s: string) => s.split(' – ').slice(-1)[0];
+---
+<div class="not-content rp rp-details">
+  {ds.families.map((f: any) => ds.groups.filter((g: string) => hasDetail(f.cells[g])).map((g: string) => {
+    const c = f.cells[g];
+    const tools = c.compared?.length > 1 ? c.compared : [];
+    return (
+      <details class="rp-detail" id={detailId(f.id, g)} data-fold={f.fold_index} data-k={c.params[0]?.data_k ?? ''}>
+        <summary>
+          <span class="rp-dh">{groupOf[g].label} · {f.id} · {tools.length ? `${c.n} matched recordings` : c.chip}</span>
+          <span class="rp-dn">({c.rec_line}) · {f.title}, {mode(f)}</span>
+        </summary>
+        <p class="rp-sent">{c.sentence}</p>
+        {c.limit_line && <p class="rp-var">{c.limit_line}</p>}
+        {tools.includes('MVIS') && <p class="rp-var">{c.variant_line}</p>}
+        {c.pairs.length > 0 && (
+          <div class="rp-tw"><table class="rp-pairs">
+            <thead><tr><th scope="col">Pair</th><th scope="col">R</th><th scope="col">95 % interval</th><th scope="col">p (Holm)</th><th scope="col">Decision</th><th scope="col">Leave one out</th></tr></thead>
+            <tbody>{c.pairs.map((q: any) => (
+              <tr>
+                <th scope="row"><RpShape tool={q.a} /> {q.a} ÷ <RpShape tool={q.b} /> {q.b}<span class="rp-np"> · {q.n_params} param.</span></th>
+                <td>{q.R ?? '–'}</td><td>{q.R === null ? '–' : ci(q, c.n)}</td>
+                <td>{q.p_holm ?? '–'}{q.p !== null && q.p !== q.p_holm && <span class="rp-mut"> (raw {q.p})</span>}{q.exact === false && <span class="rp-mut"> · sampled</span>}</td>
+                <td>{DEC(q)}{q.tie_reason && <span class="rp-mut">: {TIE[q.tie_reason]}</span>}</td>
+                <td>{loo(q)}</td>
+              </tr>))}
+            </tbody>
+          </table></div>
+        )}
+        {c.band_lines.map((l: string) => <p class="rp-var">{l}</p>)}
+        <RatioPlot pairs={c.pairs} />
+        {c.params.length > 0 && (
+          <div class="rp-tw"><table class="rp-params">
+            <thead><tr><th scope="col">Parameter</th>{tools.map((t: string) => <th scope="col"><RpShape tool={t} /> {t} sd</th>)}{tools.length === 2 && <th scope="col" class="rp-ratio">Ratio</th>}</tr></thead>
+            <tbody>{c.params.map((p: any) => (
+              <tr>
+                <th scope="row">{short(p.sensor)} · {p.label}{p.unit && <span class="rp-unit"> {p.unit}</span>}</th>
+                {tools.map((t: string) => (
+                  <td>{p.sd[t] === undefined ? <i class="rp-mut">–</i> : fmtSd(p.sd[t])}
+                    {p.published?.[t] && p.published[t].n !== c.n && <span class="rp-all">all: {fmtSd(p.published[t].sd)} ({p.published[t].n})</span>}
+                  </td>
+                ))}
+                {tools.length === 2 && <td class="rp-ratio">{p.sd[tools[0]] && p.sd[tools[1]] ? (p.sd[tools[0]] / p.sd[tools[1]]).toFixed(2) : '–'}</td>}
+              </tr>))}
+            </tbody>
+          </table></div>
+        )}
+        {(c.excluded.length > 0 || c.dropped.length > 0 || Object.keys(c.unmatched).length > 0) && (
+          <div class="rp-excl"><b>Not in this comparison</b>
+            <ul>
+              {c.excluded.map((e: any) => <li>{e.tool === 'all' ? 'All tools' : e.tool}{e.role !== 'not_run' && <> · {ROLE[e.role] ?? e.role}</>} · {e.rows} {e.rows === 1 ? 'row' : 'rows'}: {e.reason}</li>)}
+              {c.dropped.map((d: any) => <li>{d.tool} · {short(d.sensor)} {d.key}: {d.reason}</li>)}
+              {Object.entries(c.unmatched).map(([t, k]: [string, any]) => <li>{t} · {k} {k === 1 ? 'recording' : 'recordings'} with values outside the matched set: another compared tool has no value there on some row</li>)}
+            </ul>
+          </div>
+        )}
+        {c.caveats.length > 0 && <ul class="rp-cl">{c.caveats.map((k: string) => <li><b>{letters[k]}</b> {data.caveats[k]}</li>)}</ul>}
+        <p class="rp-foot">{data.footer}</p>
+        <p><button type="button" class="rp-open" data-rp-table={ds.id} data-fold={f.fold_index} data-k={c.params[0]?.data_k ?? ''}>Open the {f.id} parameter table</button></p>
+      </details>
+    );
+  }))}
+</div>
