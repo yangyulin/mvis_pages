@@ -77,11 +77,11 @@ sensors:
       - [Sensor part numbers, Not recorded, Unknown]
     dataset:
       - [Chessboard, "1 recording of 42 s, our own unit, taken warm (55 °C)"]
-      - [Chessboard data, "Not hosted. The clip and figures come from a copy blurred outside the board."]
+      - [Chessboard data, "__HUB:community/looper-insight9/data/__, takes 01 to 04 (this page shows take 04). Everything except the board is blurred. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
       - [Hand-held, "10 of about 66 s, 15.0 GB in all"]
       - [Hand-held data, "__LINK__. CC BY-NC 4.0, for the hand-held data, clip and figures; commercial use by request"]
       - [Robot arm, "2 of about 58 s, same program in both"]
-      - [Robot-arm data, "__HUB:community/looper-insight9/data/__. Everything except the board is blurred. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
+      - [Robot-arm data, "__HUB:community/looper-insight9/data/__. Normal frames. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
       - [Board, "Chessboard: 10×7 squares (9×6 inner corners), 43.47 mm, shown on a monitor. Hand-held and robot arm: AprilGrid 6×6, tag 55 mm, spacing 0.3, t36h11"]
       - [Configs and results, "__HUB:community/looper-insight9/__"]
     folder: looper-insight9/
@@ -98,7 +98,7 @@ sensors:
       maker: {name: LooperRobotics, url: "https://looper-robotics.com/"}
       links: {product: "https://looper-robotics.com/home/product/insight-9/"}
       image: {kind: photo, file: looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page", url: "https://looper-robotics.com/home/product/insight-9/"}
-      foot: "Maker values checked 2026-11-03 for the retail Insight 9 · 1 chessboard recording of our own unit, 42 s, blurred except the board · 10 hand-held recordings of about 66 s, CC BY-NC 4.0 · 2 robot-arm recordings of about 58 s, blurred except the board"
+      foot: "Maker values checked 2026-11-03 for the retail Insight 9 · 1 chessboard recording of our own unit, 42 s, blurred except the board · 10 hand-held recordings of about 66 s, CC BY-NC 4.0 · 2 robot-arm recordings of about 58 s, CC BY-NC 4.0"
       key_specs:
         cameras: {v: "2 mono 544×640, 1 colour 1920×1080", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
         shutter: {v: "Mono global, colour rolling", tag: maker, src: "https://looper-robotics.com/home/product/insight-9/"}
