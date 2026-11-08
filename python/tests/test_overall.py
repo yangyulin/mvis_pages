@@ -109,3 +109,16 @@ def test_export_refuses_rating_words(tmp_path):
     rub.write_text(yaml.safe_dump(bad))
     with pytest.raises(SystemExit, match="rating"):
         overall.export(rep, tmp_path / "x.json", rub)
+
+
+def test_challenge_template_lists_every_rubric_aspect():
+    import yaml
+    tpl = Path(__file__).resolve().parents[2] / ".github/ISSUE_TEMPLATE/rubric-challenge.yml"
+    form = yaml.safe_load(tpl.read_text())
+    aspect = next(b for b in form["body"] if b.get("id") == "aspect")["attributes"]["options"]
+    tool = next(b for b in form["body"] if b.get("id") == "tool")["attributes"]["options"]
+    rows = [f"{a['id']} {a['label']}" for a in RUBRIC["measured"]["aspects"]]
+    rows += [f"{a['id']} {a['label']}" for t in RUBRIC["tiers"] for a in t["aspects"]]
+    assert [o for o in aspect if o[:1] in "ACU" and o[1:2].isdigit()] == rows
+    assert tool[:3] == RUBRIC["tools"]
+    assert RUBRIC["challenge_url"].endswith("template=" + tpl.name)

@@ -5,7 +5,8 @@ version: 1
 rubric: v1
 date: 2026-11-08
 tools: [MVIS, Kalibr, Basalt]
-challenge_url: https://github.com/openmvis/openmvis/issues/new?template=rubric-challenge.yml
+challenge_url: https://github.com/yangyulin/mvis_pages/issues/new?template=rubric-challenge.yml
+# The template lives in this repo (.github/ISSUE_TEMPLATE/rubric-challenge.yml); a test keeps its aspect list in step.
 
 wording:
   banner: "Derived total, rubric v1 ({date}). The MVIS authors ran every tool, including Kalibr and Basalt. Challenge any cell:"

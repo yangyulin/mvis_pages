@@ -18,7 +18,7 @@
    "Kalibr": "Kalibr, default settings (view shuffle on). Camera-only runs start from the MVIS focal length.",
    "Basalt": "Basalt 0.1.7. Capabilities as released; measured cells from our headless build with robustness patches."
   },
-  "challenge_url": "https://github.com/openmvis/openmvis/issues/new?template=rubric-challenge.yml"
+  "challenge_url": "https://github.com/yangyulin/mvis_pages/issues/new?template=rubric-challenge.yml"
  },
  "tiers": [
   {
