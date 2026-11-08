@@ -67,6 +67,8 @@
 .sp .sensorimg figcaption{font-size:.8rem;color:var(--muted);margin-top:.35rem}
 
 /* MVIS canvas views (mvis.analysis.views) */
+/* SPDX-FileCopyrightText: 2026 Yulin Yang <contact@openmvis.com> */
+/* SPDX-License-Identifier: GPL-3.0-only */
 /* MVIS report views (calibration process + solved rig). Theme: --mv-* tokens fall back
    from the report's names to the site's, so one file serves both. */
 .mvv{--mv-card:var(--bg-card,var(--bg,#fff));--mv-soft:var(--bg-code,var(--soft,#f3f3f1));--mv-ink:var(--text-primary,var(--ink,#14140f));
@@ -86,6 +88,10 @@
 .mvv .mv-readout{position:absolute;right:10px;top:10px;font-size:12px;color:var(--mv-muted);background:var(--mv-card);border:1px solid var(--mv-line);border-radius:7px;padding:3px 9px;max-width:60%}
 .mvv .mv-side{border-left:1px solid var(--mv-line);padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden}
 .mvv .mv-hd{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mv-muted);font-weight:600}
+.mvv .mv-list{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:6px}
+.mvv .mv-compact .mv-list{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(96px,1fr);overflow-y:auto}
+.mvv .mv-compact .mv-cam{padding:4px 5px}.mvv .mv-compact .mv-cam b{font-size:11px;white-space:nowrap;overflow:hidden}
+.mvv .mv-compact .mv-tag{display:none}
 .mvv .mv-cam{border:1px solid var(--mv-line);border-radius:9px;padding:5px 7px;cursor:pointer;flex:1 1 0;min-height:0;display:flex;flex-direction:column;background:var(--mv-card);overflow:hidden}
 .mvv .mv-cam[aria-current=true]{border-color:var(--mv-accent);box-shadow:0 0 0 1px var(--mv-accent) inset}
 .mvv .mv-cam b{font-size:12px;display:flex;align-items:center;gap:6px}.mvv .mv-cam b i{width:9px;height:9px;border-radius:50%;display:inline-block}
@@ -110,6 +116,7 @@
 .mvv .mv-fs{position:fixed!important;inset:0;z-index:1000;border-radius:0!important}
 .mvv .mv-fs .mv-stage,.mvv .mv-fs .mv-stage canvas{height:calc(100vh - 60px)!important}.mvv .mv-fs .mv-side{height:calc(100vh - 60px)}
 @media (max-width:860px){.mvv .mv-box{grid-template-columns:minmax(0,1fr)}.mvv .mv-side{border-left:0;border-top:1px solid var(--mv-line);height:auto;flex-direction:row;overflow-x:auto}
+  .mvv .mv-list,.mvv .mv-compact .mv-list{display:flex;flex-direction:row;gap:6px;overflow:visible}.mvv .mv-compact .mv-cam{min-width:150px}
   .mvv .mv-cam{min-width:230px;flex:none}.mvv .mv-pair{height:120px;flex:none}.mvv .mv-info{border-left:0;border-top:1px solid var(--mv-line)}
   .mvv .mv-stage canvas{height:340px}.mvv .mv-stage{min-height:340px}.mvv .mv-two{grid-template-columns:1fr}.mvv .mv-readout{max-width:none;left:10px}}
 @media print{.mvv .mv-tools,.mvv .mv-strip button,.mvv .mv-strip select,.mvv .mv-strip input{display:none}}
