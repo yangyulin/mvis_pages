@@ -14,6 +14,8 @@ SIDEBAR = """() => {
   return {
     sections: kids.map(label),
     children: Object.fromEntries(kids.map(li => [label(li), [...(li.querySelector(':scope > details > ul')?.children || [])].map(label)])),
+    groups: Object.fromEntries(kids.map(li => [label(li), Object.fromEntries([...(li.querySelector(':scope > details > ul')?.children || [])]
+      .filter(c => c.querySelector(':scope > details')).map(c => [label(c), [...c.querySelector(':scope > details > ul').children].map(label)]))])),
     links: [...nav.querySelectorAll('a[href]')].map(a => a.getAttribute('href')),
   };
 }"""
@@ -34,7 +36,7 @@ def run(base: str, out) -> int:  # pragma: no cover - drives Chrome through Play
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.goto(f"{base}/getting-started/overview/")
         s = page.evaluate(SIDEBAR)
-        problems = checks.sidebar_problems(s)
+        problems = checks.sidebar_problems(s, json.loads((SITE / "src/data/sensor-nav.json").read_text()))
         links = checks.local_links(s["links"])
         problems += checks.status_problems({link: page.request.get(base + link).status for link in links})
         problems += checks.unlisted(checks.routes(SITE / "src/content/docs"), links)
@@ -44,7 +46,7 @@ def run(base: str, out) -> int:  # pragma: no cover - drives Chrome through Play
             opened[link] = page.evaluate(CURRENT_OPEN)
         problems += checks.closed_problems(opened)
         phone = browser.new_page(viewport={"width": 320, "height": 640})
-        phone.goto(f"{base}/benchmark/sensors/")
+        phone.goto(f"{base}/sensors/")
         problems += checks.maker_heights_problem(phone.evaluate("[...document.querySelectorAll('.sg-maker')].map(m => Math.round(m.getBoundingClientRect().height))"))
         browser.close()
     report, lines = checks.nav_report(links, problems)

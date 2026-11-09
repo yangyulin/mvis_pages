@@ -30,7 +30,8 @@ npm run dev                 # http://localhost:4321
 Build the static site:
 
 ```bash
-npm run build               # astro build into ../docs, then post-build.mjs renames _astro/ (Pages serves docs/)
+npm run build               # astro build into ../docs, then post-build.mjs renames _astro/ and writes moved-page redirects
+PYTHONNOUSERSITE=1 python3 scripts/check_moves.py   # after every build: old addresses redirect, no broken internal links
 npm run preview             # serve the built site locally
 ```
 
@@ -57,7 +58,7 @@ What each writes:
 
 | Script | Writes |
 |---|---|
-| `export_sensors.py` | `site/src/data/sensors/*.json`, `sensor.css`, `site/src/scripts/sensor-page.js`, `site/src/data/sensor-nav.json`, `site/src/content/docs/benchmark/sensors/*.mdx`, `site/public/media/sensors/<slug>/` |
+| `export_sensors.py` | `site/src/data/sensors/*.json`, `sensor.css`, `site/src/scripts/sensor-page.js`, `site/src/data/sensor-nav.json`, `site/src/content/docs/sensors/*.mdx`, `site/public/media/sensors/<slug>/` |
 | `export_board.py` | `site/src/data/leaderboard/board.json`, `board.css` |
 | `export_uzh.py` | `site/src/data/leaderboard/uzh_fpv.json` |
 | `export_repeatability.py` | `site/src/data/leaderboard/repeatability.json` (matched-recording repeatability per family and group; reads the private per-recording stats file, writes derived spreads only) |
@@ -65,6 +66,8 @@ What each writes:
 The page text is public (`python/data/public_sensors.yaml`); the run paths stay private in mira and are passed by
 path. Every sensor text drawn from the data (page JSON, MDX, process figures, sidebar) goes through a public lint
 first; see `python/README.md` for the exact list. Edit the data or the lib, never the generated files.
+
+After a build, `check_moves.py` checks that every address in `site/src/data/moved.json` redirects straight to its new page and that no internal link is broken.
 
 Browser and media checks: `nav_check.py`, `responsive_check.py`, `hero_sync_check.py`, `hero_labels_check.py`
 (Playwright with the system Chrome) and `check_hero_media.py` (ffprobe). Their rules are in `mvis_site/checks.py`.

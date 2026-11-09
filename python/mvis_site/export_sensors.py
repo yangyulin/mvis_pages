@@ -29,7 +29,7 @@ from .site_files import mdx, overview_mdx, sensor_json, sensor_nav, site_css, si
 
 MEDIA = "site/public/media/sensors"
 DATA_DIR = "site/src/data/sensors"
-DOCS = "site/src/content/docs/benchmark/sensors"
+DOCS = "site/src/content/docs/sensors"
 MAKE_DIRS = (DATA_DIR, DOCS, "site/src/scripts")
 
 
