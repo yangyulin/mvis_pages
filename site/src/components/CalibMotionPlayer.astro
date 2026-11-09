@@ -15,10 +15,14 @@ const main = mode === 'main';
   <p class="cm-caption" data-role="caption"></p>
   {!main && <p class="cm-diff" data-role="diff"></p>}
 
+  <div class="cm-prac" data-role="pbadge" hidden>
+    <span data-role="ptext" aria-live="polite"></span>
+    <button type="button" class="cm-pracexit" data-role="pexit">Exit practice</button>
+  </div>
   <section class="cm-now" data-role="now" aria-label="Now">
     <div class="cm-now-top">
       <span class="cm-now-title"><i class="cm-now-sw" data-role="sw"></i><span data-role="title" aria-live="polite"></span></span>
-      <span class="cm-now-right"><span class="cm-now-left" data-role="left"></span><button type="button" class="cm-nowplay" data-role="play2" aria-label="Play">Play</button></span>
+      <span class="cm-now-right"><span class="cm-now-left" data-role="left"></span><button type="button" class="cm-primary cm-nowplay" data-role="play2" aria-label="Play"><span class="cm-ic" aria-hidden="true">▶&#xFE0E;</span><span class="cm-pl">Play</span></button></span>
     </div>
     <div class="cm-now-cue" data-role="cue"></div>
     <div class="cm-now-beat" data-role="beat">&nbsp;</div>
@@ -37,7 +41,25 @@ const main = mode === 'main';
         <button type="button" data-view="top">Top</button>
         <button type="button" data-view="side" title="From the operator's right">Side</button>
       </div>
-      <div class="cm-count" data-role="count" hidden aria-hidden="true"></div>
+      <div class="cm-count" data-role="count" hidden aria-live="assertive"><b data-role="countn"></b><span data-role="ready"></span></div>
+      <div class="cm-over cm-start" data-role="start">
+        <button type="button" class="cm-bigplay" data-role="startbtn">
+          <span class="cm-bigic" aria-hidden="true"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+          <span class="cm-biglab" data-role="startlab">{main ? 'Start the guided motion · 60 s' : 'Play the real recording'}</span>
+        </button>
+        <p class="cm-steps3" data-role="steps3">{main
+          ? <><span><b>1</b> Watch it once</span><span><b>2</b> Practise each move</span><span><b>3</b> Follow along with your rig</span></>
+          : <span>Watch the path and the corners each camera detected</span>}</p>
+      </div>
+      <div class="cm-over cm-end" data-role="end" hidden>
+        <p class="cm-endq">Done. Did your board reach every corner?</p>
+        <div class="cm-endcov"><canvas data-role="endcov" aria-label="Image coverage at the end of the take"></canvas><span data-role="endpct"></span></div>
+        <div class="cm-endbtns">
+          <button type="button" class="cm-primary" data-role="again"><span class="cm-ic" aria-hidden="true">↺</span>Watch again</button>
+          {main && <button type="button" class="cm-second" data-role="hard">Practise the hardest move</button>}
+          <a class="cm-second" href="#step-by-step">Read the steps</a>
+        </div>
+      </div>
     </div>
     <div class="cm-cardcol">
       <div class="cm-tabs" data-role="tabs" role="group" aria-label="Camera"></div>
@@ -46,11 +68,14 @@ const main = mode === 'main';
   </div>
 
   <div class="cm-transport">
-    <button type="button" class="cm-play" data-role="play" aria-label="Play">Play</button>
-    <button type="button" class="cm-step" data-role="prev" aria-label="Previous move">◀ Move</button>
-    <button type="button" class="cm-step" data-role="nextmove" aria-label="Next move">Move ▶</button>
-    <input class="cm-scrub" type="range" data-role="scrub" min="0" max="60" step="0.01" value="0" aria-label="Time" />
-    <span class="cm-time" data-role="time">0.0 s</span>
+    <div class="cm-tmain">
+      <button type="button" class="cm-primary cm-play" data-role="play" aria-label="Play"><span class="cm-ic" aria-hidden="true">▶&#xFE0E;</span><span class="cm-pl">Play</span></button>
+      <input class="cm-scrub" type="range" data-role="scrub" min="0" max="60" step="0.01" value="0" aria-label="Time" />
+      <span class="cm-time" data-role="time">0.0 s</span>
+    </div>
+    <div class="cm-tsub">
+    <button type="button" class="cm-step" data-role="prev" aria-label="Previous move">◀&#xFE0E; Move</button>
+    <button type="button" class="cm-step" data-role="nextmove" aria-label="Next move">Move ▶&#xFE0E;</button>
     <span class="cm-speeds" data-role="speeds" role="group" aria-label="Speed"></span>
     <span class="cm-toggles">
       <button type="button" data-role="repeat" aria-pressed="false">Repeat this move</button>
@@ -59,10 +84,11 @@ const main = mode === 'main';
       <button type="button" class="cm-camfs" data-role="camfs" aria-pressed="false">Camera</button>
       <button type="button" data-role="fs" aria-pressed="false">Full screen</button>
     </span>
+    </div>
   </div>
-  <p class="cm-keys">Space play · ←/→ move · R repeat · F full screen</p>
+  <p class="cm-keys">Space play · ←/→ move · R repeat · F full screen{main && ' · Esc exit practice'}</p>
 
-  <div class="cm-chips cm-segchips" data-role="segchips" aria-label="Jump to a move"></div>
+  <div class="cm-chips cm-segchips" data-role="segchips" role="group" aria-label={main ? 'Jump to a move, or practise it' : 'Jump to a move'}></div>
 
   <details class="cm-traces" data-role="traces">
     <summary>Sensor traces (gyro, accelerometer)</summary>
@@ -82,6 +108,8 @@ const main = mode === 'main';
     --cm-now-bg: #f1f5f9; --cm-now-fg: var(--sl-color-white); --cm-corner: #16a34a; --cm-ghost: var(--sl-color-gray-3);
     --cm-cam0: #2563eb; --cm-cam1: #dc2626; --cm-cam2: #16a34a;
     --cm-text: var(--sl-color-gray-3);
+    /* primary button: 5.9:1 white on sky-700 in light, 8:1 slate-900 on sky-400 in dark */
+    --cm-pri-bg: #0369a1; --cm-pri-fg: #fff;
     margin-block: 1rem 2rem;
     font-size: 0.9rem;
     outline: none;
@@ -91,7 +119,9 @@ const main = mode === 'main';
     --cm-board: #e2e8f0; --cm-tag: #0f172a; --cm-cov: 56, 189, 248;
     --cm-s-lr: #2dd4bf; --cm-s-ud: #f472b6; --cm-s-bf: #d4a373; --cm-s-loop: #d9d65c; --cm-s-rest: #64748b;
     --cm-now-bg: var(--sl-color-gray-6); --cm-corner: #4ade80;
+    --cm-pri-bg: #38bdf8; --cm-pri-fg: #0f172a;
   }
+  .cm :is(button, a, input):focus-visible { outline: 3px solid var(--sl-color-accent); outline-offset: 2px; }
   .cm:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 4px; border-radius: 0.5rem; }
   .cm button { font: inherit; cursor: pointer; }
   .cm-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
@@ -102,8 +132,7 @@ const main = mode === 'main';
   .cm-chips button:hover, .cm-toggles button:hover, .cm-speeds button:hover, .cm-views button:hover, .cm-tabs button:hover, .cm-step:hover {
     border-color: var(--sl-color-accent); color: var(--sl-color-white);
   }
-  .cm [aria-pressed='true'] { background: var(--sl-color-accent); border-color: var(--sl-color-accent); color: var(--sl-color-black); }
-  :root[data-theme='light'] .cm [aria-pressed='true'] { color: #fff; }
+  .cm [aria-pressed='true'] { background: var(--cm-pri-bg); border-color: var(--cm-pri-bg); color: var(--cm-pri-fg); }
   .cm-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; margin-right: 0.35rem; }
   .cm-dot.pass { background: #22c55e; } .cm-dot.fail { background: #ef4444; } .cm-dot.none { background: var(--sl-color-gray-4); }
   .cm-caption { margin: 0.5rem 0 0; color: var(--sl-color-gray-2); }
@@ -119,14 +148,26 @@ const main = mode === 'main';
   .cm-now-title { font-weight: 600; font-size: 1rem; display: inline-flex; align-items: center; gap: 0.45rem; min-width: 0; }
   .cm-now-sw { width: 0.85rem; height: 0.85rem; border-radius: 0.2rem; flex: none; }
   .cm-now-right { display: inline-flex; align-items: center; gap: 0.5rem; }
-  .cm-nowplay {
-    display: none; font-weight: 700; min-height: 2.5rem; min-width: 4.6rem; padding: 0.25rem 0.7rem; border-radius: 0.45rem;
-    border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--sl-color-black);
+  /* the one primary button (Play / Pause / Again): filled, 44 px at least, the same in the Now panel and the transport */
+  .cm .cm-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; font-weight: 700; font-size: 1.05rem;
+    min-height: 2.75rem; min-width: 6.5rem; padding: 0.3rem 1rem; border-radius: 0.5rem; text-decoration: none;
+    border: 1px solid var(--cm-pri-bg); background: var(--cm-pri-bg); color: var(--cm-pri-fg);
   }
-  :root[data-theme='light'] .cm-nowplay { color: #fff; }
+  .cm .cm-primary:hover { filter: brightness(1.08); }
+  .cm-ic { font-size: 0.9em; width: 1.1em; text-align: center; }
+  .cm .cm-second {
+    display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0.3rem 0.9rem; border-radius: 0.5rem; font-weight: 600;
+    border: 1px solid var(--sl-color-gray-4); background: var(--sl-color-bg); color: var(--sl-color-white); text-decoration: none;
+  }
+  .cm .cm-second:hover { border-color: var(--sl-color-accent); }
+  .cm-nowplay { flex: none; }
+  .cm-now-top { align-items: center; }
   .cm-now-left { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .cm-now-cue { font-size: clamp(1.15rem, 1rem + 0.8vw, 1.6rem); font-weight: 600; line-height: 1.2; align-self: center; overflow: hidden; }
   .cm-now-beat { color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
+  .cm[data-mode='real'] .cm-now-beat { display: none; }
+  .cm-now.cm-ready .cm-now-cue { color: var(--sl-color-text-accent); }
   .cm-now-bar { position: relative; height: 8px; border-radius: 4px; background: var(--sl-color-gray-5); overflow: hidden; }
   .cm-now-bar > i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
   .cm-now-bar > span i { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--sl-color-bg); opacity: 0.9; }
@@ -148,13 +189,45 @@ const main = mode === 'main';
     position: absolute; left: 0.5rem; top: 0.5rem; max-width: calc(100% - 16rem); font-size: 0.78rem; padding: 0.15rem 0.45rem; border-radius: 0.3rem;
     background: color-mix(in srgb, var(--sl-color-bg) 82%, transparent); color: var(--sl-color-gray-2); pointer-events: none;
   }
-  .cm-views { position: absolute; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+  .cm-views { position: absolute; z-index: 3; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
   .cm-views button { min-height: 1.9rem; padding: 0.25rem 0.55rem; }
   .cm-count {
-    position: absolute; inset: 0; display: grid; place-items: center; font-size: 5rem; font-weight: 700; pointer-events: none;
-    color: var(--sl-color-white); background: color-mix(in srgb, var(--sl-color-bg) 45%, transparent); border-radius: 0.5rem;
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+    pointer-events: none; color: var(--sl-color-white); background: color-mix(in srgb, var(--sl-color-bg) 55%, transparent);
+    border-radius: 0.5rem; text-align: center; padding: 1rem;
   }
+  .cm-count b { font-size: 5rem; font-weight: 700; line-height: 1; }
+  .cm-count span { font-size: 1.15rem; font-weight: 600; max-width: 24rem; }
   .cm-count[hidden] { display: none; }
+  /* start and end screens over the 3D view: the whole view is the button */
+  .cm-over {
+    position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0.8rem; padding: 1rem; text-align: center; border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--sl-color-bg) 72%, transparent); color: var(--sl-color-white);
+  }
+  .cm-over[hidden] { display: none; }
+  .cm-start { cursor: pointer; }
+  .cm-end { background: color-mix(in srgb, var(--sl-color-bg) 88%, transparent); }
+  .cm .cm-bigplay {
+    display: flex; flex-direction: column; align-items: center; gap: 0.7rem; padding: 0.5rem 1rem; border: 0; background: none;
+    color: var(--sl-color-white); border-radius: 0.75rem;
+  }
+  .cm-bigic {
+    display: grid; place-items: center; width: 5.5rem; height: 5.5rem; border-radius: 50%; padding-left: 0.3rem;
+    background: var(--cm-pri-bg); color: var(--cm-pri-fg); box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.45); transition: transform 0.15s;
+  }
+  .cm-bigplay:hover .cm-bigic, .cm-start:hover .cm-bigic { transform: scale(1.06); }
+  .cm-biglab { font-size: 1.3rem; font-weight: 700; }
+  .cm-steps3 { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem 1rem; margin: 0; color: var(--sl-color-gray-2); font-size: 0.95rem; }
+  .cm-steps3 b {
+    display: inline-grid; place-items: center; width: 1.35rem; height: 1.35rem; margin-right: 0.3rem; border-radius: 50%;
+    font-size: 0.8rem; border: 1px solid var(--sl-color-gray-3); color: var(--sl-color-white);
+  }
+  .cm-endq { margin: 0; font-size: 1.3rem; font-weight: 700; }
+  .cm-endcov { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; margin: 0; color: var(--sl-color-gray-2); }
+  .cm-view3d .cm-endcov canvas { width: auto; height: min(8rem, 22vh); min-height: 0; max-width: 16rem; cursor: default; }
+  .cm-over { overflow: hidden; }
+  .cm-endbtns { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 0; }
   .cm-cardcol { min-width: 0; }
   .cm-tabs { display: none; gap: 0.3rem; margin-bottom: 0.4rem; }
   .cm-cards { display: grid; gap: 0.5rem; grid-template-columns: minmax(0, 1fr); }
@@ -174,10 +247,15 @@ const main = mode === 'main';
   .cm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin-top: 0.25rem; align-items: start; }
   .cm-pair canvas { border-radius: 0.3rem; }
   .cm-card small { display: block; font-size: 0.74rem; color: var(--cm-text); margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
+  /* the per-frame note: always one line of fixed height (ellipsis when narrow), so the cards never change height */
+  .cm-card small.cm-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; height: 1.35em; }
 
   /* transport: on a desktop it sticks to the bottom of the window while the player is on screen, so Play, the move
      steps and the scrubber stay at hand under the Now panel and the 3D view */
-  .cm-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.6rem; margin: 0.7rem 0 0; }
+  .cm-transport { display: flex; flex-direction: column; gap: 0.4rem; margin: 0.7rem 0 0; }
+  .cm-tmain { display: flex; align-items: center; gap: 0.75rem; }
+  .cm-tsub { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
+  .cm-tsub button { font-size: 0.78rem !important; min-height: 1.9rem !important; padding: 0.2rem 0.55rem !important; color: var(--sl-color-gray-2); }
   @media (min-width: 40.0625rem) {
     .cm-transport {
       position: sticky; bottom: 0; z-index: 4; padding: 0.45rem 0; background: var(--sl-color-bg);
@@ -185,11 +263,23 @@ const main = mode === 'main';
     }
     .cm-fs .cm-transport { position: static; box-shadow: none; }
   }
-  .cm-play {
-    font-size: 1.2rem !important; font-weight: 700; min-width: 5.5rem; min-height: 2.5rem; padding: 0.3rem 0.9rem; border-radius: 0.45rem;
-    border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--sl-color-black);
+  /* practise mode: a badge over the Now panel, with its way out */
+  .cm-prac {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin: 0.6rem 0 0;
+    padding: 0.35rem 0.4rem 0.35rem 0.8rem; border-radius: 0.5rem; font-weight: 600;
+    background: color-mix(in srgb, var(--sl-color-accent) 16%, var(--sl-color-bg)); border: 1px solid var(--sl-color-accent); color: var(--sl-color-white);
   }
-  :root[data-theme='light'] .cm-play { color: #fff; }
+  .cm-prac[hidden] { display: none; }
+  .cm .cm-pracexit {
+    min-height: 2.75rem; padding: 0.25rem 0.8rem; border-radius: 0.45rem; border: 1px solid var(--sl-color-gray-3);
+    background: var(--sl-color-bg); color: var(--sl-color-white); font-weight: 600;
+  }
+  .cm-segchip { display: inline-flex; }
+  .cm-segchip > button:first-child { border-start-end-radius: 0; border-end-end-radius: 0; }
+  .cm .cm-segchips .cm-pbtn {
+    border-start-start-radius: 0; border-end-start-radius: 0; margin-left: -1px; font-weight: 600; color: var(--cm-pri-bg);
+  }
+  .cm .cm-segchips .cm-pbtn[aria-pressed='true'] { color: var(--cm-pri-fg); }
   .cm-step { border-radius: 0.45rem; }
   .cm-scrub {
     flex: 1 1 12rem; min-width: 8rem; height: 1.4rem; margin: 0; appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer;
@@ -228,6 +318,13 @@ const main = mode === 'main';
     text-decoration: underline; text-underline-offset: 2px;
   }
 
+  /* the guide's "Boards we used" previews (outside the player, styled here with it) */
+  .cm-boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin-block: 1rem; }
+  .cm-boards figure { margin: 0; }
+  .cm-boards img { display: block; width: 100%; height: auto; border: 1px solid var(--sl-color-gray-5); border-radius: 0.4rem; background: #fff; }
+  .cm-boards figcaption { margin-top: 0.4rem; font-size: 0.88rem; color: var(--sl-color-gray-2); line-height: 1.5; }
+  .cm-boards a { color: var(--sl-color-text-accent); }
+
   /* full screen: Now panel on top, the stage fills the height, transport at the bottom */
   .cm.cm-fs {
     position: fixed; inset: 0; z-index: 1000; margin: 0; padding: 0.75rem 1rem; background: var(--sl-color-bg);
@@ -254,16 +351,26 @@ const main = mode === 'main';
     .cm-stage { grid-template-columns: minmax(0, 1fr); }
     .cm-view3d canvas { min-height: 0; }
     .cm-readout { max-width: calc(100% - 1rem); }
-    .cm-views { position: static; justify-content: flex-start; margin-top: 0.4rem; }
+    .cm-views { position: relative; right: auto; top: auto; justify-content: flex-start; margin-top: 0.4rem; }
     .cm-views button, .cm-chips button, .cm-toggles button, .cm-speeds button, .cm-tabs button, .cm-step { min-height: 2.5rem; }
     .cm-multi .cm-tabs { display: flex; }
     .cm-multi .cm-card { display: none; }
     .cm-multi .cm-card[aria-current='true'] { display: block; }
     .cm-multi .cm-pair { --cm-h: 13rem; }
-    .cm-nowplay { display: inline-block; }   /* the Now panel sticks to the top here: Play stays at hand */
-    .cm-fs .cm-nowplay { display: none; }
-    .cm-play { order: 1; } .cm-step { order: 2; } .cm-speeds { order: 3; }
-    .cm-scrub { order: 4; flex-basis: 100%; } .cm-time { order: 5; } .cm-toggles { order: 6; }
+    .cm-tsub button { min-height: 2.5rem !important; }
+    .cm .cm-primary { min-width: 5.5rem; }
+    .cm .cm-nowplay { min-width: 0; padding-inline: 0.75rem; font-size: 0.95rem; }
+    .cm-now-top { gap: 0.5rem; }
+    .cm-now-title { font-size: 0.92rem; min-height: 2lh; }   /* a long move name takes 2 lines: always keep room for 2 */
+    .cm-now-title [data-role='title'] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+    .cm-now-left { font-size: 1rem; }
+    .cm-time { min-width: 0; font-size: 0.8rem; white-space: nowrap; }
+    .cm-bigic { width: 4.5rem; height: 4.5rem; }
+    .cm-biglab { font-size: 1.1rem; }
+    .cm-steps3 { font-size: 0.85rem; flex-direction: column; align-items: flex-start; }
+    .cm-endq { font-size: 1.1rem; }
+    .cm-view3d .cm-endcov canvas { display: none; }   /* the coverage card sits right under the view here */
+    .cm-over { gap: 0.5rem; padding: 0.6rem; }
     .cm-segchips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.3rem; }
     .cm-segchips button { flex: none; }
     .cm-keys { display: none; }

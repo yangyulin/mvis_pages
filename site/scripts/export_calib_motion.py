@@ -44,17 +44,20 @@ smoothed value; half-cycles shorter than 0.8 s or under 20 % of the largest swin
   corner square (mix)    angle of the optical-axis hit point on the board      one beat per quarter turn (a corner)
   rest                   none                                                  "Count 3"
 
-Camera-card sidecar (calib-motion/cams v1), derived from the views file, never copied raw; 10 Hz steps on the anim
-time base (the views and the anim file share the time origin):
-  {schema, variant, hz, n, licence, cams: [{name, color, size [w, h], k [fx, fy, cx, cy],
+Camera-card sidecar (calib-motion/cams v2), derived from the views file, never copied raw; every frame of the views
+file (its full rate, about 20 Hz AprilGrid and 10 Hz chessboard, gaps kept) on the anim time base (the views and the
+anim file share the time origin), so the page can interpolate between the two frames around the play time:
+  {schema, variant, hz (median frame rate), n, t [s per frame], licence, cams: [{name, color, size [w, h], k [fx, fy, cx, cy],
      T_C0_Ck (4x4, m: camera k in cam0 axes), grid [nx, ny] (100 px cells), reach [0/1 per cell: centre within
      fx * 90 deg of the principal point, the anim metric_reach rule with this camera's intrinsics],
      cov100_first [s or null per cell: first detected corner in it, all frames], uv [[u0, v0, du1, dv1, ...] per
-     step: integer px of the detected corners of the last frame at that step, the first pair absolute, every later
-     pair as the difference to the pair before it], outline [4 corners or null per step],
-     n_so_far [detected corners up to the step], dist_cm, off_deg [per step: |n . (c - board centre)| and
+     frame: integer px of the corners detected in that frame (none: []), the first pair absolute, every later
+     pair as the difference to the pair before it], outline [4 corners or null per frame: the board outline projected
+     with the solved pose, so it is there also in frames without detections (cam2)],
+     n_so_far [detected corners up to the frame], dist_cm, off_deg [per frame: |n . (c - board centre)| and
      acos(|z_C . n|), the MVIS views readout]}]}
-Dropped: ids, any jpg*, anything path-like. Budget per sidecar: 1.0 MB raw, 400 kB gzip.
+Dropped: ids, any jpg*, anything path-like.
+Budget per sidecar: 1.5 MB raw, 450 kB gzip (600 frames of 3 cameras: 1.35 MB raw, 0.43 MB gzip for AprilGrid).
 --cams also writes cov_cam0 (share of cam0's reachable 100 px cells with a detected corner, all frames) into that
 variant's entry of the index.json next to it: the page's real-example table shows it, so it equals the cam0 card's
 final %. (cov_reach, the anim file's coverage, is kept for reference.)
@@ -77,7 +80,6 @@ twin_verdicts.json, as the page reads it (everything else in the file is ignored
 import argparse
 import array
 import base64
-import bisect
 import gzip
 import json
 import math
@@ -87,7 +89,7 @@ SITE = Path(__file__).resolve().parents[1]
 DROP = ("gyro_cam", "accel_cam", "grav_cam")
 INFO = ("duration_matched", "frame_scale", "sigma_ratio_scaled")
 LOCAL = ("/home/", "/tmp/", "~/", "Datasets", "openmvis-internal", "results/")
-CAMS_HZ, CAMS_RAW_MAX, CAMS_GZ_MAX = 10.0, 1_000_000, 400_000
+CAMS_RAW_MAX, CAMS_GZ_MAX = 1_500_000, 450_000
 
 
 def slim(d):
@@ -258,10 +260,8 @@ def cams_sidecar(views, anim):
     mean = [sum(p[i] for p in Pr) / N for i in range(3)]
     if sum(bn[i] * (mean[i] - B["center"][i]) for i in range(3)) < 0:
         bn = [-x for x in bn]
-    dur = anim["duration_s"]
-    n = int(math.floor(dur * CAMS_HZ + 1e-6)) + 1
-    step = [min(range(max(0, j - 1), min(N, j + 2)), key=lambda k: abs(T[k] - i / CAMS_HZ))
-            for i in range(n) for j in [bisect.bisect_left(T, i / CAMS_HZ)]]
+    gaps = sorted(b - a for a, b in zip(T[:-1], T[1:])) or [0.0]   # every frame of the views file
+    hz = round(1 / gaps[len(gaps) // 2], 3) if gaps[len(gaps) // 2] > 0 else 0.0
     c0 = S["cams"][0]
     R0, p0 = R9(c0["R"]), c0["p"]
     out = []
@@ -280,13 +280,13 @@ def cams_sidecar(views, anim):
             for q in range(uvo[k], uvo[k + 1], 2):
                 cell = min(ny - 1, max(0, uv[q + 1] // 100)) * nx + min(nx - 1, max(0, uv[q] // 100))
                 if first[cell] is None:
-                    first[cell] = round(T[k], 1)
+                    first[cell] = round(T[k], 3)
         # cam k in cam0 axes: T_C0_Ck = T_B_C0^-1 T_B_Ck (B = the views rig body)
         Rk = mm([list(r) for r in zip(*R0)], Rc)
         tk = mtv(R0, [pc[i] - p0[i] for i in range(3)])
         Tk = [[round(Rk[i][j], 6) for j in range(3)] + [round(tk[i], 5)] for i in range(3)] + [[0, 0, 0, 1]]
         uvs, outl, nsf, dist, off = [], [], [], [], []
-        for k in step:
+        for k in range(N):
             seg = uv[uvo[k]:uvo[k + 1]]
             m = 2 * len(c["ids"][k]) if c.get("ids") else len(seg)
             f = list(seg[len(seg) - m:]) if m <= len(seg) else list(seg)   # m = 0: nothing detected then
@@ -302,8 +302,8 @@ def cams_sidecar(views, anim):
         out.append(dict(name=c["name"], color=c["color"], size=[W, H], k=[round(x, 3) for x in c["k"]], T_C0_Ck=Tk,
                         grid=[nx, ny], reach=reach, cov100_first=first, uv=uvs, outline=outl, n_so_far=nsf,
                         dist_cm=dist, off_deg=off))
-    return {"schema": "calib-motion/cams v1", "variant": anim["variant"], "hz": CAMS_HZ, "n": n,
-            "licence": "CC BY-NC 4.0", "cams": out}
+    return {"schema": "calib-motion/cams v2", "variant": anim["variant"], "hz": hz, "n": N,
+            "t": [round(x, 3) for x in T], "licence": "CC BY-NC 4.0", "cams": out}
 
 
 def cov_pct(cam):

@@ -248,8 +248,11 @@ function guideSoFar(d) {
   return soFar;
 }
 
-// Real-example cards: decode the sidecar (delta-coded corners) once.
+// Real-example cards: decode the sidecar (delta-coded corners) once. Every camera gets the frame times t (s) and the
+// frame period (1 / the exporter's hz). An old v1 sidecar (no t, still cached just after a deploy): t from its hz.
 export function prepCams(side) {
+  const period = side.hz ? 1 / side.hz : 0.1;
+  const t = side.t || side.cams[0].uv.map((_, k) => +(k * period).toFixed(3));
   return side.cams.map((c) => {
     const uv = c.uv.map((f) => {
       const a = new Int16Array(f.length);
@@ -258,26 +261,53 @@ export function prepCams(side) {
     });
     const R = c.T_C0_Ck.slice(0, 3).map((r) => r.slice(0, 3));
     const tt = c.T_C0_Ck.slice(0, 3).map((r) => r[3]);
-    return { ...c, uv, R, tt, nReach: c.reach.reduce((a, b) => a + b, 0) };
+    return { ...c, uv, R, tt, t, period, nReach: c.reach.reduce((a, b) => a + b, 0) };
   });
 }
 
-// No corners at sidecar step k (the first frame of a take, a blink): the nearest step with corners within 1 s (10
-// steps), later first, so a card never starts empty; k itself when none.
-export function nearestStep(uv, k) {
-  let ks = k;
-  for (let j = 1; !uv[ks].length && j <= 10; j++) {
-    if (k + j < uv.length && uv[k + j].length) ks = k + j;
-    else if (k - j >= 0 && uv[k - j].length) ks = k - j;
-  }
-  return ks;
+// The frames around time t: k0 = the last frame at or before t (0 before the first), k1 = the next one, a = how far
+// t is between them (0..1).
+export function bracket(T, t) {
+  const n = T.length;
+  if (!n || t <= T[0]) return { k0: 0, k1: 0, a: 0 };
+  if (t >= T[n - 1]) return { k0: n - 1, k1: n - 1, a: 0 };
+  let lo = 0, hi = n - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (T[m] <= t) lo = m; else hi = m; }
+  return { k0: lo, k1: hi, a: (t - T[lo]) / (T[hi] - T[lo]) };
 }
+
+// The board outline at a time between two frames: corner by corner on the straight line between them; one side
+// missing (board out of view there): the nearer frame's outline, which may be none.
+export function lerpOutline(o0, o1, a) {
+  if (o0 && o1) return o0.map(([u, v], j) => [u + a * (o1[j][0] - u), v + a * (o1[j][1] - v)]);
+  return (a < 0.5 ? o0 : o1) || null;
+}
+
+// What a real-example card shows at time t: the outline interpolated between the frames around t, the corners so
+// far up to t, and the detected corners by the local gap. Between two frames at most two periods apart (a normal
+// gap, also the uneven 0.05 / 0.10 s ones): the nearer frame's corners, or the other's when the nearer has none, so
+// the card never blinks between two detections. In a real gap (over two periods), before the first and after the
+// last frame: the nearest frame's corners within half a period of it, else none.
+export function camFrame(c, t) {
+  const T = c.t, { k0, k1, a } = bracket(T, t), eps = 1e-6;
+  const kn = a < 0.5 ? k0 : k1, ko = kn === k0 ? k1 : k0;
+  const normal = k0 !== k1 && T[k1] - T[k0] <= 2 * c.period + eps;
+  const near = T.length > 0 && Math.abs(T[kn] - t) <= c.period / 2 + eps;
+  const f = normal ? (c.uv[kn].length ? c.uv[kn] : c.uv[ko]) : near ? c.uv[kn] : [], uv = [];
+  for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
+  return { uv, n: uv.length, kNow: t < (T[0] ?? 0) ? -1 : k0, outline: lerpOutline(c.outline[k0], c.outline[k1], a),
+    soFar: t < (T[0] ?? 0) ? 0 : c.n_so_far[k0], dist: c.dist_cm[kn], off: c.off_deg[kn] };
+}
+
+// The card note: one line of fixed form, so the card never changes height while the take plays.
+export const cardNote = ({ n, pct, soFar }) =>
+  `${n ? `${n} corners` : 'no corners this frame'} · ${Math.round(pct)} % of the image · ${soFar.toLocaleString('en-US')} so far`;
 
 // Share (%) of a sidecar camera's reachable 100 px cells with a detected corner by time t; at the end it is the
 // index's cov_cam0 for cam0.
 export function camCoverage(c, t) {
   let got = 0;
-  c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= t + 0.05 && c.reach[n]) got++; });
+  c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= t + 1e-6 && c.reach[n]) got++; });
   return (100 * got) / Math.max(1, c.nReach);
 }
 
@@ -298,6 +328,84 @@ export function advance(st, now, dur) {
   if (st.t >= dur) { st.t = dur; return true; }
   return false;
 }
+
+// ---------- start screen, practise mode, end screen (pure: also used by the tests) ----------
+// The overlay on the 3D view: 'start' before the first play (back after loading another example), 'none' while the
+// take plays or is scrubbed, 'end' once it played to its end. Events: 'play', 'seek', 'end', 'load'.
+export function screenStep(screen, ev) {
+  if (ev === 'load') return 'start';
+  if (ev === 'end') return screen === 'start' ? 'start' : 'end';
+  return 'none';   // play or seek leaves the start and end screens
+}
+// What the primary button offers: play, pause (also during the 3-2-1), or again at the end of the take.
+export const playMode = ({ playing, counting, t, dur }) => (playing || counting ? 'pause' : t >= dur - 1e-3 ? 'again' : 'play');
+export const PLAY_TEXT = { play: ['▶\uFE0E', 'Play'], pause: ['❚❚', 'Pause'], again: ['↺', 'Again'] };
+// The start screen's button: the guides are followed, the real examples watched; each says its length.
+export const startLabel = (d, real) => `${real ? 'Play the real recording' : 'Start the guided motion'} · ${Math.round(d.dur)} s`;
+// The 3-2-1 before the first move: where to stand, from the camera's distance to the board plane at the start.
+export function getReadyText(d) {
+  const p = d.s.p_C[0], c = d.raw.board.center;
+  return `Get in position: board ${Math.round(100 * Math.abs(p[2] - c[2]))} cm ahead, face-on`;
+}
+// The hardest move to practise: the one with the fastest peak, linear and angular speed each as a share of the take's
+// peak, added. Rests never count. null when the take has no moves.
+export function hardestMove(d) {
+  const { s, n, hz } = d;
+  const v = new Float64Array(n), w = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const a = s.p_C[Math.max(0, i - 1)], b = s.p_C[Math.min(n - 1, i + 1)];
+    v[i] = (Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) * hz) / (Math.min(n - 1, i + 1) - Math.max(0, i - 1) || 1);
+    w[i] = Math.hypot(...s.gyro[i]);
+  }
+  const V = Math.max(1e-9, ...v), Wp = Math.max(1e-9, ...w);
+  let best = null, score = -1;
+  for (const g of d.segs) {
+    if (!g.k) continue;
+    let pv = 0, pw = 0;
+    for (let i = Math.max(0, Math.round(g.t0 * hz)); i < Math.min(n, Math.round(g.t1 * hz) + 1); i++) { pv = Math.max(pv, v[i]); pw = Math.max(pw, w[i]); }
+    if (pv / V + pw / Wp > score + 1e-12) { score = pv / V + pw / Wp; best = g; }
+  }
+  return best;
+}
+export const PRACTICE_SPEED = 0.5;
+// Practise one move: jump to it, 0.5x, repeat it; what was set before is kept to restore. Only moves (not rests).
+// Returns false (nothing changed) for a rest or a move not in the take.
+export function enterPractice(st, segs, g) {
+  if (!g || !g.k || !segs.includes(g)) return false;
+  if (!st.practice) st.saved = { speed: st.speed, repeat: st.repeat };
+  st.practice = g;
+  st.repeat = g;
+  st.speed = PRACTICE_SPEED;
+  st.hold = 0;
+  st.t = g.t0 + 1e-3;
+  return true;
+}
+// Leave practice: the speed and repeat from before it, the clock where it is. False when not practising.
+export function exitPractice(st) {
+  if (!st.practice) return false;
+  const sv = st.saved || { speed: 1, repeat: null };
+  st.speed = sv.speed;
+  st.repeat = sv.repeat;
+  st.practice = null;
+  st.saved = null;
+  st.hold = 0;
+  return true;
+}
+// Each frame: a repeat follows the move the clock is in (a chip, a step, the scrubber), and practise with it; on a rest
+// practise ends. True when practise ended (the speed and repeat from before it are back).
+export function followPractice(st, g) {
+  if (st.repeat && st.repeat !== g && !st.hold) st.repeat = g;
+  if (!st.practice || st.repeat === st.practice) return false;
+  if (st.repeat && st.repeat.k) { st.practice = st.repeat; return false; }
+  return exitPractice(st);
+}
+// The Repeat button / R: on repeats the move the clock is in (g), off stops it; during practise off also ends practise.
+export function toggleRepeat(st, g) {
+  if (st.practice) { exitPractice(st); st.repeat = null; }
+  else st.repeat = st.repeat ? null : g;
+  st.hold = 0;
+}
+export const practiceBadge = (st) => (st.practice ? `Practising: ${st.practice.name} · ${st.speed}× · ${st.repeat ? 'repeating' : 'once'}` : '');
 
 // The largest 4-connected group of cells (indices into a gx x gy grid) among `cells`.
 export function largestRegion(cells, gx, gy) {
@@ -329,14 +437,18 @@ export function mount(root) {
     readout: $('readout'), cards: $('cards'), tabs: $('tabs'), play: $('play'), prev: $('prev'), nextB: $('nextmove'),
     scrub: $('scrub'), time: $('time'), speeds: $('speeds'), repeat: $('repeat'), axes: $('axes'), img: $('img'), fs: $('fs'),
     camfs: $('camfs'), play2: $('play2'), segchips: $('segchips'), traces: $('traces'), status: $('status'), count: $('count'),
-    views: $('views'), table: $('table'), now: $('now'),
+    views: $('views'), table: $('table'), now: $('now'), countn: $('countn'), ready: $('ready'), start: $('start'),
+    startbtn: $('startbtn'), startlab: $('startlab'), end: $('end'), endcov: $('endcov'), endpct: $('endpct'), again: $('again'),
+    hard: $('hard'), pbadge: $('pbadge'), ptext: $('ptext'), pexit: $('pexit'),
   };
+  const real = root.dataset.mode === 'real';
   const base = root.dataset.base;
   const ids = MODES[root.dataset.mode] || MODES.main;
   const cache = new Map();
   const st = {
     d: null, vid: null, t: 0, playing: false, speed: 1, last: 0, view: 'op', az: 0.75, el: 0.32, zoom: 1,
     axes: false, img: true, sel: 0, repeat: null, hold: 0, want: null, counting: 0, theme: {}, dirtyImu: true, lastTitle: '',
+    screen: 'start', practice: null, saved: null,
   };
   const sp = Number(store.get('cm-speed'));
   if (SPEEDS.includes(sp)) st.speed = sp;
@@ -397,11 +509,17 @@ export function mount(root) {
     st.d = d;
     st.vid = id;
     st.t = 0;
+    if (st.saved) st.speed = st.saved.speed;
+    st.practice = null;
+    st.saved = null;
     st.repeat = null;
     st.hold = 0;
     st.sel = 0;
     st.zoom = 1;
     setPlaying(false);
+    setScreen('load');
+    syncSpeeds();
+    ui.startlab.textContent = startLabel(d, real);
     ui.scrub.max = String(d.dur);
     ui.status.textContent = '';
     const V = VARIANTS[id];
@@ -449,7 +567,7 @@ export function mount(root) {
       el.innerHTML = `<b><i style="background:${c.color}"></i>${c.name}<span class="cm-tag">drawn, no frame</span></b>`
         + `<div class="cm-pair"><canvas style="${ar}" aria-label="${c.name}: board and detected corners"></canvas>`
         + `<canvas style="${ar}" aria-label="${c.name}: image coverage so far"></canvas></div>`
-        + `<small>${c.pending ? 'loading detected corners…' : ''}</small>`
+        + `<small class="cm-note">${c.pending ? 'loading detected corners…' : '\u00a0'}</small>`
         + '<small class="cm-key">filled: seen · dashed: still empty · <span>fill next</span>: the biggest gap</small>';
       el.addEventListener('click', () => pick(i));
       ui.cards.append(el);
@@ -460,7 +578,7 @@ export function mount(root) {
       tab.addEventListener('click', () => pick(i));
       ui.tabs.append(tab);
       const [view, cov] = el.querySelectorAll('canvas');
-      return { el, tab, view, cov, note: el.querySelector('small'), cam: c, covCv: null, covAt: -1 };
+      return { el, tab, view, cov, note: el.querySelector('.cm-note'), cam: c, covCv: null, covAt: -1 };
     });
     root.classList.toggle('cm-multi', cards.length > 1);
   }
@@ -484,17 +602,13 @@ export function mount(root) {
     return { R: mm(R, c.R), p: add(p, mv(R, c.tt)) };
   }
   const idx = (t) => Math.max(0, Math.min(st.d.n - 1, Math.round(t * st.d.hz)));
-  const sidx = (t) => Math.max(0, Math.min(st.d.cams ? st.d.cams[0].uv.length - 1 : 0, Math.round(t * 10)));
 
   // What one card shows now: {uv: [[u, v, detected]], n, outline, pct, soFar, dist, off}
   function cardNow(ci) {
     const d = st.d, i = idx(st.t), raw = d.raw;
     if (d.cams) {
-      const c = d.cams[ci], k = sidx(st.t);
-      const ks = nearestStep(c.uv, k), f = c.uv[ks], uv = [];
-      for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
-      return { uv, n: uv.length, near: ks !== k ? (ks - k) / 10 : 0, outline: c.outline[ks] || c.outline[k], pct: camCoverage(c, st.t),
-        soFar: c.n_so_far[k], dist: c.dist_cm[ks], off: c.off_deg[ks] };
+      const c = d.cams[ci];
+      return { ...camFrame(c, st.t), pct: camCoverage(c, st.t) };
     }
     const { R, p } = camPose(0, i);
     const det = boardDetections(raw.board, raw.camera.intr8, raw.camera.image_size, R, p);
@@ -538,7 +652,7 @@ export function mount(root) {
         if (u < -2 || v < -2 || u > iw + 2 || v > ih + 2) continue;
         ctx.beginPath();
         ctx.arc(u * k, v * k, r, 0, 7);
-        if (ok) { ctx.globalAlpha = now.near ? 0.55 : 1; ctx.fillStyle = th.corner; ctx.fill(); ctx.globalAlpha = 1; } else { ctx.strokeStyle = th.text; ctx.lineWidth = px; ctx.stroke(); }
+        if (ok) { ctx.fillStyle = th.corner; ctx.fill(); } else { ctx.strokeStyle = th.text; ctx.lineWidth = px; ctx.stroke(); }
       }
       if (!now.n && !now.outline) {
         ctx.fillStyle = th.text;
@@ -548,8 +662,8 @@ export function mount(root) {
         ctx.textAlign = 'start';
       }
       const sel = ci === st.sel;
-      const nowText = `${now.n ? `${now.n} corners ${now.near ? `(nearest frame, ${now.near > 0 ? '+' : ''}${now.near.toFixed(1)} s)` : 'now'}` : 'no corners now'}`;
-      if (!card.cov.clientWidth) { card.note.textContent = nowText; return; }   // a thumbnail: the view only
+      card.note.textContent = cardNote(now);
+      if (!card.cov.clientWidth) return;   // a thumbnail: the view only
       // coverage: first-seen cells (guides: fine grid; real: the detected corners), 100 px grid, empty cells dashed
       fit(card.cov);
       W = card.cov.width; H = card.cov.height; k = W / iw;
@@ -557,14 +671,15 @@ export function mount(root) {
       ctx.fillStyle = th.panel;
       ctx.fillRect(0, 0, W, H);
       if (d.cams) {
-        if (!card.covCv || card.covAt > sidx(st.t) || card.covCv.width !== W) {
+        const kNow = now.kNow;   // corners of every frame up to the play time
+        if (!card.covCv || card.covAt > kNow || card.covCv.width !== W) {
           card.covCv = document.createElement('canvas');
           card.covCv.width = W; card.covCv.height = H; card.covAt = -1;
         }
         const cg = card.covCv.getContext('2d'), c = d.cams[ci];
         cg.fillStyle = `rgba(${th.cov}, 0.45)`;
-        for (let s = card.covAt + 1; s <= sidx(st.t); s++) { const f = c.uv[s]; for (let q = 0; q + 1 < f.length; q += 2) cg.fillRect(f[q] * k - px, f[q + 1] * k - px, 2 * px, 2 * px); }
-        card.covAt = sidx(st.t);
+        for (let s = card.covAt + 1; s <= kNow; s++) { const f = c.uv[s]; for (let q = 0; q + 1 < f.length; q += 2) cg.fillRect(f[q] * k - px, f[q + 1] * k - px, 2 * px, 2 * px); }
+        card.covAt = kNow;
         ctx.drawImage(card.covCv, 0, 0);
       } else {
         const [nx] = d.raw.coverage.fine_grid, cell = d.raw.coverage.fine_px;
@@ -578,7 +693,7 @@ export function mount(root) {
       }
       const [gx, gy] = d.cams ? d.cams[ci].grid : d.raw.coverage.metric_grid;
       const reach = d.cams ? d.cams[ci].reach : d.reach;
-      const seen = (n) => (d.cams ? d.cams[ci].cov100_first[n] != null && d.cams[ci].cov100_first[n] <= st.t + 0.05 : d.first100[n] <= st.t);
+      const seen = (n) => (d.cams ? d.cams[ci].cov100_first[n] != null && d.cams[ci].cov100_first[n] <= st.t + 1e-6 : d.first100[n] <= st.t);
       const empty = [];
       for (let n = 0; n < gx * gy; n++) if (reach[n] && !seen(n)) empty.push(n);
       // "fill next" (selected card only)
@@ -620,7 +735,6 @@ export function mount(root) {
       for (let x = 100; x < iw; x += 100) { ctx.beginPath(); ctx.moveTo(x * k, 0); ctx.lineTo(x * k, H); ctx.stroke(); }
       for (let y = 100; y < ih; y += 100) { ctx.beginPath(); ctx.moveTo(0, y * k); ctx.lineTo(W, y * k); ctx.stroke(); }
       ctx.globalAlpha = 1;
-      card.note.textContent = `${nowText} · ${Math.round(now.pct)} % of the image · ${now.soFar.toLocaleString('en-US')} so far`;
     });
   }
 
@@ -811,8 +925,10 @@ export function mount(root) {
     ui.bar.style.background = st.theme.seg[n.key];
     ui.bar.style.width = `${(100 * n.frac).toFixed(2)}%`;
     ui.left.textContent = `${n.left} s left`;
-    ui.cue.textContent = n.short;
-    ui.beat.textContent = n.beatText || ' ';
+    const ready = st.screen === 'start';
+    ui.now.classList.toggle('cm-ready', ready);
+    ui.cue.textContent = ready ? 'Press Play to start' : n.short;
+    ui.beat.textContent = ready ? (real ? '\u00a0' : `${getReadyText(d)}, then hold still.`) : n.beatText || '\u00a0';
     const soon = n.next && n.until <= 3;
     ui.next.classList.toggle('soon', !!soon);
     ui.next.textContent = n.next
@@ -821,8 +937,9 @@ export function mount(root) {
     const on = cards[st.sel] && cards[st.sel].now;
     ui.readout.textContent = on ? `${cards[st.sel].cam.name}: ${Math.round(on.dist)} cm from the board, ${Math.round(on.off)}° off its normal` : '';
     const g = d.segs[n.j];
-    ui.segchips.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-pressed', String(k === n.j)));
-    if (st.repeat && st.repeat !== g && !st.hold) st.repeat = g;
+    ui.segchips.querySelectorAll('.cm-jump').forEach((b, k) => b.setAttribute('aria-pressed', String(k === n.j)));
+    if (followPractice(st, g)) { syncSpeeds(); ui.repeat.setAttribute('aria-pressed', String(!!st.repeat)); }
+    showPractice();
   }
 
   function segChips() {
@@ -830,9 +947,21 @@ export function mount(root) {
     st.d.segs.forEach((g) => {
       const b = document.createElement('button');
       b.type = 'button';
+      b.className = 'cm-jump';
       b.innerHTML = `<i class="cm-sw cm-s-${g.key}"></i>${g.k ? `${g.k} ${g.name}` : g.name} · ${segSecs(g)} s`;
-      b.addEventListener('click', () => goSeg(g));
-      ui.segchips.append(b);
+      b.addEventListener('click', () => { setScreen('seek'); goSeg(g); });
+      if (real || !g.k) { ui.segchips.append(b); return; }
+      const w = document.createElement('span');
+      w.className = 'cm-segchip';
+      const pb = document.createElement('button');
+      pb.type = 'button';
+      pb.className = 'cm-pbtn';
+      pb.textContent = 'Practise';
+      pb.setAttribute('aria-label', `Practise ${g.name}: 0.5× speed, repeating`);
+      pb.setAttribute('aria-pressed', 'false');
+      pb.addEventListener('click', () => practise(g));
+      w.append(b, pb);
+      ui.segchips.append(w);
     });
   }
   function scrubBands() {
@@ -901,6 +1030,8 @@ export function mount(root) {
     drawTraces();
     ui.scrub.value = String(st.t);
     ui.time.textContent = `${st.t.toFixed(1)} / ${st.d.dur.toFixed(1)} s`;
+    const m = playMode({ playing: st.playing, counting: st.counting, t: st.t, dur: st.d.dur });
+    if (m !== st.lastMode) playLabel(m);
   }
 
   // ---- transport ----
@@ -915,25 +1046,87 @@ export function mount(root) {
   }
   function step(dir) {
     if (!st.d) return;
+    setScreen('seek');
     const segs = st.d.segs, g = segAt(segs, st.t), j = segs.indexOf(g);
     if (dir < 0) goSeg(st.t - g.t0 > 1.5 ? g : segs[Math.max(0, j - 1)]);
     else if (j + 1 < segs.length) goSeg(segs[j + 1]);
   }
   function tick(now) {
     if (!st.playing) return;
-    if (advance(st, now, st.d.dur)) { draw(); setPlaying(false); return; }
+    if (advance(st, now, st.d.dur)) { setPlaying(false); draw(); setScreen('end'); return; }
     draw();
     requestAnimationFrame(tick);
   }
   function setPlaying(on) {
     st.playing = on && !!st.d;
     if (!st.playing) { clearInterval(st.counting); st.counting = 0; ui.count.hidden = true; }
-    playLabel(st.playing);
+    playLabel(st.playing ? 'pause' : playMode({ playing: false, counting: 0, t: st.t, dur: st.d ? st.d.dur : Infinity }));
     if (st.playing) { st.last = performance.now(); requestAnimationFrame(tick); }
   }
-  function playLabel(on) {
-    for (const b of [ui.play, ui.play2]) if (b) { b.textContent = on ? 'Pause' : 'Play'; b.setAttribute('aria-label', on ? 'Pause' : 'Play'); }
+  function playLabel(m) {
+    st.lastMode = m;
+    const [ic, lab] = PLAY_TEXT[m];
+    for (const b of [ui.play, ui.play2]) {
+      if (!b) continue;
+      b.querySelector('.cm-ic').textContent = ic;
+      b.querySelector('.cm-pl').textContent = lab;
+      b.setAttribute('aria-label', m === 'again' ? 'Play again from the start' : lab);
+    }
   }
+  // start / end screens over the 3D view
+  function setScreen(ev) {
+    const was = st.screen;
+    st.screen = screenStep(st.screen, ev);
+    ui.start.hidden = st.screen !== 'start';
+    ui.end.hidden = st.screen !== 'end';
+    if (st.screen === 'end' && was !== 'end') showEnd();
+  }
+  function showEnd() {
+    const card = cards[st.sel];
+    const c = ui.endcov, src = card && card.cov;
+    if (src && src.width > 1 && src.clientWidth) {
+      c.width = src.width; c.height = src.height;
+      c.style.aspectRatio = `${src.width} / ${src.height}`;
+      c.getContext('2d').drawImage(src, 0, 0);
+      c.hidden = false;
+    } else c.hidden = true;
+    const pct = card && card.now ? Math.round(card.now.pct) : null;
+    ui.endpct.textContent = pct == null ? '' : pct >= 100 ? `${card.cam.name}: every reachable part of the image seen (100 %).`
+      : `${card.cam.name}: ${pct} % of the image seen; the dashed cells were never reached.`;
+    if (ui.hard) {
+      const h = hardestMove(st.d);
+      ui.hard.hidden = !h;
+      if (h) ui.hard.textContent = `Practise the hardest move: ${h.name}`;
+    }
+    ui.again.focus({ preventScroll: true });
+  }
+  // practise mode (the guides only)
+  function syncSpeeds() { ui.speeds.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(Number(x.dataset.v) === st.speed))); }
+  function showPractice() {
+    if (!ui.pbadge) return;
+    ui.pbadge.hidden = !st.practice;
+    const txt = practiceBadge(st);
+    if (ui.ptext.textContent !== txt) ui.ptext.textContent = txt;
+    const jumps = [...ui.segchips.querySelectorAll('.cm-jump')];
+    ui.segchips.querySelectorAll('.cm-segchip').forEach((w) => {
+      const mine = !!st.practice && st.d.segs[jumps.indexOf(w.querySelector('.cm-jump'))] === st.practice;
+      w.querySelector('.cm-pbtn').setAttribute('aria-pressed', String(mine));
+    });
+  }
+  function practise(g) {
+    if (real || !st.d || !enterPractice(st, st.d.segs, g)) return;
+    if (st.playing || st.counting) setPlaying(false);
+    syncSpeeds();
+    ui.repeat.setAttribute('aria-pressed', 'true');
+    togglePlay();
+  }
+  function leavePractice() {
+    if (!exitPractice(st)) return;
+    syncSpeeds();
+    ui.repeat.setAttribute('aria-pressed', String(!!st.repeat));
+    draw();
+  }
+  if (ui.pexit) ui.pexit.addEventListener('click', leavePractice);
   // one player at a time: starting this one pauses the other; a player scrolled out of view pauses
   document.addEventListener('cm-play', (e) => { if (e.detail !== root && (st.playing || st.counting)) setPlaying(false); });
   new IntersectionObserver((es) => { if (!es[es.length - 1].isIntersecting && (st.playing || st.counting)) setPlaying(false); }).observe(root);
@@ -942,16 +1135,20 @@ export function mount(root) {
     if (st.playing || st.counting) return setPlaying(false);
     document.dispatchEvent(new CustomEvent('cm-play', { detail: root }));
     if (st.t >= st.d.dur - 1e-3) st.t = 0;
+    setScreen('play');
+    draw();
     const g = segAt(st.d.segs, st.t);
     if (st.t - g.t0 > 0.2) return setPlaying(true);
-    // lead-in: 3-2-1 in real seconds before a move starts
+    // lead-in: 3-2-1 in real seconds before a move starts; at the take's start, where to stand
     let n = 3;
     ui.count.hidden = false;
-    ui.count.textContent = String(n);
-    playLabel(true);
+    ui.countn.textContent = String(n);
+    ui.ready.textContent = st.d.segs.indexOf(g) === 0 && !real ? getReadyText(st.d)
+      : st.practice ? `Practise: ${g.name}` : g.k ? `Get ready: ${g.name}` : '';
+    playLabel('pause');
     st.counting = setInterval(() => {
       n -= 1;
-      if (n > 0) { ui.count.textContent = String(n); return; }
+      if (n > 0) { ui.countn.textContent = String(n); return; }
       clearInterval(st.counting);
       st.counting = 0;
       ui.count.hidden = true;
@@ -959,29 +1156,36 @@ export function mount(root) {
     }, 1000);
   }
   ui.play.addEventListener('click', togglePlay);
+  ui.start.addEventListener('click', () => { if (!st.playing && !st.counting) togglePlay(); });
+  ui.again.addEventListener('click', () => { st.t = 0; togglePlay(); });
+  if (ui.hard) ui.hard.addEventListener('click', () => practise(hardestMove(st.d)));
   if (ui.play2) ui.play2.addEventListener('click', togglePlay);
   ui.prev.addEventListener('click', () => step(-1));
   ui.nextB.addEventListener('click', () => step(1));
-  ui.scrub.addEventListener('input', () => seek(Number(ui.scrub.value)));
+  ui.scrub.addEventListener('input', () => { setScreen('seek'); seek(Number(ui.scrub.value)); });
   SPEEDS.forEach((v) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = `${v}×`;
+    b.dataset.v = String(v);
     b.setAttribute('aria-pressed', String(v === st.speed));
     b.addEventListener('click', () => {
       st.speed = v;
-      store.set('cm-speed', String(v));
-      ui.speeds.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      if (st.practice) st.saved.speed = v;   // also the speed after practice
+      else store.set('cm-speed', String(v));
+      syncSpeeds();
+      showPractice();
     });
     ui.speeds.append(b);
   });
-  function toggleRepeat() {
+  function onRepeat() {
     if (!st.d) return;
-    st.repeat = st.repeat ? null : segAt(st.d.segs, st.t);
-    st.hold = 0;
+    const was = st.practice;
+    toggleRepeat(st, segAt(st.d.segs, st.t));
     ui.repeat.setAttribute('aria-pressed', String(!!st.repeat));
+    if (was) { syncSpeeds(); draw(); }
   }
-  ui.repeat.addEventListener('click', toggleRepeat);
+  ui.repeat.addEventListener('click', onRepeat);
   const toggle = (b, k) => b.addEventListener('click', () => { st[k] = !st[k]; b.setAttribute('aria-pressed', String(st[k])); draw(); });
   toggle(ui.axes, 'axes');
   toggle(ui.img, 'img');
@@ -1063,9 +1267,10 @@ export function mount(root) {
     const k = e.key, inRange = e.target && e.target.type === 'range';
     if (k === ' ' || k === 'k' || k === 'K') togglePlay();
     else if ((k === 'ArrowLeft' || k === 'ArrowRight') && !inRange) step(k === 'ArrowLeft' ? -1 : 1);
-    else if (k === 'r' || k === 'R') toggleRepeat();
+    else if (k === 'r' || k === 'R') onRepeat();
     else if (k === 'f' || k === 'F') setFs(!root.classList.contains('cm-fs'));
     else if (k === 'Escape' && root.classList.contains('cm-fs')) setFs(false);
+    else if (k === 'Escape' && st.practice) leavePractice();
     else return;
     e.preventDefault();
     e.stopPropagation();

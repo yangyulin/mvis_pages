@@ -1,8 +1,9 @@
 """site/scripts/export_calib_motion.py on a synthetic MVIS views file: local-path refusal, the sidecar size budget, the
-delta-coded corners, cov_cam0 and the move beats. The script is stdlib only and outside mvis_site, so it is loaded
+delta-coded corners, the full-rate frames, cov_cam0 and the move beats. The script is stdlib only and outside mvis_site, so it is loaded
 by path."""
 import array
 import base64
+import gzip
 import importlib.util
 import json
 import math
@@ -72,6 +73,41 @@ def test_sidecar_corners_round_trip_through_the_delta_coding():
     uv = side["cams"][0]["uv"]
     assert [decode(f) for f in uv] == FRAMES          # frame 1: only the last detection, the older one dropped
     assert uv[1][2:4] == [40 - 250, 30 - 150]         # stored as differences, negative ones too
+
+
+def test_sidecar_keeps_every_views_frame_with_its_time_and_outline():
+    """Full rate: one sidecar entry per views frame (here 20 Hz with a gap), not 10 Hz steps; outline in every frame."""
+    v = views()
+    t = [0.0, 0.05, 0.1, 0.3]                                         # 20 Hz, then a 0.2 s gap
+    v["scene"]["t"] = t
+    o = [[[10 * k, 0], [10 * k + 50, 0], [10 * k + 50, 40], [10 * k, 40]] for k in range(4)]
+    v["scene"]["cams"][0]["outline"] = o
+    side = X.cams_sidecar(v, ANIM)
+    assert side["schema"] == "calib-motion/cams v2"
+    assert side["n"] == 4 and side["t"] == t and side["hz"] == 20.0
+    c = side["cams"][0]
+    assert len(c["uv"]) == len(c["outline"]) == len(c["n_so_far"]) == len(c["dist_cm"]) == 4
+    assert c["outline"] == o                                          # frame 0 has no corners but keeps its outline
+    assert c["uv"][0] == [] and c["n_so_far"] == [0, 3, 4, 6]
+
+
+def test_sidecar_cell_first_times_keep_the_frame_time_not_a_10hz_step():
+    """cov100_first holds the frame time to 1 ms (a cell first seen at 0.15 s must not count from 0.1 s)."""
+    v = views()
+    v["scene"]["t"] = [0.0, 0.15, 0.2, 0.3]
+    c = X.cams_sidecar(v, ANIM)["cams"][0]
+    assert 0.15 in c["cov100_first"]
+
+
+def test_sidecar_budget_fits_a_600_frame_three_camera_take():
+    """The budget (1.5 MB raw, 450 kB gzip) holds the real AprilGrid take at full rate (1.36 MB, 426 kB)."""
+    assert (X.CAMS_RAW_MAX, X.CAMS_GZ_MAX) == (1_500_000, 450_000)
+    site = SCRIPT.parents[1] / "public/data/calib-motion"
+    for f in ("real_takes/aprilgrid_06.cams.json", "real_chess/chessboard_1107_01.cams.json"):
+        txt = (site / f).read_bytes()
+        side = json.loads(txt)
+        assert side["n"] == len(side["t"]) == 600
+        assert len(txt) <= X.CAMS_RAW_MAX and len(gzip.compress(txt, 9)) <= X.CAMS_GZ_MAX
 
 
 def test_cams_writes_the_sidecar_and_cov_cam0_as_the_card_final_value(take):
