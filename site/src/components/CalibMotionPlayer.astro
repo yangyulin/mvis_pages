@@ -1,0 +1,181 @@
+---
+// Calibration-motion player (guides/calibration-motion). Data: public/data/calib-motion/{v4,v3,real_takes,real_chess}/
+// <variant>.json (calib-motion-demo/anim v1), copied by site/scripts/export_calib_motion.py (v4/ = AprilGrid guide motion,
+// v3/ = chessboard version, real_takes/ = the AprilGrid example (real take 06), real_chess/ = the chessboard example (real
+// take 11-07 01)). Trajectories and projected board outlines only, no camera images. Canvas 2D, no WebGL.
+// mode = 'main' (guide motion, chessboard version, coverage maps) or 'real' (the AprilGrid and the chessboard example);
+// both can be on one page.
+interface Props { mode?: 'main' | 'real' }
+const { mode = 'main' } = Astro.props;
+const main = mode === 'main';
+---
+
+<div class="not-content cm" id={`cm-player-${mode}`} data-mode={mode} data-base="/data/calib-motion/">
+  <div class="cm-variants" role="group" aria-label="Motion">
+    {main ? (
+    <div class="cm-chips" data-role="variants-main"></div>
+    ) : (
+    <div class="cm-chips" data-role="variants-real"></div>
+    )}
+  </div>
+
+  <p class="cm-caption" data-role="caption" aria-live="polite"></p>
+
+  <div class="cm-stage">
+    <figure class="cm-view3d">
+      <canvas data-role="c3d" aria-label="3D view of the board and the rig"></canvas>
+      <figcaption>Rig, board and the camera's whole path: faint ahead, solid where it has been, with a dot at the
+        camera. Drag to turn the view, double-click to reset.</figcaption>
+      <div class="cm-legend cm-pathlegend" data-role="pathlegend" aria-label="Path colour per move"></div>
+      <div class="cm-legend">
+        <span><i class="cm-sw cm-x"></i>IMU x</span><span><i class="cm-sw cm-y"></i>y</span><span><i class="cm-sw cm-z"></i>z</span>
+        <span><i class="cm-sw cm-g"></i>gravity</span><span><i class="cm-sw cm-t cm-halo"></i>last 4 s</span>
+      </div>
+    </figure>
+    <figure class="cm-viewcam">
+      <canvas data-role="ccam" aria-label="What the camera sees"></canvas>
+      <figcaption>Camera image: board outline and coverage so far (<b data-role="cov">0</b> %).</figcaption>
+    </figure>
+  </div>
+
+  <div class="cm-seg">
+    <div class="cm-seg-name" data-role="segname"></div>
+    <div class="cm-seg-cue" data-role="segcue"></div>
+  </div>
+
+  <canvas class="cm-imu" data-role="cimu" aria-label="Gyro and accelerometer traces"></canvas>
+  {main && <p class="cm-imunote">The fine wobble on the traces is the natural shake every hand-held take has anyway; do not add it on purpose.</p>}
+
+  <div class="cm-controls">
+    <button type="button" class="cm-play" data-role="play" aria-label="Play">Play</button>
+    <input type="range" data-role="scrub" min="0" max="60" step="0.01" value="0" aria-label="Time" />
+    <span class="cm-time" data-role="time">0.0 / {main ? '60.0' : '41.1'} s</span>
+    <label class="cm-speed">Speed
+      <select data-role="speed">
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+    </label>
+  </div>
+  <div class="cm-chips cm-segchips" data-role="segchips" aria-label="Jump to a segment"></div>
+  <p class="cm-status" data-role="status"></p>
+
+  {main && (
+  <div class="cm-covcmp" data-role="covcmp">
+    <div class="cm-covcmp-head">Image coverage over the whole recording, camera 0</div>
+    <div class="cm-covcmp-grid">
+      <figure>
+        <canvas data-cov="0" aria-label="Coverage map of the guide motion"></canvas>
+        <figcaption><button type="button" class="cm-covlink" data-covplay="guide06c_60">Guide motion</button>, 60 s: <b data-covpct="0">…</b> of the reachable cells</figcaption>
+      </figure>
+      <figure>
+        <canvas data-cov="1" aria-label="Coverage map of the AprilGrid example"></canvas>
+        <figcaption><button type="button" class="cm-covlink" data-covplay="aprilgrid_06">AprilGrid example</button>, 41 s: <b data-covpct="1">…</b> of the reachable cells</figcaption>
+      </figure>
+    </div>
+    <p class="cm-covcmp-note">Shaded: image area the AprilGrid covered, partly visible boards included (an AprilGrid is
+      detected when some of its tags leave the picture). The grid is the 100 px cells the coverage metric counts; a dashed
+      cell is one the board could reach but never did.</p>
+  </div>
+  )}
+</div>
+
+<style is:global>
+  .cm {
+    --cm-x: #d1382c; --cm-y: #2f9e44; --cm-z: #1c6fd1; --cm-g: #7c3aed; --cm-t: #d97706;
+    --cm-board: #f8fafc; --cm-tag: #0f172a; --cm-cov: 2, 132, 199;
+    /* path colour per move (not the IMU axis, gravity or trail colours) */
+    --cm-s-lr: #0d9488; --cm-s-ud: #db2777; --cm-s-bf: #8b5e34; --cm-s-loop: #7c7c00; --cm-s-rest: #94a3b8;
+    --cm-line: var(--sl-color-gray-5); --cm-text: var(--sl-color-gray-2); --cm-bg: var(--sl-color-bg);
+    margin-block: 1rem 2rem;
+    font-size: 0.9rem;
+  }
+  :root[data-theme='dark'] .cm {
+    --cm-x: #f87171; --cm-y: #4ade80; --cm-z: #60a5fa; --cm-g: #c4b5fd; --cm-t: #fbbf24;
+    --cm-board: #e2e8f0; --cm-tag: #0f172a; --cm-cov: 56, 189, 248;
+    --cm-s-lr: #2dd4bf; --cm-s-ud: #f472b6; --cm-s-bf: #d4a373; --cm-s-loop: #d9d65c; --cm-s-rest: #64748b;
+  }
+  .cm-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .cm-chips button {
+    font: inherit; font-size: 0.82rem; line-height: 1.2; cursor: pointer;
+    padding: 0.3rem 0.6rem; border-radius: 999px;
+    border: 1px solid var(--sl-color-gray-5); background: transparent; color: var(--sl-color-gray-2);
+  }
+  .cm-chips button:hover { border-color: var(--sl-color-accent); color: var(--sl-color-white); }
+  .cm-chips button[aria-pressed='true'] {
+    background: var(--sl-color-accent); border-color: var(--sl-color-accent); color: var(--sl-color-black);
+  }
+  :root[data-theme='light'] .cm-chips button[aria-pressed='true'] { color: #fff; }
+  .cm-chips button .cm-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; margin-right: 0.35rem; }
+  .cm-dot.pass { background: #22c55e; }
+  .cm-dot.fail { background: #ef4444; }
+  .cm-dot.none { background: var(--sl-color-gray-4); }
+  .cm-rig {
+    display: inline-block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.05rem 0.4rem;
+    border-radius: 0.3rem; border: 1px solid var(--sl-color-gray-5); color: var(--sl-color-gray-3); vertical-align: 0.1em;
+  }
+  .cm-covcmp { margin-top: 1.25rem; }
+  .cm-covcmp-head { font-weight: 600; color: var(--sl-color-white); margin-bottom: 0.4rem; }
+  .cm-covcmp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 14rem)); gap: 0.75rem 1.25rem; }
+  .cm-covcmp canvas { aspect-ratio: 544 / 640; }
+  .cm-covcmp-note { font-size: 0.78rem; color: var(--sl-color-gray-3); margin-top: 0.4rem; }
+  .cm-covlink {
+    font: inherit; padding: 0; border: 0; background: none; cursor: pointer; font-weight: 600;
+    color: var(--sl-color-text-accent); text-decoration: underline; text-underline-offset: 2px;
+  }
+  .cm-caption { margin: 0.6rem 0 0.6rem; color: var(--sl-color-gray-2); min-height: 2.6em; }
+  .cm-stage { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 0.75rem; }
+  .cm figure { margin: 0; min-width: 0; }
+  .cm canvas {
+    display: block; width: 100%; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem;
+    background: var(--sl-color-bg-nav, var(--sl-color-black));
+  }
+  .cm-view3d canvas { aspect-ratio: 4 / 3; touch-action: pan-y; cursor: grab; }
+  .cm-viewcam canvas { aspect-ratio: 544 / 640; max-height: 100%; }
+  .cm figcaption { font-size: 0.78rem; color: var(--sl-color-gray-3); margin-top: 0.3rem; }
+  .cm-legend { display: flex; flex-wrap: wrap; gap: 0.2rem 0.75rem; font-size: 0.75rem; color: var(--sl-color-gray-3); margin-top: 0.2rem; }
+  .cm-sw { display: inline-block; width: 0.8rem; height: 0.2rem; vertical-align: middle; margin-right: 0.25rem; border-radius: 1px; }
+  .cm-sw.cm-x { background: var(--cm-x); } .cm-sw.cm-y { background: var(--cm-y); } .cm-sw.cm-z { background: var(--cm-z); }
+  .cm-sw.cm-g { background: var(--cm-g); } .cm-sw.cm-t { background: var(--cm-t); }
+  .cm-sw.cm-halo { height: 0.4rem; opacity: 0.6; }
+  .cm-pathlegend .cm-sw { height: 0.25rem; }
+  .cm-sw.cm-s-lr { background: var(--cm-s-lr); } .cm-sw.cm-s-ud { background: var(--cm-s-ud); }
+  .cm-sw.cm-s-bf { background: var(--cm-s-bf); } .cm-sw.cm-s-loop { background: var(--cm-s-loop); }
+  .cm-sw.cm-s-rest { background: var(--cm-s-rest); }
+  .cm-seg {
+    margin: 0.75rem 0; padding: 0.6rem 0.8rem; border-left: 3px solid var(--sl-color-accent);
+    background: var(--sl-color-gray-6); border-radius: 0 0.4rem 0.4rem 0; min-height: 4.2rem;
+  }
+  .cm-seg-name { font-weight: 600; color: var(--sl-color-white); }
+  .cm-seg-cue { color: var(--sl-color-gray-2); margin-top: 0.15rem; }
+  .cm-imu { aspect-ratio: 5 / 1; min-height: 120px; cursor: pointer; }
+  .cm-imunote { font-size: 0.78rem; color: var(--sl-color-gray-3); margin: 0.3rem 0 0; }
+  .cm-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0.6rem 0 0.4rem; }
+  .cm-controls input[type='range'] { flex: 1 1 12rem; min-width: 8rem; accent-color: var(--sl-color-accent); }
+  .cm-play {
+    font: inherit; font-weight: 600; min-width: 4.5rem; padding: 0.35rem 0.8rem; border-radius: 0.4rem; cursor: pointer;
+    border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--sl-color-black);
+  }
+  :root[data-theme='light'] .cm-play { color: #fff; }
+  .cm-time { font-variant-numeric: tabular-nums; color: var(--sl-color-gray-2); min-width: 7.5rem; }
+  .cm-speed { color: var(--sl-color-gray-3); font-size: 0.82rem; }
+  .cm-speed select {
+    font: inherit; margin-left: 0.25rem; background: var(--sl-color-bg); color: var(--sl-color-white);
+    border: 1px solid var(--sl-color-gray-5); border-radius: 0.3rem; padding: 0.1rem 0.3rem;
+  }
+  .cm-segchips button { border-radius: 0.35rem; }
+  .cm-status { font-size: 0.78rem; color: var(--sl-color-gray-3); margin: 0.4rem 0 0; min-height: 1em; }
+  @media (max-width: 40rem) {
+    .cm-stage { grid-template-columns: minmax(0, 1fr); }
+    .cm-viewcam canvas { max-width: 16rem; margin-inline: auto; }
+    .cm-imu { aspect-ratio: 2.6 / 1; }
+    .cm-covcmp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+
+<script>
+  import { mount } from '../scripts/calib-motion.js';
+  document.querySelectorAll('.cm[data-mode]').forEach((el) => mount(el));
+</script>

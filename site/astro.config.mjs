@@ -122,6 +122,7 @@ export default defineConfig({
         {
           label: 'Guides',
           items: [
+            { label: 'Calibration motion', link: '/guides/calibration-motion/' },
             { label: 'Camera calibration', link: '/guides/camera-calibration/' },
             { label: 'Camera–IMU calibration', link: '/guides/camera-imu-calibration/' },
             { label: 'Multi-camera / multi-IMU rigs', link: '/guides/multi-sensor-rigs/' },
