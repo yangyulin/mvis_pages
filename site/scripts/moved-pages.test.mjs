@@ -22,12 +22,17 @@ test('movedPage refuses addresses that would break out of the string or the fold
     assert.throws(() => movedPage(...bad), /bad address/);
 });
 
-test('writeMovedPages writes each old address and replaces what Astro left there', async () => {
+test('writeMovedPages writes a page at each old address', async () => {
   const out = (await mkdtemp(join(tmpdir(), 'moved-'))) + '/';
-  await mkdir(join(out, 'old/a'), { recursive: true });
-  await writeFile(join(out, 'old/a/index.html'), 'astro redirect');
-  const n = await writeMovedPages(out, { '/old/a/': '/new/a/', '/old/b/': '/new/b/' });
-  assert.equal(n, 2);
+  assert.equal(await writeMovedPages(out, { '/old/a/': '/new/a/', '/old/b/': '/new/b/' }), 2);
   assert.match(await readFile(join(out, 'old/a/index.html'), 'utf8'), /location\.replace\('\/new\/a\/'/);
   assert.match(await readFile(join(out, 'old/b/index.html'), 'utf8'), /location\.replace\('\/new\/b\/'/);
+});
+
+test('writeMovedPages refuses to overwrite a real page at an old address', async () => {
+  const out = (await mkdtemp(join(tmpdir(), 'moved-'))) + '/';
+  await mkdir(join(out, 'old/a'), { recursive: true });
+  await writeFile(join(out, 'old/a/index.html'), 'a real page');
+  await assert.rejects(writeMovedPages(out, { '/old/a/': '/new/a/' }), /page already exists at moved address \/old\/a\//);
+  assert.equal(await readFile(join(out, 'old/a/index.html'), 'utf8'), 'a real page');
 });

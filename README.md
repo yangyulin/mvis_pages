@@ -30,7 +30,8 @@ npm run dev                 # http://localhost:4321
 Build the static site:
 
 ```bash
-npm run build               # astro build into ../docs, then post-build.mjs renames _astro/ (Pages serves docs/)
+npm run build               # astro build into ../docs, then post-build.mjs renames _astro/ and writes moved-page redirects
+PYTHONNOUSERSITE=1 python3 scripts/check_moves.py   # after every build: old addresses redirect, no broken internal links
 npm run preview             # serve the built site locally
 ```
 
