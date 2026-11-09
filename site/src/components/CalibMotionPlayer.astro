@@ -189,7 +189,7 @@ const main = mode === 'main';
     position: absolute; left: 0.5rem; top: 0.5rem; max-width: calc(100% - 16rem); font-size: 0.78rem; padding: 0.15rem 0.45rem; border-radius: 0.3rem;
     background: color-mix(in srgb, var(--sl-color-bg) 82%, transparent); color: var(--sl-color-gray-2); pointer-events: none;
   }
-  .cm-views { position: absolute; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+  .cm-views { position: absolute; z-index: 3; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
   .cm-views button { min-height: 1.9rem; padding: 0.25rem 0.55rem; }
   .cm-count {
     position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
@@ -349,7 +349,7 @@ const main = mode === 'main';
     .cm-stage { grid-template-columns: minmax(0, 1fr); }
     .cm-view3d canvas { min-height: 0; }
     .cm-readout { max-width: calc(100% - 1rem); }
-    .cm-views { position: relative; z-index: 3; right: auto; top: auto; justify-content: flex-start; margin-top: 0.4rem; }
+    .cm-views { position: relative; right: auto; top: auto; justify-content: flex-start; margin-top: 0.4rem; }
     .cm-views button, .cm-chips button, .cm-toggles button, .cm-speeds button, .cm-tabs button, .cm-step { min-height: 2.5rem; }
     .cm-multi .cm-tabs { display: flex; }
     .cm-multi .cm-card { display: none; }

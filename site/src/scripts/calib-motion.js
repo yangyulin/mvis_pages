@@ -361,6 +361,20 @@ export function exitPractice(st) {
   st.hold = 0;
   return true;
 }
+// Each frame: a repeat follows the move the clock is in (a chip, a step, the scrubber), and practise with it; on a rest
+// practise ends. True when practise ended (the speed and repeat from before it are back).
+export function followPractice(st, g) {
+  if (st.repeat && st.repeat !== g && !st.hold) st.repeat = g;
+  if (!st.practice || st.repeat === st.practice) return false;
+  if (st.repeat && st.repeat.k) { st.practice = st.repeat; return false; }
+  return exitPractice(st);
+}
+// The Repeat button / R: on repeats the move the clock is in (g), off stops it; during practise off also ends practise.
+export function toggleRepeat(st, g) {
+  if (st.practice) { exitPractice(st); st.repeat = null; }
+  else st.repeat = st.repeat ? null : g;
+  st.hold = 0;
+}
 export const practiceBadge = (st) => (st.practice ? `Practising: ${st.practice.name} · ${st.speed}× · ${st.repeat ? 'repeating' : 'once'}` : '');
 
 // The largest 4-connected group of cells (indices into a gx x gy grid) among `cells`.
@@ -898,12 +912,7 @@ export function mount(root) {
     ui.readout.textContent = on ? `${cards[st.sel].cam.name}: ${Math.round(on.dist)} cm from the board, ${Math.round(on.off)}° off its normal` : '';
     const g = d.segs[n.j];
     ui.segchips.querySelectorAll('.cm-jump').forEach((b, k) => b.setAttribute('aria-pressed', String(k === n.j)));
-    if (st.repeat && st.repeat !== g && !st.hold) st.repeat = g;
-    // practise follows the move the clock is in (a chip, a step, the scrubber); on a rest it ends
-    if (st.practice && st.repeat !== st.practice) {
-      if (st.repeat && st.repeat.k) st.practice = st.repeat;
-      else { exitPractice(st); syncSpeeds(); ui.repeat.setAttribute('aria-pressed', String(!!st.repeat)); }
-    }
+    if (followPractice(st, g)) { syncSpeeds(); ui.repeat.setAttribute('aria-pressed', String(!!st.repeat)); }
     showPractice();
   }
 
@@ -996,7 +1005,7 @@ export function mount(root) {
     ui.scrub.value = String(st.t);
     ui.time.textContent = `${st.t.toFixed(1)} / ${st.d.dur.toFixed(1)} s`;
     const m = playMode({ playing: st.playing, counting: st.counting, t: st.t, dur: st.d.dur });
-    if (m !== st.lastMode) playLabel(m === 'pause');
+    if (m !== st.lastMode) playLabel(m);
   }
 
   // ---- transport ----
@@ -1011,6 +1020,7 @@ export function mount(root) {
   }
   function step(dir) {
     if (!st.d) return;
+    setScreen('seek');
     const segs = st.d.segs, g = segAt(segs, st.t), j = segs.indexOf(g);
     if (dir < 0) goSeg(st.t - g.t0 > 1.5 ? g : segs[Math.max(0, j - 1)]);
     else if (j + 1 < segs.length) goSeg(segs[j + 1]);
@@ -1024,11 +1034,10 @@ export function mount(root) {
   function setPlaying(on) {
     st.playing = on && !!st.d;
     if (!st.playing) { clearInterval(st.counting); st.counting = 0; ui.count.hidden = true; }
-    playLabel(st.playing);
+    playLabel(st.playing ? 'pause' : playMode({ playing: false, counting: 0, t: st.t, dur: st.d ? st.d.dur : Infinity }));
     if (st.playing) { st.last = performance.now(); requestAnimationFrame(tick); }
   }
-  function playLabel(on) {
-    const m = on ? 'pause' : playMode({ playing: false, counting: 0, t: st.t, dur: st.d ? st.d.dur : Infinity });
+  function playLabel(m) {
     st.lastMode = m;
     const [ic, lab] = PLAY_TEXT[m];
     for (const b of [ui.play, ui.play2]) {
@@ -1110,7 +1119,7 @@ export function mount(root) {
     ui.countn.textContent = String(n);
     ui.ready.textContent = st.d.segs.indexOf(g) === 0 && !real ? getReadyText(st.d)
       : st.practice ? `Practise: ${g.name}` : g.k ? `Get ready: ${g.name}` : '';
-    playLabel(true);
+    playLabel('pause');
     st.counting = setInterval(() => {
       n -= 1;
       if (n > 0) { ui.countn.textContent = String(n); return; }
@@ -1125,8 +1134,8 @@ export function mount(root) {
   ui.again.addEventListener('click', () => { st.t = 0; togglePlay(); });
   if (ui.hard) ui.hard.addEventListener('click', () => practise(hardestMove(st.d)));
   if (ui.play2) ui.play2.addEventListener('click', togglePlay);
-  ui.prev.addEventListener('click', () => { setScreen('seek'); step(-1); });
-  ui.nextB.addEventListener('click', () => { setScreen('seek'); step(1); });
+  ui.prev.addEventListener('click', () => step(-1));
+  ui.nextB.addEventListener('click', () => step(1));
   ui.scrub.addEventListener('input', () => { setScreen('seek'); seek(Number(ui.scrub.value)); });
   SPEEDS.forEach((v) => {
     const b = document.createElement('button');
@@ -1143,14 +1152,14 @@ export function mount(root) {
     });
     ui.speeds.append(b);
   });
-  function toggleRepeat() {
+  function onRepeat() {
     if (!st.d) return;
-    if (st.practice) return leavePractice();   // repeat off ends practice
-    st.repeat = st.repeat ? null : segAt(st.d.segs, st.t);
-    st.hold = 0;
+    const was = st.practice;
+    toggleRepeat(st, segAt(st.d.segs, st.t));
     ui.repeat.setAttribute('aria-pressed', String(!!st.repeat));
+    if (was) { syncSpeeds(); draw(); }
   }
-  ui.repeat.addEventListener('click', toggleRepeat);
+  ui.repeat.addEventListener('click', onRepeat);
   const toggle = (b, k) => b.addEventListener('click', () => { st[k] = !st[k]; b.setAttribute('aria-pressed', String(st[k])); draw(); });
   toggle(ui.axes, 'axes');
   toggle(ui.img, 'img');
@@ -1232,7 +1241,7 @@ export function mount(root) {
     const k = e.key, inRange = e.target && e.target.type === 'range';
     if (k === ' ' || k === 'k' || k === 'K') togglePlay();
     else if ((k === 'ArrowLeft' || k === 'ArrowRight') && !inRange) step(k === 'ArrowLeft' ? -1 : 1);
-    else if (k === 'r' || k === 'R') toggleRepeat();
+    else if (k === 'r' || k === 'R') onRepeat();
     else if (k === 'f' || k === 'F') setFs(!root.classList.contains('cm-fs'));
     else if (k === 'Escape' && root.classList.contains('cm-fs')) setFs(false);
     else if (k === 'Escape' && st.practice) leavePractice();

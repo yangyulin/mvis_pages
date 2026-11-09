@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import {
   kb4Project, boardDetections, nowState, prep, segSecs, segAt, largestRegion, mergeSegs, prepCams, nearestStep,
   camCoverage, fillNext, advance, quatToR, screenStep, playMode, startLabel, getReadyText, hardestMove, enterPractice,
-  exitPractice, practiceBadge, PRACTICE_SPEED,
+  exitPractice, practiceBadge, PRACTICE_SPEED, followPractice, toggleRepeat,
 } from '../src/scripts/calib-motion.js';
 
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
@@ -328,4 +328,26 @@ test('practise: jumps into the move at 0.5x, repeats it, stays inside it; exit r
   enterPractice(st2, guide.segs, guide.segs[4]);
   exitPractice(st2);
   assert.deepEqual([st2.speed, st2.repeat], [0.25, guide.segs[1]]);
+});
+
+test('practise follows a chip or step to the next move, ends on a rest; repeat off during practise stays off', () => {
+  const [m1, m2, m3] = guide.segs.filter((g) => g.k), rest = guide.segs.find((g) => !g.k);
+  const st = { t: m1.t0 + 0.1, speed: 1, repeat: m1, hold: 0, practice: null, saved: null };
+  enterPractice(st, guide.segs, m2);
+  assert.equal(followPractice(st, m2), false);                          // in the practised move: nothing changes
+  assert.equal(followPractice(st, m3), false);                          // a step to the next move: practise follows
+  assert.deepEqual([st.practice, st.repeat, st.speed], [m3, m3, PRACTICE_SPEED]);
+  assert.equal(followPractice(st, rest), true);                         // a rest: practise ends, speed back
+  assert.deepEqual([st.practice, st.speed], [null, 1]);
+  // Repeat on at move 1, practise move 2, repeat off: no repeat, also on the next frame
+  const s2 = { t: m1.t0 + 0.1, speed: 1, repeat: m1, hold: 0, practice: null, saved: null };
+  enterPractice(s2, guide.segs, m2);
+  toggleRepeat(s2, m2);
+  followPractice(s2, m2);
+  assert.deepEqual([s2.practice, s2.repeat, s2.speed], [null, null, 1]);
+  // outside practise the toggle switches the move the clock is in on and off
+  toggleRepeat(s2, m3);
+  assert.equal(s2.repeat, m3);
+  toggleRepeat(s2, m3);
+  assert.equal(s2.repeat, null);
 });
