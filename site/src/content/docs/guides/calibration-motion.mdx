@@ -17,9 +17,8 @@ calibration parameter.
 
 <CalibMotionPlayer />
 
-Left: the rig, the board and the camera's whole path, one colour per move (faint ahead, solid behind).
-Right: what the camera sees and the image area covered so far. Below: the gyro and accelerometer.
-*Chessboard version* is the same idea for a chessboard, which must stay fully in view.
+Follow the **Now** panel: it names the move, says what to do, counts down and shows what comes next; the
+camera card on the right shows what the camera sees and which parts of the image are still empty.
 
 ## Step by step
 
@@ -44,15 +43,10 @@ Four moves in order, blended into each other, with a short rest at each end:
 
 ## Real examples
 
-Two hand-held recordings of our Looper Insight 9, solved with MVIS and replayed through the twin of
-their board. Both pass. Trajectory and image coverage only; no camera images.
+Two hand-held recordings of our Looper Insight 9, solved with MVIS; both pass the twin. The cards show the
+corners MVIS detected in each of the three cameras, drawn without the camera images.
 
 <CalibMotionPlayer mode="real" />
-
-| Example | Length | Image coverage | Twin |
-|---|---|---|---|
-| AprilGrid example | 41 s | 98 % | good |
-| Chessboard example | 61 s | 69 % | good |
 
 Both move faster than the guide motion; at a comfortable pace, follow the 60 s guide.
 

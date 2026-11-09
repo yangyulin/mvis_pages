@@ -8,7 +8,7 @@
     "start": "astro dev",
     "build": "astro build && node scripts/post-build.mjs",
     "preview": "astro preview",
-    "test": "node --test scripts/rename-assets.test.mjs scripts/moved-pages.test.mjs",
+    "test": "node --test scripts/rename-assets.test.mjs scripts/moved-pages.test.mjs scripts/calib-motion.test.mjs",
     "astro": "astro"
   },
   "dependencies": {
