@@ -247,16 +247,63 @@ test('bracket and outline interpolation: the midpoint between two frames is the 
   }
 });
 
-test('corners: only from the nearest frame within half a frame period, else none; never another frame as a fallback', () => {
-  const c = { t: [0, 0.1, 1.1], period: 0.1, uv: [new Int16Array([1, 2]), new Int16Array([3, 4, 5, 6]), new Int16Array([7, 8])],
-    outline: [null, null, null], n_so_far: [1, 3, 4], dist_cm: [1, 2, 3], off_deg: [1, 2, 3] };
+const mkCam = (t, uv, period) => ({ t, period, uv: uv.map((f) => new Int16Array(f)), outline: t.map(() => null),
+  n_so_far: uv.map((_, k) => uv.slice(0, k + 1).reduce((s, f) => s + f.length / 2, 0)), dist_cm: t.map(() => 1), off_deg: t.map(() => 1) });
+
+test('corners: a normal gap (up to two periods) shows the nearer frame, or the other when the nearer has none', () => {
+  const c = mkCam([0, 0.1, 0.2, 0.3], [[1, 2], [3, 4, 5, 6], [], [7, 8]], 0.1);
   assert.equal(camFrame(c, 0.04).n, 1);
   assert.equal(camFrame(c, 0.06).n, 2);
-  assert.equal(camFrame(c, 0.5).n, 0);           // in a gap: no corners
-  assert.equal(camFrame(c, 0.5).soFar, 3);       // so far: frames up to now
+  assert.equal(camFrame(c, 0.11).n, 2);
+  assert.equal(camFrame(c, 0.19).n, 2);          // nearer frame (0.2) has none: the other one
+  assert.equal(camFrame(c, 0.2).n, 1);           // on the empty frame itself: the next one (it brackets 0.2-0.3)
+  assert.equal(camFrame(c, 0.26).n, 1);
+  assert.equal(camFrame(c, 0.34).n, 1);          // after the last frame, within half a period
+  assert.equal(camFrame(c, 0.36).n, 0);          // beyond: none
+  assert.equal(camFrame(c, -0.04).n, 1);
+  assert.equal(camFrame(c, -0.06).n, 0);
+  const e = mkCam([0, 0.1, 0.2], [[], [], [1, 2]], 0.1);
+  assert.equal(camFrame(e, 0.05).n, 0);          // both frames of the gap without corners: none
+});
+
+test('corners: uneven 0.05 / 0.10 s frames (20 Hz take) show corners on every 1/30 s draw, no blink', () => {
+  const t = [0];
+  for (let k = 1; k < 40; k++) t.push(+(t[k - 1] + (k % 3 ? 0.05 : 0.1)).toFixed(3));
+  const c = mkCam(t, t.map(() => [1, 2, 3, 4]), 0.05);
+  for (let i = 0; i / 30 <= t.at(-1); i++) assert.equal(camFrame(c, i / 30).n, 2, `t ${(i / 30).toFixed(3)}`);
+});
+
+test('corners: a real gap (over two periods) shows none away from its frames, the nearest frame within half a period', () => {
+  const c = mkCam([0, 0.1, 1.1, 1.2], [[1, 2], [3, 4, 5, 6], [7, 8], [9, 10]], 0.1);
+  assert.equal(camFrame(c, 0.14).n, 2);
+  assert.equal(camFrame(c, 0.16).n, 0);
+  assert.equal(camFrame(c, 0.6).n, 0);
+  assert.equal(camFrame(c, 0.6).soFar, 3);       // so far: frames up to now
+  assert.equal(camFrame(c, 1.06).n, 1);
+  assert.equal(camFrame(c, 1.04).n, 0);
+});
+
+test('corners: whole takes, every 1/30 s in a normal gap with corners on both sides shows corners (0 blinks)', () => {
+  let blinks = 0, samples = 0, realGapNone = 0;
+  for (const [, id] of REAL) {
+    for (const c of realCams[id]) {
+      for (let i = 0; i / 30 <= realDur[id]; i++) {
+        const t = i / 30, { k0, k1 } = bracket(c.t, t);
+        if (k0 === k1 || !c.uv[k0].length || !c.uv[k1].length) continue;
+        const none = /^no corners/.test(cardNote({ ...camFrame(c, t), pct: 0 }));
+        if (c.t[k1] - c.t[k0] <= 2 * c.period + 1e-6) { samples++; if (none) blinks++; } else if (none) realGapNone++;
+      }
+    }
+  }
+  assert.ok(samples > 5000, `${samples}`);
+  assert.equal(blinks, 0);
+  assert.ok(realGapNone > 0, 'the chessboard take still has real gaps with none');
+});
+
+test('corners: a real cam2 frame without corners between two others without corners: none, outline kept', () => {
   const cam2 = realCams.aprilgrid_06[2];
-  const empty = cam2.t.findIndex((x, k) => !cam2.uv[k].length);
-  assert.ok(empty >= 0);
+  const empty = cam2.t.findIndex((x, k) => k > 0 && !cam2.uv[k - 1].length && !cam2.uv[k].length && !cam2.uv[k + 1]?.length);
+  assert.ok(empty > 0);
   const f = camFrame(cam2, cam2.t[empty]);
   assert.equal(f.n, 0);
   assert.ok(f.outline, 'cam2 keeps its outline in a frame without corners');

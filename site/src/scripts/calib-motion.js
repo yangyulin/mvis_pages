@@ -283,12 +283,17 @@ export function lerpOutline(o0, o1, a) {
   return (a < 0.5 ? o0 : o1) || null;
 }
 
-// What a real-example card shows at time t: the outline interpolated between the frames around t, the detected
-// corners of the nearest frame only when it is within half a frame period (else none), the corners so far up to t.
+// What a real-example card shows at time t: the outline interpolated between the frames around t, the corners so
+// far up to t, and the detected corners by the local gap. Between two frames at most two periods apart (a normal
+// gap, also the uneven 0.05 / 0.10 s ones): the nearer frame's corners, or the other's when the nearer has none, so
+// the card never blinks between two detections. In a real gap (over two periods), before the first and after the
+// last frame: the nearest frame's corners within half a period of it, else none.
 export function camFrame(c, t) {
-  const T = c.t, { k0, k1, a } = bracket(T, t);
-  const kn = a < 0.5 ? k0 : k1, near = T.length && Math.abs(T[kn] - t) <= c.period / 2 + 1e-6;
-  const f = near ? c.uv[kn] : [], uv = [];
+  const T = c.t, { k0, k1, a } = bracket(T, t), eps = 1e-6;
+  const kn = a < 0.5 ? k0 : k1, ko = kn === k0 ? k1 : k0;
+  const normal = k0 !== k1 && T[k1] - T[k0] <= 2 * c.period + eps;
+  const near = T.length > 0 && Math.abs(T[kn] - t) <= c.period / 2 + eps;
+  const f = normal ? (c.uv[kn].length ? c.uv[kn] : c.uv[ko]) : near ? c.uv[kn] : [], uv = [];
   for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
   return { uv, n: uv.length, kNow: t < (T[0] ?? 0) ? -1 : k0, outline: lerpOutline(c.outline[k0], c.outline[k1], a),
     soFar: t < (T[0] ?? 0) ? 0 : c.n_so_far[k0], dist: c.dist_cm[kn], off: c.off_deg[kn] };
