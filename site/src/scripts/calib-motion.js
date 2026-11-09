@@ -134,9 +134,10 @@ export function beatAt(g, t) {
   for (const x of g.beats || []) if (x.t <= t + 1e-6) b = x;
   return b;
 }
-// Whole seconds as the player shows them everywhere (chips, Now panel, Next): rounded, so a 10.3 s move is "10 s" on its
-// chip and the Now panel starts its countdown at 10; never 0 before the very end.
-export const secs = (x) => (x <= 1e-6 ? 0 : Math.max(1, Math.round(x)));
+// A move's length in whole seconds (its chip, "Count N", the Now panel at its start): the difference of its rounded
+// boundaries, so the chips add up to the take's rounded length and match the guide table (3–20 s is 17 s). The Now
+// panel's "s left" and "Next in" count down to the rounded end, from this value to 1.
+export const segSecs = (g) => Math.max(1, Math.round(g.t1) - Math.round(g.t0));
 const ORD = ['', '', '2nd', '3rd', '4th', '5th'];
 const cut = (s, n) => (s.length <= n ? s : `${s.slice(0, n - 1).replace(/[\s,;–-]+\S*$/, '')}…`);
 
@@ -147,7 +148,7 @@ export function nowState(d, t) {
   const nx = d.segs[j + 1] || null;
   const b = beatAt(g, t);
   let beatText = '';
-  if (g.unit === 'Rest') beatText = j === d.segs.length - 1 ? 'Done' : `Count ${secs(g.t1 - g.t0)}`;
+  if (g.unit === 'Rest') beatText = j === d.segs.length - 1 ? 'Done' : `Count ${segSecs(g)}`;
   else if (b && g.nbeat > 0) {
     const of = `${g.unit} ${b.i} of ${g.nbeat}`;
     beatText = b.word ? `${of} · ${b.word}` : of;
@@ -155,7 +156,7 @@ export function nowState(d, t) {
   const span = Math.max(1e-6, g.t1 - g.t0);
   return {
     j, k: g.k, K: d.K, name: g.name, short: g.short, cue: g.cue, key: g.key,
-    left: secs(g.t1 - t), until: g.t1 - t,
+    left: t >= g.t1 - 1e-6 ? 0 : Math.min(segSecs(g), Math.max(1, Math.round(Math.round(g.t1) - t))), until: g.t1 - t,
     beatText, frac: Math.max(0, Math.min(1, (t - g.t0) / span)),
     ticks: (g.beats || []).filter((x) => x.t > g.t0 + 1e-3).map((x) => (x.t - g.t0) / span),
     next: nx ? { k: nx.k, name: nx.name, short: nx.short, key: nx.key } : null,
@@ -163,16 +164,17 @@ export function nowState(d, t) {
 }
 
 // Adjacent segments with the same label and cue play as one move; moves are numbered, rests are not.
-function mergeSegs(segs) {
+export function mergeSegs(segs) {
   const out = [];
   for (const g of segs) {
     if (!(g.t1 - g.t0 > 1e-6)) continue;
     const last = out[out.length - 1];
-    if (last && last.label === g.label && last.cue === g.cue && Math.abs(last.t1 - g.t0) < 1e-6) {
+    const cue = (g.cue || '').replace(/(\d) deg\b/g, '$1°').replace(/\b(\d+)\.0 times\b/g, '$1 times');
+    if (last && last.label === g.label && last.cue === cue && Math.abs(last.t1 - g.t0) < 1e-6) {
       last.t1 = g.t1;
       last.beats = [...last.beats, ...(g.beats || []).map((b) => ({ ...b, i: b.i + last.nbeat }))];
       last.nbeat += g.nbeat || 0;
-    } else out.push({ ...g, beats: g.beats || [], nbeat: g.nbeat || 0, cue: (g.cue || '').replace(/(\d) deg\b/g, '$1°').replace(/\b(\d+)\.0 times\b/g, '$1 times') });
+    } else out.push({ ...g, beats: g.beats || [], nbeat: g.nbeat || 0, cue });
   }
   return out;
 }
@@ -247,7 +249,7 @@ function guideSoFar(d) {
 }
 
 // Real-example cards: decode the sidecar (delta-coded corners) once.
-function prepCams(side) {
+export function prepCams(side) {
   return side.cams.map((c) => {
     const uv = c.uv.map((f) => {
       const a = new Int16Array(f.length);
@@ -258,6 +260,43 @@ function prepCams(side) {
     const tt = c.T_C0_Ck.slice(0, 3).map((r) => r[3]);
     return { ...c, uv, R, tt, nReach: c.reach.reduce((a, b) => a + b, 0) };
   });
+}
+
+// No corners at sidecar step k (the first frame of a take, a blink): the nearest step with corners within 1 s (10
+// steps), later first, so a card never starts empty; k itself when none.
+export function nearestStep(uv, k) {
+  let ks = k;
+  for (let j = 1; !uv[ks].length && j <= 10; j++) {
+    if (k + j < uv.length && uv[k + j].length) ks = k + j;
+    else if (k - j >= 0 && uv[k - j].length) ks = k - j;
+  }
+  return ks;
+}
+
+// Share (%) of a sidecar camera's reachable 100 px cells with a detected corner by time t; at the end it is the
+// index's cov_cam0 for cam0.
+export function camCoverage(c, t) {
+  let got = 0;
+  c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= t + 0.05 && c.reach[n]) got++; });
+  return (100 * got) / Math.max(1, c.nReach);
+}
+
+// "Fill next": the largest connected still-empty region, once part of the image is seen (nothing while nothing is).
+export const fillNext = (empty, nReach, gx, gy) => (empty.length < nReach ? largestRegion(empty, gx, gy) : new Set());
+
+// The play clock for one animation frame at `now` (ms): at most 0.1 s of take time per frame times the speed (a tab
+// in the background does not jump); a repeated move holds 1 s at its end, then restarts. True when the take ended.
+export function advance(st, now, dur) {
+  const dt = Math.min(0.1, (now - st.last) / 1000);
+  st.last = now;
+  if (st.hold) {
+    if (now >= st.hold) { st.hold = 0; st.t = st.repeat.t0 + 1e-3; }
+    return false;
+  }
+  st.t += dt * st.speed;
+  if (st.repeat && st.t >= st.repeat.t1) { st.t = Math.min(dur, st.repeat.t1) - 1e-3; st.hold = now + 1000; return false; }
+  if (st.t >= dur) { st.t = dur; return true; }
+  return false;
 }
 
 // The largest 4-connected group of cells (indices into a gx x gy grid) among `cells`.
@@ -448,18 +487,9 @@ export function mount(root) {
     const d = st.d, i = idx(st.t), raw = d.raw;
     if (d.cams) {
       const c = d.cams[ci], k = sidx(st.t);
-      // no corners at this step (the first frame of a take, a blink): show the nearest step with corners within 1 s,
-      // later first, so a card never starts empty
-      let ks = k;
-      for (let j = 1; !c.uv[ks].length && j <= 10; j++) {
-        if (k + j < c.uv.length && c.uv[k + j].length) ks = k + j;
-        else if (k - j >= 0 && c.uv[k - j].length) ks = k - j;
-      }
-      const f = c.uv[ks], uv = [];
+      const ks = nearestStep(c.uv, k), f = c.uv[ks], uv = [];
       for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
-      let got = 0;
-      c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= st.t + 0.05 && c.reach[n]) got++; });
-      return { uv, n: uv.length, near: ks !== k ? (ks - k) / 10 : 0, outline: c.outline[ks] || c.outline[k], pct: (100 * got) / Math.max(1, c.nReach),
+      return { uv, n: uv.length, near: ks !== k ? (ks - k) / 10 : 0, outline: c.outline[ks] || c.outline[k], pct: camCoverage(c, st.t),
         soFar: c.n_so_far[k], dist: c.dist_cm[ks], off: c.off_deg[ks] };
     }
     const { R, p } = camPose(0, i);
@@ -547,8 +577,8 @@ export function mount(root) {
       const seen = (n) => (d.cams ? d.cams[ci].cov100_first[n] != null && d.cams[ci].cov100_first[n] <= st.t + 0.05 : d.first100[n] <= st.t);
       const empty = [];
       for (let n = 0; n < gx * gy; n++) if (reach[n] && !seen(n)) empty.push(n);
-      // "fill next" (selected card only): the largest connected still-empty region, once part of the image is seen
-      const next = sel && empty.length < reach.reduce((a, b) => a + (b ? 1 : 0), 0) ? largestRegion(empty, gx, gy) : new Set();
+      // "fill next" (selected card only)
+      const next = sel ? fillNext(empty, reach.reduce((a, b) => a + (b ? 1 : 0), 0), gx, gy) : new Set();
       const cellRect = (n) => {
         const cx = n % gx, cy = Math.floor(n / gx);
         return [cx * 100 * k + 2 * px, cy * 100 * k + 2 * px, Math.min(100, iw - cx * 100) * k - 4 * px, Math.min(100, ih - cy * 100) * k - 4 * px];
@@ -782,7 +812,7 @@ export function mount(root) {
     const soon = n.next && n.until <= 3;
     ui.next.classList.toggle('soon', !!soon);
     ui.next.textContent = n.next
-      ? `${soon ? `Next in ${secs(n.until)} s` : 'Next'}: ${n.next.k ? `${n.next.k} ${n.next.name}` : n.next.name} — ${cut(n.next.short, 60)}`
+      ? `${soon ? `Next in ${n.left} s` : 'Next'}: ${n.next.k ? `${n.next.k} ${n.next.name}` : n.next.name} — ${cut(n.next.short, 60)}`
       : 'Last step. Then stop recording.';
     const on = cards[st.sel] && cards[st.sel].now;
     ui.readout.textContent = on ? `${cards[st.sel].cam.name}: ${Math.round(on.dist)} cm from the board, ${Math.round(on.off)}° off its normal` : '';
@@ -796,7 +826,7 @@ export function mount(root) {
     st.d.segs.forEach((g) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.innerHTML = `<i class="cm-sw cm-s-${g.key}"></i>${g.k ? `${g.k} ${g.name}` : g.name} · ${secs(g.t1 - g.t0)} s`;
+      b.innerHTML = `<i class="cm-sw cm-s-${g.key}"></i>${g.k ? `${g.k} ${g.name}` : g.name} · ${segSecs(g)} s`;
       b.addEventListener('click', () => goSeg(g));
       ui.segchips.append(b);
     });
@@ -887,15 +917,7 @@ export function mount(root) {
   }
   function tick(now) {
     if (!st.playing) return;
-    const dt = Math.min(0.1, (now - st.last) / 1000);
-    st.last = now;
-    if (st.hold) {
-      if (now >= st.hold) { st.hold = 0; st.t = st.repeat.t0 + 1e-3; }
-    } else {
-      st.t += dt * st.speed;
-      if (st.repeat && st.t >= st.repeat.t1) { st.t = Math.min(st.d.dur, st.repeat.t1) - 1e-3; st.hold = now + 1000; }
-      else if (st.t >= st.d.dur) { st.t = st.d.dur; draw(); setPlaying(false); return; }
-    }
+    if (advance(st, now, st.d.dur)) { draw(); setPlaying(false); return; }
     draw();
     requestAnimationFrame(tick);
   }

@@ -311,97 +311,102 @@ def cov_pct(cam):
     return 100 * got / max(1, sum(cam["reach"]))
 
 
-ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-ap.add_argument("--anim", type=Path)
-ap.add_argument("--refresh", type=Path, nargs="+")
-ap.add_argument("--cams", type=Path)
-ap.add_argument("--cams-anim", type=Path)
-ap.add_argument("--verdicts", type=Path)
-ap.add_argument("--placeholder")
-ap.add_argument("--out", type=Path, default=SITE / "public" / "data" / "calib-motion")
-ap.add_argument("--variants", nargs="+")
-ap.add_argument("--verdict-ids", nargs="+")
-a = ap.parse_args()
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--anim", type=Path)
+    ap.add_argument("--refresh", type=Path, nargs="+")
+    ap.add_argument("--cams", type=Path)
+    ap.add_argument("--cams-anim", type=Path)
+    ap.add_argument("--verdicts", type=Path)
+    ap.add_argument("--placeholder")
+    ap.add_argument("--out", type=Path, default=SITE / "public" / "data" / "calib-motion")
+    ap.add_argument("--variants", nargs="+")
+    ap.add_argument("--verdict-ids", nargs="+")
+    a = ap.parse_args(argv)
 
-if a.refresh:
-    for f in a.refresh:
-        d = add_beats(json.loads(f.read_text()))
-        size = dump(d, f)
-        print(f"{f.name}: {size / 1e3:.0f} kB,", ", ".join(f"{g['label'].split()[-1]} {g['nbeat']}" for g in d["segments"]))
-        ip = f.with_name("index.json")
-        if ip.exists():   # the page's real-example table reads length and coverage from the index
+    if a.refresh:
+        for f in a.refresh:
+            d = add_beats(json.loads(f.read_text()))
+            size = dump(d, f)
+            print(f"{f.name}: {size / 1e3:.0f} kB,", ", ".join(f"{g['label'].split()[-1]} {g['nbeat']}" for g in d["segments"]))
+            ip = f.with_name("index.json")
+            if ip.exists():   # the page's real-example table reads length and coverage from the index
+                ix = json.loads(ip.read_text())
+                for v in ix["variants"]:
+                    if v["id"] == d["variant"]:
+                        v["duration_s"], v["cov_reach"], v["bytes"] = d["duration_s"], d["coverage"]["cov_reach_final"], size
+                dump(ix, ip)
+        return
+
+    if a.cams:
+        if not a.cams_anim:
+            raise SystemExit("--cams needs --cams-anim (the exported anim file of that take)")
+        anim = json.loads(a.cams_anim.read_text())
+        side = cams_sidecar(json.loads(a.cams.expanduser().read_text()), anim)
+        path = a.cams_anim.with_name(f"{anim['variant']}.cams.json")
+        raw = dump(side, path)
+        gz = len(gzip.compress(path.read_bytes(), 9))
+        print(f"{path.name}: {raw / 1e3:.0f} kB raw, {gz / 1e3:.0f} kB gzip, n {side['n']};",
+              ", ".join(f"{c['name']} {cov_pct(c):.0f} %" for c in side["cams"]),
+              f"(anim cov_reach {100 * anim['coverage']['cov_reach_final']:.0f} %)")
+        if raw > CAMS_RAW_MAX or gz > CAMS_GZ_MAX:
+            path.unlink()
+            raise SystemExit(f"{path.name}: over the budget ({CAMS_RAW_MAX / 1e3:.0f} kB raw, {CAMS_GZ_MAX / 1e3:.0f} kB gzip)")
+        ip = path.with_name("index.json")
+        if ip.exists():   # the real-example table shows the cam0 card's final coverage, so card and table agree
             ix = json.loads(ip.read_text())
             for v in ix["variants"]:
-                if v["id"] == d["variant"]:
-                    v["duration_s"], v["cov_reach"], v["bytes"] = d["duration_s"], d["coverage"]["cov_reach_final"], size
+                if v["id"] == side["variant"]:
+                    v["cov_cam0"] = round(cov_pct(side["cams"][0]) / 100, 4)
             dump(ix, ip)
-    raise SystemExit(0)
+        return
 
-if a.cams:
-    if not a.cams_anim:
-        raise SystemExit("--cams needs --cams-anim (the exported anim file of that take)")
-    anim = json.loads(a.cams_anim.read_text())
-    side = cams_sidecar(json.loads(a.cams.expanduser().read_text()), anim)
-    path = a.cams_anim.with_name(f"{anim['variant']}.cams.json")
-    raw = dump(side, path)
-    gz = len(gzip.compress(path.read_bytes(), 9))
-    print(f"{path.name}: {raw / 1e3:.0f} kB raw, {gz / 1e3:.0f} kB gzip, n {side['n']};",
-          ", ".join(f"{c['name']} {cov_pct(c):.0f} %" for c in side["cams"]),
-          f"(anim cov_reach {100 * anim['coverage']['cov_reach_final']:.0f} %)")
-    if raw > CAMS_RAW_MAX or gz > CAMS_GZ_MAX:
-        path.unlink()
-        raise SystemExit(f"{path.name}: over the budget ({CAMS_RAW_MAX / 1e3:.0f} kB raw, {CAMS_GZ_MAX / 1e3:.0f} kB gzip)")
-    ip = path.with_name("index.json")
-    if ip.exists():   # the real-example table shows the cam0 card's final coverage, so card and table agree
-        ix = json.loads(ip.read_text())
-        for v in ix["variants"]:
-            if v["id"] == side["variant"]:
-                v["cov_cam0"] = round(cov_pct(side["cams"][0]) / 100, 4)
-        dump(ix, ip)
-    raise SystemExit(0)
+    if not a.anim:
+        raise SystemExit("give --anim, --refresh or --cams")
+    src, out = a.anim.expanduser(), a.out.expanduser()
+    out.mkdir(parents=True, exist_ok=True)
 
-if not a.anim:
-    raise SystemExit("give --anim, --refresh or --cams")
-src, out = a.anim.expanduser(), a.out.expanduser()
-out.mkdir(parents=True, exist_ok=True)
+    if a.variants:
+        index = {"variants": []}
+        for vid in a.variants:
+            d = json.loads((src / f"{vid}.json").read_text())
+            index.setdefault("rig", d.get("rig"))
+            index.setdefault("hz", d.get("hz"))
+            index["variants"].append({k: d.get(k) for k in ("kind", "description", "duration_s")}
+                                     | {"id": vid, "file": f"{vid}.json", "cov_reach": d["coverage"]["cov_reach_final"]})
+    else:
+        index = json.loads((src / "index.json").read_text())
+    for v in index["variants"]:
+        v["bytes"] = dump(slim(json.loads((src / v["file"]).read_text())), out / v["file"])
+        print(f"{v['file']}: {v['bytes'] / 1e3:.0f} kB")
+    for v in index["variants"]:
+        v.pop("description", None)
+    dump(index, out / "index.json")
 
-if a.variants:
-    index = {"variants": []}
-    for vid in a.variants:
-        d = json.loads((src / f"{vid}.json").read_text())
-        index.setdefault("rig", d.get("rig"))
-        index.setdefault("hz", d.get("hz"))
-        index["variants"].append({k: d.get(k) for k in ("kind", "description", "duration_s")}
-                                 | {"id": vid, "file": f"{vid}.json", "cov_reach": d["coverage"]["cov_reach_final"]})
-else:
-    index = json.loads((src / "index.json").read_text())
-for v in index["variants"]:
-    v["bytes"] = dump(slim(json.loads((src / v["file"]).read_text())), out / v["file"])
-    print(f"{v['file']}: {v['bytes'] / 1e3:.0f} kB")
-for v in index["variants"]:
-    v.pop("description", None)
-dump(index, out / "index.json")
-
-vpath = a.verdicts.expanduser() if a.verdicts else src / "twin_verdicts.json"
-if vpath.exists():
-    ver = json.loads(vpath.read_text())
-    if not str(ver.get("schema", "")).startswith("calib-motion-demo/twin-verdict"):
-        raise SystemExit(f"{vpath}: not a gate.py twin_verdicts.json")
-    ver.pop("root", None)
-    ver.pop("groups", None)
-    ver.pop("verdicts", None)
-    ref = ver.get("ref")
-    keep = set(a.verdict_ids) if a.verdict_ids else None
-    ver["variants"] = {k: v for k, v in ver["variants"].items() if k != ref and (keep is None or k in keep)}
-    for v in ver["variants"].values():
-        for k in INFO:
-            v.pop(k, None)
-        for r in (v.get("params") or {}).values():
+    vpath = a.verdicts.expanduser() if a.verdicts else src / "twin_verdicts.json"
+    if vpath.exists():
+        ver = json.loads(vpath.read_text())
+        if not str(ver.get("schema", "")).startswith("calib-motion-demo/twin-verdict"):
+            raise SystemExit(f"{vpath}: not a gate.py twin_verdicts.json")
+        ver.pop("root", None)
+        ver.pop("groups", None)
+        ver.pop("verdicts", None)
+        ref = ver.get("ref")
+        keep = set(a.verdict_ids) if a.verdict_ids else None
+        ver["variants"] = {k: v for k, v in ver["variants"].items() if k != ref and (keep is None or k in keep)}
+        for v in ver["variants"].values():
             for k in INFO:
-                r.pop(k, None)
-    if a.placeholder:
-        ver["placeholder"] = a.placeholder
-    dump(ver, out / "twin_verdicts.json")
-    print("twin_verdicts.json", "(placeholder)" if a.placeholder else "")
-else:
-    print("no twin_verdicts.json; the page shows 'verdicts pending'")
+                v.pop(k, None)
+            for r in (v.get("params") or {}).values():
+                for k in INFO:
+                    r.pop(k, None)
+        if a.placeholder:
+            ver["placeholder"] = a.placeholder
+        dump(ver, out / "twin_verdicts.json")
+        print("twin_verdicts.json", "(placeholder)" if a.placeholder else "")
+    else:
+        print("no twin_verdicts.json; the page shows 'verdicts pending'")
+
+
+if __name__ == "__main__":
+    main()
