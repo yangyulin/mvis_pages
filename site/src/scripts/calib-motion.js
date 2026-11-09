@@ -20,21 +20,21 @@
 
 export const VARIANTS = {
   // ---- AprilGrid guide motions built from the AprilGrid example (v4) ----
-  guide06c_60: { set: 'v4', label: 'Guide motion, 60 s', why: 'Built from the AprilGrid example below: its four moves in the same order (left-right, up-down, back-forth with roll, a loop parallel to the board), with the take\'s coupling and amplitudes, slowed to a pace a hand keeps up comfortably. Added: 3 s rests, a speed that varies on every sweep, turns past the board at the ends of left-right (about 22°, with a sharp turnaround) and up-down (about 34°), an off-centre roll during back-forth, a counter-turn and a 25° roll in the loop, so the board reaches all four picture corners. The fine wobble on top is the slow, natural shake of a hand (1.5-3.5 times a second). 2 left-right, 2 up-down, 3 in-outs, 2.1 loops.' },
+  guide06c_60: { set: 'v4', label: 'Guide motion, 60 s', why: 'Four moves in the order of the AprilGrid example below, at a comfortable hand pace: left-right, up-down, back-forth with roll, and a loop parallel to the board.' },
   guide06c_50: { set: 'v4', label: 'Guide motion, 50 s', why: 'The guide motion with one in-out and about one loop fewer: the same rates, amplitudes and cues.' },
   guide06b_60: { set: 'v4', label: 'Guide with a fast wobble, 60 s', why: 'The previous guide motion: the same moves, but its hand wobble was a 4-6 Hz buzz, faster than a hand shakes. It passes too, with larger σ.' },
   guide06_60: { set: 'v4', label: 'First guide, 60 s', why: 'The first guide built from the AprilGrid example: the same blocks, but it turned only about 15° past the board at the ends of left-right, barely rolled in the loop and had less jiggle. Slowed down, it lost td.' },
   guide06_50: { set: 'v4', label: 'First guide, 50 s', why: 'The first guide cut to 50 s.' },
   base06_fit: { set: 'v4', label: 'AprilGrid example, smoothed real-speed fit', why: 'A smooth fit of the AprilGrid example at the speed it was recorded (41 s), faster than the hand limits. Not the real take: its twin row is with the real examples below.' },
   // ---- chessboard twin (v3) ----
-  guide60b: { set: 'v3', label: 'Chessboard version, 60 s', why: 'The guide motion for a chessboard, derived from our 30 s chessboard take of 2026-11-08: the speed varies on every sweep, left-right and up-down turn past the board so it reaches the picture edges, back-forth holds the board off-centre while rolling, and a corner square ends the motion. Tamed to a comfortable pace and cut to 60 s: 2 left-right, 2 up-down, 3 in-outs. The fine wobble on top is the slow, natural shake of a hand. The whole chessboard stays in view, since a chessboard is only detected when every corner is visible.' },
+  guide60b: { set: 'v3', label: 'Chessboard version, 60 s', why: 'The same idea for a chessboard: smaller swings so the whole board stays in view, and a corner square instead of the loop.' },
   guide60: { set: 'v3', label: 'Chessboard version with a fast wobble, 60 s', why: 'The previous chessboard version: the same moves, but its hand wobble was a 4-6 Hz buzz, faster than a hand shakes. It passes too, with larger σ.' },
   derived_good_tamed: { set: 'v3', label: 'Chessboard version, 80 s', why: 'The chessboard version before it was cut to 60 s: 3 left-right, 3 up-down and 4 in-outs, and a 10 s corner square. The same rates, amplitudes and cues.' },
   real_take: { set: 'v3', label: 'Chessboard take 11-08 01, 30 s', why: 'Our hand-held 30 s recording in front of a monitor chessboard, the take the chessboard version is built from: twice left-right, twice up-down, twice back-forth, with the roll tied to the in-out.' },
   // ---- real AprilGrid take (real_takes/, AprilGrid twin) ----
-  aprilgrid_06: { set: 'real', label: 'AprilGrid example', why: 'Our 41 s hand-held recording (take 06 of 2026-11-08) in front of a monitor AprilGrid, our best real take and the one the guide motion is built from: three times left-right, three times up-down, four in-outs (0.16-0.53 m) while rolling about ±60°, then 3 loops parallel to the board. Trajectory only, replayed from the calibrated poses; no camera images.' },
+  aprilgrid_06: { set: 'real', label: 'AprilGrid example', why: 'Our 41 s hand-held recording in front of a monitor AprilGrid, the take the guide motion is built from.' },
   // ---- real chessboard take (real_chess/, chessboard twin) ----
-  chessboard_1107_01: { set: 'realc', label: 'Chessboard example', why: 'Our 61 s hand-held recording of 2026-11-07 in front of a monitor chessboard, the whole board kept in view: in-outs while rolling first, then left-right, up-down, about four rolls in place, a short up-down by translation and a mixed block of rolls and reaches toward the corners. Not in the guide order, and the board never reaches the picture corners, but long enough to pass. Trajectory only, replayed from the calibrated poses; no camera images.' },
+  chessboard_1107_01: { set: 'realc', label: 'Chessboard example', why: 'Our 61 s hand-held recording in front of a monitor chessboard, with the whole board kept in view.' },
 };
 const MAIN = ['guide06c_60', 'guide60b'];
 const REAL = ['aprilgrid_06', 'chessboard_1107_01'];
@@ -318,7 +318,7 @@ export function mount(root) {
     let tail = '';
     if (v && v.status === 'judged') {
       const w = `σ at most ${worstRatio(v).toFixed(2)}× the 80 s reference${v.worst_sigma_param ? ` (${v.worst_sigma_param.replace(/_/g, ' ')})` : ''}`;
-      tail = v.passed ? ` Twin: good, every parameter passes; ${w}.`
+      tail = v.passed ? ` Twin: good.`
         : ` Twin: fails ${v.failed_params.length} of 22 parameters${v.failed_params.length <= 3 ? ` (${v.failed_params.map((p) => p.replace(/_/g, ' ')).join(', ')})` : ''}.`;
     }
     const rig = SETS[VARIANTS[st.vid].set].rig;

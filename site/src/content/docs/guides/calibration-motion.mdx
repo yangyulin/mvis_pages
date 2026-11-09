@@ -6,187 +6,74 @@ wide: true
 ---
 
 import CalibMotionPlayer from '../../../components/CalibMotionPlayer.astro';
-import CalibMotionVerdicts from '../../../components/CalibMotionVerdicts.astro';
 
-A camera–IMU calibration can only find what the motion shows it. If the rig never pitches, the solver
-cannot tell the gyro scale on that axis from noise. If the board never reaches the image corners, the
-lens distortion stays loose. The motion below takes 60 seconds and needs nothing beyond an AprilGrid.
-
-We built it from a real hand-held recording with our own Looper Insight 9 in front of a monitor
-AprilGrid (the [AprilGrid example](#real-examples) below), slowed it to a pace a hand keeps up comfortably, and changed it only where a
-**noisy digital twin** of the rig said it was weak. The twin simulates the recording, solves it, and
-compares the result with the truth. A motion is good if the twin still converges on every calibration
-parameter.
+A camera–IMU calibration can only find what the motion shows it. The 60 s motion below excites every
+axis and sweeps the board across the whole image. We built it from a real hand-held recording with our
+Looper Insight 9 and checked it with a **noisy digital twin**: the twin simulates the recording, solves
+it and compares the result with the truth. A motion is good if the twin still converges on every
+calibration parameter.
 
 ## The motion
 
 <CalibMotionPlayer />
 
-Left: the board, the rig (camera frustum, IMU axes) and the camera's whole path, one colour per move: faint
-for the part still to come, solid for the part already travelled. Right: what the camera sees, with the
-image area the board has covered so far. Below: the gyro and accelerometer as the IMU would record them.
-The two maps at the bottom compare the image coverage of the guide motion with the AprilGrid example, the
-real recording it is built from.
-*Chessboard version* is the same idea for a chessboard, which must stay fully in view (see
-[below](#chessboard-version)).
+Left: the rig, the board and the camera's whole path, one colour per move (faint ahead, solid behind).
+Right: what the camera sees and the image area covered so far. Below: the gyro and accelerometer.
+*Chessboard version* is the same idea for a chessboard, which must stay fully in view.
 
 ## Step by step
 
-The motion keeps the four moves of the AprilGrid example, our best real take, in the same order: **left–right with yaw**,
-**up–down with pitch**, **back–forth with roll** and a **loop parallel to the board**. Rests start and end
-the recording. Four rules run through all of it:
+Four moves in order, blended into each other, with a short rest at each end:
 
-- **Vary the speed. Never move at a steady pace.** Push through the middle of every sweep and brake into
-  the ends (about 1.25× the average rate in the middle and 0.75× at the ends; on back–forth a gentler
-  1.15× and 0.85×).
-- **Turn past the board.** At the ends of left–right (yaw) and up–down (pitch), keep turning past the
-  board so it slides to the edges of the picture. On left–right, turn round sharply at each end.
-- **Roll with the board off-centre.** During back–forth, aim beside the board while you roll, so the
-  roll carries it into the corners of the picture.
-- **Reach the corners.** In the loop, turn the camera a little against the loop and roll it, so the board
-  runs round the picture border into every corner.
+| # | Move | Time | What to do |
+|---|---|---|---|
+| 0 | Rest | 0–3 s | Hold still in front of the board, count 3. |
+| 1 | Left–right + yaw | 3–20 s | Swing left and right around the board, 2 times (about 43° each side), turning about 22° past facing it at each end so the board slides to the picture edge. Turn round sharply. |
+| 2 | Up–down + pitch | 20–32 s | Move up and down, 2 times (about 33° above and below), tipping about 34° past the board so it reaches the top or bottom edge. |
+| 3 | Back–forth + roll | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times, rolling like a steering wheel up to about 65°. Hold the board off-centre so the roll carries it into the corners. |
+| 4 | Loop + roll | 47–57 s | Move round a loop parallel to the board, about 40 cm across, 2 times, turning a little against the loop and rolling about 25°, so the board runs into every corner. |
+| 5 | Rest | 57–60 s | Hold still, count 3. |
 
-An AprilGrid is detected even when some of its tags leave the picture, so the board may run off the edge,
-but keep most of it in view: in the guide motion all 36 tags are visible in the median frame, at least
-60 % of them in about 95 % of the frames, and never fewer than 4.
+- **Vary the speed** on every sweep: push through the middle, brake into the ends.
+- **Keep most of the board in view.** An AprilGrid may run partly off the edge; a chessboard may not.
+- **Don't add shake.** The natural wobble of a hand is all the motion needs.
 
-**Setup**
-
-- AprilGrid (we used 6 × 6 tags of 43.47 mm on a monitor) upright at chest height, flat, well lit.
-- Short exposure, about **2 ms** (bright room, auto exposure off), so the fast parts stay sharp.
-- Start about **0.42 m** in front of the board, face-on, rig upright.
-- Record **60 s**. Do not add any shake: the slow, natural wobble of a hand-held camera (a degree or two, two
-  or three times a second) is all the motion needs.
-
-**The recording**
-
-| # | Move | Time | Amplitude and rate | Cue |
-|---|---|---|---|---|
-| 0 | Rest | 0–3 s | – | Hold the camera still in front of the board, count 3. |
-| 1 | Left–right + yaw | 3.0–19.7 s | orbit ±43° around the board, turn 22° past it at each end with a sharp turnaround, 0.31–0.45 m away; 2 swings, 8.3 s each | Swing left and right around the board, 2 times (about 43° to each side, 8.3 s per left-right-left), turning past facing it by about 22° at each end so the board slides to the left or right edge of the picture. Vary the speed, never a steady pace: push through the middle and brake into each end. Turn round sharply at each end. Keep most of the board in the picture; it may run off the edge. |
-| 2 | Up–down + pitch | 19.7–31.8 s | ±33° above and below the board, tip 34° past it at each end, 0.26–0.44 m away; 2 swings, 6.1 s each | Move up and down, 2 times (about 33° above and below the board, 6.1 s per up-down-up), tipping the camera past the board by about 34° so it reaches the top or bottom edge of the picture. Vary the speed, never a steady pace: push through the middle and brake into each end. Keep most of the board in the picture; it may run off the edge. |
-| 3 | Back–forth + roll | 31.8–46.8 s | 0.22 ↔ 0.52 m, 3 in-outs, 5.0 s each; roll ±65°, a little ahead of the in-out; aim 30° (far) to 5° (near) beside the board, one side first, then the other | Move in to 0.22 m and back out to 0.52 m, 3 times (5.0 s per in-out), rolling the camera like a steering wheel up to about 65°, one way coming in and the other going out (the roll a little ahead of the in-out). Vary the speed, never a steady pace: push through the middle and brake into each end. Hold the board off-centre (aim about 30° beside it when far, 5° when near) so the roll carries it into the picture corners: one side first, then the other. Keep most of the board in the picture; it may run off the edge. |
-| 4 | Loop + roll | 46.8–57 s | loop 0.31 × 0.43 m parallel to the board, 2.1 times, 4.8 s each; counter-turn 22° left–right, 17° up–down; roll ±25°, once per loop | Move the camera round a loop parallel to the board, about 43 cm across, 2.1 times (4.8 s per loop), turning it a little against the loop (about 17° up-down, 22° left-right) so the board slides round the picture border and into each corner. Roll the camera too, about 25° one way and then the other, once per loop. Vary the speed: speed up and slow down twice per loop. Keep most of the board in the picture; it may run off the edge. |
-| 5 | Rest | 57–60 s | – | Hold still, count 3. Done. |
-
-Blend one move into the next; do not stop between steps. The motion stays inside what a hand does
-comfortably: it peaks at about 0.38 m/s, 1.9 rad/s and 1.5 m/s² (speed and acceleration of the IMU), and
-the camera never looks more than 68° away from the board. The board reaches every image cell it can reach, all four picture corners
-included.
-
-**50 s is enough.** Drop one in-out and about one loop (2 in-outs, 1.1 loops, the rest unchanged): the
-twin still passes every parameter, with σ at most 1.88× the reference against 1.69× for 60 s (td both
-times; lever arm x 1.85× against 1.66×), about what 985 instead of 1185 frames costs.
-
-### What the twin says about the guide motion
-
-<CalibMotionVerdicts set="v4" />
-
-**Why the loop rolls and left–right turns round sharply.** Our first guide from the AprilGrid example lost
-td, the camera time offset, when slowed to the hand limits: σ 3.14× the reference at 60 s and 3.30× at 50 s,
-over the 3× limit, against 1.11× for the smoothed real-speed fit of the AprilGrid example. It barely rolled in the loop, turned only
-about 15° past the board at the ends of left–right and had less jiggle, so less angular acceleration. A 25°
-roll in the loop, 22° turns past the board with a sharp turnaround, and more jiggle brought td back to
-2.10× (60 s) and 2.18× (50 s). That jiggle was a 4–6 Hz buzz, faster than a hand shakes. The guide now has
-the slower wobble of a real hand, 1.5–3.5 times a second and a little larger, which gives as much angular
-acceleration and passes better still: td 1.69× and lever arm x 1.66× at 60 s (*Guide with a fast wobble*
-in the table: 2.10× and 2.27×).
+**Setup:** AprilGrid upright and flat (we used 6 × 6 tags of 43.47 mm on a monitor), short exposure
+(about 2 ms), start about 0.42 m away, face-on. The motion stays at a comfortable hand pace (about
+0.4 m/s and 1.9 rad/s at most). 50 s also works: drop one in-out and one loop.
 
 ## Real examples
 
-Two hand-held recordings of our Looper Insight 9, one per board: the *AprilGrid example* is our 41 s
-AprilGrid recording of 2026-11-08, the *Chessboard example* our 61 s chessboard recording of
-2026-11-07. Each was solved for real with MVIS (camera intrinsics free, t_ga estimated) and replayed
-through the twin of its board, and each passes the same rule as the guide motion. The player shows each
-take's whole trajectory, replayed from the calibrated poses, and the image area the board covered. No
-camera images are shown.
+Two hand-held recordings of our Looper Insight 9, solved with MVIS and replayed through the twin of
+their board. Both pass. Trajectory and image coverage only; no camera images.
 
 <CalibMotionPlayer mode="real" />
 
-| Take | Board, length | What the operator did | Coverage | Real solve, camera 0 | Twin |
-|---|---|---|---|---|---|
-| AprilGrid example | AprilGrid 6 × 6 on a monitor, 41.2 s | Three times left–right, three times up–down, four in-outs (0.16–0.53 m) while rolling about ±60°, then 3 loops parallel to the board. The guide motion is built from this take | 98 % | reprojection 0.16 px (median); t_ga −5.39 ± 0.021 ms; lever (−12.50, 38.73, 19.27) ± (0.12, 0.10, 0.16) mm | **good**, σ at most 1.70× the reference (accel scale y), 808 frames, on the AprilGrid twin |
-| Chessboard example | chessboard 9 × 6 on a monitor, 60.8 s | In-outs while rolling first, then left–right, up–down, about four rolls in place, a short up–down by translation and a mixed block of rolls and reaches toward the corners, with the whole board in view | 69 % | reprojection 0.10 px (median); t_ga −5.32 ± 0.031 ms; lever (−12.53, 38.90, 18.65) ± (0.24, 0.22, 0.49) mm | **good**, σ at most 2.21× (accel scale y), 1201 frames, on the chessboard twin |
+| Example | Length | Image coverage | Twin |
+|---|---|---|---|
+| AprilGrid example | 41 s | 98 % | good |
+| Chessboard example | 61 s | 69 % | good |
 
-Coverage is the share of the reachable 100 px image cells the board reached (the player's number at
-the end of the take). An AprilGrid is detected even when part of it is outside the picture, so its
-coverage counts partly visible boards; the chessboard counts only frames with the whole board in view.
-Lever is the camera position in the IMU frame. σ is the formal 1σ of the solve. Each take is compared
-with the 80 s reference motion on the twin of its own board.
-
-What they show: a shorter take is fine when every axis turns well past the board and the board sweeps
-the picture. The AprilGrid example gets there in 41 s by moving fast: it peaks at 0.75 m/s, 5.0 rad/s and 6.1 m/s² (at
-the IMU), two to three times what the guide motion asks for. The chessboard example is slower (0.54 m/s,
-3.7 rad/s, 4.0 m/s²) and keeps the board near the image centre, so it needs 61 s, and it is the closest
-of the two to the 3× limit. At a comfortable pace, follow the 60 s guide motion.
-
-<CalibMotionVerdicts set="real" />
+Both move faster than the guide motion; at a comfortable pace, follow the 60 s guide.
 
 ## Chessboard version
 
-A chessboard is only detected when every one of its corners is in the picture, so a chessboard motion
-must keep the whole board in view and cannot swing as far. *Chessboard version* in the player is our
-guide for that case. We built it from our 30 s chessboard take of 2026-11-08 (*Chessboard take 11-08 01* in
-the table below): twice left–right, twice up–down, twice back–forth, with no instructions beyond the three
-moves. The twin's uncertainties for that take match the real solve's (lever arm within 11 %, camera–IMU rotation within
-35 %, the time offsets within about 40 %), so the twin can be trusted to compare motions. The take passes,
-close to the limit (σ at most 2.93× the reference, accel scale y). It moves smoothly and slowly
-(0.47–0.55 m/s² RMS of linear acceleration), keeps the board near the image centre (69 % of the reachable
-cells) and changes distance little (0.31–0.59 m).
-
-One change per miss turned it into the chessboard version: vary the speed (push and brake, plus a small
-jiggle); turn past the board at the ends of left–right and up–down, and add a corner square, for the edges
-and corners; and a longer, off-centre, rolled back–forth for distance and roll. Each change passed the
-twin on its own. All four together were faster
-than a hand moves comfortably, so we tamed the jiggle and the in-out and cut the motion from 80 s to 60 s
-by dropping whole swings: 2 left–right, 2 up–down, 3 in-outs and a 9.6 s corner square. It peaks at about
-0.40 m/s, 1.9 rad/s and 1.4 m/s², keeps the whole chessboard in view in 93 % of the frames, and passes
-every parameter with σ at most 1.92× the reference (lever arm x). Its fine wobble is the same slow hand shake
-as in the AprilGrid guide; with the earlier 4–6 Hz buzz it passed at 2.48× (td).
-
-<CalibMotionVerdicts set="v3" />
+A chessboard is only detected with every corner in the picture, so its motion swings less and adds a
+short corner square instead of the loop. Same rules otherwise; it also passes the twin.
 
 ## Motions that fail
 
-We also ran motions that each miss one of the rules, on the AprilGrid twin and against the same 80 s
-reference. None of them passes:
-
-- **Fast shaking from one spot, nearly face-on** (like the UZH-FPV calibration bags): speed does not replace
-  range: the distortion terms k3 and k4 stay loose.
-- **One slow axis at a time, with pauses, never pitched** (like the XQ20 vendor recordings): little angular
-  acceleration and unexcited axes. The lever arm, both time offsets, gyro scale x and y, accel scale z and
-  k4 all fail.
-- **A missing rotation.** Translation only, or yaw only: the camera–IMU rotation cannot be found and every
-  parameter fails. No pitch: gravity never tips onto the optical axis (gyro scale y, accel scale z fail). No
-  roll: no turn about the optical axis (gyro scale z, accel scale y fail).
-- **The board always centred**: the lens edge is never seen, so k2–k4 stay loose.
-- **Smooth, slow orbits aimed at the board centre**, with no varied speed and no turn past the board: little
-  angular acceleration and the board stays mid-image. The lever arm, both time offsets, gyro scale z and
-  k1–k4 fail.
+- **Fast shaking from one spot, face-on:** the lens distortion stays loose.
+- **One slow axis at a time, never pitched:** lever arm, time offsets and IMU scales stay loose.
+- **A missing rotation** (no pitch, no roll, or yaw only): the matching gyro and accelerometer scales,
+  or the whole camera–IMU rotation, cannot be found.
+- **The board always centred:** the image edges are never seen, so the distortion stays loose.
 
 ## How we judged it
 
-The twin is a simulated **Looper Insight 9** (camera 0 and its IMU, with their calibrated values as the
-truth) in front of the board, an AprilGrid or a chessboard. Each motion drives the simulated rig. Noise
-matches the real sensor: corner noise, IMU white noise and bias drift, motion blur and dropped detections.
-On the AprilGrid twin every tag in the picture is used; on the chessboard twin only frames with the whole
-board in view, as with the real detectors. Each motion is solved with the normal camera–IMU setup (t_ga
-estimated, camera intrinsics free) on 3 noise seeds plus 1 noise-free run.
-
-A motion **passes** a parameter if:
-
-1. every solve converges: the solver reports success, and its reprojection error is plausible, at most
-   1.5× the reference motion's median on each noise seed (about 0.70 px here) and below 0.05 px on the
-   noise-free run;
-2. the noise-free error is at most 1σ of the reference motion (or a small floor), so the motion and not
-   the noise sets the result;
-3. σ is honest: the error is above 3σ on at most one of the 3 noise seeds, and above 4σ on none (one seed
-   in three just over 3σ happens by chance);
-4. σ is at most 3× the σ of the 80 s reference motion. The two are compared directly, whatever the length
-   of the motion: a 20 or 30 s take is fine as long as it pins every parameter down this well.
-
-A motion is **good** if every parameter passes. σ is the median of the formal σ over the 3 seeds. The 22
-parameters: camera–IMU rotation (x, y, z), lever arm (x, y, z), time offsets td and t_ga, gyro and accel
-scale per axis, and the camera intrinsics fx, fy, cx, cy, k1–k4. Rotation errors are reported as the log(R)
-rotation vector in mrad, never as roll-pitch-yaw angles. The reference on each twin is a well-excited
-simulated motion of 80 s run on that twin; it is not shown on this page.
+The twin is a simulated Looper Insight 9 in front of the board, with realistic corner and IMU noise,
+motion blur and dropped detections. Each motion is solved on 3 noise seeds plus a noise-free run (t_ga
+estimated, camera intrinsics free). A motion is **good** if, on all 22 parameters (camera–IMU rotation,
+lever arm, td, t_ga, gyro and accelerometer scales, and the camera intrinsics), every solve converges, the
+error stays within its uncertainty, and the uncertainty is at most 3× that of a well-excited 80 s
+reference motion.

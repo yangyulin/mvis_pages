@@ -44,7 +44,7 @@ const main = mode === 'main';
   </div>
 
   <canvas class="cm-imu" data-role="cimu" aria-label="Gyro and accelerometer traces"></canvas>
-  {main && <p class="cm-imunote">The fine wobble on the traces is the natural shake every hand-held take has anyway; do not add it on purpose.</p>}
+  {main && <p class="cm-imunote">The fine wobble is natural hand shake; do not add it on purpose.</p>}
 
   <div class="cm-controls">
     <button type="button" class="cm-play" data-role="play" aria-label="Play">Play</button>
@@ -62,24 +62,6 @@ const main = mode === 'main';
   <div class="cm-chips cm-segchips" data-role="segchips" aria-label="Jump to a segment"></div>
   <p class="cm-status" data-role="status"></p>
 
-  {main && (
-  <div class="cm-covcmp" data-role="covcmp">
-    <div class="cm-covcmp-head">Image coverage over the whole recording, camera 0</div>
-    <div class="cm-covcmp-grid">
-      <figure>
-        <canvas data-cov="0" aria-label="Coverage map of the guide motion"></canvas>
-        <figcaption><button type="button" class="cm-covlink" data-covplay="guide06c_60">Guide motion</button>, 60 s: <b data-covpct="0">…</b> of the reachable cells</figcaption>
-      </figure>
-      <figure>
-        <canvas data-cov="1" aria-label="Coverage map of the AprilGrid example"></canvas>
-        <figcaption><button type="button" class="cm-covlink" data-covplay="aprilgrid_06">AprilGrid example</button>, 41 s: <b data-covpct="1">…</b> of the reachable cells</figcaption>
-      </figure>
-    </div>
-    <p class="cm-covcmp-note">Shaded: image area the AprilGrid covered, partly visible boards included (an AprilGrid is
-      detected when some of its tags leave the picture). The grid is the 100 px cells the coverage metric counts; a dashed
-      cell is one the board could reach but never did.</p>
-  </div>
-  )}
 </div>
 
 <style is:global>
