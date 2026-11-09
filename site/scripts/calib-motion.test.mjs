@@ -4,7 +4,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  kb4Project, boardDetections, nowState, prep, segSecs, segAt, largestRegion, mergeSegs, prepCams, nearestStep,
+  kb4Project, boardDetections, nowState, prep, segSecs, segAt, largestRegion, mergeSegs, prepCams, bracket,
+  lerpOutline, camFrame, cardNote,
   camCoverage, fillNext, advance, quatToR, screenStep, playMode, startLabel, getReadyText, hardestMove, enterPractice,
   exitPractice, practiceBadge, PRACTICE_SPEED, followPractice, toggleRepeat,
 } from '../src/scripts/calib-motion.js';
@@ -188,14 +189,101 @@ test('sidecar: delta-coded corners decode to the exporter pairs and land inside 
   }
 });
 
-test('nearestStep: no corners now shows a later step first, then an earlier one, within 1 s (10 steps)', () => {
-  const uv = (ks, n = 30) => Array.from({ length: n }, (_, k) => (ks.includes(k) ? [1, 2] : []));
-  assert.equal(nearestStep(uv([5]), 5), 5);           // corners now: itself
-  assert.equal(nearestStep(uv([7, 3]), 5), 7);        // 2 later beats 2 earlier
-  assert.equal(nearestStep(uv([8, 3]), 5), 3);        // earlier wins when it is closer
-  assert.equal(nearestStep(uv([15]), 5), 15);         // 10 steps = 1 s: still shown
-  assert.equal(nearestStep(uv([16]), 5), 5);          // 11 steps: none
-  assert.equal(nearestStep(uv([0], 3), 2), 0);        // at the end of the take: only earlier steps exist
+const REAL = [['real_takes', 'aprilgrid_06'], ['real_chess', 'chessboard_1107_01']];
+const realCams = Object.fromEntries(REAL.map(([dir, id]) => [id, prepCams(read(`${DATA}${dir}/${id}.cams.json`))]));
+const realDur = Object.fromEntries(REAL.map(([dir, id]) => [id, read(`${DATA}${dir}/index.json`).variants.find((v) => v.id === id).duration_s]));
+
+test('sidecar: every frame of the views file (600 per take, with times), an outline in every frame of every camera', () => {
+  for (const [id, cams] of Object.entries(realCams)) {
+    for (const c of cams) {
+      assert.equal(c.t.length, 600);
+      assert.equal(c.uv.length, 600);
+      assert.ok(c.t.every((x, k) => !k || x > c.t[k - 1]), `${id}: times rise`);
+      assert.ok(c.outline.every((o) => o && o.length === 4), `${id} ${c.name}: outline in every frame`);
+    }
+    assert.ok(Math.abs(cams[0].t.at(-1) - realDur[id]) < 0.1, `${id}: frames span the take`);
+  }
+  assert.ok(Math.abs(realCams.aprilgrid_06[0].period - 0.05) < 1e-9);        // 20 Hz
+  assert.ok(Math.abs(realCams.chessboard_1107_01[0].period - 0.1) < 1e-9);   // 10 Hz
+});
+
+test('bracket and outline interpolation: the midpoint between two frames is the mean of their outlines', () => {
+  const T = [0, 0.1, 0.3];
+  assert.deepEqual(bracket(T, -1), { k0: 0, k1: 0, a: 0 });
+  assert.deepEqual(bracket(T, 0.1), { k0: 1, k1: 2, a: 0 });
+  assert.ok(Math.abs(bracket(T, 0.2).a - 0.5) < 1e-9);
+  assert.deepEqual(bracket(T, 5), { k0: 2, k1: 2, a: 0 });
+  const o0 = [[0, 0], [10, 0], [10, 10], [0, 10]], o1 = [[4, 2], [14, 2], [14, 12], [4, 12]];
+  assert.deepEqual(lerpOutline(o0, o1, 0.5), [[2, 1], [12, 1], [12, 11], [2, 11]]);
+  assert.deepEqual(lerpOutline(o0, null, 0.4), o0);                 // out of view on one side: the nearer frame
+  assert.equal(lerpOutline(o0, null, 0.6), null);
+  for (const c of realCams.aprilgrid_06) {                          // on the real take, at each frame midpoint
+    for (let k = 0; k + 1 < c.t.length; k += 37) {
+      const o = camFrame(c, (c.t[k] + c.t[k + 1]) / 2).outline;
+      o.forEach(([u, v], j) => {
+        assert.ok(Math.abs(u - (c.outline[k][j][0] + c.outline[k + 1][j][0]) / 2) < 1e-6);
+        assert.ok(Math.abs(v - (c.outline[k][j][1] + c.outline[k + 1][j][1]) / 2) < 1e-6);
+      });
+    }
+  }
+});
+
+test('corners: only from the nearest frame within half a frame period, else none; never another frame as a fallback', () => {
+  const c = { t: [0, 0.1, 1.1], period: 0.1, uv: [new Int16Array([1, 2]), new Int16Array([3, 4, 5, 6]), new Int16Array([7, 8])],
+    outline: [null, null, null], n_so_far: [1, 3, 4], dist_cm: [1, 2, 3], off_deg: [1, 2, 3] };
+  assert.equal(camFrame(c, 0.04).n, 1);
+  assert.equal(camFrame(c, 0.06).n, 2);
+  assert.equal(camFrame(c, 0.5).n, 0);           // in a gap: no corners
+  assert.equal(camFrame(c, 0.5).soFar, 3);       // so far: frames up to now
+  const cam2 = realCams.aprilgrid_06[2];
+  const empty = cam2.t.findIndex((x, k) => !cam2.uv[k].length);
+  assert.ok(empty >= 0);
+  const f = camFrame(cam2, cam2.t[empty]);
+  assert.equal(f.n, 0);
+  assert.ok(f.outline, 'cam2 keeps its outline in a frame without corners');
+  assert.match(cardNote({ ...f, pct: 54 }), /^no corners this frame · 54 % of the image · /);
+});
+
+// The card note at time t of every camera; every 1/30 s (a drawn frame at 1x) plus every frame time of the take.
+function* notesOf(id) {
+  for (const c of realCams[id]) {
+    const ts = [...c.t];
+    for (let t = 0; t <= realDur[id]; t += 1 / 30) ts.push(t);
+    for (const t of ts) yield [c, t, cardNote({ ...camFrame(c, t), pct: camCoverage(c, t) })];
+  }
+}
+
+test('card note: one line of fixed form for every frame of both takes, at most 64 characters (no wrap, no fallback)', () => {
+  const form = /^(\d+ corners|no corners this frame) · \d{1,3} % of the image · \d{1,3}(,\d{3})* so far$/;
+  let longest = '';
+  for (const [id] of REAL.map(([, x]) => [x])) {
+    for (const [c, t, note] of notesOf(id)) {
+      assert.match(note, form, `${id} ${c.name} t ${t}`);
+      if (note.length > longest.length) longest = note;
+    }
+  }
+  assert.ok(longest.length <= 64, longest);
+  assert.ok(!/nearest/.test(longest));
+});
+
+test('outline at 1x: a drawn frame (1/30 s) moves it no further than the frames around it move in 1/30 s', () => {
+  // interpolation, no steps: the jump between two drawn frames is bounded by the fastest frame interval they span
+  for (const [, id] of REAL) {
+    for (const c of realCams[id]) {
+      const span = (k) => Math.max(...c.outline[k + 1].map(([u, v], j) => Math.hypot(u - c.outline[k][j][0], v - c.outline[k][j][1])));
+      let prev = null, tp = 0;
+      for (let t = 0; t <= realDur[id]; t += 1 / 30) {
+        const o = camFrame(c, t).outline;
+        if (prev) {
+          const jump = Math.max(...o.map(([u, v], j) => Math.hypot(u - prev[j][0], v - prev[j][1])));
+          let speed = 0;
+          for (let k = bracket(c.t, tp).k0; k <= bracket(c.t, t).k0 && k + 1 < c.t.length; k++) speed = Math.max(speed, span(k) / (c.t[k + 1] - c.t[k]));
+          assert.ok(jump <= speed * (t - tp) + 1e-6, `${id} ${c.name} t ${t.toFixed(3)}: ${jump.toFixed(1)} px`);
+        }
+        prev = o; tp = t;
+      }
+    }
+  }
 });
 
 test('coverage: the cam0 card at the end equals the index cov_cam0 (71 % chessboard, 98 % AprilGrid); it grows', () => {

@@ -247,6 +247,8 @@ const main = mode === 'main';
   .cm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin-top: 0.25rem; align-items: start; }
   .cm-pair canvas { border-radius: 0.3rem; }
   .cm-card small { display: block; font-size: 0.74rem; color: var(--cm-text); margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
+  /* the per-frame note: always one line of fixed height (ellipsis when narrow), so the cards never change height */
+  .cm-card small.cm-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; height: 1.35em; }
 
   /* transport: on a desktop it sticks to the bottom of the window while the player is on screen, so Play, the move
      steps and the scrubber stay at hand under the Now panel and the 3D view */
@@ -359,7 +361,8 @@ const main = mode === 'main';
     .cm .cm-primary { min-width: 5.5rem; }
     .cm .cm-nowplay { min-width: 0; padding-inline: 0.75rem; font-size: 0.95rem; }
     .cm-now-top { gap: 0.5rem; }
-    .cm-now-title { font-size: 0.92rem; }
+    .cm-now-title { font-size: 0.92rem; min-height: 2lh; }   /* a long move name takes 2 lines: always keep room for 2 */
+    .cm-now-title [data-role='title'] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
     .cm-now-left { font-size: 1rem; }
     .cm-time { min-width: 0; font-size: 0.8rem; white-space: nowrap; }
     .cm-bigic { width: 4.5rem; height: 4.5rem; }

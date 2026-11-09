@@ -248,8 +248,11 @@ function guideSoFar(d) {
   return soFar;
 }
 
-// Real-example cards: decode the sidecar (delta-coded corners) once.
+// Real-example cards: decode the sidecar (delta-coded corners) once. Every camera gets the frame times t (s) and the
+// frame period (the median gap between frames).
 export function prepCams(side) {
+  const t = side.t || [], gaps = t.slice(1).map((x, k) => x - t[k]).sort((a, b) => a - b);
+  const period = gaps.length ? gaps[gaps.length >> 1] : 0.1;
   return side.cams.map((c) => {
     const uv = c.uv.map((f) => {
       const a = new Int16Array(f.length);
@@ -258,20 +261,42 @@ export function prepCams(side) {
     });
     const R = c.T_C0_Ck.slice(0, 3).map((r) => r.slice(0, 3));
     const tt = c.T_C0_Ck.slice(0, 3).map((r) => r[3]);
-    return { ...c, uv, R, tt, nReach: c.reach.reduce((a, b) => a + b, 0) };
+    return { ...c, uv, R, tt, t, period, nReach: c.reach.reduce((a, b) => a + b, 0) };
   });
 }
 
-// No corners at sidecar step k (the first frame of a take, a blink): the nearest step with corners within 1 s (10
-// steps), later first, so a card never starts empty; k itself when none.
-export function nearestStep(uv, k) {
-  let ks = k;
-  for (let j = 1; !uv[ks].length && j <= 10; j++) {
-    if (k + j < uv.length && uv[k + j].length) ks = k + j;
-    else if (k - j >= 0 && uv[k - j].length) ks = k - j;
-  }
-  return ks;
+// The frames around time t: k0 = the last frame at or before t (0 before the first), k1 = the next one, a = how far
+// t is between them (0..1).
+export function bracket(T, t) {
+  const n = T.length;
+  if (!n || t <= T[0]) return { k0: 0, k1: 0, a: 0 };
+  if (t >= T[n - 1]) return { k0: n - 1, k1: n - 1, a: 0 };
+  let lo = 0, hi = n - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (T[m] <= t) lo = m; else hi = m; }
+  return { k0: lo, k1: hi, a: (t - T[lo]) / (T[hi] - T[lo]) };
 }
+
+// The board outline at a time between two frames: corner by corner on the straight line between them; one side
+// missing (board out of view there): the nearer frame's outline, which may be none.
+export function lerpOutline(o0, o1, a) {
+  if (o0 && o1) return o0.map(([u, v], j) => [u + a * (o1[j][0] - u), v + a * (o1[j][1] - v)]);
+  return (a < 0.5 ? o0 : o1) || null;
+}
+
+// What a real-example card shows at time t: the outline interpolated between the frames around t, the detected
+// corners of the nearest frame only when it is within half a frame period (else none), the corners so far up to t.
+export function camFrame(c, t) {
+  const T = c.t, { k0, k1, a } = bracket(T, t);
+  const kn = a < 0.5 ? k0 : k1, near = T.length && Math.abs(T[kn] - t) <= c.period / 2 + 1e-6;
+  const f = near ? c.uv[kn] : [], uv = [];
+  for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
+  return { uv, n: uv.length, kNow: t < (T[0] ?? 0) ? -1 : k0, outline: lerpOutline(c.outline[k0], c.outline[k1], a),
+    soFar: t < (T[0] ?? 0) ? 0 : c.n_so_far[k0], dist: c.dist_cm[kn], off: c.off_deg[kn] };
+}
+
+// The card note: one line of fixed form, so the card never changes height while the take plays.
+export const cardNote = ({ n, pct, soFar }) =>
+  `${n ? `${n} corners` : 'no corners this frame'} · ${Math.round(pct)} % of the image · ${soFar.toLocaleString('en-US')} so far`;
 
 // Share (%) of a sidecar camera's reachable 100 px cells with a detected corner by time t; at the end it is the
 // index's cov_cam0 for cam0.
@@ -537,7 +562,7 @@ export function mount(root) {
       el.innerHTML = `<b><i style="background:${c.color}"></i>${c.name}<span class="cm-tag">drawn, no frame</span></b>`
         + `<div class="cm-pair"><canvas style="${ar}" aria-label="${c.name}: board and detected corners"></canvas>`
         + `<canvas style="${ar}" aria-label="${c.name}: image coverage so far"></canvas></div>`
-        + `<small>${c.pending ? 'loading detected corners…' : ''}</small>`
+        + `<small class="cm-note">${c.pending ? 'loading detected corners…' : '\u00a0'}</small>`
         + '<small class="cm-key">filled: seen · dashed: still empty · <span>fill next</span>: the biggest gap</small>';
       el.addEventListener('click', () => pick(i));
       ui.cards.append(el);
@@ -548,7 +573,7 @@ export function mount(root) {
       tab.addEventListener('click', () => pick(i));
       ui.tabs.append(tab);
       const [view, cov] = el.querySelectorAll('canvas');
-      return { el, tab, view, cov, note: el.querySelector('small'), cam: c, covCv: null, covAt: -1 };
+      return { el, tab, view, cov, note: el.querySelector('.cm-note'), cam: c, covCv: null, covAt: -1 };
     });
     root.classList.toggle('cm-multi', cards.length > 1);
   }
@@ -572,17 +597,13 @@ export function mount(root) {
     return { R: mm(R, c.R), p: add(p, mv(R, c.tt)) };
   }
   const idx = (t) => Math.max(0, Math.min(st.d.n - 1, Math.round(t * st.d.hz)));
-  const sidx = (t) => Math.max(0, Math.min(st.d.cams ? st.d.cams[0].uv.length - 1 : 0, Math.round(t * 10)));
 
   // What one card shows now: {uv: [[u, v, detected]], n, outline, pct, soFar, dist, off}
   function cardNow(ci) {
     const d = st.d, i = idx(st.t), raw = d.raw;
     if (d.cams) {
-      const c = d.cams[ci], k = sidx(st.t);
-      const ks = nearestStep(c.uv, k), f = c.uv[ks], uv = [];
-      for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
-      return { uv, n: uv.length, near: ks !== k ? (ks - k) / 10 : 0, outline: c.outline[ks] || c.outline[k], pct: camCoverage(c, st.t),
-        soFar: c.n_so_far[k], dist: c.dist_cm[ks], off: c.off_deg[ks] };
+      const c = d.cams[ci];
+      return { ...camFrame(c, st.t), pct: camCoverage(c, st.t) };
     }
     const { R, p } = camPose(0, i);
     const det = boardDetections(raw.board, raw.camera.intr8, raw.camera.image_size, R, p);
@@ -626,7 +647,7 @@ export function mount(root) {
         if (u < -2 || v < -2 || u > iw + 2 || v > ih + 2) continue;
         ctx.beginPath();
         ctx.arc(u * k, v * k, r, 0, 7);
-        if (ok) { ctx.globalAlpha = now.near ? 0.55 : 1; ctx.fillStyle = th.corner; ctx.fill(); ctx.globalAlpha = 1; } else { ctx.strokeStyle = th.text; ctx.lineWidth = px; ctx.stroke(); }
+        if (ok) { ctx.fillStyle = th.corner; ctx.fill(); } else { ctx.strokeStyle = th.text; ctx.lineWidth = px; ctx.stroke(); }
       }
       if (!now.n && !now.outline) {
         ctx.fillStyle = th.text;
@@ -636,8 +657,8 @@ export function mount(root) {
         ctx.textAlign = 'start';
       }
       const sel = ci === st.sel;
-      const nowText = `${now.n ? `${now.n} corners ${now.near ? `(nearest frame, ${now.near > 0 ? '+' : ''}${now.near.toFixed(1)} s)` : 'now'}` : 'no corners now'}`;
-      if (!card.cov.clientWidth) { card.note.textContent = nowText; return; }   // a thumbnail: the view only
+      card.note.textContent = cardNote(now);
+      if (!card.cov.clientWidth) return;   // a thumbnail: the view only
       // coverage: first-seen cells (guides: fine grid; real: the detected corners), 100 px grid, empty cells dashed
       fit(card.cov);
       W = card.cov.width; H = card.cov.height; k = W / iw;
@@ -645,14 +666,15 @@ export function mount(root) {
       ctx.fillStyle = th.panel;
       ctx.fillRect(0, 0, W, H);
       if (d.cams) {
-        if (!card.covCv || card.covAt > sidx(st.t) || card.covCv.width !== W) {
+        const kNow = now.kNow;   // corners of every frame up to the play time
+        if (!card.covCv || card.covAt > kNow || card.covCv.width !== W) {
           card.covCv = document.createElement('canvas');
           card.covCv.width = W; card.covCv.height = H; card.covAt = -1;
         }
         const cg = card.covCv.getContext('2d'), c = d.cams[ci];
         cg.fillStyle = `rgba(${th.cov}, 0.45)`;
-        for (let s = card.covAt + 1; s <= sidx(st.t); s++) { const f = c.uv[s]; for (let q = 0; q + 1 < f.length; q += 2) cg.fillRect(f[q] * k - px, f[q + 1] * k - px, 2 * px, 2 * px); }
-        card.covAt = sidx(st.t);
+        for (let s = card.covAt + 1; s <= kNow; s++) { const f = c.uv[s]; for (let q = 0; q + 1 < f.length; q += 2) cg.fillRect(f[q] * k - px, f[q + 1] * k - px, 2 * px, 2 * px); }
+        card.covAt = kNow;
         ctx.drawImage(card.covCv, 0, 0);
       } else {
         const [nx] = d.raw.coverage.fine_grid, cell = d.raw.coverage.fine_px;
@@ -708,7 +730,6 @@ export function mount(root) {
       for (let x = 100; x < iw; x += 100) { ctx.beginPath(); ctx.moveTo(x * k, 0); ctx.lineTo(x * k, H); ctx.stroke(); }
       for (let y = 100; y < ih; y += 100) { ctx.beginPath(); ctx.moveTo(0, y * k); ctx.lineTo(W, y * k); ctx.stroke(); }
       ctx.globalAlpha = 1;
-      card.note.textContent = `${nowText} · ${Math.round(now.pct)} % of the image · ${now.soFar.toLocaleString('en-US')} so far`;
     });
   }
 
