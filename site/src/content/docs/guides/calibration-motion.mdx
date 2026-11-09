@@ -37,9 +37,40 @@ Four moves in order, blended into each other, with a short rest at each end:
 - **Keep most of the board in view.** An AprilGrid may run partly off the edge; a chessboard may not.
 - **Don't add shake.** The natural wobble of a hand is all the motion needs.
 
-**Setup:** AprilGrid upright and flat (we used 6 × 6 tags of 43.47 mm on a monitor), short exposure
-(about 2 ms), start about 0.42 m away, face-on. The motion stays at a comfortable hand pace (about
-0.4 m/s and 1.9 rad/s at most). 50 s also works: drop one in-out and one loop.
+**Setup:** AprilGrid upright and flat (we used 6 × 6 tags of 43.47 mm on a monitor; [download it
+below](#boards-we-used)), short exposure (about 2 ms), start about 0.42 m away, face-on. The motion stays at a
+comfortable hand pace (about 0.4 m/s and 1.9 rad/s at most). 50 s also works: drop one in-out and one loop.
+
+## Boards we used
+
+Both boards are full-screen images for a 2560 × 1440 monitor, with configs for MVIS and Kalibr.
+
+<div class="cm-boards not-content">
+  <figure>
+    <a href="/downloads/boards/aprilgrid_6x6_2560x1440.png"><img src="/downloads/boards/aprilgrid_6x6_2560x1440.png" width="320" height="180" loading="lazy" alt="AprilGrid of 6 × 6 tags, black on white, in a 2560 × 1440 image" /></a>
+    <figcaption>
+      <b>AprilGrid 6 × 6</b> (tag36h11, tag 43.47 mm, spacing 0.3)<br />
+      <a href="/downloads/boards/aprilgrid_6x6_2560x1440.png" download>image</a> (PNG, 75 KB) ·
+      <a href="/downloads/boards/aprilgrid_6x6_mvis.yaml" download>MVIS config</a> ·
+      <a href="/downloads/boards/aprilgrid_6x6.yaml" download>Kalibr config</a> (YAML, under 1 KB)
+    </figcaption>
+  </figure>
+  <figure>
+    <a href="/downloads/boards/chessboard_10x7_2560x1440.png"><img src="/downloads/boards/chessboard_10x7_2560x1440.png" width="320" height="180" loading="lazy" alt="Chessboard of 10 × 7 squares, black on white, in a 2560 × 1440 image" /></a>
+    <figcaption>
+      <b>Chessboard 10 × 7 squares</b> (9 × 6 inner corners, square 43.47 mm)<br />
+      <a href="/downloads/boards/chessboard_10x7_2560x1440.png" download>image</a> (PNG, 30 KB) ·
+      <a href="/downloads/boards/chessboard_10x7_2560x1440_mvis.yaml" download>MVIS config</a> ·
+      <a href="/downloads/boards/chessboard_10x7_2560x1440_kalibr.yaml" download>Kalibr config</a> (YAML, under 1 KB)
+    </figcaption>
+  </figure>
+</div>
+
+**How to show them:** open the image full screen at 100 % on a 2560 × 1440 monitor, with no display scaling
+and no zoom, so one image pixel is one screen pixel. On our monitor 160 px (one tag, one square) measure
+43.47 mm, the size in the configs. On another screen, measure one tag or square with a ruler and put that
+size in the config (`tag_size` / `square_size` for MVIS, `tagSize` / `rowSpacingMeters` and `colSpacingMeters`
+for Kalibr).
 
 ## Real examples
 

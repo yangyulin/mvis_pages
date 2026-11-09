@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   kb4Project, boardDetections, nowState, prep, segSecs, segAt, largestRegion, mergeSegs, prepCams, nearestStep,
-  camCoverage, fillNext, advance, quatToR,
+  camCoverage, fillNext, advance, quatToR, screenStep, playMode, startLabel, getReadyText, hardestMove, enterPractice,
+  exitPractice, practiceBadge, PRACTICE_SPEED,
 } from '../src/scripts/calib-motion.js';
 
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
@@ -253,4 +254,78 @@ test('repeat switched off during the hold (another example loaded): the clock re
   assert.equal(st.t, 12);
   advance(st, 616, guide.dur);
   assert.ok(Math.abs(st.t - 12.016) < 1e-9);
+});
+
+const chess = prep(read(`${DATA}v3/guide60b.json`), 'guide60b');
+const realAG = prep(read(`${DATA}real_takes/aprilgrid_06.json`), 'aprilgrid_06');
+const realCB = prep(read(`${DATA}real_chess/chessboard_1107_01.json`), 'chessboard_1107_01');
+
+test('start / end screen: start until the first play or seek, end only after playing to the end, start again on load', () => {
+  let s = 'start';
+  assert.equal(screenStep(s, 'end'), 'start');        // nothing played yet: no end screen
+  s = screenStep(s, 'play'); assert.equal(s, 'none');
+  assert.equal(screenStep('start', 'seek'), 'none');  // a chip, step or the scrubber also dismisses it
+  s = screenStep(s, 'end'); assert.equal(s, 'end');
+  assert.equal(screenStep(s, 'seek'), 'none');
+  assert.equal(screenStep(s, 'play'), 'none');        // Watch again
+  for (const x of ['start', 'none', 'end']) assert.equal(screenStep(x, 'load'), 'start');
+});
+
+test('primary button: Play, Pause while playing or counting, Again at the end', () => {
+  assert.equal(playMode({ playing: false, counting: 0, t: 0, dur: 60 }), 'play');
+  assert.equal(playMode({ playing: true, counting: 0, t: 10, dur: 60 }), 'pause');
+  assert.equal(playMode({ playing: false, counting: 7, t: 0, dur: 60 }), 'pause');
+  assert.equal(playMode({ playing: false, counting: 0, t: 60, dur: 60 }), 'again');
+  assert.equal(playMode({ playing: false, counting: 0, t: 59.9, dur: 60 }), 'play');
+});
+
+test('start labels say the length: 60 s guides, 41 s and 61 s real takes', () => {
+  assert.equal(startLabel(guide, false), 'Start the guided motion · 60 s');
+  assert.equal(startLabel(chess, false), 'Start the guided motion · 60 s');
+  assert.equal(startLabel(realAG, true), 'Play the real recording · 41 s');
+  assert.equal(startLabel(realCB, true), 'Play the real recording · 61 s');
+});
+
+test('get-ready line: the start distance to the board plane, as in the setup line and the first cue', () => {
+  assert.equal(getReadyText(guide), 'Get in position: board 42 cm ahead, face-on');
+  assert.equal(getReadyText(chess), 'Get in position: board 46 cm ahead, face-on');
+  // the first cue of each guide says the same distance
+  for (const d of [guide, chess]) assert.ok(d.segs[0].short.includes(getReadyText(d).match(/\d+ cm/)[0]), d.segs[0].short);
+});
+
+test('hardest move: a move (never a rest) with the fastest peak; loop in the AprilGrid guide, in-out in the chessboard', () => {
+  assert.equal(hardestMove(guide).name, 'Loop + roll');
+  assert.equal(hardestMove(chess).name, 'Back-forth + roll');
+  for (const d of [guide, chess, realAG, realCB]) assert.ok(hardestMove(d).k);
+  assert.equal(hardestMove({ ...guide, segs: guide.segs.filter((g) => !g.k) }), null);
+});
+
+test('practise: jumps into the move at 0.5x, repeats it, stays inside it; exit restores speed and repeat', () => {
+  const g = guide.segs[2];
+  const st = { t: 33, speed: 1, repeat: null, hold: 0, last: 0, practice: null, saved: null };
+  assert.equal(enterPractice(st, guide.segs, guide.segs[0]), false);   // a rest: refused, nothing changed
+  assert.equal(enterPractice(st, guide.segs, chess.segs[2]), false);   // a move of another take: refused
+  assert.equal(enterPractice(st, guide.segs, null), false);
+  assert.deepEqual([st.t, st.speed, st.repeat, st.practice], [33, 1, null, null]);
+  assert.equal(enterPractice(st, guide.segs, g), true);
+  assert.equal(st.speed, PRACTICE_SPEED);
+  assert.equal(st.repeat, g);
+  assert.ok(st.t > g.t0 && st.t < g.t0 + 0.01);
+  assert.equal(practiceBadge(st), 'Practising: Up-down · 0.5× · repeating');
+  // 40 s of frames at 60 Hz: the clock never leaves the move
+  for (let now = 16.7; now < 40000; now += 16.7) {
+    advance(st, now, guide.dur);
+    assert.ok(st.t >= g.t0 && st.t <= g.t1, `t ${st.t}`);
+  }
+  // switching to another move keeps what was set before the first one
+  enterPractice(st, guide.segs, guide.segs[3]);
+  assert.equal(st.practice, guide.segs[3]);
+  assert.equal(exitPractice(st), true);
+  assert.deepEqual([st.speed, st.repeat, st.practice, practiceBadge(st)], [1, null, null, '']);
+  assert.equal(exitPractice(st), false);                                // not practising: nothing to undo
+  // a repeat and 0.25x set before practice come back after it
+  const st2 = { t: 5, speed: 0.25, repeat: guide.segs[1], hold: 0, practice: null };
+  enterPractice(st2, guide.segs, guide.segs[4]);
+  exitPractice(st2);
+  assert.deepEqual([st2.speed, st2.repeat], [0.25, guide.segs[1]]);
 });

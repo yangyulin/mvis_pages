@@ -299,6 +299,70 @@ export function advance(st, now, dur) {
   return false;
 }
 
+// ---------- start screen, practise mode, end screen (pure: also used by the tests) ----------
+// The overlay on the 3D view: 'start' before the first play (back after loading another example), 'none' while the
+// take plays or is scrubbed, 'end' once it played to its end. Events: 'play', 'seek', 'end', 'load'.
+export function screenStep(screen, ev) {
+  if (ev === 'load') return 'start';
+  if (ev === 'end') return screen === 'start' ? 'start' : 'end';
+  return 'none';   // play or seek leaves the start and end screens
+}
+// What the primary button offers: play, pause (also during the 3-2-1), or again at the end of the take.
+export const playMode = ({ playing, counting, t, dur }) => (playing || counting ? 'pause' : t >= dur - 1e-3 ? 'again' : 'play');
+export const PLAY_TEXT = { play: ['▶\uFE0E', 'Play'], pause: ['❚❚', 'Pause'], again: ['↺', 'Again'] };
+// The start screen's button: the guides are followed, the real examples watched; each says its length.
+export const startLabel = (d, real) => `${real ? 'Play the real recording' : 'Start the guided motion'} · ${Math.round(d.dur)} s`;
+// The 3-2-1 before the first move: where to stand, from the camera's distance to the board plane at the start.
+export function getReadyText(d) {
+  const p = d.s.p_C[0], c = d.raw.board.center;
+  return `Get in position: board ${Math.round(100 * Math.abs(p[2] - c[2]))} cm ahead, face-on`;
+}
+// The hardest move to practise: the one with the fastest peak, linear and angular speed each as a share of the take's
+// peak, added. Rests never count. null when the take has no moves.
+export function hardestMove(d) {
+  const { s, n, hz } = d;
+  const v = new Float64Array(n), w = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const a = s.p_C[Math.max(0, i - 1)], b = s.p_C[Math.min(n - 1, i + 1)];
+    v[i] = (Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) * hz) / (Math.min(n - 1, i + 1) - Math.max(0, i - 1) || 1);
+    w[i] = Math.hypot(...s.gyro[i]);
+  }
+  const V = Math.max(1e-9, ...v), Wp = Math.max(1e-9, ...w);
+  let best = null, score = -1;
+  for (const g of d.segs) {
+    if (!g.k) continue;
+    let pv = 0, pw = 0;
+    for (let i = Math.max(0, Math.round(g.t0 * hz)); i < Math.min(n, Math.round(g.t1 * hz) + 1); i++) { pv = Math.max(pv, v[i]); pw = Math.max(pw, w[i]); }
+    if (pv / V + pw / Wp > score + 1e-12) { score = pv / V + pw / Wp; best = g; }
+  }
+  return best;
+}
+export const PRACTICE_SPEED = 0.5;
+// Practise one move: jump to it, 0.5x, repeat it; what was set before is kept to restore. Only moves (not rests).
+// Returns false (nothing changed) for a rest or a move not in the take.
+export function enterPractice(st, segs, g) {
+  if (!g || !g.k || !segs.includes(g)) return false;
+  if (!st.practice) st.saved = { speed: st.speed, repeat: st.repeat };
+  st.practice = g;
+  st.repeat = g;
+  st.speed = PRACTICE_SPEED;
+  st.hold = 0;
+  st.t = g.t0 + 1e-3;
+  return true;
+}
+// Leave practice: the speed and repeat from before it, the clock where it is. False when not practising.
+export function exitPractice(st) {
+  if (!st.practice) return false;
+  const sv = st.saved || { speed: 1, repeat: null };
+  st.speed = sv.speed;
+  st.repeat = sv.repeat;
+  st.practice = null;
+  st.saved = null;
+  st.hold = 0;
+  return true;
+}
+export const practiceBadge = (st) => (st.practice ? `Practising: ${st.practice.name} · ${st.speed}× · ${st.repeat ? 'repeating' : 'once'}` : '');
+
 // The largest 4-connected group of cells (indices into a gx x gy grid) among `cells`.
 export function largestRegion(cells, gx, gy) {
   const left = new Set(cells);
@@ -329,14 +393,18 @@ export function mount(root) {
     readout: $('readout'), cards: $('cards'), tabs: $('tabs'), play: $('play'), prev: $('prev'), nextB: $('nextmove'),
     scrub: $('scrub'), time: $('time'), speeds: $('speeds'), repeat: $('repeat'), axes: $('axes'), img: $('img'), fs: $('fs'),
     camfs: $('camfs'), play2: $('play2'), segchips: $('segchips'), traces: $('traces'), status: $('status'), count: $('count'),
-    views: $('views'), table: $('table'), now: $('now'),
+    views: $('views'), table: $('table'), now: $('now'), countn: $('countn'), ready: $('ready'), start: $('start'),
+    startbtn: $('startbtn'), startlab: $('startlab'), end: $('end'), endcov: $('endcov'), endpct: $('endpct'), again: $('again'),
+    hard: $('hard'), pbadge: $('pbadge'), ptext: $('ptext'), pexit: $('pexit'),
   };
+  const real = root.dataset.mode === 'real';
   const base = root.dataset.base;
   const ids = MODES[root.dataset.mode] || MODES.main;
   const cache = new Map();
   const st = {
     d: null, vid: null, t: 0, playing: false, speed: 1, last: 0, view: 'op', az: 0.75, el: 0.32, zoom: 1,
     axes: false, img: true, sel: 0, repeat: null, hold: 0, want: null, counting: 0, theme: {}, dirtyImu: true, lastTitle: '',
+    screen: 'start', practice: null, saved: null,
   };
   const sp = Number(store.get('cm-speed'));
   if (SPEEDS.includes(sp)) st.speed = sp;
@@ -397,11 +465,17 @@ export function mount(root) {
     st.d = d;
     st.vid = id;
     st.t = 0;
+    if (st.saved) st.speed = st.saved.speed;
+    st.practice = null;
+    st.saved = null;
     st.repeat = null;
     st.hold = 0;
     st.sel = 0;
     st.zoom = 1;
     setPlaying(false);
+    setScreen('load');
+    syncSpeeds();
+    ui.startlab.textContent = startLabel(d, real);
     ui.scrub.max = String(d.dur);
     ui.status.textContent = '';
     const V = VARIANTS[id];
@@ -811,8 +885,10 @@ export function mount(root) {
     ui.bar.style.background = st.theme.seg[n.key];
     ui.bar.style.width = `${(100 * n.frac).toFixed(2)}%`;
     ui.left.textContent = `${n.left} s left`;
-    ui.cue.textContent = n.short;
-    ui.beat.textContent = n.beatText || ' ';
+    const ready = st.screen === 'start';
+    ui.now.classList.toggle('cm-ready', ready);
+    ui.cue.textContent = ready ? 'Press Play to start' : n.short;
+    ui.beat.textContent = ready ? (real ? '\u00a0' : `${getReadyText(d)}, then hold still.`) : n.beatText || '\u00a0';
     const soon = n.next && n.until <= 3;
     ui.next.classList.toggle('soon', !!soon);
     ui.next.textContent = n.next
@@ -821,8 +897,14 @@ export function mount(root) {
     const on = cards[st.sel] && cards[st.sel].now;
     ui.readout.textContent = on ? `${cards[st.sel].cam.name}: ${Math.round(on.dist)} cm from the board, ${Math.round(on.off)}° off its normal` : '';
     const g = d.segs[n.j];
-    ui.segchips.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-pressed', String(k === n.j)));
+    ui.segchips.querySelectorAll('.cm-jump').forEach((b, k) => b.setAttribute('aria-pressed', String(k === n.j)));
     if (st.repeat && st.repeat !== g && !st.hold) st.repeat = g;
+    // practise follows the move the clock is in (a chip, a step, the scrubber); on a rest it ends
+    if (st.practice && st.repeat !== st.practice) {
+      if (st.repeat && st.repeat.k) st.practice = st.repeat;
+      else { exitPractice(st); syncSpeeds(); ui.repeat.setAttribute('aria-pressed', String(!!st.repeat)); }
+    }
+    showPractice();
   }
 
   function segChips() {
@@ -830,9 +912,21 @@ export function mount(root) {
     st.d.segs.forEach((g) => {
       const b = document.createElement('button');
       b.type = 'button';
+      b.className = 'cm-jump';
       b.innerHTML = `<i class="cm-sw cm-s-${g.key}"></i>${g.k ? `${g.k} ${g.name}` : g.name} · ${segSecs(g)} s`;
-      b.addEventListener('click', () => goSeg(g));
-      ui.segchips.append(b);
+      b.addEventListener('click', () => { setScreen('seek'); goSeg(g); });
+      if (real || !g.k) { ui.segchips.append(b); return; }
+      const w = document.createElement('span');
+      w.className = 'cm-segchip';
+      const pb = document.createElement('button');
+      pb.type = 'button';
+      pb.className = 'cm-pbtn';
+      pb.textContent = 'Practise';
+      pb.setAttribute('aria-label', `Practise ${g.name}: 0.5× speed, repeating`);
+      pb.setAttribute('aria-pressed', 'false');
+      pb.addEventListener('click', () => practise(g));
+      w.append(b, pb);
+      ui.segchips.append(w);
     });
   }
   function scrubBands() {
@@ -901,6 +995,8 @@ export function mount(root) {
     drawTraces();
     ui.scrub.value = String(st.t);
     ui.time.textContent = `${st.t.toFixed(1)} / ${st.d.dur.toFixed(1)} s`;
+    const m = playMode({ playing: st.playing, counting: st.counting, t: st.t, dur: st.d.dur });
+    if (m !== st.lastMode) playLabel(m === 'pause');
   }
 
   // ---- transport ----
@@ -921,7 +1017,7 @@ export function mount(root) {
   }
   function tick(now) {
     if (!st.playing) return;
-    if (advance(st, now, st.d.dur)) { draw(); setPlaying(false); return; }
+    if (advance(st, now, st.d.dur)) { setPlaying(false); draw(); setScreen('end'); return; }
     draw();
     requestAnimationFrame(tick);
   }
@@ -932,8 +1028,70 @@ export function mount(root) {
     if (st.playing) { st.last = performance.now(); requestAnimationFrame(tick); }
   }
   function playLabel(on) {
-    for (const b of [ui.play, ui.play2]) if (b) { b.textContent = on ? 'Pause' : 'Play'; b.setAttribute('aria-label', on ? 'Pause' : 'Play'); }
+    const m = on ? 'pause' : playMode({ playing: false, counting: 0, t: st.t, dur: st.d ? st.d.dur : Infinity });
+    st.lastMode = m;
+    const [ic, lab] = PLAY_TEXT[m];
+    for (const b of [ui.play, ui.play2]) {
+      if (!b) continue;
+      b.querySelector('.cm-ic').textContent = ic;
+      b.querySelector('.cm-pl').textContent = lab;
+      b.setAttribute('aria-label', m === 'again' ? 'Play again from the start' : lab);
+    }
   }
+  // start / end screens over the 3D view
+  function setScreen(ev) {
+    const was = st.screen;
+    st.screen = screenStep(st.screen, ev);
+    ui.start.hidden = st.screen !== 'start';
+    ui.end.hidden = st.screen !== 'end';
+    if (st.screen === 'end' && was !== 'end') showEnd();
+  }
+  function showEnd() {
+    const card = cards[st.sel];
+    const c = ui.endcov, src = card && card.cov;
+    if (src && src.width > 1 && src.clientWidth) {
+      c.width = src.width; c.height = src.height;
+      c.style.aspectRatio = `${src.width} / ${src.height}`;
+      c.getContext('2d').drawImage(src, 0, 0);
+      c.hidden = false;
+    } else c.hidden = true;
+    const pct = card && card.now ? Math.round(card.now.pct) : null;
+    ui.endpct.textContent = pct == null ? '' : pct >= 100 ? `${card.cam.name}: every reachable part of the image seen (100 %).`
+      : `${card.cam.name}: ${pct} % of the image seen; the dashed cells were never reached.`;
+    if (ui.hard) {
+      const h = hardestMove(st.d);
+      ui.hard.hidden = !h;
+      if (h) ui.hard.textContent = `Practise the hardest move: ${h.name}`;
+    }
+    ui.again.focus({ preventScroll: true });
+  }
+  // practise mode (the guides only)
+  function syncSpeeds() { ui.speeds.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(Number(x.dataset.v) === st.speed))); }
+  function showPractice() {
+    if (!ui.pbadge) return;
+    ui.pbadge.hidden = !st.practice;
+    const txt = practiceBadge(st);
+    if (ui.ptext.textContent !== txt) ui.ptext.textContent = txt;
+    const jumps = [...ui.segchips.querySelectorAll('.cm-jump')];
+    ui.segchips.querySelectorAll('.cm-segchip').forEach((w) => {
+      const mine = !!st.practice && st.d.segs[jumps.indexOf(w.querySelector('.cm-jump'))] === st.practice;
+      w.querySelector('.cm-pbtn').setAttribute('aria-pressed', String(mine));
+    });
+  }
+  function practise(g) {
+    if (real || !st.d || !enterPractice(st, st.d.segs, g)) return;
+    if (st.playing || st.counting) setPlaying(false);
+    syncSpeeds();
+    ui.repeat.setAttribute('aria-pressed', 'true');
+    togglePlay();
+  }
+  function leavePractice() {
+    if (!exitPractice(st)) return;
+    syncSpeeds();
+    ui.repeat.setAttribute('aria-pressed', String(!!st.repeat));
+    draw();
+  }
+  if (ui.pexit) ui.pexit.addEventListener('click', leavePractice);
   // one player at a time: starting this one pauses the other; a player scrolled out of view pauses
   document.addEventListener('cm-play', (e) => { if (e.detail !== root && (st.playing || st.counting)) setPlaying(false); });
   new IntersectionObserver((es) => { if (!es[es.length - 1].isIntersecting && (st.playing || st.counting)) setPlaying(false); }).observe(root);
@@ -942,16 +1100,20 @@ export function mount(root) {
     if (st.playing || st.counting) return setPlaying(false);
     document.dispatchEvent(new CustomEvent('cm-play', { detail: root }));
     if (st.t >= st.d.dur - 1e-3) st.t = 0;
+    setScreen('play');
+    draw();
     const g = segAt(st.d.segs, st.t);
     if (st.t - g.t0 > 0.2) return setPlaying(true);
-    // lead-in: 3-2-1 in real seconds before a move starts
+    // lead-in: 3-2-1 in real seconds before a move starts; at the take's start, where to stand
     let n = 3;
     ui.count.hidden = false;
-    ui.count.textContent = String(n);
+    ui.countn.textContent = String(n);
+    ui.ready.textContent = st.d.segs.indexOf(g) === 0 && !real ? getReadyText(st.d)
+      : st.practice ? `Practise: ${g.name}` : g.k ? `Get ready: ${g.name}` : '';
     playLabel(true);
     st.counting = setInterval(() => {
       n -= 1;
-      if (n > 0) { ui.count.textContent = String(n); return; }
+      if (n > 0) { ui.countn.textContent = String(n); return; }
       clearInterval(st.counting);
       st.counting = 0;
       ui.count.hidden = true;
@@ -959,24 +1121,31 @@ export function mount(root) {
     }, 1000);
   }
   ui.play.addEventListener('click', togglePlay);
+  ui.start.addEventListener('click', () => { if (!st.playing && !st.counting) togglePlay(); });
+  ui.again.addEventListener('click', () => { st.t = 0; togglePlay(); });
+  if (ui.hard) ui.hard.addEventListener('click', () => practise(hardestMove(st.d)));
   if (ui.play2) ui.play2.addEventListener('click', togglePlay);
-  ui.prev.addEventListener('click', () => step(-1));
-  ui.nextB.addEventListener('click', () => step(1));
-  ui.scrub.addEventListener('input', () => seek(Number(ui.scrub.value)));
+  ui.prev.addEventListener('click', () => { setScreen('seek'); step(-1); });
+  ui.nextB.addEventListener('click', () => { setScreen('seek'); step(1); });
+  ui.scrub.addEventListener('input', () => { setScreen('seek'); seek(Number(ui.scrub.value)); });
   SPEEDS.forEach((v) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = `${v}×`;
+    b.dataset.v = String(v);
     b.setAttribute('aria-pressed', String(v === st.speed));
     b.addEventListener('click', () => {
       st.speed = v;
-      store.set('cm-speed', String(v));
-      ui.speeds.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      if (st.practice) st.saved.speed = v;   // also the speed after practice
+      else store.set('cm-speed', String(v));
+      syncSpeeds();
+      showPractice();
     });
     ui.speeds.append(b);
   });
   function toggleRepeat() {
     if (!st.d) return;
+    if (st.practice) return leavePractice();   // repeat off ends practice
     st.repeat = st.repeat ? null : segAt(st.d.segs, st.t);
     st.hold = 0;
     ui.repeat.setAttribute('aria-pressed', String(!!st.repeat));
@@ -1066,6 +1235,7 @@ export function mount(root) {
     else if (k === 'r' || k === 'R') toggleRepeat();
     else if (k === 'f' || k === 'F') setFs(!root.classList.contains('cm-fs'));
     else if (k === 'Escape' && root.classList.contains('cm-fs')) setFs(false);
+    else if (k === 'Escape' && st.practice) leavePractice();
     else return;
     e.preventDefault();
     e.stopPropagation();
