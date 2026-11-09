@@ -1,0 +1,20 @@
+{
+ "/examples/": "/benchmark/examples/",
+ "/examples/tum-vi/": "/benchmark/examples/tum-vi/",
+ "/examples/monado/": "/benchmark/examples/monado/",
+ "/examples/looper-sa16/": "/benchmark/examples/looper-sa16/",
+ "/examples/uzh-fpv/": "/benchmark/examples/uzh-fpv/",
+ "/benchmark/leaderboard/": "/benchmark/results/",
+ "/benchmark/sensors/": "/sensors/",
+ "/benchmark/sensors/alg-avs111c/": "/sensors/alg-avs111c/",
+ "/benchmark/sensors/dibuli-prism-a4l/": "/sensors/dibuli-prism-a4l/",
+ "/benchmark/sensors/gi-ego1/": "/sensors/gi-ego1/",
+ "/benchmark/sensors/gi-ego1gs/": "/sensors/gi-ego1gs/",
+ "/benchmark/sensors/hampo/": "/sensors/hampo/",
+ "/benchmark/sensors/hp-reverb-g2/": "/sensors/hp-reverb-g2/",
+ "/benchmark/sensors/intel-t265/": "/sensors/intel-t265/",
+ "/benchmark/sensors/looper-insight9/": "/sensors/looper-insight9/",
+ "/benchmark/sensors/samsung-odyssey-plus/": "/sensors/samsung-odyssey-plus/",
+ "/benchmark/sensors/valve-index/": "/sensors/valve-index/",
+ "/benchmark/sensors/xq20/": "/sensors/xq20/"
+}

@@ -1,0 +1,65 @@
+---
+title: UZH-FPV
+description: MVIS, Kalibr and Basalt on the 8 UZH-FPV calibration bags, with IMU weights taken from the residuals in UZH's own Kalibr results.
+pageType: example
+wide: true
+tableOfContents: false
+---
+
+import UzhFpvResults from '../../../../components/UzhFpvResults.astro';
+
+The [UZH-FPV Drone Racing dataset](https://fpv.ifi.uzh.ch/datasets/) ships camera-IMU calibration bags for two
+devices, recorded indoors and outdoors with the camera at 45° and facing forward. We ran
+MVIS, [Kalibr](https://github.com/ethz-asl/kalibr) and [Basalt](https://gitlab.com/VladyslavUsenko/basalt) on all
+8 bags and show them in the same table as the [leaderboard](/benchmark/results/). This is a one-off study, not
+part of the leaderboard or the regression suite.
+
+**There is no ground truth.** Differences show where tools disagree, not who is right. The MVIS authors made every
+run, including Kalibr and Basalt.
+
+## IMU weights
+
+**All three tools use IMU sigmas taken from the residuals in UZH's own Kalibr results, not the MVIS defaults.** UZH
+publishes no measured IMU noise, and the sigmas in its `imu.yaml` are the same on all 8 bags (gyro 0.05, accel 0.1).
+For each bag we take the RMS of Kalibr's 3-axis residual norm and divide by √(3 × IMU rate). That gives gyro
+3.0–8.5e-4 rad/s/√Hz and accel 1.1–5.2e-3 m/s²/√Hz, against the MVIS defaults of 1e-2 and 2e-2. Bias sigmas keep the
+MVIS default ratio of 0.1. These are estimates, not measured noise.
+
+The choice matters most on the Davis. On its forward bags, the difference between the indoor and outdoor MVIS rotation
+is 4.1 mrad with these weights and 38.9 mrad with the defaults. Snapdragon moves less, and its forward bags get
+slightly worse, from 2.2 to 4.2 mrad.
+
+## The rig
+
+| Device | Cameras | IMU | Bags |
+|---|---|---|---|
+| mDAVIS346 | 1 global-shutter, 346×260, equidistant | integrated, about 1000 Hz | 4 |
+| Snapdragon Flight | 2 global-shutter, 640×480, equidistant | about 500 Hz | 4 |
+
+Board: AprilGrid 5×4, `tag_size` 0.075 m, `tag_spacing` 0.2, family `t36h11`.
+
+Data and UZH's own Kalibr results: [UZH-FPV datasets page](https://fpv.ifi.uzh.ch/datasets/). Cite Delmerico et al.,
+"Are We Ready for Autonomous Drone Racing? The UZH-FPV Drone Racing Dataset", ICRA 2019. License: CC BY-NC-SA 3.0.
+
+## Results
+
+<UzhFpvResults />
+
+## Reading these results
+
+- **One Basalt solve is left out.** On `davis_indoor_forward` with these weights, Basalt gives a 120 mm lever and an accel
+  scale of 0.84, so its Davis column has 3 of 4 bags. At Basalt's default noise that bag is plausible, but
+  `snapdragon_indoor_45` then fails with a broken spline.
+- **Basalt's Davis distance stands out.** Its camera-to-IMU distance is 33.6 mm, against 23.2 mm from Kalibr and 22.8 mm
+  from MVIS on the same 3 bags. We haven't established why. At default noise Basalt's lever z is 14–25 mm.
+- **Each device's 4 bags form one family**, because the camera and IMU are on the same device. That assumes the
+  camera-IMU geometry stayed the same across recordings, which we can't confirm.
+- **Snapdragon's time offset really does differ between bags**, with an sd near 4.7 ms in every tool, so a small difference
+  between tools on that row says little about each bag.
+- **Rotations aren't in this table**, the same as on the leaderboard, because the IMU models define the IMU frame differently.
+
+## Results files
+
+The calibration numbers and configs for all three tools, including the Basalt default-noise run, are on the Hub at
+[`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/uzh-fpv/results/2026-11-04).
+The repository is gated, and access is granted once you accept its terms.

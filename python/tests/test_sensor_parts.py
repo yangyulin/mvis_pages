@@ -55,7 +55,7 @@ def test_hosted_row_says_access_is_automatic_not_on_request():
 
 
 def test_example_row_links_the_example_and_is_empty_without_one():
-    assert '<a href="/examples/monado/">Monado</a>' in S.example_row({"example": {"url": "/examples/monado/", "label": "Monado"}})
+    assert '<a href="/benchmark/examples/monado/">Monado</a>' in S.example_row({"example": {"url": "/benchmark/examples/monado/", "label": "Monado"}})
     assert S.example_row({}) == ""
 
 

@@ -18,6 +18,10 @@ def world(tmp_path):
     return dict(root=tmp_path / "priv", cfg_path=cfg_path, pub=pub, cfg=cfg, site=tmp_path / "site")
 
 
+def test_pages_are_written_to_the_sensor_wiki_folder():
+    assert X.DOCS == "site/src/content/docs/sensors"
+
+
 def test_sha256(tmp_path):
     p = tmp_path / "x"
     p.write_bytes(b"abc")
@@ -63,8 +67,8 @@ def test_render_plans_every_file_and_leaves_pub_alone(world):
     assert set(plan.texts) == {
         "site/public/media/sensors/rig-photo/process0.json", "site/public/media/sensors/rig-photo/process1.json",
         "site/public/media/sensors/rig-groups/process0.json", "site/public/media/sensors/rig-old/process0.json",
-        *(f"site/src/data/sensors/{s}.json" for s in plan.slugs), *(f"site/src/content/docs/benchmark/sensors/{s}.mdx" for s in plan.slugs),
-        "site/src/data/sensor-nav.json", "site/src/content/docs/benchmark/sensors/index.mdx", "site/src/data/sensors/sensor.css",
+        *(f"site/src/data/sensors/{s}.json" for s in plan.slugs), *(f"site/src/content/docs/sensors/{s}.mdx" for s in plan.slugs),
+        "site/src/data/sensor-nav.json", "site/src/content/docs/sensors/index.mdx", "site/src/data/sensors/sensor.css",
         "site/src/scripts/sensor-page.js"}
     copies = {rel: src.name for src, rel in plan.copies}
     assert copies == {"site/public/media/sensors/rig-photo/rig.jpg": "rig.jpg",
@@ -84,7 +88,7 @@ def test_render_page_content(world):
     assert "header" in j["parts"] and "specifications" in j["parts"] and "rig" in j["parts"] and "detail" in j["parts"]
     assert "sha256 of the recording: <code>" + X.sha256(world["root"] / "rec.bin") + "</code>" in j["parts"]["run"]
     assert "↗︎" in plan.texts["site/src/data/sensors/rig-photo.json"]  # the text-style arrow, in the data file only
-    assert "︎" not in plan.texts["site/src/content/docs/benchmark/sensors/rig-photo.mdx"]
+    assert "︎" not in plan.texts["site/src/content/docs/sensors/rig-photo.mdx"]
     assert j["procs"] == ["/media/sensors/rig-photo/process0.json", "/media/sensors/rig-photo/process1.json"]
     proc = json.loads(plan.texts["site/public/media/sensors/rig-photo/process0.json"])
     assert set(proc) == {"data", "layout", "spec"} and ", " not in plan.texts["site/public/media/sensors/rig-photo/process0.json"][:200]

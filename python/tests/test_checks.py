@@ -10,11 +10,99 @@ def test_routes_from_the_mdx_tree(tmp_path):
     assert C.routes(tmp_path) == {"/", "/a/", "/a/b/"}
 
 
-def test_sidebar_problems():
-    good = {"sections": C.SECTIONS, "children": {"Examples & benchmark": C.COMBINED}}
-    assert C.sidebar_problems(good) == []
-    bad = {"sections": ["X"], "children": {}}
-    assert C.sidebar_problems(bad) == ["sections are ['X']", "combined section holds None"]
+NAV = [{"label": "T265", "link": "/sensors/t265/", "group": "Tracking"}, {"label": "Ego", "link": "/sensors/ego/", "group": "Head-worn"},
+       {"label": "Ego GS", "link": "/sensors/ego-gs/", "group": "Head-worn"}]
+
+
+def _sidebar(**kw):
+    s = {"sections": C.SECTIONS, "children": {"Benchmark": C.BENCHMARK, "Sensor wiki": ["Overview", "Tracking", "Head-worn"]},
+         "groups": {"Sensor wiki": {"Tracking": ["T265"], "Head-worn": ["Ego", "Ego GS"]}}}
+    s.update(kw)
+    return s
+
+
+def test_sidebar_has_benchmark_then_sensor_wiki():
+    assert C.SECTIONS.index("Sensor wiki") == C.SECTIONS.index("Benchmark") + 1
+    assert C.BENCHMARK == ["Examples", "Results", "Methodology"]
+    assert C.sidebar_problems(_sidebar(), NAV) == []
+
+
+def test_sidebar_problems_name_what_is_wrong():
+    assert C.sidebar_problems({"sections": ["X"], "children": {}, "groups": {}}, NAV) == [
+        "sections are ['X']", "Benchmark holds None", "Sensor wiki holds None, want ['Overview', 'Tracking', 'Head-worn']",
+        "Sensor wiki › Tracking holds None, want ['T265']", "Sensor wiki › Head-worn holds None, want ['Ego', 'Ego GS']"]
+
+
+def test_a_sensor_under_benchmark_fails():
+    s = _sidebar(children={"Benchmark": [*C.BENCHMARK, "Sensors"], "Sensor wiki": ["Overview", "Tracking", "Head-worn"]})
+    assert C.sidebar_problems(s, NAV) == ["Benchmark holds ['Examples', 'Results', 'Methodology', 'Sensors']"]
+
+
+def test_a_sensor_missing_or_twice_in_the_groups_fails():
+    missing = _sidebar(groups={"Sensor wiki": {"Tracking": ["T265"], "Head-worn": ["Ego"]}})
+    assert C.sidebar_problems(missing, NAV) == ["Sensor wiki › Head-worn holds ['Ego'], want ['Ego', 'Ego GS']"]
+    twice = _sidebar(groups={"Sensor wiki": {"Tracking": ["T265", "Ego"], "Head-worn": ["Ego", "Ego GS"]}})
+    assert C.sidebar_problems(twice, NAV) == ["Sensor wiki › Tracking holds ['T265', 'Ego'], want ['T265']"]
+
+
+def test_deep_pages_use_the_new_addresses():
+    assert "/sensors/intel-t265/" in C.DEEP_PAGES and "/benchmark/examples/monado/" in C.DEEP_PAGES
+    assert not [p for p in C.DEEP_PAGES if p.startswith(("/benchmark/sensors/", "/examples/"))]
+
+
+def _redirect(to):  # Astro's static redirect page
+    return (f'<!doctype html><title>Redirecting to: {to}</title><meta http-equiv="refresh" content="0;url={to}">'
+            f'<meta name="robots" content="noindex"><link rel="canonical" href="https://openmvis.com{to}"><body><a href="{to}">x</a></body>')
+
+
+def _docs(tmp_path, pages):
+    for route, html in pages.items():
+        f = tmp_path / route.strip("/") / "index.html"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(html)
+    return tmp_path
+
+
+PAGE = '<html><body><a href="/new/">self</a><a href="/media/x.jpg">m</a><a href="https://x.org/">ext</a><a href="/new/#top">h</a></body></html>'
+
+
+def test_check_moves_passes_a_clean_move(tmp_path):
+    docs = _docs(tmp_path, {"/old/": _redirect("/new/"), "/new/": PAGE})
+    (tmp_path / "media").mkdir()
+    (tmp_path / "media/x.jpg").write_text("j")
+    assert C.check_moves(docs, {"/old/": "/new/"}) == []
+
+
+def test_check_moves_flags_wrong_target_missing_redirect_and_a_page_left_behind(tmp_path):
+    docs = _docs(tmp_path, {"/old/": _redirect("/other/"), "/other/": "<p>o</p>", "/new/": "<p>n</p>", "/kept/": "<p>still a page</p>",
+                            "/new2/": "<p>n2</p>"})
+    assert C.check_moves(docs, {"/old/": "/new/", "/gone/": "/new2/", "/kept/": "/new/"}) == [
+        "/old/: redirects to /other/, want /new/", "/gone/: no page at the old address", "/kept/: still a real page, want a redirect to /new/"]
+
+
+def test_check_moves_flags_a_new_address_that_is_missing_or_a_redirect(tmp_path):
+    docs = _docs(tmp_path, {"/a/": _redirect("/b/"), "/b/": _redirect("/c/"), "/c/": "<p>c</p>", "/d/": _redirect("/e/")})
+    assert C.check_moves(docs, {"/a/": "/b/", "/d/": "/e/"}) == [
+        "/b/: new address is a redirect, not a page", "/e/: new address has no page", "/a/: redirects to /b/, which redirects again",
+        "/d/: redirects to /e/, which has no page"]
+
+
+def test_check_moves_flags_two_hop_chains_outside_the_moves(tmp_path):
+    docs = _docs(tmp_path, {"/x/": _redirect("/y/"), "/y/": _redirect("/z/"), "/z/": "<p>z</p>"})
+    assert C.check_moves(docs, {}) == ["/x/: redirects to /y/, which redirects again"]
+
+
+def test_check_moves_flags_broken_internal_links(tmp_path):
+    docs = _docs(tmp_path, {"/p/": '<a href="/missing/">a</a><a href="/p/">b</a><a href="/f.css">c</a><a href="/q">d</a><a href="#x">e</a>', "/q/": "<p>q</p>"})
+    assert C.check_moves(docs, {}) == ["/p/: broken link /missing/", "/p/: broken link /f.css"]
+
+
+def test_hash_keeping_redirect_page_counts_as_a_redirect(tmp_path):
+    keep = ('<head><meta name="robots" content="noindex"><link rel="canonical" href="https://openmvis.com/new/">'
+            "<script>location.replace('/new/' + location.search + location.hash)</script></head>")
+    docs = _docs(tmp_path, {"/old/": keep, "/new/": "<p>n</p>"})
+    assert C.redirect_target((docs / "old/index.html").read_text()) == "/new/"
+    assert C.check_moves(docs, {"/old/": "/new/"}) == []
 
 
 def test_links_and_unlisted_routes():
@@ -156,3 +244,9 @@ def test_label_problems():
     assert C.label_problems(1440, bad) == ["A", "chips need scrolling (40 px hidden)", "clipped readout: IMU"]
     assert C.label_problems(390, bad) == ["A", "clipped readout: IMU"]
     assert C.label_problems(390, []) == []
+
+
+def test_a_real_page_that_calls_location_replace_is_not_a_redirect():
+    page = "<main><button onclick=\"location.replace('/x/')\">go</button></main>"
+    assert C.redirect_target(page) is None
+
