@@ -260,9 +260,7 @@ def cams_sidecar(views, anim):
     mean = [sum(p[i] for p in Pr) / N for i in range(3)]
     if sum(bn[i] * (mean[i] - B["center"][i]) for i in range(3)) < 0:
         bn = [-x for x in bn]
-    step = list(range(N))   # every frame of the views file
-    n = len(step)
-    gaps = sorted(T[k + 1] - T[k] for k in step[:-1]) or [0.0]
+    gaps = sorted(b - a for a, b in zip(T[:-1], T[1:])) or [0.0]   # every frame of the views file
     hz = round(1 / gaps[len(gaps) // 2], 3) if gaps[len(gaps) // 2] > 0 else 0.0
     c0 = S["cams"][0]
     R0, p0 = R9(c0["R"]), c0["p"]
@@ -282,13 +280,13 @@ def cams_sidecar(views, anim):
             for q in range(uvo[k], uvo[k + 1], 2):
                 cell = min(ny - 1, max(0, uv[q + 1] // 100)) * nx + min(nx - 1, max(0, uv[q] // 100))
                 if first[cell] is None:
-                    first[cell] = round(T[k], 1)
+                    first[cell] = round(T[k], 3)
         # cam k in cam0 axes: T_C0_Ck = T_B_C0^-1 T_B_Ck (B = the views rig body)
         Rk = mm([list(r) for r in zip(*R0)], Rc)
         tk = mtv(R0, [pc[i] - p0[i] for i in range(3)])
         Tk = [[round(Rk[i][j], 6) for j in range(3)] + [round(tk[i], 5)] for i in range(3)] + [[0, 0, 0, 1]]
         uvs, outl, nsf, dist, off = [], [], [], [], []
-        for k in step:
+        for k in range(N):
             seg = uv[uvo[k]:uvo[k + 1]]
             m = 2 * len(c["ids"][k]) if c.get("ids") else len(seg)
             f = list(seg[len(seg) - m:]) if m <= len(seg) else list(seg)   # m = 0: nothing detected then
@@ -304,8 +302,8 @@ def cams_sidecar(views, anim):
         out.append(dict(name=c["name"], color=c["color"], size=[W, H], k=[round(x, 3) for x in c["k"]], T_C0_Ck=Tk,
                         grid=[nx, ny], reach=reach, cov100_first=first, uv=uvs, outline=outl, n_so_far=nsf,
                         dist_cm=dist, off_deg=off))
-    return {"schema": "calib-motion/cams v2", "variant": anim["variant"], "hz": hz, "n": n,
-            "t": [round(T[k], 3) for k in step], "licence": "CC BY-NC 4.0", "cams": out}
+    return {"schema": "calib-motion/cams v2", "variant": anim["variant"], "hz": hz, "n": N,
+            "t": [round(x, 3) for x in T], "licence": "CC BY-NC 4.0", "cams": out}
 
 
 def cov_pct(cam):

@@ -189,6 +189,25 @@ test('sidecar: delta-coded corners decode to the exporter pairs and land inside 
   }
 });
 
+test('sidecar: the frame period comes from the sidecar hz (one rule, the exporter one), not a second median', () => {
+  const cam = { uv: [[], [], []], reach: [1], T_C0_Ck: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]] };
+  const [c] = prepCams({ hz: 20, t: [0, 0.1, 0.2], cams: [cam] });
+  assert.equal(c.period, 0.05);
+});
+
+test('sidecar: an old v1 file (no t, cached across a deploy) gets frame times from its hz, so cards still move', () => {
+  const cam = { uv: [[], [], []], reach: [1], T_C0_Ck: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]] };
+  const [c] = prepCams({ hz: 10, cams: [cam] });
+  assert.deepEqual(c.t, [0, 0.1, 0.2]);
+  assert.equal(bracket(c.t, 0.15).k0, 1);
+});
+
+test('coverage: a cell first seen at 0.15 s does not count at 0.11 s (no 0.05 s lead from the old 10 Hz slack)', () => {
+  const c = { cov100_first: [0.15], reach: [1], nReach: 1 };
+  assert.equal(camCoverage(c, 0.11), 0);
+  assert.equal(camCoverage(c, 0.15), 100);
+});
+
 const REAL = [['real_takes', 'aprilgrid_06'], ['real_chess', 'chessboard_1107_01']];
 const realCams = Object.fromEntries(REAL.map(([dir, id]) => [id, prepCams(read(`${DATA}${dir}/${id}.cams.json`))]));
 const realDur = Object.fromEntries(REAL.map(([dir, id]) => [id, read(`${DATA}${dir}/index.json`).variants.find((v) => v.id === id).duration_s]));

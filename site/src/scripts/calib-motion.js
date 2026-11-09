@@ -249,10 +249,10 @@ function guideSoFar(d) {
 }
 
 // Real-example cards: decode the sidecar (delta-coded corners) once. Every camera gets the frame times t (s) and the
-// frame period (the median gap between frames).
+// frame period (1 / the exporter's hz). An old v1 sidecar (no t, still cached just after a deploy): t from its hz.
 export function prepCams(side) {
-  const t = side.t || [], gaps = t.slice(1).map((x, k) => x - t[k]).sort((a, b) => a - b);
-  const period = gaps.length ? gaps[gaps.length >> 1] : 0.1;
+  const period = side.hz ? 1 / side.hz : 0.1;
+  const t = side.t || side.cams[0].uv.map((_, k) => +(k * period).toFixed(3));
   return side.cams.map((c) => {
     const uv = c.uv.map((f) => {
       const a = new Int16Array(f.length);
@@ -302,7 +302,7 @@ export const cardNote = ({ n, pct, soFar }) =>
 // index's cov_cam0 for cam0.
 export function camCoverage(c, t) {
   let got = 0;
-  c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= t + 0.05 && c.reach[n]) got++; });
+  c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= t + 1e-6 && c.reach[n]) got++; });
   return (100 * got) / Math.max(1, c.nReach);
 }
 
@@ -688,7 +688,7 @@ export function mount(root) {
       }
       const [gx, gy] = d.cams ? d.cams[ci].grid : d.raw.coverage.metric_grid;
       const reach = d.cams ? d.cams[ci].reach : d.reach;
-      const seen = (n) => (d.cams ? d.cams[ci].cov100_first[n] != null && d.cams[ci].cov100_first[n] <= st.t + 0.05 : d.first100[n] <= st.t);
+      const seen = (n) => (d.cams ? d.cams[ci].cov100_first[n] != null && d.cams[ci].cov100_first[n] <= st.t + 1e-6 : d.first100[n] <= st.t);
       const empty = [];
       for (let n = 0; n < gx * gy; n++) if (reach[n] && !seen(n)) empty.push(n);
       // "fill next" (selected card only)

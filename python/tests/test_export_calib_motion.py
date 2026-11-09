@@ -91,6 +91,14 @@ def test_sidecar_keeps_every_views_frame_with_its_time_and_outline():
     assert c["uv"][0] == [] and c["n_so_far"] == [0, 3, 4, 6]
 
 
+def test_sidecar_cell_first_times_keep_the_frame_time_not_a_10hz_step():
+    """cov100_first holds the frame time to 1 ms (a cell first seen at 0.15 s must not count from 0.1 s)."""
+    v = views()
+    v["scene"]["t"] = [0.0, 0.15, 0.2, 0.3]
+    c = X.cams_sidecar(v, ANIM)["cams"][0]
+    assert 0.15 in c["cov100_first"]
+
+
 def test_sidecar_budget_fits_a_600_frame_three_camera_take():
     """The budget (1.5 MB raw, 450 kB gzip) holds the real AprilGrid take at full rate (1.36 MB, 426 kB)."""
     assert (X.CAMS_RAW_MAX, X.CAMS_GZ_MAX) == (1_500_000, 450_000)
