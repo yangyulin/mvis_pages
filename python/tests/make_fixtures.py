@@ -258,7 +258,7 @@ def pub_entry(kind="photo"):
         p["source"] = "https://example.com/old"
         p["company"] = {"name": "Old Co", "url": "https://example.com/co"}
         p["data_link"] = {"url": "https://example.com/data", "label": "Elsewhere"}
-        p["example"] = {"url": "/examples/x/", "label": "Example"}
+        p["example"] = {"url": "/benchmark/examples/x/", "label": "Example"}
         del p["folder"]
         p["group"] = "g2"
     return p

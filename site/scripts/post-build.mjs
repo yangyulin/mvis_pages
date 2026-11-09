@@ -15,8 +15,13 @@
 // (`build_type: "workflow"`), which skips Jekyll. That needs a repo-settings
 // change; delete this script when it happens.
 
+import { readFile } from 'node:fs/promises';
+import { writeMovedPages } from './moved-pages.mjs';
 import { postBuild } from './rename-assets.mjs';
 
-const { lines, code } = await postBuild(new URL('../../docs/', import.meta.url).pathname);
+const out = new URL('../../docs/', import.meta.url).pathname;
+const { lines, code } = await postBuild(out);
 for (const l of lines) (l.err ? console.error : console.log)(l.text);
 if (code) process.exit(code);
+const moved = JSON.parse(await readFile(new URL('../src/data/moved.json', import.meta.url), 'utf8'));
+console.log(`post-build: ${await writeMovedPages(out, moved)} moved-page redirects (keep #fragment)`);

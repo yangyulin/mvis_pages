@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
+from urllib.parse import unquote
 
 # --- sidebar (nav_check) ---------------------------------------------------------------------------------------
-SECTIONS = ["Getting started", "Guides", "Examples & benchmark", "Concepts", "Reference", "Contribute", "About"]
-COMBINED = ["Examples", "Sensors", "Results", "Methodology"]
-DEEP_PAGES = ["/benchmark/sensors/intel-t265/", "/examples/monado/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
+SECTIONS = ["Getting started", "Guides", "Benchmark", "Sensor wiki", "Concepts", "Reference", "Contribute", "About"]
+BENCHMARK = ["Examples", "Results", "Methodology"]
+DEEP_PAGES = ["/sensors/intel-t265/", "/benchmark/examples/monado/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
 NOT_IN_SIDEBAR = {"/"}
 
 
@@ -21,13 +23,78 @@ def routes(docs: Path) -> set[str]:
     return out
 
 
-def sidebar_problems(s: dict) -> list[str]:
-    """Top-level sections and the combined section, from a measured sidebar {sections, children, links}."""
+def sidebar_problems(s: dict, nav: list[dict]) -> list[str]:
+    """Top-level sections, Benchmark, and the Sensor wiki: Overview, then one subgroup per sensor-nav.json group in its
+    order, each holding its sensors once. s is a measured sidebar {sections, children, groups, links}."""
     out = []
     if s["sections"] != SECTIONS:
         out.append(f"sections are {s['sections']}")
-    if s["children"].get("Examples & benchmark") != COMBINED:
-        out.append(f"combined section holds {s['children'].get('Examples & benchmark')}")
+    if s["children"].get("Benchmark") != BENCHMARK:
+        out.append(f"Benchmark holds {s['children'].get('Benchmark')}")
+    by_group = {}
+    for n in nav:
+        by_group.setdefault(n["group"], []).append(n["label"])
+    want = ["Overview", *by_group]
+    if s["children"].get("Sensor wiki") != want:
+        out.append(f"Sensor wiki holds {s['children'].get('Sensor wiki')}, want {want}")
+    got = s["groups"].get("Sensor wiki", {})
+    out += [f"Sensor wiki › {g} holds {got.get(g)}, want {labels}" for g, labels in by_group.items() if got.get(g) != labels]
+    return out
+
+
+# --- moved pages and internal links (check_moves, on the built docs/) ---------------------------------------------
+_REFRESH = re.compile(r'http-equiv="refresh"\s+content="0;\s*url=([^"]+)"')
+_REPLACE = re.compile(r"location\.replace\('([^']+)'")
+_HREF = re.compile(r'href="(/(?!/)[^"]*)"')
+
+
+def redirect_target(html: str) -> str | None:
+    """Where a redirect page sends the reader (Astro's meta refresh, or a hash-keeping script page); None for a real page."""
+    m = _REPLACE.search(html) or _REFRESH.search(html)
+    return m.group(1) if m else None
+
+
+def _route(docs: Path, f: Path) -> str:
+    rel = f.relative_to(docs).as_posix()
+    return "/" + rel.removesuffix("index.html") if rel.endswith("index.html") else "/" + rel
+
+
+def _resolves(docs: Path, link: str) -> bool:
+    path = unquote(link.split("#")[0].split("?")[0]).lstrip("/")
+    if not path or path.endswith("/"):
+        return (docs / path / "index.html").is_file()
+    return (docs / path).is_file() or (docs / path / "index.html").is_file()
+
+
+def check_moves(docs: Path, moved: dict[str, str]) -> list[str]:
+    """On a built site: each moved old address is a redirect page straight to its new one, each new address a real page;
+    no redirect anywhere points at a redirect or at nothing; every internal link on a real page resolves."""
+    docs = Path(docs)
+    pages = {_route(docs, f): f.read_text(encoding="utf-8", errors="replace") for f in sorted(docs.rglob("*.html"))}
+    target = {r: redirect_target(h) for r, h in pages.items()}
+    out = []
+    for old, new in moved.items():
+        if old not in pages:
+            out.append(f"{old}: no page at the old address")
+        elif target[old] is None:
+            out.append(f"{old}: still a real page, want a redirect to {new}")
+        elif target[old] != new:
+            out.append(f"{old}: redirects to {target[old]}, want {new}")
+        if new not in pages:
+            out.append(f"{new}: new address has no page")
+        elif target[new] is not None:
+            out.append(f"{new}: new address is a redirect, not a page")
+    for r, to in target.items():
+        if to is None:
+            continue
+        dest = to if to.endswith("/") else to + "/"
+        if dest not in pages:
+            out.append(f"{r}: redirects to {to}, which has no page")
+        elif target[dest] is not None:
+            out.append(f"{r}: redirects to {to}, which redirects again")
+    for r, h in pages.items():
+        if target[r] is None:
+            out += [f"{r}: broken link {link}" for link in dict.fromkeys(_HREF.findall(h)) if not _resolves(docs, link)]
     return out
 
 

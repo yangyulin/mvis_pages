@@ -1,17 +1,17 @@
 [
  {
   "label": "Rig photo",
-  "link": "/benchmark/sensors/rig-photo/",
+  "link": "/sensors/rig-photo/",
   "group": "Group One"
  },
  {
   "label": "Rig groups",
-  "link": "/benchmark/sensors/rig-groups/",
+  "link": "/sensors/rig-groups/",
   "group": "Group One"
  },
  {
   "label": "Rig old",
-  "link": "/benchmark/sensors/rig-old/",
+  "link": "/sensors/rig-old/",
   "group": "Group Two"
  }
 ]

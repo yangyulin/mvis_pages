@@ -1,57 +1,57 @@
 [
  {
   "label": "Intel RealSense T265",
-  "link": "/benchmark/sensors/intel-t265/",
+  "link": "/sensors/intel-t265/",
   "group": "Tracking cameras and modules"
  },
  {
   "label": "LooperRobotics Insight 9",
-  "link": "/benchmark/sensors/looper-insight9/",
+  "link": "/sensors/looper-insight9/",
   "group": "Tracking cameras and modules"
  },
  {
   "label": "Dibuli Prism-A4L",
-  "link": "/benchmark/sensors/dibuli-prism-a4l/",
+  "link": "/sensors/dibuli-prism-a4l/",
   "group": "Tracking cameras and modules"
  },
  {
   "label": "ALG AVS111C-Y stereo module",
-  "link": "/benchmark/sensors/alg-avs111c/",
+  "link": "/sensors/alg-avs111c/",
   "group": "Tracking cameras and modules"
  },
  {
   "label": "Hampo stereo module",
-  "link": "/benchmark/sensors/hampo/",
+  "link": "/sensors/hampo/",
   "group": "Tracking cameras and modules"
  },
  {
   "label": "GI Ego1",
-  "link": "/benchmark/sensors/gi-ego1/",
+  "link": "/sensors/gi-ego1/",
   "group": "Head-worn cameras"
  },
  {
   "label": "GI EGO1GS",
-  "link": "/benchmark/sensors/gi-ego1gs/",
+  "link": "/sensors/gi-ego1gs/",
   "group": "Head-worn cameras"
  },
  {
   "label": "XQ20 stereo headset",
-  "link": "/benchmark/sensors/xq20/",
+  "link": "/sensors/xq20/",
   "group": "Head-worn cameras"
  },
  {
   "label": "Valve Index",
-  "link": "/benchmark/sensors/valve-index/",
+  "link": "/sensors/valve-index/",
   "group": "VR headsets"
  },
  {
   "label": "HP Reverb G2",
-  "link": "/benchmark/sensors/hp-reverb-g2/",
+  "link": "/sensors/hp-reverb-g2/",
   "group": "VR headsets"
  },
  {
   "label": "Samsung Odyssey+",
-  "link": "/benchmark/sensors/samsung-odyssey-plus/",
+  "link": "/sensors/samsung-odyssey-plus/",
   "group": "VR headsets"
  }
 ]

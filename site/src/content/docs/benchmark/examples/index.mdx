@@ -5,7 +5,7 @@ pageType: reference
 wide: true
 ---
 
-import ExampleGrid from '../../../components/ExampleGrid.astro';
+import ExampleGrid from '../../../../components/ExampleGrid.astro';
 
 Complete runs, each on a released dataset: the configuration used, the result
 produced, and — where a reference calibration exists — how far the two differ.
@@ -14,35 +14,35 @@ Pick the one whose rig looks most like yours.
 <ExampleGrid examples={[
   {
     title: 'TUM VI',
-    href: '/examples/tum-vi/',
+    href: '/benchmark/examples/tum-vi/',
     sensors: 'Stereo 1024² fisheye + BMI160 @ 200 Hz',
     format: 'ROS1 bag',
     shows: 'All six distortion models on identical data, vs a published Kalibr reference',
   },
   {
     title: 'Monado',
-    href: '/examples/monado/',
+    href: '/benchmark/examples/monado/',
     sensors: 'Valve Index — stereo fisheye + IMU',
     format: 'EuRoC mav0',
     shows: 'Round-trip PASS and t_ga, vs the Monado reference baseline',
   },
   {
     title: 'Looper SA16',
-    href: '/examples/looper-sa16/',
+    href: '/benchmark/examples/looper-sa16/',
     sensors: '2–3 cameras (one rolling shutter) + IMU @ 400 Hz',
     format: 'Custom → EuRoC mav0',
     shows: 'Four recording campaigns: rolling shutter, IMU oversampling, hardware sync',
   },
   {
     title: 'UZH-FPV',
-    href: '/examples/uzh-fpv/',
+    href: '/benchmark/examples/uzh-fpv/',
     sensors: 'mDAVIS346 + IMU, Snapdragon Flight stereo + IMU',
     format: 'ROS1 bag',
     shows: 'MVIS, Kalibr and Basalt side by side, with IMU weights from Kalibr residuals',
   },
 ]} />
 
-Looking for a specific sensor? See [Sensors](/benchmark/sensors/).
+Looking for a specific sensor? See the [Sensor wiki](/sensors/).
 
 ## How to read these pages
 
@@ -71,4 +71,4 @@ plot is right.
 A run on a dataset we do not have is the most useful thing you can send. See
 [Submit a dataset](/contribute/submit-dataset/) for the format, and
 [Submit results](/contribute/submit-results/) if you want it on the
-[leaderboard](/benchmark/leaderboard/) as well.
+[leaderboard](/benchmark/results/) as well.

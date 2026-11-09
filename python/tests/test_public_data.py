@@ -16,8 +16,8 @@ def _cards(pub):
 
 def test_nav_lists_every_public_sensor_once_in_overview_order(pub):
     links = [n["link"] for n in sensor_nav(pub)]
-    assert sorted(links) == sorted(f"/benchmark/sensors/{s}/" for s in pub["sensors"])
-    assert links == [f"/benchmark/sensors/{s}/" for g in sensor_groups(pub) for s in g["slugs"]]
+    assert sorted(links) == sorted(f"/sensors/{s}/" for s in pub["sensors"])
+    assert links == [f"/sensors/{s}/" for g in sensor_groups(pub) for s in g["slugs"]]
 
 
 def test_t265_is_first_and_labels_keep_full_names(pub):
@@ -79,8 +79,8 @@ def test_every_page_reports_a_calibrated_fov(pub):
 
 def test_looper_and_valve_link_their_examples(pub):
     pages = pub["sensors"]
-    assert pages["looper-insight9"]["example"]["url"] == "/examples/looper-sa16/"
-    assert pages["valve-index"]["example"]["url"] == "/examples/monado/"
+    assert pages["looper-insight9"]["example"]["url"] == "/benchmark/examples/looper-sa16/"
+    assert pages["valve-index"]["example"]["url"] == "/benchmark/examples/monado/"
 
 
 def test_every_sensor_page_links_to_its_hosted_data(pub):

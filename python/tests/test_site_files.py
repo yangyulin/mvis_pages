@@ -10,7 +10,7 @@ from mvis_site import site_files as S
 
 def test_card_takes_its_own_name_and_maker_first():
     p = F.pub_entry("photo")
-    assert S.card_for("rig", p) == {"title": "Rig", "href": "/benchmark/sensors/rig/", "image": "/media/sensors/rig/rig.jpg", "alt": "The rig",
+    assert S.card_for("rig", p) == {"title": "Rig", "href": "/sensors/rig/", "image": "/media/sensors/rig/rig.jpg", "alt": "The rig",
                                     "maker": "Maker Co", "type": "Stereo module", "tags": p["card"]["tags"]}
     p["card"]["maker"] = "Short"
     assert S.card_for("rig", p)["maker"] == "Short"
@@ -28,6 +28,14 @@ def test_mdx_for_a_datasheet_and_an_older_page():
     del old["header"]
     m = S.mdx("old", old)
     assert "sensor: old" not in m and m.count("<SensorPage") == len(S.PARTS) + 1 and 'part="lead"' in m
+
+
+def test_sensor_pages_live_under_the_sensor_wiki():
+    assert S.SENSOR_BASE == "/sensors/"
+    assert "import SensorPage from '../../../components/SensorPage.astro';" in S.mdx("rig", F.pub_entry("photo"))
+    text = S.overview_mdx(F.pub_doc())
+    assert text.startswith("---\ntitle: Sensor wiki\n") and "import SensorGrid from '../../../components/SensorGrid.astro';" in text
+    assert "](/benchmark/results/)" in text and "/benchmark/leaderboard/" not in text
 
 
 def test_site_css_scopes_the_page_css():
@@ -51,7 +59,7 @@ def test_site_js_wraps_player_and_map():
 def test_groups_follow_the_pub_order_and_drop_empty_groups():
     pub = F.pub_doc()
     assert S.sensor_groups(pub) == [{"title": "Group One", "slugs": ["rig-photo", "rig-groups"]}, {"title": "Group Two", "slugs": ["rig-old"]}]
-    assert [n["link"] for n in S.sensor_nav(pub)] == ["/benchmark/sensors/rig-photo/", "/benchmark/sensors/rig-groups/", "/benchmark/sensors/rig-old/"]
+    assert [n["link"] for n in S.sensor_nav(pub)] == ["/sensors/rig-photo/", "/sensors/rig-groups/", "/sensors/rig-old/"]
 
 
 def test_sensor_without_a_known_group_fails():
@@ -75,4 +83,4 @@ def test_overview_has_a_heading_per_group_and_every_sensor_once():
 def test_sensor_json(variant):
     p = F.pub_entry("photo")
     j = S.sensor_json("rig", p, {"a": "b"}, [variant])
-    assert j["procs"] == ["/media/sensors/rig/process0.json"] and j["plotly"] == S.PLOTLY_LOCAL and j["card"]["href"] == "/benchmark/sensors/rig/"
+    assert j["procs"] == ["/media/sensors/rig/process0.json"] and j["plotly"] == S.PLOTLY_LOCAL and j["card"]["href"] == "/sensors/rig/"

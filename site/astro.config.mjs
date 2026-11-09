@@ -6,6 +6,12 @@ import { readFileSync } from 'node:fs';
 
 // Written by site/scripts/export_sensors.py (python/mvis_site) with the Sensors overview, so both list sensors in one order.
 const sensorNav = JSON.parse(readFileSync(new URL('./src/data/sensor-nav.json', import.meta.url), 'utf8'));
+// Sensor wiki subgroups, one per sensor-nav.json group in file order.
+const sensorGroups = [...new Set(sensorNav.map((n) => n.group))].map((group) => ({
+  label: group,
+  collapsed: true,
+  items: sensorNav.filter((n) => n.group === group).map(({ label, link }) => ({ label, link })),
+}));
 
 // GitHub Pages serves `main:/docs`, so the build writes there. A build therefore
 // publishes the site — there is no separate deploy step.
@@ -34,7 +40,7 @@ export default defineConfig({
   // a redirects key ending in `.html` builds as a directory, so /Foo.html would
   // 404. They are static files in `public/` instead.
   redirects: {
-    '/benchmark/sensors/looper-insight9-arm': '/benchmark/sensors/looper-insight9/',
+    '/benchmark/sensors/looper-insight9-arm': '/sensors/looper-insight9/',
     '/compilation': '/getting-started/installation/',
     '/quick-start': '/getting-started/quickstart/',
     '/contributors': '/about/contributors/',
@@ -50,26 +56,28 @@ export default defineConfig({
     // --- Examples reshaped to Monado / Looper / TUM VI (2026-08-05) ---
     '/examples/in-house-4imus-3cams': '/reference/datasets/virig-4imus-3cams/',
     '/examples/in-house-4imus-4cams': '/reference/datasets/virig-4imus-4cams/',
-    '/examples/monado-msd': '/examples/monado/',
-    '/examples/tum-vie': '/examples/',
+    '/examples/monado-msd': '/benchmark/examples/monado/',
+    '/examples/tum-vie': '/benchmark/examples/',
     '/math/calib-graph': '/concepts/calibration-graph/',
     '/math/camera-calib': '/concepts/camera-model/',
     '/math/base-imu-calib': '/concepts/camera-imu-math/base-imu/',
     '/math/aux-imu-calib': '/concepts/camera-imu-math/aux-imu/',
     '/math/observability': '/concepts/observability/',
     '/math/degeneracy': '/concepts/degeneracy/',
-    '/leaderboard': '/benchmark/leaderboard/',
+    '/leaderboard': '/benchmark/results/',
     '/leaderboard/submit': '/contribute/submit-results/',
-    '/examples/hanpo': '/benchmark/sensors/hampo/',
-    '/examples/hampo': '/benchmark/sensors/hampo/',
-    '/examples/a4n': '/benchmark/sensors/xq20/',
-    '/benchmark/sensors/a4n': '/benchmark/sensors/xq20/',
-    '/examples/dibuli-prism-a4l': '/benchmark/sensors/dibuli-prism-a4l/',
-    '/examples/gi-ego1': '/benchmark/sensors/gi-ego1/',
-    '/examples/gi-ego1gs': '/benchmark/sensors/gi-ego1gs/',
-    '/examples/gi-ego1-gs-module': '/benchmark/sensors/gi-ego1gs/',
-    '/benchmark/sensors/gi-ego1-gs-module': '/benchmark/sensors/gi-ego1gs/',
-    '/examples/looper-insight9': '/benchmark/sensors/looper-insight9/',
+    '/examples/hanpo': '/sensors/hampo/',
+    '/examples/hampo': '/sensors/hampo/',
+    '/examples/a4n': '/sensors/xq20/',
+    '/benchmark/sensors/a4n': '/sensors/xq20/',
+    '/examples/dibuli-prism-a4l': '/sensors/dibuli-prism-a4l/',
+    '/examples/gi-ego1': '/sensors/gi-ego1/',
+    '/examples/gi-ego1gs': '/sensors/gi-ego1gs/',
+    '/examples/gi-ego1-gs-module': '/sensors/gi-ego1gs/',
+    '/benchmark/sensors/gi-ego1-gs-module': '/sensors/gi-ego1gs/',
+    '/examples/looper-insight9': '/sensors/looper-insight9/',
+    // Pages moved on 2026-11-09 (Benchmark and Sensor wiki split) are not here: scripts/moved-pages.mjs writes
+    // their redirects from src/data/moved.json after the build, keeping the #fragment of old deep links.
   },
 
   integrations: [
@@ -106,7 +114,7 @@ export default defineConfig({
         PageTitle: './src/components/PageTitle.astro',
       },
 
-      // Sidebar — design plan §3. Eight groups, ordered concepts → how-to →
+      // Sidebar — design plan §3. Eight sections (Benchmark then Sensor wiki since 2026-11-09), ordered concepts → how-to →
       // reference (COLMAP's spine, §1.1). Every leaf declares its pageType in
       // its own frontmatter, enforced by the §3.1 rule.
       sidebar: [
@@ -133,30 +141,27 @@ export default defineConfig({
           ],
         },
         {
-          label: 'Examples & benchmark',
+          label: 'Benchmark',
           items: [
             {
               label: 'Examples',
               collapsed: true,
               items: [
-                { label: 'Overview', link: '/examples/' },
-                { label: 'TUM VI', link: '/examples/tum-vi/' },
-                { label: 'Monado', link: '/examples/monado/' },
-                { label: 'Looper SA16', link: '/examples/looper-sa16/' },
-                { label: 'UZH-FPV', link: '/examples/uzh-fpv/' },
+                { label: 'Overview', link: '/benchmark/examples/' },
+                { label: 'TUM VI', link: '/benchmark/examples/tum-vi/' },
+                { label: 'Monado', link: '/benchmark/examples/monado/' },
+                { label: 'Looper SA16', link: '/benchmark/examples/looper-sa16/' },
+                { label: 'UZH-FPV', link: '/benchmark/examples/uzh-fpv/' },
               ],
             },
-            {
-              label: 'Sensors',
-              collapsed: true,
-              items: [
-                { label: 'Overview', link: '/benchmark/sensors/' },
-                ...sensorNav.map(({ label, link }) => ({ label, link })),
-              ],
-            },
-            { label: 'Results', link: '/benchmark/leaderboard/' },
+            { label: 'Results', link: '/benchmark/results/' },
             { label: 'Methodology', link: '/benchmark/methodology/' },
           ],
+        },
+        {
+          // Open, with collapsed device-kind subgroups: 4 rows on a phone; a sensor page opens its own subgroup.
+          label: 'Sensor wiki',
+          items: [{ label: 'Overview', link: '/sensors/' }, ...sensorGroups],
         },
         {
           label: 'Concepts',

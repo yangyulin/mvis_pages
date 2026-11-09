@@ -56,7 +56,7 @@ sensors:
     description: Two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU, calibrated with MVIS on 4 chessboard recordings of our own unit and on 10 hand-held and 2 robot-arm recordings.
     lead: Sensor head from Looper Robotics with two global-shutter mono cameras, one rolling-shutter colour camera and a 400 Hz IMU. Our own unit on a chessboard, and the hand-held and robot-arm recordings, are shown separately.
     chips: [Global + rolling shutter, 3 cameras, 400 Hz IMU, Chessboard + hand-held + robot arm, Hand-held data CC BY-NC 4.0]
-    example: {url: "/examples/looper-sa16/", label: "Looper SA16"}
+    example: {url: "/benchmark/examples/looper-sa16/", label: "Looper SA16"}
     thanks:
       people:
         - {name: Qinrui Yan, role: "COO & Co-Founder, DeepMirror; Head of LooperRobotics", url: "https://www.linkedin.com/in/qinrui-yan-3625aa90"}
@@ -394,7 +394,7 @@ sensors:
     description: VR headset with a global-shutter fisheye stereo pair and a 1 kHz IMU, calibrated with MVIS on the Monado dataset.
     lead: VR headset from Valve with a front global-shutter fisheye stereo pair and a 6-axis IMU at about 1 kHz, solved from the Monado SLAM calibration data.
     chips: [Global shutter, Stereo fisheye, 1 kHz IMU, CC BY 4.0]
-    example: {url: "/examples/monado/", label: "Monado"}
+    example: {url: "/benchmark/examples/monado/", label: "Monado"}
     card: {name: "Index", tags: [Global shutter, 2 cameras, 1 kHz IMU], sensors: "Stereo global-shutter fisheye + IMU @ 1 kHz", format: "EuRoC mav0", shows: "A consumer headset, from public data"}
     source: https://www.valvesoftware.com/en/index
     source_label: Valve Index page
