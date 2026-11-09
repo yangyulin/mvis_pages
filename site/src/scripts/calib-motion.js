@@ -572,9 +572,11 @@ export function mount(root) {
         ctx.textBaseline = 'middle';
         ctx.lineWidth = 3 * px;
         ctx.strokeStyle = th.panel;
-        ctx.strokeText('fill next', x + w / 2, y + h / 2);
+        const hw = ctx.measureText('fill next').width / 2 + 2 * px, lx = Math.max(hw, Math.min(W - hw, x + w / 2));   // keep the label inside the card
+        const ly = Math.max(fs * px, Math.min(H - fs * px, y + h / 2));
+        ctx.strokeText('fill next', lx, ly);
         ctx.fillStyle = th.accent;
-        ctx.fillText('fill next', x + w / 2, y + h / 2);
+        ctx.fillText('fill next', lx, ly);
         ctx.textAlign = 'start';
         ctx.textBaseline = 'alphabetic';
       }
