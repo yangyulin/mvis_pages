@@ -86,11 +86,12 @@ def test_cams_writes_the_sidecar_and_cov_cam0_as_the_card_final_value(take):
     assert "cov_cam0" not in ix[1]
 
 
-def test_cams_over_the_size_budget_removes_the_sidecar_and_leaves_the_index(take, monkeypatch):
+def test_cams_over_the_size_budget_keeps_the_old_sidecar_and_the_index(take, monkeypatch):
+    (take / "take.cams.json").write_text("old")
     monkeypatch.setattr(X, "CAMS_RAW_MAX", 100)
     with pytest.raises(SystemExit, match="over the budget"):
         run_cams(take)
-    assert not (take / "take.cams.json").exists()
+    assert (take / "take.cams.json").read_text() == "old"
     assert "cov_cam0" not in json.loads((take / "index.json").read_text())["variants"][0]
 
 

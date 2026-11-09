@@ -344,14 +344,14 @@ def main(argv=None):
         anim = json.loads(a.cams_anim.read_text())
         side = cams_sidecar(json.loads(a.cams.expanduser().read_text()), anim)
         path = a.cams_anim.with_name(f"{anim['variant']}.cams.json")
-        raw = dump(side, path)
-        gz = len(gzip.compress(path.read_bytes(), 9))
+        txt = json.dumps(side, separators=(",", ":")).encode()   # checked against the budget before anything is written
+        raw, gz = len(txt), len(gzip.compress(txt, 9))
         print(f"{path.name}: {raw / 1e3:.0f} kB raw, {gz / 1e3:.0f} kB gzip, n {side['n']};",
               ", ".join(f"{c['name']} {cov_pct(c):.0f} %" for c in side["cams"]),
               f"(anim cov_reach {100 * anim['coverage']['cov_reach_final']:.0f} %)")
         if raw > CAMS_RAW_MAX or gz > CAMS_GZ_MAX:
-            path.unlink()
             raise SystemExit(f"{path.name}: over the budget ({CAMS_RAW_MAX / 1e3:.0f} kB raw, {CAMS_GZ_MAX / 1e3:.0f} kB gzip)")
+        dump(side, path)
         ip = path.with_name("index.json")
         if ip.exists():   # the real-example table shows the cam0 card's final coverage, so card and table agree
             ix = json.loads(ip.read_text())

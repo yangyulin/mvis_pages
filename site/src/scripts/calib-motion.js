@@ -75,7 +75,7 @@ const store = {
 };
 
 // ---------- small math ----------
-function quatToR([w, x, y, z]) {
+export function quatToR([w, x, y, z]) {
   return [
     [1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
     [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
@@ -290,7 +290,7 @@ export function advance(st, now, dur) {
   const dt = Math.min(0.1, (now - st.last) / 1000);
   st.last = now;
   if (st.hold) {
-    if (now >= st.hold) { st.hold = 0; st.t = st.repeat.t0 + 1e-3; }
+    if (now >= st.hold) { st.hold = 0; if (st.repeat) st.t = st.repeat.t0 + 1e-3; }
     return false;
   }
   st.t += dt * st.speed;
@@ -336,7 +336,7 @@ export function mount(root) {
   const cache = new Map();
   const st = {
     d: null, vid: null, t: 0, playing: false, speed: 1, last: 0, view: 'op', az: 0.75, el: 0.32, zoom: 1,
-    axes: false, img: true, sel: 0, repeat: null, hold: 0, counting: 0, theme: {}, dirtyImu: true, lastTitle: '',
+    axes: false, img: true, sel: 0, repeat: null, hold: 0, want: null, counting: 0, theme: {}, dirtyImu: true, lastTitle: '',
   };
   const sp = Number(store.get('cm-speed'));
   if (SPEEDS.includes(sp)) st.speed = sp;
@@ -382,19 +382,23 @@ export function mount(root) {
 
   async function load(id) {
     for (const [k, b] of chips) b.setAttribute('aria-pressed', String(k === id));
+    st.want = id;   // a slower earlier click must not replace this one when its data lands
     if (id === st.vid) return;
     ui.status.textContent = 'Loading…';
     let d;
     try {
       d = await getData(id);
     } catch (e) {
+      if (st.want !== id) return;
       ui.status.textContent = `Could not load ${VARIANTS[id].label}: ${e.message}`;
       return;
     }
+    if (st.want !== id) return;
     st.d = d;
     st.vid = id;
     st.t = 0;
     st.repeat = null;
+    st.hold = 0;
     st.sel = 0;
     st.zoom = 1;
     setPlaying(false);

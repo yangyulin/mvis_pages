@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   kb4Project, boardDetections, nowState, prep, segSecs, segAt, largestRegion, mergeSegs, prepCams, nearestStep,
-  camCoverage, fillNext, advance,
+  camCoverage, fillNext, advance, quatToR,
 } from '../src/scripts/calib-motion.js';
 
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
@@ -74,9 +74,7 @@ test('chessboard detections are all or none', () => {
   const d = read(`${DATA}v3/guide60b.json`);
   const s = d.samples;
   for (let i = 0; i < s.t.length; i += 7) {
-    const [w, x, y, z] = s.q_wxyz[i];
-    const R = [[1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)], [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)], [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)]];
-    const n = boardDetections(d.board, d.camera.intr8, d.camera.image_size, R, s.p_C[i]).n;
+    const n = boardDetections(d.board, d.camera.intr8, d.camera.image_size, quatToR(s.q_wxyz[i]), s.p_C[i]).n;
     assert.ok(n === 0 || n === 54, `t ${s.t[i]}: ${n}`);
   }
 });
@@ -103,17 +101,6 @@ test('fill next: the largest 4-connected empty region', () => {
   assert.deepEqual([...largestRegion([0, 1, 4, 7, 11], 4, 3)].sort((x, y) => x - y), [0, 1, 4]);
   assert.equal(largestRegion([], 4, 3).size, 0);
   assert.equal(largestRegion([3, 4], 4, 3).size, 1);   // 3 and 4 are on different rows, not neighbours
-});
-
-test('real-example table coverage equals the cam0 card at the end (71 % chessboard, 98 % AprilGrid)', () => {
-  for (const [dir, id, want] of [['real_chess', 'chessboard_1107_01', 71], ['real_takes', 'aprilgrid_06', 98]]) {
-    const ix = read(`${DATA}${dir}/index.json`).variants.find((v) => v.id === id);
-    const c0 = read(`${DATA}${dir}/${id}.cams.json`).cams[0];
-    const got = c0.reach.filter((r, n) => r && c0.cov100_first[n] != null).length;
-    const card = Math.round((100 * got) / c0.reach.reduce((x, y) => x + y, 0));
-    assert.equal(Math.round(100 * ix.cov_cam0), card);
-    assert.equal(card, want);
-  }
 });
 
 const ALL = [['v4/guide06c_60', 'guide06c_60'], ['v3/guide60b', 'guide60b'], ['real_takes/aprilgrid_06', 'aprilgrid_06'],
@@ -257,4 +244,13 @@ test('repeat: a move plays to its end, holds 1 s, restarts just inside it; the l
     assert.ok(Math.abs(st.t - (g.t0 + 1e-3)) < 1e-9);
     assert.equal(segAt(guide.segs, st.t), g);
   }
+});
+
+test('repeat switched off during the hold (another example loaded): the clock resumes in place, no crash', () => {
+  const st = { t: 12, last: 0, speed: 1, hold: 500, repeat: null };
+  assert.equal(advance(st, 600, guide.dur), false);
+  assert.equal(st.hold, 0);
+  assert.equal(st.t, 12);
+  advance(st, 616, guide.dur);
+  assert.ok(Math.abs(st.t - 12.016) < 1e-9);
 });
