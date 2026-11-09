@@ -20,7 +20,7 @@ export const VARIANTS = {
   aprilgrid_06: { set: 'real', label: 'AprilGrid example', why: 'Our 41 s hand-held take in front of a monitor AprilGrid, the take the guide motion is built from.',
     diff: 'The same four moves in the same order, but in 41 s: about twice the guide’s speed (up to 0.75 m/s and 5 rad/s) and closer to the board (16 cm).' },
   chessboard_1107_01: { set: 'realc', label: 'Chessboard example', why: 'Our 61 s hand-held take in front of a monitor chessboard, the whole board kept in view.',
-    diff: 'A different order (in-out first, a roll in place, then repeats and a mixed corner block), farther from the board (43–73 cm), so it covers less of the image (69 %).' },
+    diff: 'A different order (in-out first, a roll in place, then repeats and a mixed corner block), farther from the board (43–73 cm), so cam0 covers less of the image (71 %).' },
 };
 const SETS = {
   v4: { dir: 'v4/' }, v3: { dir: 'v3/' }, real: { dir: 'real_takes/', cams: true }, realc: { dir: 'real_chess/', cams: true },
@@ -61,6 +61,7 @@ const SEG_KEYS = ['lr', 'ud', 'bf', 'loop', 'rest'];
 const SEG_OF_ROLE = { lr: 'lr', ud: 'ud', bf: 'bf', roll: 'bf', circle: 'loop', mix: 'loop', rest: 'rest' };
 const segKey = (g) => SEG_OF_ROLE[String(g.role || g.name || '').replace(/\d+$/, '')] || 'rest';
 const SPEEDS = [0.25, 0.5, 1];
+const FILL = 0.8;
 const FOV = (95 * Math.PI) / 180, INC = Math.cos((75 * Math.PI) / 180);
 
 async function fetchJSON(url) {
@@ -133,6 +134,10 @@ export function beatAt(g, t) {
   for (const x of g.beats || []) if (x.t <= t + 1e-6) b = x;
   return b;
 }
+// Whole seconds as the player shows them everywhere (chips, Now panel, Next): rounded, so a 10.3 s move is "10 s" on its
+// chip and the Now panel starts its countdown at 10; never 0 before the very end.
+export const secs = (x) => (x <= 1e-6 ? 0 : Math.max(1, Math.round(x)));
+const ORD = ['', '', '2nd', '3rd', '4th', '5th'];
 const cut = (s, n) => (s.length <= n ? s : `${s.slice(0, n - 1).replace(/[\s,;–-]+\S*$/, '')}…`);
 
 // What the Now panel shows at time t.
@@ -142,18 +147,18 @@ export function nowState(d, t) {
   const nx = d.segs[j + 1] || null;
   const b = beatAt(g, t);
   let beatText = '';
-  if (g.unit === 'Rest') beatText = 'Count 3';
+  if (g.unit === 'Rest') beatText = j === d.segs.length - 1 ? 'Done' : `Count ${secs(g.t1 - g.t0)}`;
   else if (b && g.nbeat > 0) {
     const of = `${g.unit} ${b.i} of ${g.nbeat}`;
     beatText = b.word ? `${of} · ${b.word}` : of;
   }
   const span = Math.max(1e-6, g.t1 - g.t0);
   return {
-    j, k: g.k, K: d.K, name: g.k ? g.name : 'Hold still', short: g.short, cue: g.cue, key: g.key,
-    left: Math.max(0, Math.ceil(g.t1 - t - 1e-6)), until: g.t1 - t,
+    j, k: g.k, K: d.K, name: g.name, short: g.short, cue: g.cue, key: g.key,
+    left: secs(g.t1 - t), until: g.t1 - t,
     beatText, frac: Math.max(0, Math.min(1, (t - g.t0) / span)),
     ticks: (g.beats || []).filter((x) => x.t > g.t0 + 1e-3).map((x) => (x.t - g.t0) / span),
-    next: nx ? { k: nx.k, name: nx.k ? nx.name : 'Hold still', short: nx.short, key: nx.key } : null,
+    next: nx ? { k: nx.k, name: nx.name, short: nx.short, key: nx.key } : null,
   };
 }
 
@@ -202,21 +207,21 @@ export function prep(d, vid = d.variant) {
   const segs = mergeSegs(d.segments);
   const short = SHORT[vid] || {};
   let K = 0;
+  const times = {};
   for (const g of segs) {
     g.key = segKey(g);
     g.k = g.key === 'rest' ? null : ++K;
-    g.name = g.label.replace(/\s+/g, ' ').replace(/^\d+ /, '').trim();
+    // "1  Left-right" -> "Left-right"; "Left-right 2" (a repeat in a real take) -> "Left-right (2nd)"; rests "Hold still"
+    const base = g.label.replace(/\s+/g, ' ').replace(/^\d+ /, '').replace(/ \d+$/, '').trim();
+    times[base] = (times[base] || 0) + 1;
+    g.name = !g.k ? 'Hold still' : times[base] > 1 ? `${base} (${ORD[times[base]] || `${times[base]}th`})` : base;
     g.short = short[g.role] || short[String(g.role).replace(/\d+$/, '')] || g.cue.split('. ')[0] || '';
   }
   const path = s.p_C.map(toD);
   const key = new Array(n).fill('rest');
   for (const g of segs) for (let i = Math.max(0, Math.round(g.t0 * hz)); i < Math.min(n, Math.round(g.t1 * hz) + 1); i++) key[i] = g.key;
-  const runs = [];
-  for (let i = 0; i < n; i++) {
-    const last = runs[runs.length - 1];
-    if (last && last.key === key[i]) last.k1 = i;
-    else runs.push({ key: key[i], k0: Math.max(0, i - 1), k1: i });
-  }
+  // one path run per move (sample range, one sample of overlap so the runs join)
+  const runs = segs.map((g) => ({ g, key: g.key, k0: Math.max(0, Math.round(g.t0 * hz) - 1), k1: Math.min(n - 1, Math.round(g.t1 * hz)) }));
   const rng = (k) => { let m = 0; for (const v of s[k]) for (const x of v) m = Math.max(m, Math.abs(x)); return m * 1.05 || 1; };
   return {
     raw: d, vid, s, n, hz, dur: d.duration_s, first, first100, reach: d.coverage.metric_reach,
@@ -255,6 +260,26 @@ function prepCams(side) {
   });
 }
 
+// The largest 4-connected group of cells (indices into a gx x gy grid) among `cells`.
+export function largestRegion(cells, gx, gy) {
+  const left = new Set(cells);
+  let best = new Set();
+  for (const c of cells) {
+    if (!left.has(c)) continue;
+    const grp = new Set([c]), q = [c];
+    left.delete(c);
+    while (q.length) {
+      const n = q.pop(), x = n % gx, y = Math.floor(n / gx);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const xx = x + dx, yy = y + dy, m = yy * gx + xx;
+        if (xx >= 0 && xx < gx && yy >= 0 && yy < gy && left.has(m)) { left.delete(m); grp.add(m); q.push(m); }
+      }
+    }
+    if (grp.size > best.size) best = grp;
+  }
+  return best;
+}
+
 // ---------- player ----------
 export function mount(root) {
   const $ = (r) => root.querySelector(`[data-role="${r}"]`);
@@ -264,7 +289,7 @@ export function mount(root) {
     cue: $('cue'), beat: $('beat'), bar: $('bar'), ticks: $('ticks'), next: $('next'), more: $('more'), moretext: $('moretext'),
     readout: $('readout'), cards: $('cards'), tabs: $('tabs'), play: $('play'), prev: $('prev'), nextB: $('nextmove'),
     scrub: $('scrub'), time: $('time'), speeds: $('speeds'), repeat: $('repeat'), axes: $('axes'), img: $('img'), fs: $('fs'),
-    camfs: $('camfs'), segchips: $('segchips'), traces: $('traces'), status: $('status'), count: $('count'),
+    camfs: $('camfs'), play2: $('play2'), segchips: $('segchips'), traces: $('traces'), status: $('status'), count: $('count'),
     views: $('views'), table: $('table'), now: $('now'),
   };
   const base = root.dataset.base;
@@ -377,11 +402,12 @@ export function mount(root) {
       const el = document.createElement('div');
       el.className = 'cm-card';
       el.setAttribute('aria-current', String(i === st.sel));
-      const ar = `${c.size[0]} / ${c.size[1]}`;
+      const ar = `aspect-ratio:${c.size[0]} / ${c.size[1]};--ar:${(c.size[0] / c.size[1]).toFixed(4)}`;
       el.innerHTML = `<b><i style="background:${c.color}"></i>${c.name}<span class="cm-tag">drawn, no frame</span></b>`
-        + `<div class="cm-pair"><canvas style="aspect-ratio:${ar}" aria-label="${c.name}: board and detected corners"></canvas>`
-        + `<canvas style="aspect-ratio:${ar}" aria-label="${c.name}: image coverage so far"></canvas></div>`
-        + `<small>${c.pending ? 'loading detected corners…' : ''}</small>`;
+        + `<div class="cm-pair"><canvas style="${ar}" aria-label="${c.name}: board and detected corners"></canvas>`
+        + `<canvas style="${ar}" aria-label="${c.name}: image coverage so far"></canvas></div>`
+        + `<small>${c.pending ? 'loading detected corners…' : ''}</small>`
+        + '<small class="cm-key">filled: seen · dashed: still empty · <span>fill next</span>: the biggest gap</small>';
       el.addEventListener('click', () => pick(i));
       ui.cards.append(el);
       const tab = document.createElement('button');
@@ -397,7 +423,7 @@ export function mount(root) {
   }
   function pick(i) {
     st.sel = i;
-    cards.forEach((c, j) => { c.el.setAttribute('aria-current', String(j === i)); c.tab.setAttribute('aria-pressed', String(j === i)); });
+    cards.forEach((c, j) => { c.el.setAttribute('aria-current', String(j === i)); c.tab.setAttribute('aria-pressed', String(j === i)); c.covCv = null; });
     draw();
   }
   function fit(c) {
@@ -421,11 +447,20 @@ export function mount(root) {
   function cardNow(ci) {
     const d = st.d, i = idx(st.t), raw = d.raw;
     if (d.cams) {
-      const c = d.cams[ci], k = sidx(st.t), f = c.uv[k], uv = [];
+      const c = d.cams[ci], k = sidx(st.t);
+      // no corners at this step (the first frame of a take, a blink): show the nearest step with corners within 1 s,
+      // later first, so a card never starts empty
+      let ks = k;
+      for (let j = 1; !c.uv[ks].length && j <= 10; j++) {
+        if (k + j < c.uv.length && c.uv[k + j].length) ks = k + j;
+        else if (k - j >= 0 && c.uv[k - j].length) ks = k - j;
+      }
+      const f = c.uv[ks], uv = [];
       for (let q = 0; q + 1 < f.length; q += 2) uv.push([f[q], f[q + 1], true]);
       let got = 0;
       c.cov100_first.forEach((t0, n) => { if (t0 != null && t0 <= st.t + 0.05 && c.reach[n]) got++; });
-      return { uv, n: uv.length, outline: c.outline[k], pct: (100 * got) / Math.max(1, c.nReach), soFar: c.n_so_far[k], dist: c.dist_cm[k], off: c.off_deg[k] };
+      return { uv, n: uv.length, near: ks !== k ? (ks - k) / 10 : 0, outline: c.outline[ks] || c.outline[k], pct: (100 * got) / Math.max(1, c.nReach),
+        soFar: c.n_so_far[k], dist: c.dist_cm[ks], off: c.off_deg[ks] };
     }
     const { R, p } = camPose(0, i);
     const det = boardDetections(raw.board, raw.camera.intr8, raw.camera.image_size, R, p);
@@ -443,7 +478,7 @@ export function mount(root) {
   }
 
   function drawCards() {
-    const th = st.theme, d = st.d, g = segAt(d.segs, st.t), half = g.k && st.t >= (g.t0 + g.t1) / 2;
+    const th = st.theme, d = st.d;
     cards.forEach((card, ci) => {
       if (card.cam.pending || !card.view.clientWidth) return;
       const now = cardNow(ci), [iw, ih] = card.cam.size;
@@ -469,7 +504,7 @@ export function mount(root) {
         if (u < -2 || v < -2 || u > iw + 2 || v > ih + 2) continue;
         ctx.beginPath();
         ctx.arc(u * k, v * k, r, 0, 7);
-        if (ok) { ctx.fillStyle = th.corner; ctx.fill(); } else { ctx.strokeStyle = th.text; ctx.lineWidth = px; ctx.stroke(); }
+        if (ok) { ctx.globalAlpha = now.near ? 0.55 : 1; ctx.fillStyle = th.corner; ctx.fill(); ctx.globalAlpha = 1; } else { ctx.strokeStyle = th.text; ctx.lineWidth = px; ctx.stroke(); }
       }
       if (!now.n && !now.outline) {
         ctx.fillStyle = th.text;
@@ -478,6 +513,9 @@ export function mount(root) {
         ctx.fillText('board out of view', W / 2, H / 2);
         ctx.textAlign = 'start';
       }
+      const sel = ci === st.sel;
+      const nowText = `${now.n ? `${now.n} corners ${now.near ? `(nearest frame, ${now.near > 0 ? '+' : ''}${now.near.toFixed(1)} s)` : 'now'}` : 'no corners now'}`;
+      if (!card.cov.clientWidth) { card.note.textContent = nowText; return; }   // a thumbnail: the view only
       // coverage: first-seen cells (guides: fine grid; real: the detected corners), 100 px grid, empty cells dashed
       fit(card.cov);
       W = card.cov.width; H = card.cov.height; k = W / iw;
@@ -507,25 +545,46 @@ export function mount(root) {
       const [gx, gy] = d.cams ? d.cams[ci].grid : d.raw.coverage.metric_grid;
       const reach = d.cams ? d.cams[ci].reach : d.reach;
       const seen = (n) => (d.cams ? d.cams[ci].cov100_first[n] != null && d.cams[ci].cov100_first[n] <= st.t + 0.05 : d.first100[n] <= st.t);
-      for (let n = 0; n < gx * gy; n++) {
-        if (!reach[n] || seen(n)) continue;
+      const empty = [];
+      for (let n = 0; n < gx * gy; n++) if (reach[n] && !seen(n)) empty.push(n);
+      // "fill next" (selected card only): the largest connected still-empty region, once part of the image is seen
+      const next = sel && empty.length < reach.reduce((a, b) => a + (b ? 1 : 0), 0) ? largestRegion(empty, gx, gy) : new Set();
+      const cellRect = (n) => {
         const cx = n % gx, cy = Math.floor(n / gx);
-        const x = cx * 100 * k, y = cy * 100 * k, w = Math.min(100, iw - cx * 100) * k, h = Math.min(100, ih - cy * 100) * k;
-        const edge = cx === 0 || cy === 0 || cx === gx - 1 || cy === gy - 1;
-        const aim = half && edge;
-        ctx.strokeStyle = aim ? th.accent : th.text;
-        ctx.lineWidth = (aim ? 2 : 1) * px;
-        ctx.setLineDash(aim ? [] : [3 * px, 3 * px]);
-        ctx.strokeRect(x + 2 * px, y + 2 * px, w - 4 * px, h - 4 * px);
+        return [cx * 100 * k + 2 * px, cy * 100 * k + 2 * px, Math.min(100, iw - cx * 100) * k - 4 * px, Math.min(100, ih - cy * 100) * k - 4 * px];
+      };
+      for (const n of empty) {
+        const [x, y, w, h] = cellRect(n), hot = next.has(n);
+        if (hot) { ctx.globalAlpha = 0.16; ctx.fillStyle = th.accent; ctx.fillRect(x, y, w, h); ctx.globalAlpha = 1; }
+        ctx.strokeStyle = hot ? th.accent : th.text;
+        ctx.lineWidth = (hot ? 2 : 1) * px;
+        ctx.setLineDash(hot ? [] : [3 * px, 3 * px]);
+        ctx.strokeRect(x, y, w, h);
       }
       ctx.setLineDash([]);
+      if (next.size) {   // the label on the region's cell nearest its centre
+        const cs = [...next], mx = cs.reduce((a, n) => a + (n % gx), 0) / cs.length, my = cs.reduce((a, n) => a + Math.floor(n / gx), 0) / cs.length;
+        const dc = (n) => Math.hypot((n % gx) - mx, Math.floor(n / gx) - my);
+        const c0 = cs.reduce((b, n) => (dc(n) < dc(b) ? n : b));
+        const [x, y, w, h] = cellRect(c0), fs = Math.max(9, Math.min(12, w / px / 4.2));
+        ctx.font = `600 ${fs * px}px system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 3 * px;
+        ctx.strokeStyle = th.panel;
+        ctx.strokeText('fill next', x + w / 2, y + h / 2);
+        ctx.fillStyle = th.accent;
+        ctx.fillText('fill next', x + w / 2, y + h / 2);
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'alphabetic';
+      }
       ctx.strokeStyle = th.line;
       ctx.lineWidth = 1;
       ctx.globalAlpha = 0.6;
       for (let x = 100; x < iw; x += 100) { ctx.beginPath(); ctx.moveTo(x * k, 0); ctx.lineTo(x * k, H); ctx.stroke(); }
       for (let y = 100; y < ih; y += 100) { ctx.beginPath(); ctx.moveTo(0, y * k); ctx.lineTo(W, y * k); ctx.stroke(); }
       ctx.globalAlpha = 1;
-      card.note.textContent = `${now.n ? `${now.n} corners now` : 'no corners now'} · ${Math.round(now.pct)} % of the image · ${now.soFar.toLocaleString('en-US')} so far`;
+      card.note.textContent = `${nowText} · ${Math.round(now.pct)} % of the image · ${now.soFar.toLocaleString('en-US')} so far`;
     });
   }
 
@@ -550,17 +609,12 @@ export function mount(root) {
     const keyV = `${st.view}|${st.az}|${st.el}|${st.zoom}|${W}|${H}`;
     if (d.proj && d.proj.keyV === keyV) return d.proj;
     const pad = 0.09;
-    let eye, f, r, u, foc = Math.min(W, H) * 1.3;
+    let eye, f, r, u, foc = Math.min(W, H) * 1.3, mid = [0, 0];
     if (st.view === 'op') {
       eye = d.opEye;
       f = norm(sub(d.center, eye));
       r = norm(cross(f, [0, 1, 0]));
       u = cross(r, f);
-      foc = Math.min(W, H) * 1.6;
-      for (const p of pts) {   // fit the path: only ever zoom out
-        const q = sub(p, eye), z = Math.max(dot(q, f), 0.08);
-        foc = Math.min(foc, (0.46 * W * z) / (Math.abs(dot(q, r)) + pad), (0.45 * H * z) / (Math.abs(dot(q, u)) + pad));
-      }
     } else {
       const [dir, up] = st.view === 'top' ? [[0, 1, 0], [0, 0, -1]] : st.view === 'side' ? [[1, 0, 0], [0, 1, 0]]
         : [[Math.sin(st.az) * Math.cos(st.el), Math.sin(st.el), Math.cos(st.az) * Math.cos(st.el)], [0, 1, 0]];
@@ -574,14 +628,24 @@ export function mount(root) {
       }
       eye = add(d.fitCtr, scl(dir, dist));
     }
+    if (st.view !== '3d') {   // fixed views: the board and the whole path fill about 80 % of the canvas, centred
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const p of pts) {
+        const q = sub(p, eye), z = Math.max(dot(q, f), 0.08), x = dot(q, r) / z, y = dot(q, u) / z;
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      }
+      foc = Math.min((FILL * W) / Math.max(1e-6, x1 - x0), (FILL * H) / Math.max(1e-6, y1 - y0));
+      mid = [(x0 + x1) / 2, (y0 + y1) / 2];
+    }
     foc *= st.zoom;
+    const ox = W / 2 - foc * mid[0], oy = H / 2 + foc * mid[1];
     const xy = new Float32Array(2 * d.n);
     for (let k = 0; k < d.n; k++) {
       const q = sub(d.path[k], eye), z = Math.max(dot(q, f), 0.05);
-      xy[2 * k] = W / 2 + (foc * dot(q, r)) / z;
-      xy[2 * k + 1] = H / 2 - (foc * dot(q, u)) / z;
+      xy[2 * k] = ox + (foc * dot(q, r)) / z;
+      xy[2 * k + 1] = oy - (foc * dot(q, u)) / z;
     }
-    d.proj = { keyV, eye, f, r, u, foc, xy };
+    d.proj = { keyV, eye, f, r, u, foc, ox, oy, xy };
     return d.proj;
   }
 
@@ -590,8 +654,8 @@ export function mount(root) {
     fit(c3d);
     const W = c3d.width, H = c3d.height, th = st.theme, d = st.d, px = W / (c3d.clientWidth || 1);
     ctx.clearRect(0, 0, W, H);
-    const pj = projection(W, H), { eye, f, r, u, foc, xy } = pj;
-    const P = (p) => { const q = sub(p, eye), z = Math.max(dot(q, f), 0.05); return [W / 2 + (foc * dot(q, r)) / z, H / 2 - (foc * dot(q, u)) / z]; };
+    const pj = projection(W, H), { eye, f, r, u, foc, ox, oy, xy } = pj;
+    const P = (p) => { const q = sub(p, eye), z = Math.max(dot(q, f), 0.05); return [ox + (foc * dot(q, r)) / z, oy - (foc * dot(q, u)) / z]; };
     const path = (pts, close) => { ctx.beginPath(); pts.forEach((p, k) => { const [x, y] = P(p); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); if (close) ctx.closePath(); };
     const line = (pts, color, w = 1, dash) => {
       path(pts);
@@ -631,10 +695,12 @@ export function mount(root) {
       for (let k = k0 + 1; k <= k1; k++) ctx.lineTo(xy[2 * k], xy[2 * k + 1]);
       ctx.strokeStyle = color; ctx.lineWidth = w * px; ctx.globalAlpha = alpha; ctx.stroke();
     };
-    for (const run of d.runs) if (run.k1 > i) stroke(Math.max(run.k0, i), run.k1, th.seg[run.key], 1.2, 0.3);
-    for (const run of d.runs) stroke(run.k0, Math.min(run.k1, i), th.seg[run.key], 2.2, 0.95);
+    // moves already done: thin and dim; moves to come: thin and faint; the current move: full colour and width
+    const cur = segAt(d.segs, st.t);
+    for (const run of d.runs) if (run.g !== cur) stroke(run.k0, run.k1, th.seg[run.key], 1.1, run.g.t1 <= st.t ? 0.14 : 0.3);
+    for (const run of d.runs) if (run.g === cur) stroke(run.k0, run.k1, th.seg[run.key], 2.6, 1);
     const ia = Math.min(d.n - 1, i + Math.round(1.5 * d.hz));
-    for (const run of d.runs) stroke(Math.max(run.k0, i), Math.min(run.k1, ia), th.seg[run.key], 3.5, 1);
+    for (const run of d.runs) stroke(Math.max(run.k0, i), Math.min(run.k1, ia), th.seg[run.key], 4, 1);
     ctx.globalAlpha = 1;
     if (ia > i + 1) {
       const ib = Math.max(i, ia - 3), ax = xy[2 * ia], ay = xy[2 * ia + 1], a = Math.atan2(ay - xy[2 * ib + 1], ax - xy[2 * ib]);
@@ -714,7 +780,7 @@ export function mount(root) {
     const soon = n.next && n.until <= 3;
     ui.next.classList.toggle('soon', !!soon);
     ui.next.textContent = n.next
-      ? `${soon ? `Next in ${Math.max(1, Math.ceil(n.until - 1e-6))} s` : 'Next'}: ${n.next.k ? `${n.next.k} ${n.next.name}` : n.next.name} — ${cut(n.next.short, 60)}`
+      ? `${soon ? `Next in ${secs(n.until)} s` : 'Next'}: ${n.next.k ? `${n.next.k} ${n.next.name}` : n.next.name} — ${cut(n.next.short, 60)}`
       : 'Last step. Then stop recording.';
     const on = cards[st.sel] && cards[st.sel].now;
     ui.readout.textContent = on ? `${cards[st.sel].cam.name}: ${Math.round(on.dist)} cm from the board, ${Math.round(on.off)}° off its normal` : '';
@@ -728,7 +794,7 @@ export function mount(root) {
     st.d.segs.forEach((g) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.innerHTML = `<i class="cm-sw cm-s-${g.key}"></i>${g.label.replace(/\s+/g, ' ')} · ${Math.round(g.t1 - g.t0)} s`;
+      b.innerHTML = `<i class="cm-sw cm-s-${g.key}"></i>${g.k ? `${g.k} ${g.name}` : g.name} · ${secs(g.t1 - g.t0)} s`;
       b.addEventListener('click', () => goSeg(g));
       ui.segchips.append(b);
     });
@@ -834,13 +900,19 @@ export function mount(root) {
   function setPlaying(on) {
     st.playing = on && !!st.d;
     if (!st.playing) { clearInterval(st.counting); st.counting = 0; ui.count.hidden = true; }
-    ui.play.textContent = st.playing ? 'Pause' : 'Play';
-    ui.play.setAttribute('aria-label', st.playing ? 'Pause' : 'Play');
+    playLabel(st.playing);
     if (st.playing) { st.last = performance.now(); requestAnimationFrame(tick); }
   }
+  function playLabel(on) {
+    for (const b of [ui.play, ui.play2]) if (b) { b.textContent = on ? 'Pause' : 'Play'; b.setAttribute('aria-label', on ? 'Pause' : 'Play'); }
+  }
+  // one player at a time: starting this one pauses the other; a player scrolled out of view pauses
+  document.addEventListener('cm-play', (e) => { if (e.detail !== root && (st.playing || st.counting)) setPlaying(false); });
+  new IntersectionObserver((es) => { if (!es[es.length - 1].isIntersecting && (st.playing || st.counting)) setPlaying(false); }).observe(root);
   function togglePlay() {
     if (!st.d) return;
     if (st.playing || st.counting) return setPlaying(false);
+    document.dispatchEvent(new CustomEvent('cm-play', { detail: root }));
     if (st.t >= st.d.dur - 1e-3) st.t = 0;
     const g = segAt(st.d.segs, st.t);
     if (st.t - g.t0 > 0.2) return setPlaying(true);
@@ -848,7 +920,7 @@ export function mount(root) {
     let n = 3;
     ui.count.hidden = false;
     ui.count.textContent = String(n);
-    ui.play.textContent = 'Pause';
+    playLabel(true);
     st.counting = setInterval(() => {
       n -= 1;
       if (n > 0) { ui.count.textContent = String(n); return; }
@@ -859,6 +931,7 @@ export function mount(root) {
     }, 1000);
   }
   ui.play.addEventListener('click', togglePlay);
+  if (ui.play2) ui.play2.addEventListener('click', togglePlay);
   ui.prev.addEventListener('click', () => step(-1));
   ui.nextB.addEventListener('click', () => step(1));
   ui.scrub.addEventListener('input', () => seek(Number(ui.scrub.value)));
@@ -988,7 +1061,7 @@ export function mount(root) {
       b.querySelector('.cm-dot').className = `cm-dot ${cls}`;
       b.title = { none: 'twin verdict pending', pass: 'twin: good', fail: 'twin: fails' }[cls];
       if (e) rows.push(`<tr><th scope="row"><button type="button" class="cm-link" data-vid="${id}">${VARIANTS[id].label}</button></th><td>${Math.round(e.duration_s)} s</td>`
-        + `<td>${e.cov_reach != null ? `${Math.round(100 * e.cov_reach)} %` : '–'}</td><td>${{ none: 'pending', pass: 'good', fail: 'fails' }[cls]}</td></tr>`);
+        + `<td>${(e.cov_cam0 ?? e.cov_reach) != null ? `${Math.round(100 * (e.cov_cam0 ?? e.cov_reach))} %` : '–'}</td><td>${{ none: 'pending', pass: 'good', fail: 'fails' }[cls]}</td></tr>`);
     }
     if (ui.table && rows.length) {
       ui.table.innerHTML = `<thead><tr><th>Example</th><th>Length</th><th>Image coverage</th><th>Twin</th></tr></thead><tbody>${rows.join('')}</tbody>`;

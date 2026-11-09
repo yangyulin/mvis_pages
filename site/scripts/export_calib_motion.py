@@ -55,6 +55,9 @@ time base (the views and the anim file share the time origin):
      n_so_far [detected corners up to the step], dist_cm, off_deg [per step: |n . (c - board centre)| and
      acos(|z_C . n|), the MVIS views readout]}]}
 Dropped: ids, any jpg*, anything path-like. Budget per sidecar: 1.0 MB raw, 400 kB gzip.
+--cams also writes cov_cam0 (share of cam0's reachable 100 px cells with a detected corner, all frames) into that
+variant's entry of the index.json next to it: the page's real-example table shows it, so it equals the cam0 card's
+final %. (cov_reach, the anim file's coverage, is kept for reference.)
 
 twin_verdicts.json, as the page reads it (everything else in the file is ignored):
   schema, rule, rig, seeds, z_max, sigma_ratio_max, rotation  -- header from gate.py
@@ -348,6 +351,13 @@ if a.cams:
     if raw > CAMS_RAW_MAX or gz > CAMS_GZ_MAX:
         path.unlink()
         raise SystemExit(f"{path.name}: over the budget ({CAMS_RAW_MAX / 1e3:.0f} kB raw, {CAMS_GZ_MAX / 1e3:.0f} kB gzip)")
+    ip = path.with_name("index.json")
+    if ip.exists():   # the real-example table shows the cam0 card's final coverage, so card and table agree
+        ix = json.loads(ip.read_text())
+        for v in ix["variants"]:
+            if v["id"] == side["variant"]:
+                v["cov_cam0"] = round(cov_pct(side["cams"][0]) / 100, 4)
+        dump(ix, ip)
     raise SystemExit(0)
 
 if not a.anim:

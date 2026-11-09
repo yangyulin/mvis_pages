@@ -18,7 +18,7 @@ const main = mode === 'main';
   <section class="cm-now" data-role="now" aria-label="Now">
     <div class="cm-now-top">
       <span class="cm-now-title"><i class="cm-now-sw" data-role="sw"></i><span data-role="title" aria-live="polite"></span></span>
-      <span class="cm-now-left" data-role="left"></span>
+      <span class="cm-now-right"><span class="cm-now-left" data-role="left"></span><button type="button" class="cm-nowplay" data-role="play2" aria-label="Play">Play</button></span>
     </div>
     <div class="cm-now-cue" data-role="cue"></div>
     <div class="cm-now-beat" data-role="beat">&nbsp;</div>
@@ -118,6 +118,12 @@ const main = mode === 'main';
   .cm-now-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
   .cm-now-title { font-weight: 600; font-size: 1rem; display: inline-flex; align-items: center; gap: 0.45rem; min-width: 0; }
   .cm-now-sw { width: 0.85rem; height: 0.85rem; border-radius: 0.2rem; flex: none; }
+  .cm-now-right { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .cm-nowplay {
+    display: none; font-weight: 700; min-height: 2.5rem; min-width: 4.6rem; padding: 0.25rem 0.7rem; border-radius: 0.45rem;
+    border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--sl-color-black);
+  }
+  :root[data-theme='light'] .cm-nowplay { color: #fff; }
   .cm-now-left { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .cm-now-cue { font-size: clamp(1.15rem, 1rem + 0.8vw, 1.6rem); font-weight: 600; line-height: 1.2; align-self: center; overflow: hidden; }
   .cm-now-beat { color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
@@ -139,7 +145,7 @@ const main = mode === 'main';
   .cm-view3d { position: relative; min-width: 0; }
   .cm-view3d canvas { aspect-ratio: 4 / 3; min-height: 340px; touch-action: pan-y; cursor: grab; }
   .cm-readout {
-    position: absolute; left: 0.5rem; top: 0.5rem; font-size: 0.78rem; padding: 0.15rem 0.45rem; border-radius: 0.3rem;
+    position: absolute; left: 0.5rem; top: 0.5rem; max-width: calc(100% - 16rem); font-size: 0.78rem; padding: 0.15rem 0.45rem; border-radius: 0.3rem;
     background: color-mix(in srgb, var(--sl-color-bg) 82%, transparent); color: var(--sl-color-gray-2); pointer-events: none;
   }
   .cm-views { position: absolute; right: 0.5rem; top: 0.5rem; display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
@@ -151,7 +157,15 @@ const main = mode === 'main';
   .cm-count[hidden] { display: none; }
   .cm-cardcol { min-width: 0; }
   .cm-tabs { display: none; gap: 0.3rem; margin-bottom: 0.4rem; }
-  .cm-cards { display: grid; gap: 0.5rem; }
+  .cm-cards { display: grid; gap: 0.5rem; grid-template-columns: minmax(0, 1fr); }
+  /* real examples: the selected camera large (view | coverage), the others as small thumbnails to click */
+  .cm-multi .cm-cards { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cm-multi .cm-card[aria-current='true'] { grid-column: 1 / -1; order: -1; }
+  .cm-multi .cm-pair canvas { width: min(100%, calc(var(--cm-h, 15rem) * var(--ar))); justify-self: center; }
+  .cm-multi .cm-card:not([aria-current='true']) .cm-pair { grid-template-columns: minmax(0, 1fr); --cm-h: 5.5rem; }
+  .cm-multi .cm-card:not([aria-current='true']) .cm-pair canvas + canvas { display: none; }
+  .cm-card:not([aria-current='true']) .cm-key, .cm-multi .cm-card:not([aria-current='true']) .cm-tag { display: none; }
+  .cm-key span { color: var(--sl-color-accent); font-weight: 600; }
   .cm-card { border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; padding: 0.35rem 0.45rem 0.3rem; cursor: pointer; }
   .cm-card[aria-current='true'] { border-color: var(--sl-color-accent); }
   .cm-card b { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; color: var(--sl-color-white); }
@@ -159,11 +173,18 @@ const main = mode === 'main';
   .cm-tag { font-weight: 400; font-size: 0.7rem; color: var(--cm-text); margin-left: auto; }
   .cm-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin-top: 0.25rem; align-items: start; }
   .cm-pair canvas { border-radius: 0.3rem; }
-  .cm-multi .cm-pair canvas { max-height: 8.5rem; width: auto; max-width: 100%; justify-self: center; }
   .cm-card small { display: block; font-size: 0.74rem; color: var(--cm-text); margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
 
-  /* transport */
+  /* transport: on a desktop it sticks to the bottom of the window while the player is on screen, so Play, the move
+     steps and the scrubber stay at hand under the Now panel and the 3D view */
   .cm-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.6rem; margin: 0.7rem 0 0; }
+  @media (min-width: 40.0625rem) {
+    .cm-transport {
+      position: sticky; bottom: 0; z-index: 4; padding: 0.45rem 0; background: var(--sl-color-bg);
+      border-top: 1px solid var(--sl-color-gray-6); box-shadow: 0 -6px 10px -8px rgba(0, 0, 0, 0.3);
+    }
+    .cm-fs .cm-transport { position: static; box-shadow: none; }
+  }
   .cm-play {
     font-size: 1.2rem !important; font-weight: 700; min-width: 5.5rem; min-height: 2.5rem; padding: 0.3rem 0.9rem; border-radius: 0.45rem;
     border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--sl-color-black);
@@ -232,12 +253,15 @@ const main = mode === 'main';
     .cm-now { grid-template-rows: auto calc(2 * 1.2 * 1.15rem) auto auto auto; }
     .cm-stage { grid-template-columns: minmax(0, 1fr); }
     .cm-view3d canvas { min-height: 0; }
+    .cm-readout { max-width: calc(100% - 1rem); }
     .cm-views { position: static; justify-content: flex-start; margin-top: 0.4rem; }
     .cm-views button, .cm-chips button, .cm-toggles button, .cm-speeds button, .cm-tabs button, .cm-step { min-height: 2.5rem; }
     .cm-multi .cm-tabs { display: flex; }
     .cm-multi .cm-card { display: none; }
     .cm-multi .cm-card[aria-current='true'] { display: block; }
-    .cm-multi .cm-pair canvas { max-height: 14rem; }
+    .cm-multi .cm-pair { --cm-h: 13rem; }
+    .cm-nowplay { display: inline-block; }   /* the Now panel sticks to the top here: Play stays at hand */
+    .cm-fs .cm-nowplay { display: none; }
     .cm-play { order: 1; } .cm-step { order: 2; } .cm-speeds { order: 3; }
     .cm-scrub { order: 4; flex-basis: 100%; } .cm-time { order: 5; } .cm-toggles { order: 6; }
     .cm-segchips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.3rem; }

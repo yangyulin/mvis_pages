@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { kb4Project, boardDetections, nowState, prep } from '../src/scripts/calib-motion.js';
+import { kb4Project, boardDetections, nowState, prep, secs, largestRegion } from '../src/scripts/calib-motion.js';
 
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 const DATA = '../public/data/calib-motion/';
@@ -71,5 +71,43 @@ test('chessboard detections are all or none', () => {
     const R = [[1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)], [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)], [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)]];
     const n = boardDetections(d.board, d.camera.intr8, d.camera.image_size, R, s.p_C[i]).n;
     assert.ok(n === 0 || n === 54, `t ${s.t[i]}: ${n}`);
+  }
+});
+
+test('labels: chips and the Now panel share names and seconds; repeats get (2nd); the last rest says Done', () => {
+  const chess = prep(read(`${DATA}real_chess/chessboard_1107_01.json`), 'chessboard_1107_01');
+  const names = chess.segs.map((g) => g.name);
+  assert.deepEqual(names, ['Hold still', 'Back-forth + roll', 'Left-right', 'Up-down', 'Roll in place', 'Up-down (2nd)',
+    'Left-right (2nd)', 'Corners + mixed', 'Hold still']);
+  assert.ok(names.every((x) => !/\s\d+$/.test(x)));
+  const ag = prep(read(`${DATA}real_takes/aprilgrid_06.json`), 'aprilgrid_06');
+  const a = nowState(ag, 0);
+  assert.equal(a.name, 'Hold still');
+  assert.equal(a.beatText, 'Count 1');     // a 1.05 s rest: same seconds as its chip
+  assert.equal(a.left, secs(ag.segs[0].t1 - ag.segs[0].t0));
+  assert.equal(nowState(guide, 58).beatText, 'Done');
+  assert.equal(nowState(guide, 1).beatText, 'Count 3');
+  assert.equal(secs(1.05), 1);
+  assert.equal(secs(16.67), 17);
+  assert.equal(secs(10.3), 10);
+  assert.equal(secs(0.001), 1);
+  assert.equal(secs(0), 0);
+});
+
+test('fill next: the largest 4-connected empty region', () => {
+  // 4 x 3 grid; empty cells 0, 1, 4 (one region of 3) and 7, 11 (a region of 2)
+  assert.deepEqual([...largestRegion([0, 1, 4, 7, 11], 4, 3)].sort((x, y) => x - y), [0, 1, 4]);
+  assert.equal(largestRegion([], 4, 3).size, 0);
+  assert.equal(largestRegion([3, 4], 4, 3).size, 1);   // 3 and 4 are on different rows, not neighbours
+});
+
+test('real-example table coverage equals the cam0 card at the end (71 % chessboard, 98 % AprilGrid)', () => {
+  for (const [dir, id, want] of [['real_chess', 'chessboard_1107_01', 71], ['real_takes', 'aprilgrid_06', 98]]) {
+    const ix = read(`${DATA}${dir}/index.json`).variants.find((v) => v.id === id);
+    const c0 = read(`${DATA}${dir}/${id}.cams.json`).cams[0];
+    const got = c0.reach.filter((r, n) => r && c0.cov100_first[n] != null).length;
+    const card = Math.round((100 * got) / c0.reach.reduce((x, y) => x + y, 0));
+    assert.equal(Math.round(100 * ix.cov_cam0), card);
+    assert.equal(card, want);
   }
 });
