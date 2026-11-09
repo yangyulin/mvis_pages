@@ -8,7 +8,7 @@ import { join } from 'node:path';
 const SAFE = /^\/(?!\/)(?:[a-z0-9-]+\/)*$/; // a site route: no quotes, no .., no protocol-relative host
 
 export function movedPage(from, to) {
-  for (const a of [from, to]) if (!SAFE.test(a) || a.includes('..')) throw new Error(`bad address: ${a}`);
+  for (const a of [from, to]) if (!SAFE.test(a)) throw new Error(`bad address: ${a}`);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Redirecting to: ${to}</title>`
     + `<meta name="robots" content="noindex"><link rel="canonical" href="https://openmvis.com${to}">`
     + `<script>location.replace('${to}' + location.search + location.hash)</script>`

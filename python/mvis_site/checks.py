@@ -44,7 +44,7 @@ def sidebar_problems(s: dict, nav: list[dict]) -> list[str]:
 
 # --- moved pages and internal links (check_moves, on the built docs/) ---------------------------------------------
 _REFRESH = re.compile(r'http-equiv="refresh"\s+content="0;\s*url=([^"]+)"')
-_REPLACE = re.compile(r"location\.replace\('([^']+)'")
+_REPLACE = re.compile(r"<script>location\.replace\('([^']+)'")
 _HREF = re.compile(r'href="(/(?!/)[^"]*)"')
 
 

@@ -244,3 +244,9 @@ def test_label_problems():
     assert C.label_problems(1440, bad) == ["A", "chips need scrolling (40 px hidden)", "clipped readout: IMU"]
     assert C.label_problems(390, bad) == ["A", "clipped readout: IMU"]
     assert C.label_problems(390, []) == []
+
+
+def test_a_real_page_that_calls_location_replace_is_not_a_redirect():
+    page = "<main><button onclick=\"location.replace('/x/')\">go</button></main>"
+    assert C.redirect_target(page) is None
+
