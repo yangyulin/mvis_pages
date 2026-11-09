@@ -77,3 +77,13 @@ estimated, camera intrinsics free). A motion is **good** if, on all 22 parameter
 lever arm, td, t_ga, gyro and accelerometer scales, and the camera intrinsics), every solve converges, the
 error stays within its uncertainty, and the uncertainty is at most 3× that of a well-excited 80 s
 reference motion.
+
+## Replay it yourself
+
+The [replay pack](/downloads/calib-motion-replay.zip) (zip, 3.4 MB) holds the four motions at 200 Hz (IMU
+pose, ideal gyro and accelerometer), the two twin rigs (camera, IMU, truth, noise and detection rules) and our
+twin results with the pass rule, so you can run them through your own simulator and calibration tool. Its
+README gives the frames, units and replay steps; the twin itself ran on MVIS, which is not public yet.
+
+Licence: CC BY 4.0 for the guide motions, rigs and their results; the two real-example trajectories come from our
+Looper Insight 9 recordings and are CC BY-NC 4.0, as are their results.
