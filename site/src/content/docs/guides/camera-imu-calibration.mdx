@@ -144,9 +144,11 @@ the gyro rate injects a timing offset, and that offset corrupts `td`.
 The T265 is the canonical case:
 
 - **IMU:** Bosch BMI055, 62.5 Hz accel interpolated to 200 Hz
-- **Measured:** `t_ga ≈ −6.2 ms`, stable to ~0.2 ms across bags
+- **Measured:** `t_ga` about −5.7 to −8.1 ms across recordings and code versions (april_01 now −5.69 ms). The
+  offset is not a pure shift: it changes with the motion.
 
-Details in [IMU model](/concepts/imu-model/).
+Details in [IMU model](/concepts/imu-model/). Why it matters, with real numbers:
+[Why calibrate t_ga](/benchmark/tga/).
 
 ## 4. Validate
 

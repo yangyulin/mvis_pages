@@ -1,0 +1,276 @@
+---
+title: Why calibrate t_ga
+description: Two real IMUs have a gyro–accel offset of about −5 to −6 ms. Tools without a t_ga parameter fold 0.3–0.6 of an offset into the camera time offset. What this shows and what it does not.
+pageType: example
+wide: true
+---
+
+import TgaSweepPlot from '../../../components/TgaSweepPlot.astro';
+import TgaBandPlot from '../../../components/TgaBandPlot.astro';
+import TgaGapTable from '../../../components/TgaGapTable.astro';
+
+Use this page to decide whether to calibrate `t_ga` (the time offset between the gyroscope and the accelerometer
+inside one IMU), and to see what happens to `td` (the camera–IMU time offset) when a tool cannot model it.
+
+MVIS fits `t_ga`. Kalibr (one time shift per camera) and Basalt (one camera time offset for the whole rig) treat the
+IMU as one clock. If the accelerometer is off that clock, the offset has to go somewhere else.
+
+**On two real IMUs, MVIS measures `t_ga` of about −5 to −6 ms. On the same bags, Kalibr's and Basalt's `td` differ
+from MVIS by about 3 ms (Looper Insight 9) and about 2 ms (Intel T265). The sweep below predicts 3.0–3.2 ms and
+1.6–1.7 ms of that from the offset alone.**
+
+<div class="not-content rp-honest">
+  <p><b>This page shows where an offset goes, not which tool is right.</b></p>
+  <ul>
+    <li><b>Shown:</b> a real gyro–accel offset of −5 to −6 ms on two IMUs. Tools with one IMU clock move <code>td</code> by a steady share of an injected offset, and that share explains most of the <code>td</code> gap on the raw bags.</li>
+    <li><b>Not shown:</b> whose <code>td</code> is closer to the truth on raw data. That test is still open.</li>
+    <li><b>Built in our favour:</b> the sweep injects exactly the model MVIS fits (a pure accel shift, linear interpolation). MVIS recovering it is a consistency check, not proof of accuracy.</li>
+    <li><b>Round trips cannot order tools:</b> every tool returns to about zero on a bag it corrected itself.</li>
+    <li><b>Small sample, our runs:</b> one recording per device. The MVIS authors ran all three tools.</li>
+  </ul>
+  <p>All limits: <a href="#limits">Limits</a>.</p>
+</div>
+
+## Short answer
+
+- **Turn it on:** the default is off.
+
+  ```yaml title="cam_imu.yaml"
+  solve:
+    estimate_t_ga: true
+    sigma_t_ga: 0.010   # seconds: a weak 10 ms prior, as in the runs here
+  ```
+
+  See [Configuration](/reference/configuration/) and [Estimate `t_ga`](/guides/camera-imu-calibration/).
+- **Sign:** the accel stored at stamp `t` is taken as sampled at `t − t_ga`. A negative `t_ga` means the accel is
+  stamped early: it leads the gyro on the stamp timeline. Both devices here read negative.
+- **If `t_ga` is near zero** (well under 1 ms, within 2σ): MVIS sees no offset under its pure-shift model. That does
+  not rule out a frequency-dependent response like the T265's. A real-data control on such an IMU has not been run yet.
+- **If `t_ga` is 1 ms or more in size:** for an offset that is a pure shift, as injected here, a one-clock tool moves `td` by
+  0.28–0.64 × `t_ga`. Whether that is its error on raw data is not tested.
+
+  | Size of `t_ga` | `td` moved, T265-like (× 0.28–0.30) | `td` moved, Looper-like (× 0.59–0.64) |
+  |---|---|---|
+  | 1 ms | 0.3 ms | 0.6 ms |
+  | **5 ms** | **1.4–1.5 ms** | **3.0–3.2 ms** |
+  | 10 ms | 2.8–3.0 ms | 5.9–6.4 ms |
+  | 20 ms | 5.6–6.0 ms | 11.8–12.8 ms |
+
+  The share depends on the IMU and the motion. It is not a constant of the tool.
+- **IMU scale moves very little:** under 0.06 % between τ = 0 and −5 ms. In this test the offset shows up in `td`,
+  not in scale.
+- **If you must use a one-clock tool:** expect `td` to carry part of the offset, or remove it first with
+  [corrected-dataset export](/guides/corrected-datasets/). On the MVIS-corrected bags, Kalibr and Basalt read `td`
+  within 0.3 ms of zero (T265 −0.16 / −0.20 and −0.28; Looper −0.03 / −0.04 and −0.01). That is a self-consistency
+  read. Whether a pre-shift gives Kalibr or Basalt the true `td` is not tested.
+
+## In one table
+
+<TgaGapTable />
+
+On raw data, the `td` gap between tools is close to what the offset predicts: within 0.1 ms on Looper, 0.2–0.4 ms
+short on the T265. That explains the gap. It does not say which `td` is true.
+
+:::note[Older run, t_ga off]
+On older MVIS code, april_01 with `t_ga` off gave `td` −9.60 / −12.28 ms, against −7.60 / −10.29 ms with it on.
+That is close to Kalibr's −9.85 / −12.61 ms. It is the only run where MVIS itself turned `t_ga` off, and it has not
+been re-run on current code.
+:::
+
+## The offset is real
+
+- **What `t_ga` is:** see [IMU model](/concepts/imu-model/). A common cause is a driver that resamples or filters
+  the accel. The T265 driver places a 62.5 Hz accel onto 200 Hz gyro stamps.
+- **Looper Insight 9:** `t_ga` **−5.03 ± 0.02 ms** on looper_1.
+- **Intel T265:** **−5.69 ± 0.43 ms** on VI-Rig april_01. Older runs on other april recordings read −5.88 to
+  −8.07 ms. The [T265 sensor page](/sensors/intel-t265/) reads −6.59 ± 0.43 ms from one recording, in a different
+  run set.
+- **Without the solver:** an estimator-free correlation check on twelve older Looper recordings (10 hand-held,
+  2 arm) read −5.8 to −7.1 ms, against −5.0 to −5.5 ms from an older solver run; the check reads about 1.2 ms more
+  negative than the solver (bias −1.24 ± 0.42 ms). On ten T265 recordings it read −6.05 ± 0.14 ms at 2–25 Hz.
+- **On the T265 the offset shrinks with frequency** (Figure 2). One `t_ga` is a compromise for the motion.
+
+<TgaBandPlot />
+
+## The sweep: delay the accelerometer, watch `td`
+
+- **Start from a fair zero:** the MVIS-corrected bag, with a common crop. On it all three tools read `td` near zero.
+- **Delay only the accel** by τ = −50, −20, −10, −5, −2, 0, 2, 5, 10, 20 and 50 ms: a′(t) = a(t − τ). That is 11 bags
+  per device. The 0 ms bag is the corrected bag with the same crop. In MVIS's sign, the true `t_ga` is τ.
+- **Run all three tools** on every bag with their usual settings.
+- **Read** `td` and `t_ga`.
+
+<TgaSweepPlot />
+
+| Result | Looper Insight 9 | Intel T265 |
+|---|---|---|
+| MVIS `t_ga` slope | **1.000** (largest residual 0.001 ms) | **0.998** (σ 0.42 ms per bag) |
+| MVIS `td` change over the sweep | under 0.01 ms | under 0.06 ms |
+| Kalibr `td` slope (τ within ±10 ms only) | **0.639** (0.623) | **0.302** (0.316) |
+| Basalt `td` slope (τ within ±10 ms only) | **0.590** (0.576) | **0.282** (0.292) |
+| Kalibr `td` at −50 / +50 ms | −32.1 / +32.1 | −14.4 / +15.5 |
+| Basalt `td` at −50 / +50 ms | −30.4 / +28.9 | −13.8 / +14.2 |
+
+All runs of all three tools converged (run note; Basalt reports `ok` on all 22 of its runs).
+
+**Fair to Kalibr and Basalt:** with one IMU clock, the closest fit puts `td` between the gyro and the accel
+timelines. Neither tool is broken; neither has a parameter for this. Why the T265 share is about half of Looper's
+is open.
+
+## Would you notice it?
+
+- **No warning:** Kalibr and Basalt converge at every τ.
+- **Reprojection barely moves:** near the real offset (τ 0 to −5 ms) it does not change. Even at ±50 ms it rises only
+  10–16 %, which is easy to miss.
+- **Kalibr gyro error grows, but slowly:** at τ = −5 ms it is × 2.4 on Looper and × 1.2 on the T265, against τ = 0.
+  At −50 ms it is × 21 and × 5.3.
+- **A self round trip will not catch it:** Kalibr's own round trip on Looper returns +0.0006 ms.
+- **What does catch it:** a run with `t_ga` on, or an estimator-free correlation check.
+
+<details class="rp-fold">
+<summary>IMU scale under the sweep</summary>
+
+- **At real offsets (τ 0 → −5 ms):** Kalibr moves at most 0.03 % (Looper) and 0.062 % (T265); Basalt at most
+  0.032 % and 0.055 %. MVIS spans at most 0.002 % and 0.005 % over the whole sweep.
+- **Looper shape:** gyro y follows the size of τ, not its sign. Kalibr +0.96 / +1.51 % and Basalt −1.65 / −1.84 % at
+  −50 / +50 ms.
+- **T265 shape:** Kalibr's accel scale follows the sign of τ: −0.09 / −0.12 / +0.09 % per 10 ms on x / y / z.
+- **Basalt's T265 offset:** gyro x +1.22 % and accel z +1.50 % are already there at τ = 0. From −10 to +10 ms gyro x
+  stays within 0.1 % of that and accel z within 0.13 %. The offset does not cause them.
+
+</details>
+
+<details class="rp-fold">
+<summary>All cross round trips</summary>
+
+Each bag is corrected by one tool (rows) and recalibrated by each tool (columns). `td` in ms, cam0 / cam1 for MVIS
+and Kalibr, one rig value for Basalt.
+
+**Intel T265, april_01** (80 s window, intrinsics pinned)
+
+| Corrected by | Read by MVIS | Read by Kalibr | Read by Basalt |
+|---|---|---|---|
+| not corrected | −7.94 / −10.64, `t_ga` −5.69 ± 0.43 | −9.85 / −12.61 | −9.955 |
+| MVIS | +0.19 / −0.06, `t_ga` −0.11 | −0.16 / −0.20 | −0.28 |
+| Kalibr | +1.77 / +1.83, `t_ga` −5.44 ± 0.43 | −0.019 / −0.019 | −0.16 |
+| Basalt | +2.01 / −0.69, `t_ga` −5.70 ± 0.42 | +0.09 / −2.67 | −0.00002 |
+
+**Looper Insight 9, looper_1** (66 s, cam0 + cam1, intrinsics free)
+
+| Corrected by | Read by MVIS | Read by Kalibr | Read by Basalt |
+|---|---|---|---|
+| not corrected | +1.22 / +1.25, `t_ga` −5.03 ± 0.02 | −1.94 / −1.92 | −1.66 |
+| MVIS | 0.00 / 0.00, `t_ga` 0.00 | −0.03 / −0.04 | −0.01 |
+| Kalibr | +1.73 / +1.74, `t_ga` −2.65 (unexplained, see Limits) | +0.0006 / +0.0005 | +0.10 |
+| Basalt | +2.88 / +2.90, `t_ga` −5.03 | −0.29 / −0.27 | +0.0000 |
+
+- **Diagonal:** every tool returns to about zero on its own bag. On the T265, MVIS has the largest self residual
+  (+0.19 / −0.06 ms).
+- **Off the diagonal:** bags corrected by Kalibr or Basalt still carry the offset. MVIS reads `t_ga` −5.44 and −5.70 on
+  them (T265) and −5.03 on the Basalt-corrected Looper bag.
+- **One rig offset:** Kalibr's cam1 reads −2.67 ms on the Basalt-corrected T265 bag. One offset cannot remove the
+  2.7 ms between the two T265 cameras.
+
+</details>
+
+<details class="rp-fold">
+<summary>Kalibr fit statistics and reprojection</summary>
+
+Kalibr gyro and accel error (mean), τ = −50 … +50 ms:
+
+| τ (ms) | −50 | −20 | −10 | −5 | −2 | 0 | +2 | +5 | +10 | +20 | +50 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Looper gyro | 0.1177 | 0.0478 | 0.0247 | 0.0134 | 0.0074 | 0.0055 | 0.0069 | 0.0125 | 0.0237 | 0.0468 | 0.1166 |
+| Looper accel | 0.1665 | 0.0825 | 0.0569 | 0.0469 | 0.0380 | 0.0424 | 0.0378 | 0.0463 | 0.0560 | 0.0814 | 0.1628 |
+| T265 gyro | 0.0652 | 0.0294 | 0.0185 | 0.0143 | 0.0127 | 0.0122 | 0.0124 | 0.0137 | 0.0179 | 0.0290 | 0.0680 |
+| T265 accel | 0.2274 | 0.1367 | 0.1175 | 0.1118 | 0.0720 | 0.1099 | 0.0727 | 0.1116 | 0.1166 | 0.1346 | 0.2200 |
+
+The T265 accel error dips at τ = ±2 ms. We have not explained it.
+
+| Reprojection over the sweep | Looper Insight 9 | Intel T265 |
+|---|---|---|
+| MVIS, RMS | 0.317 px in every bag | 0.476 px in every bag |
+| Kalibr, mean | 0.179–0.196 px | 0.240–0.273 px |
+| Basalt, mean | 0.165–0.182 px | 0.179–0.207 px |
+
+MVIS reports an RMS and Kalibr and Basalt a mean, and the settings differ, so the levels cannot be compared across
+tools. Only the change across the sweep is meaningful.
+
+</details>
+
+## Limits
+
+- **Which `td` is true is not tested:** the page explains the gap, not which value is right. A clock check through a
+  third IMU, camera-`td` injection and a control on an IMU with `t_ga` near 0 are still open.
+- **The sweep uses our model:** a pure accel shift with linear interpolation, which is exactly what MVIS fits. A slope
+  of 1.000 / 0.998 is consistency, not accuracy. A real offset that is not a pure shift fits less well.
+- **Round trips cannot order tools:** self residuals on the T265 are MVIS +0.19 / −0.06, Kalibr −0.019 / −0.019 and
+  Basalt −0.00002 ms.
+- **The T265 offset depends on frequency:** −6.76 ms at 2–4 Hz to −1.17 ms at 30–40 Hz. Coherence falls above about
+  22 Hz, so the top two bands are less certain. So −5.69 ms is a compromise for this motion; other recordings read
+  −5.88 to −8.07 ms.
+- **First-order model:** MVIS corrects `t_ga` to first order; the ½·t_ga²·ä term is ignored, which matters at large
+  offsets. A re-linearised version is being tested and is not in MVIS yet.
+- **Open questions:**
+  - Why the T265 share (0.30) is about half Looper's (0.64). Unchecked candidates: the 62.5 Hz accel interpolated onto
+    the gyro stamps, different motion, part of the offset going into scale.
+  - MVIS on the Kalibr-corrected Looper bag reads `t_ga` −2.65 ms (expected −5.03), RMS 0.47 px and gyro x scale
+    1.0069. It is unexplained, and it does not repeat on the T265 (−5.44 ms).
+  - On the T265 the sweep predicts the raw Kalibr gap 0.2–0.25 ms short.
+- **One recording per device:** april_01 and looper_1. The other recordings have not been run.
+- **Basalt has one offset for the rig:** on the T265 its gap is −2.02 ms against cam0 and +0.68 ms against cam1.
+- **Settings differ:** Kalibr uses 10 Hz frames, Basalt every second frame with its own camera calibration, MVIS
+  30 Hz. Intrinsics are pinned on the T265 and free on Looper.
+- **The `t_ga`-off row is from older code** and has not been re-run.
+- **The MVIS authors ran every tool.**
+
+## Reproducibility
+
+| Set | Hub folder | Bags |
+|---|---|---|
+| VI-Rig, Intel T265 | [`calibench-vi/datasets` → `virig-4imus-3cams/tga-sweep`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams/tga-sweep) | 11, 3.3 GB each |
+| Looper Insight 9 | [`calibench-vi/datasets` → `looper-insight9/tga-sweep`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9/tga-sweep) | 11, 0.94 GB each |
+
+Each folder has a README, the MVIS calibration used for the correction (`mvis_correction_calib.yaml`) and
+`provenance.json` (sign convention, τ, crop, sha256 per bag).
+
+**Licence:**
+
+- **CC BY-NC 4.0:** both folders, gated, commercial use by request.
+- **Looper folder:** also carries the Looper benchmark exception: anyone may run tools on the bags and publish the
+  results for the Calibench benchmark.
+- **Cite** the VI-Rig dataset and MVIS.
+
+| Item | Value |
+|---|---|
+| MVIS | main as of 2026-11-08; 30 Hz frames, `calyx` IMU model, `estimate_t_ga: true`, `sigma_t_ga: 0.010` |
+| Kalibr | scale-misalignment IMU model, 10 Hz frames |
+| Basalt | `basalt_calibrate_imu`, every second frame, its own camera calibration |
+| Intrinsics | pinned on the T265, free on Looper |
+| T265 window | 80 s of april_01 |
+| Run dates | 2026-11-08 (Looper), 2026-11-09 (T265) |
+
+<details class="rp-fold">
+<summary>Replay it yourself</summary>
+
+1. Download one sweep folder from the Hub (you need to accept the gate first).
+2. Run each tool on each bag with your usual settings: `mvis cam-imu -c cam_imu.yaml` with `estimate_t_ga: true`,
+   Kalibr's `kalibr_calibrate_imu_camera`, and `basalt_calibrate_imu`.
+3. Read `td` (and `t_ga` for MVIS) and fit each tool's `td` against τ. The true values in every bag are
+   `t_ga` = τ, `td` = 0, identity IMU scale and zero bias.
+
+To build a sweep from your own recording: correct it with `mvis apply-calib`, crop it, then delay only the accel
+channel by τ with linear interpolation, as each folder's README describes.
+
+</details>
+
+This page uses april_01 only. The T265 sensor page's −6.59 ± 0.43 ms is from another run set.
+
+## Related
+
+- [IMU model: `t_ga`](/concepts/imu-model/)
+- [Camera–IMU calibration](/guides/camera-imu-calibration/)
+- [Corrected-dataset export](/guides/corrected-datasets/)
+- [Round-trip validation](/guides/roundtrip/)
+- [Comparison vs Kalibr / Basalt](/about/comparison/)
+- [Methodology](/benchmark/methodology/)

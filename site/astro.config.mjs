@@ -154,6 +154,7 @@ export default defineConfig({
                 { label: 'UZH-FPV', link: '/benchmark/examples/uzh-fpv/' },
               ],
             },
+            { label: 'Why calibrate t_ga', link: '/benchmark/tga/' },
             { label: 'Results', link: '/benchmark/results/' },
             { label: 'Methodology', link: '/benchmark/methodology/' },
           ],

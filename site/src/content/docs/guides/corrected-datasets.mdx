@@ -88,12 +88,15 @@ See [Round-trip validation](/guides/roundtrip/).
 On TUM MIC05 and TUM-VI raw, the correction is bit-exact. The corrected bag
 recalibrates to near-identity IMU intrinsics.
 
-On the T265, the time offsets change as follows:
+On the T265 (July run, older code), the time offsets change as follows:
 
 | Offset | Before correction | After correction |
 |---|---|---|
 | `t_ga` | −6.32 ms | +0.53 ms |
 | camera `td` | −7.6 ms | −0.37 ms |
+
+The `t_ga` sweep starts from such a corrected bag:
+[Why calibrate t_ga](/benchmark/tga/).
 
 - **Implementation:** `src/mvis/recalib/`
 - **Example config:** `examples/configs/recalib_example.yaml`

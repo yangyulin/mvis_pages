@@ -24,7 +24,7 @@ accelerometer.
 | **Per-IMU gyro-only mode** | ✅ | ✖ | ✖ |
 | IMU intrinsics (scale, misalignment) | ✅ — 3 conventions | ✅ | ✖ |
 | G-sensitivity `Tg` | ✅ | ✅ | ✖ |
-| **Gyro↔accel offset `t_ga`** | ✅ | ✖ | ✖ |
+| **[Gyro↔accel offset `t_ga`](/benchmark/tga/)** | ✅ | ✖ | ✖ |
 | Rolling-shutter readout | ✅ | via fork | ✖ |
 | **Corrected-dataset export** | ✅ `apply-calib` | ✖ | ✖ |
 | **Round-trip PASS/FAIL validation** | ✅ `roundtrip` | ✖ | ✖ |
@@ -43,11 +43,12 @@ accelerometer.
 - **More than one IMU.** MVIS puts every IMU in one graph. Kalibr and Basalt
   model a single IMU. There, a four-IMU rig has to be calibrated pairwise and
   composed. That accumulates error and throws away the correlations.
-- **It measures driver artefacts instead of working around them.** `t_ga` is
-  the time offset between the gyroscope and accelerometer channels. MVIS
-  measures the offset a driver's interpolation introduces. The T265 reads
-  −6.2 ms, stable to ~0.2 ms. Kalibr has no equivalent; the usual alternative
-  is to discard the sensor.
+- **It fits the gyro–accel offset.** `t_ga` is the time offset between the
+  gyroscope and accelerometer channels. Kalibr and Basalt have one IMU clock.
+  On the same bags their `td` differs from MVIS by about 3.2 ms on Looper
+  Insight 9 and 1.9–2.0 ms on the T265; an injection sweep predicts 3.0–3.2 and
+  1.6–1.7 ms of that from the offset alone. Whose `td` is closer to the truth is
+  not yet tested. [Details](/benchmark/tga/).
 - **Validation is a command, not a habit.** `mvis roundtrip` gives a
   PASS/FAIL. A PASS requires IMU intrinsics to collapse *and* geometry to
   hold. Nothing comparable ships with the others.
