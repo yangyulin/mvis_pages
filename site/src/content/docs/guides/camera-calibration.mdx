@@ -8,14 +8,25 @@ import { Image } from 'astro:assets';
 import kalibrBoard from '../../../assets/kalibr_board.png';
 import aurcoBoard from '../../../assets/aurco.JPG';
 
-Camera-only calibration: intrinsics, distortion, extrinsics, time offsets, and
-rolling-shutter readout, solved jointly. This is also **step one of camera–IMU
-calibration**, which consumes the result.
+Use this page to calibrate one or more cameras without an IMU. MVIS solves all
+of these jointly:
+
+- **Intrinsics:** focal length and image centre of each camera
+- **Distortion:** how the lens bends straight lines
+- **Extrinsics:** where each camera sits relative to the others
+- **Time offsets:** the clock delay between cameras
+- **Rolling-shutter readout:** the time a rolling-shutter sensor takes to read
+  out one frame, row by row
+
+This is also **step one of camera–IMU calibration**. That step uses the result
+of this one.
 
 ## 1. Make a target
 
 <Image src={kalibrBoard} alt="AprilGrid target" width="200" />
 <Image src={aurcoBoard} alt="ArUco target" width="200" />
+
+Pick one of three boards. Each needs these fields in the config:
 
 | Board | `board_type` | Required fields |
 |---|---|---|
@@ -23,25 +34,28 @@ calibration**, which consumes the result.
 | Chessboard | `chessboard` | `rows`, `cols` (**inner corners**), `square_size` (m) |
 | ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` |
 
-AprilGrid follows the Kalibr 2-bit border convention, and Kalibr target YAMLs
-load directly via `apriltag_board.from_kalibr_yaml`.
+AprilGrid follows the Kalibr 2-bit border convention. Kalibr target YAMLs load
+directly via `apriltag_board.from_kalibr_yaml`.
 
 :::caution[Measure the printed board]
-Print at 100% and measure a tag with calipers. A board whose true size differs
-from `tag_size` scales every translation in the rig by that same factor — a
-silent, systematic error no residual will reveal.
+Print at 100% and measure a tag with calipers. If the true size differs from
+`tag_size`, every translation in the rig scales by that same factor. This error
+is silent and systematic: no residual will reveal it.
 :::
 
 ## 2. Record
 
-Fill the frame and cover the image to its corners — distortion is only
-constrained where tags were actually seen. Vary distance and angle; avoid
-motion blur.
+- **Fill the frame** and cover the image out to its corners. Distortion is only
+  constrained where tags were actually seen.
+- **Vary distance and angle.**
+- **Avoid motion blur.**
 
 ## 3. Point the config at your data
 
-Six input formats, all streaming one image at a time so memory stays bounded
-regardless of dataset size:
+MVIS reads six input formats. All of them stream one image at a time, so memory
+stays bounded whatever the dataset size.
+
+A folder of images:
 
 ```yaml title="config.yaml"
 cameras:
@@ -49,6 +63,8 @@ cameras:
     source_type: images              # a folder, sorted by filename
     source_path: /path/to/cam0_images
 ```
+
+A ROS1 bag, with several cameras from one bag:
 
 ```yaml title="config.yaml"
 cameras:
@@ -62,6 +78,8 @@ cameras:
     topic: /cam1/image_raw
 ```
 
+A EuRoC / ASL folder, as used by TUM-VI and Monado SLAM:
+
 ```yaml title="config.yaml"
 cameras:
   - camera_id: 0
@@ -69,7 +87,10 @@ cameras:
     source_path: /path/to/cam0
 ```
 
-Also available: `timestamped_images` (folder + CSV) and `ros2bag`.
+Also available:
+
+- `timestamped_images`: a folder plus a CSV of timestamps
+- `ros2bag`
 
 ## 4. Pick a distortion model
 
@@ -78,9 +99,12 @@ Also available: `timestamped_images` (folder + CSV) and `ros2bag`.
                                      # double_sphere | eucm | ucm | omni_radtan
 ```
 
-`radtan` for normal lenses, `equidistant` for fisheye. Models can be **mixed
-across cameras** in one rig. The trade-offs — and the wide-FoV divergence to
-watch for — are in [Camera model](/concepts/camera-model/).
+- **Normal lenses:** `radtan`
+- **Fisheye lenses:** `equidistant`
+- **Mixed rigs:** models can be **mixed across cameras** in one rig
+
+The trade-offs are in [Camera model](/concepts/camera-model/). That page also
+covers the divergence to watch for with a wide field of view (FoV).
 
 ## 5. Run
 
@@ -90,7 +114,7 @@ mvis calibrate --config config.yaml
 
 ## What the pipeline does
 
-Worth knowing, because the failure messages name these stages:
+The failure messages name these stages, so they are worth knowing:
 
 | Stage | What happens |
 |---|---|
@@ -104,29 +128,40 @@ Worth knowing, because the failure messages name these stages:
 
 ## Speed
 
-`corner_subsample` defaults to `top_left`: one corner per tag instead of four,
-**3–5× faster for under 0.1% quality drift**, validated across eight dataset
-families. It auto-falls back to `all` on sparse data.
+`corner_subsample` defaults to `top_left`. It uses one corner per tag instead of
+four.
+
+- **Speed-up:** **3–5× faster for under 0.1% quality drift**
+- **Tested:** validated across eight dataset families
+- **Fallback:** it switches to `all` on its own when the data is sparse
 
 ```yaml title="config.yaml"
 corner_subsample: top_left     # top_left | two_diag | all
 ```
 
-`factor_hz` subsamples frames if a long recording is slowing you down.
+If a long recording is slowing you down, `factor_hz` subsamples the frames.
 
 ## 6. Read the report
 
-Two YAMLs — `*_calib.yaml` to deploy, `*_full.yaml` with board poses to
-replay — plus a self-contained HTML report. Check the **motion-excitation
-grade** before the reprojection error: see
+MVIS writes three files:
+
+- **`*_calib.yaml`:** the result to deploy
+- **`*_full.yaml`:** the result plus board poses, to replay the run
+- **HTML report:** self-contained
+
+Check the **motion-excitation grade** before the reprojection error. The grade
+says how well your motion constrained the calibration. The reprojection error
+is the pixel gap between seen and predicted corners. See
 [Evaluation & metrics](/reference/evaluation/).
 
 ## Multi-camera
 
-Add entries to `cameras:` and set `reference_camera`. There is no separate
-stereo step — all cameras enter one graph, so a five-camera rig stays
-consistent instead of accumulating pairwise error. Enable
-`optimize_time_offset: true` for unsynchronised cameras.
+1. Add one entry per camera to `cameras:`.
+2. Set `reference_camera`.
+3. For unsynchronised cameras, enable `optimize_time_offset: true`.
+
+There is no separate stereo step. All cameras enter one graph. A five-camera rig
+stays consistent this way, instead of piling up pairwise error.
 
 ## Next
 

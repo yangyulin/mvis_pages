@@ -7,16 +7,29 @@ wide: true
 
 import CalibMotionPlayer from '../../../components/CalibMotionPlayer.astro';
 
-A camera–IMU calibration can only find what the motion shows it. The 60 s motion below excites every
-axis and sweeps the board across the whole image. We built it from a real hand-held recording with our
-Looper Insight 9 and checked it with a **noisy digital twin**: the twin simulates the recording, solves
-it and compares the result with the truth. A motion is good if the twin still converges on every
-calibration parameter.
+Use this page to plan how you move the rig for a camera–IMU calibration. You need a board on a screen
+and a rig with cameras and an IMU (inertial measurement unit: gyroscope and accelerometer).
+
+A calibration can only find what the motion shows it. Our 60 s motion below excites every axis. It also
+sweeps the board across the whole image.
+
+We built it from a real hand-held recording with our Looper Insight 9. We checked it with a **noisy
+digital twin**. The twin:
+
+- simulates the recording;
+- solves it;
+- compares the result with the truth.
+
+A motion is good if the twin still converges on every calibration parameter. Converges means the solve
+settles on a value.
 
 ## <span id="boards-we-used" class="cm-anchor"></span>1. Set up the board
 
-The main motion is built for an AprilGrid, which may run partly off the edge of the picture; a chessboard is only
-detected with every corner in the picture, so it has its own, smaller motion (see [step 2](#2-watch-and-practise-the-motion)).
+Pick your board first. Each board has its own motion:
+
+- **AprilGrid:** the main motion is built for it. It may run partly off the edge of the picture.
+- **Chessboard:** it is only detected with every corner in the picture. So it has its own, smaller motion
+  (see [step 2](#2-watch-and-practise-the-motion)).
 
 Both boards are full-screen images for a 2560 × 1440 monitor, with configs for MVIS and Kalibr.
 
@@ -41,29 +54,45 @@ Both boards are full-screen images for a 2560 × 1440 monitor, with configs for 
   </figure>
 </div>
 
-**How to show them:** open the image full screen at 100 % on a 2560 × 1440 monitor, with no display scaling
-and no zoom, so one image pixel is one screen pixel. On our monitor 160 px (one tag, one square) measure
-43.47 mm, the size in the configs. On another screen, measure one tag or square with a ruler and put that
-size in the config (`tag_size` / `square_size` for MVIS, `tagSize` / `rowSpacingMeters` and `colSpacingMeters`
-for Kalibr).
+**How to show them:**
 
-**Setup:** board upright and flat, enough light for a short exposure (about 2 ms); start face-on, about 0.42 m
-away for the AprilGrid motion (0.47 m for the chessboard).
+1. Open the image full screen at 100 % on a 2560 × 1440 monitor.
+2. Use no display scaling and no zoom, so one image pixel is one screen pixel.
+
+On our monitor 160 px (one tag, one square) measure 43.47 mm, the size in the configs. On another screen,
+measure one tag or square with a ruler. Put that size in the config:
+
+- **MVIS:** `tag_size` / `square_size`
+- **Kalibr:** `tagSize` / `rowSpacingMeters` and `colSpacingMeters`
+
+**Setup:**
+
+- Board upright and flat.
+- Enough light for a short exposure (about 2 ms).
+- Start face-on, about 0.42 m away for the AprilGrid motion (0.47 m for the chessboard).
 
 ## <span id="the-motion" class="cm-anchor"></span><span id="chessboard-version" class="cm-anchor"></span>2. Watch and practise the motion
 
 <CalibMotionPlayer />
 
-Pick the chip for your board. Follow the **Now** panel: it names the move, says what to do, counts down and
-shows what comes next; the camera card on the right shows what the camera sees and which parts of the image are
-still empty. The chessboard motion has the same four moves, built from our chessboard example: it swings less,
-comes in only to 0.28 m and turns only a little in the loop, so the whole board stays in view; same rules
-otherwise, and it also passes the twin.
+Pick the chip for your board. Then follow the **Now** panel. It:
+
+- names the move;
+- says what to do;
+- counts down;
+- shows what comes next.
+
+The camera card on the right shows what the camera sees. It also shows which parts of the image are still
+empty.
+
+**Chessboard motion:** the same four moves, built from our chessboard example. It swings less, comes in
+only to 0.28 m and turns only a little in the loop, so the whole board stays in view. The rules are otherwise
+the same, and it also passes the twin.
 
 ## <span id="step-by-step" class="cm-anchor"></span>3. Step by step
 
-Four moves in order, blended into each other, with a short rest at each end, at a comfortable hand pace (about
-0.4 m/s and 1.9 rad/s at most):
+Do four moves in order, with a short rest at each end. Blend each move into the next. Keep a comfortable
+hand pace: about 0.4 m/s and 1.9 rad/s at most.
 
 | # | Move | Time | What to do |
 |---|---|---|---|
@@ -80,42 +109,60 @@ Four moves in order, blended into each other, with a short rest at each end, at 
 
 ## 4. Record and check
 
-Record the 60 s motion with your rig. 50 s also works: drop one in-out and one loop. Then calibrate with the
-board config from [step 1](#1-set-up-the-board) and check the result, as in the
-[camera–IMU calibration guide](/guides/camera-imu-calibration/).
+1. Record the 60 s motion with your rig. 50 s also works: drop one in-out and one loop.
+2. Calibrate with the board config from [step 1](#1-set-up-the-board).
+3. Check the result, as in the [camera–IMU calibration guide](/guides/camera-imu-calibration/).
 
 ## Real examples
 
-Two hand-held recordings of our Looper Insight 9, solved with MVIS; both pass the twin. The cards show the
-corners MVIS detected in each of the three cameras, drawn without the camera images.
+Here are two hand-held recordings of our Looper Insight 9, solved with MVIS. Both pass the twin. The cards
+show the corners MVIS detected in each of the three cameras. They are drawn without the camera images.
 
 <CalibMotionPlayer mode="real" />
 
-Both move faster than the guide motion; at a comfortable pace, follow the 60 s guide.
+Both move faster than the guide motion. At a comfortable pace, follow the 60 s guide.
 
 ## Motions that fail
 
+Avoid these motions. Each leaves some parameters loose: the solve cannot pin them down.
+
 - **Fast shaking from one spot, face-on:** the lens distortion stays loose.
-- **One slow axis at a time, never pitched:** lever arm, time offsets and IMU scales stay loose.
+- **One slow axis at a time, never pitched:** lever arm (the camera–IMU position offset), time offsets and IMU scales
+  stay loose.
 - **A missing rotation** (no pitch, no roll, or yaw only): the matching gyro and accelerometer scales,
   or the whole camera–IMU rotation, cannot be found.
 - **The board always centred:** the image edges are never seen, so the distortion stays loose.
 
 ## How we judged it
 
-The twin is a simulated Looper Insight 9 in front of the board, with realistic corner and IMU noise,
-motion blur and dropped detections. Each motion is solved on 3 noise seeds plus a noise-free run (t_ga
-estimated, camera intrinsics free). A motion is **good** if, on all 22 parameters (camera–IMU rotation,
-lever arm, td, t_ga, gyro and accelerometer scales, and the camera intrinsics), every solve converges, the
-error stays within its uncertainty, and the uncertainty is at most 3× that of a well-excited 80 s
-reference motion.
+The twin is a simulated Looper Insight 9 in front of the board. It has realistic corner and IMU noise,
+motion blur and dropped detections.
+
+Each motion is solved on 3 noise seeds plus a noise-free run. In each solve t_ga (the time offset between the
+gyroscope and the accelerometer) is estimated. The camera intrinsics (focal length, image centre and lens distortion) are free.
+
+A motion is **good** if, on all 22 parameters:
+
+- every solve converges;
+- the error stays within its uncertainty;
+- the uncertainty is at most 3× that of a well-excited 80 s reference motion.
+
+The 22 parameters are the camera–IMU rotation, lever arm, td (the camera–IMU time offset), t_ga, gyro and
+accelerometer scales, and the camera intrinsics.
 
 ## Replay it yourself
 
-The [replay pack](/downloads/calib-motion-replay.zip) (zip, 3.2 MB) holds the four motions at 200 Hz (IMU
-pose, ideal gyro and accelerometer), the two twin rigs (camera, IMU, truth, noise and detection rules) and our
-twin results with the pass rule, so you can run them through your own simulator and calibration tool. Its
-README gives the frames, units and replay steps; the twin itself ran on MVIS, which is not public yet.
+Run our motions through your own simulator and calibration tool with the
+[replay pack](/downloads/calib-motion-replay.zip) (zip, 3.2 MB). It holds:
 
-Licence: CC BY 4.0 for the guide motions, rigs and their results; the two real-example trajectories come from our
-Looper Insight 9 recordings and are CC BY-NC 4.0, as are their results.
+- **the four motions** at 200 Hz (IMU pose, ideal gyro and accelerometer);
+- **the two twin rigs** (camera, IMU, truth, noise and detection rules);
+- **our twin results** with the pass rule.
+
+Its README gives the frames, units and replay steps. The twin itself ran on MVIS, which is not public yet.
+
+**Licence:**
+
+- **CC BY 4.0:** the guide motions, rigs and their results.
+- **CC BY-NC 4.0:** the two real-example trajectories and their results. The trajectories come from our
+  Looper Insight 9 recordings.

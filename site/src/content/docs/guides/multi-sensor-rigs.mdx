@@ -4,13 +4,17 @@ description: Calibrate rigs with several cameras and several IMUs in a single gr
 pageType: guide
 ---
 
-Multi-sensor rigs are the case MVIS is built for. There is no separate
-stereo step and no pairwise composition: every camera and every IMU enters one
-factor graph, so correlations between them are kept rather than discarded.
+Use this page to calibrate a rig with several cameras, several IMUs, or both.
+Multi-sensor rigs are the case MVIS is built for.
+
+- **One graph:** every camera and every IMU enters one factor graph (one joint
+  problem solved together).
+- **No separate stereo step** and no pairwise composition.
+- **Correlations kept:** links between the sensors are kept rather than discarded.
 
 ## Several cameras
 
-Add entries and choose the reference:
+Add one entry per camera and choose the reference:
 
 ```yaml title="config.yaml"
 cameras:
@@ -35,19 +39,26 @@ reference_camera: 0
 optimize_time_offset: true         # for unsynchronised cameras
 ```
 
-Extrinsics are expressed against `reference_camera`. Camera-to-camera
-transforms follow by composition through the graph, which is what keeps a
-five-camera rig consistent.
+- **Extrinsics** (the pose of each camera on the rig) are expressed against
+  `reference_camera`.
+- **Camera-to-camera transforms** follow by composition through the graph.
+  This is what keeps a five-camera rig consistent.
 
-**Cross-FOV rigs** — a fisheye and a narrow lens on the same rig — are where
-time-offset estimation usually fails. MVIS runs two independent estimators
-(PnP-based and M5 homography cross-correlation) precisely for this case.
+**Cross-FOV rigs** put a fisheye and a narrow lens on the same rig. Here
+time-offset estimation usually fails. For this case MVIS runs two independent
+estimators:
+
+- **PnP-based:** from the board pose seen in each camera
+- **M5 homography cross-correlation**
 
 ## Several IMUs
 
-The first entry in `imu_topics` is the **base IMU**: the reference clock, and
-the only IMU that carries the trajectory. Everything else is auxiliary, related
-by a rigid transform and a time offset.
+The first entry in `imu_topics` is the **base IMU**:
+
+- **Reference clock** for the whole rig
+- **The only IMU that carries the trajectory**
+- Every other IMU is **auxiliary**, related to it by a rigid transform and a
+  time offset.
 
 ```yaml title="cam_imu.yaml"
 input:
@@ -58,24 +69,29 @@ input:
     - {gyro_only: true}        # aux with an untrustworthy accel
 ```
 
-Choose the best sensor as base — highest rate, lowest noise. Its errors
+Choose the best sensor as base: highest rate, lowest noise. Its errors
 propagate to the whole rig.
 
-`gyro_only` is per-IMU and not permitted on the base. What it does and when to
-prefer it over `estimate_t_ga`: [IMU model](/concepts/imu-model/).
+`gyro_only` is set per IMU and is not permitted on the base. What it does and
+when to prefer it over `estimate_t_ga`: [IMU model](/concepts/imu-model/).
 
 ## Why redundancy helps
 
 Several IMUs observe the *same* motion. That redundancy constrains parameters a
-single IMU leaves weak — time offsets, readout, and IMU intrinsics — which is
-the reason to carry the extra sensors at all. It is also what makes the
-[round-trip check](/guides/roundtrip/) meaningful on these rigs: a wrong
+single IMU leaves weak:
+
+- **Time offsets**
+- **Readout** (the rolling-shutter readout time)
+- **IMU intrinsics** (scale, misalignment and similar sensor errors)
+
+This is the reason to carry the extra sensors at all. It also makes the
+[round-trip check](/guides/roundtrip/) meaningful on these rigs. A wrong
 calibration usually cannot satisfy every IMU at once.
 
 ## Sensor numbering when comparing with Kalibr
 
-MVIS numbers sensors by role; Kalibr numbers by input order. Getting this
-wrong silently compares the wrong pair. For the released rigs:
+MVIS numbers sensors by role; Kalibr numbers them by input order. Getting this
+wrong silently compares the wrong pair. The tables below map the released rigs.
 
 **4 IMUs + 3 cameras**
 
@@ -93,9 +109,9 @@ wrong silently compares the wrong pair. For the released rigs:
 | MVIS | Cam0 | Cam1 | Cam2 | Cam3 | Ib | Is0 | Is1 | Is2 |
 
 MVIS reads and writes Kalibr `camchain` and `camchain-imucam` files
-directly — see [Result formats](/reference/result-formats/).
+directly. See [Result formats](/reference/result-formats/).
 
 ## Worked runs
 
-[4 IMUs + 3 cams](/reference/datasets/virig-4imus-3cams/) ·
-[4 IMUs + 4 cams](/reference/datasets/virig-4imus-4cams/)
+- [4 IMUs + 3 cams](/reference/datasets/virig-4imus-3cams/)
+- [4 IMUs + 4 cams](/reference/datasets/virig-4imus-4cams/)

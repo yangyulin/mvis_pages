@@ -4,34 +4,44 @@ description: Validate a calibration end to end — calibrate, correct, recalibra
 pageType: guide
 ---
 
-Reprojection error tells you a calibration fits its own observations. It does
-not tell you the calibration is *right*. Round-trip does: apply the calibration
-to the data it came from, then calibrate again. If it was correct, there is
-nothing left to find.
+Use this page to check that a calibration is *right*, not only that it fits.
+
+- **Reprojection error** (how far detected corners land from where the
+  calibration predicts them) tells you a calibration fits its own observations.
+  It does not tell you the calibration is right.
+- **Round-trip** does. We apply the calibration to the data it came from, then
+  calibrate again. If it was correct, there is nothing left to find.
 
 ```bash
 mvis roundtrip -c cam_imu.yaml
 ```
 
-One command runs calibrate → [`apply-calib`](/guides/corrected-datasets/) →
-recalibrate → report. It exits non-zero on FAIL, so it belongs in CI.
+One command runs four steps:
+
+1. Calibrate.
+2. Correct the data with [`apply-calib`](/guides/corrected-datasets/).
+3. Recalibrate.
+4. Report.
+
+It exits non-zero on FAIL, so it belongs in CI.
 
 ## What PASS means
 
-Two conditions, and they pull in opposite directions — which is what makes the
-test informative:
+PASS needs two conditions. They pull in opposite directions, which is what
+makes the test informative.
 
-**Collapse.** On the corrected bag, every IMU's `Dw` and `Da` must go to
-identity and `b_g` / `b_a` to zero. The first pass claimed to have measured
-those; if it was right, correction consumed them and there is nothing left.
+- **Collapse.** On the corrected bag, every IMU's `Dw` and `Da` (the gyroscope
+  and accelerometer scale and axis-misalignment matrices) must go to identity.
+  The biases `b_g` / `b_a` must go to zero. The first pass claimed to have
+  measured those. If it was right, correction consumed them and there is
+  nothing left.
+- **Preserve.** The camera and IMU extrinsics (the poses between sensors) must
+  not move. Nor must the **stereo baseline**. Correction changes timing and
+  inertial scaling, not geometry. A baseline that shifts means the first solve
+  traded geometry against something else.
 
-**Preserve.** The camera and IMU extrinsics — and the **stereo baseline** —
-must not move. Correction changes timing and inertial scaling, not geometry. A
-baseline that shifts means the first solve traded geometry against something
-else.
-
-Residual `td` is reported as a **warning, not a failure**: how much of a time
-offset survives correction is observability-dependent.
+Residual `td` (the camera-to-IMU time offset) is a **warning, not a failure**.
+How much of a time offset survives correction depends on how observable it is.
 
 ## Flags
 
@@ -43,9 +53,9 @@ offset survives correction is observability-dependent.
 | `--keep-corrected` | Keep the intermediate corrected bag |
 | `--keep-bias` | Passed through to `apply-calib` |
 
-The corrected bag is given a distinct name — so it gets a **fresh detection
-cache** rather than silently reusing the original's — and is deleted afterwards
-unless you keep it.
+The corrected bag gets a distinct name. So it gets a **fresh detection cache**
+rather than silently reusing the original's. It is deleted afterwards unless
+you keep it.
 
 ## Confirmed results
 
@@ -58,13 +68,14 @@ unless you keep it.
 
 A FAIL is a real finding, not a flaky test. The usual causes:
 
-- **Wrong camera model** — the intrinsics absorbed error that reappears once
+- **Wrong camera model.** The intrinsics absorbed error that reappears once
   timing is corrected. Try another [distortion
   model](/concepts/camera-model/).
-- **Wrong IMU convention** — see [IMU model](/concepts/imu-model/).
-- **An interpolated accelerometer** corrupting `td`. This is the T265 case;
-  `gyro_only` on that IMU, or estimating `t_ga`, is the fix.
-- **Insufficient excitation** — the parameter was never observed, so correcting
-  by it does nothing consistent.
+- **Wrong IMU convention.** See [IMU model](/concepts/imu-model/).
+- **An interpolated accelerometer** corrupting `td`. This is the T265 case.
+  The fix is `gyro_only` on that IMU, or estimating `t_ga` (the time offset
+  between the gyroscope and accelerometer channels).
+- **Insufficient excitation.** The parameter was never observed, so
+  correcting by it does nothing consistent.
 
 Same entry point as `studies/roundtrip.py`.

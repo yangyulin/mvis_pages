@@ -8,9 +8,12 @@ wide: true
 import { Image } from 'astro:assets';
 import viRig from '../../../assets/vi_rig.jpg';
 
-MVIS is **pure Python** and runs on Windows, macOS, and Linux via
-`pip install`. There is no ROS dependency and nothing to compile. Build steps
-are in [Installation](/getting-started/installation/).
+Use this page to check what MVIS needs before you install it. It also lists
+what MVIS calibrates and which inputs and boards it reads.
+
+- **Pure Python:** runs on Windows, macOS and Linux
+- **Install:** `pip install`; nothing to compile, no ROS dependency
+- **Build steps:** see [Installation](/getting-started/installation/)
 
 ## Dependencies
 
@@ -27,6 +30,10 @@ are in [Installation](/getting-started/installation/).
 
 ## What can be calibrated
 
+Intrinsics are a sensor's own parameters, such as lens distortion. Extrinsics
+are where one sensor sits relative to another. RS means rolling shutter: the
+camera reads its rows one after another.
+
 | Quantity | Scope | Notes |
 |---|---|---|
 | Camera intrinsics + distortion | per camera | Eight models, mixable across a rig |
@@ -42,20 +49,31 @@ are in [Installation](/getting-started/installation/).
 
 ## Camera models
 
-`radtan` · `kb4` (fisheye; also `fisheye`, `kannala_brandt`) · `equidistant`
-(the same pixels as `kb4` when every corner is under 90°) · `fov` ·
-`double_sphere` · `eucm` · `ucm` · `omni_radtan` (experimental). Details:
+MVIS has eight camera models. Details are in
 [Camera model](/concepts/camera-model/).
+
+- `radtan`
+- `kb4`: fisheye; also called `fisheye` or `kannala_brandt`
+- `equidistant`: the same pixels as `kb4` when every corner is under 90°
+- `fov`
+- `double_sphere`
+- `eucm`
+- `ucm`
+- `omni_radtan` (experimental)
 
 ## IMU-intrinsics conventions
 
-`kalibr` · `rpng` · `calyx` — a convention, not a quality lever. See
-[IMU model](/concepts/imu-model/).
+Pick one of three conventions. It is a convention only; it does not make the
+calibration better. See [IMU model](/concepts/imu-model/).
+
+- `kalibr`
+- `rpng`
+- `calyx`
 
 ## Input formats
 
-Detection is streaming — one image at a time — so memory is bounded regardless
-of dataset size.
+Memory stays bounded, whatever the dataset size. Detection streams the input,
+one image at a time. Set `source_type` to one of these:
 
 | `source_type` | Input |
 |---|---|
@@ -68,18 +86,20 @@ of dataset size.
 
 ## Calibration boards
 
+Set `board_type` and the required fields for your board.
+
 | Board | `board_type` | Required fields |
 |---|---|---|
 | AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` |
 | Chessboard | `chessboard` | `rows`, `cols` (inner corners), `square_size` (m) |
 | ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` |
 
-Kalibr target YAMLs load directly.
+Kalibr target YAML files also load directly.
 
 ## Reference rig
 
-The released MVIS datasets come from a self-built VI-Rig. It is not required —
-it is what the shipped example configs assume.
+Our released MVIS datasets come from a VI-Rig we built ourselves. You do not
+need it. The shipped example configs assume it.
 
 <Image src={viRig} alt="VI-Rig with 4 IMUs and 5 cameras" width="320" />
 

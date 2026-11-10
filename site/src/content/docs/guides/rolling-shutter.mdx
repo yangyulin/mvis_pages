@@ -4,9 +4,11 @@ description: Solve per-row readout time jointly with intrinsics, extrinsics, and
 pageType: guide
 ---
 
-A rolling-shutter camera exposes rows sequentially, so one image spans a range
-of times. MVIS solves the **readout time** as a parameter rather than
-correcting for it afterwards.
+Use this page to calibrate a rolling-shutter camera. Such a camera exposes its
+rows one after another, so one image spans a range of times.
+
+MVIS solves the **readout time** as a parameter. This is the time the camera
+takes to read out its rows. We solve it rather than correcting for it afterwards.
 
 ## Enable it
 
@@ -16,10 +18,11 @@ cameras:
     shutter_type: rolling      # global | rolling
 ```
 
-Per camera — a rig can mix global- and rolling-shutter cameras freely, and the
-released 4-IMU/4-camera rig does exactly that.
+- **Per camera:** you set it on each camera.
+- **Mixed rigs:** a rig can mix global- and rolling-shutter cameras freely.
+- **Example:** the released 4-IMU/4-camera rig does exactly that.
 
-In a camera–IMU config, readout can be estimated in the cam-IMU stage instead:
+In a camera–IMU config, you can estimate readout in the cam-IMU stage instead:
 
 ```yaml title="cam_imu.yaml"
 camera_input:
@@ -28,20 +31,33 @@ camera_input:
 
 ## Why it is solved jointly
 
-Projection, time offset, rolling shutter, extrinsic composition, and SLERP pose
-interpolation live in **one unified factor**. A row's observation is projected
-against the trajectory at *that row's* time, not the frame's — so readout is
-constrained by the same residuals as everything else instead of being a
-post-hoc correction with no derivative.
+Readout is constrained by the same residuals as everything else. So it is not a
+post-hoc correction with no derivative. A residual is the error between an
+observed and a predicted image point.
+
+This works because **one unified factor** (one error term in the solver) holds
+all of these:
+
+- projection
+- time offset
+- rolling shutter
+- extrinsic composition
+- SLERP pose interpolation (smooth blending between two poses)
+
+We project a row's observation against the trajectory at *that row's* time,
+not the frame's.
 
 ## What to expect
 
-Readout is among the weakest parameters in the graph. It is only excited by
-motion fast enough that rows see meaningfully different geometry — a slow,
-smooth recording will not constrain it, and the estimate will drift toward
-whatever the initialisation suggested.
+Readout is among the weakest parameters in the graph.
 
-Two checks worth more than a single run's residual:
+- **Needs fast motion:** only motion fast enough that rows see meaningfully
+  different geometry excites it.
+- **Slow recordings fail:** a slow, smooth recording will not constrain it.
+- **Drift:** then the estimate drifts toward whatever the initialisation
+  suggested.
+
+Two checks are worth more than a single run's residual:
 
 - **Repeatability.** Calibrate several sequences of the same rig with
   [batch mode](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
@@ -51,17 +67,17 @@ Two checks worth more than a single run's residual:
 
 :::caution[Readout and time offset trade against each other]
 Both shift *when* an observation is considered to have happened. With
-insufficient motion the solver cannot separate them, and the pair can land
-anywhere along a ridge while the residual stays flat. If a rolling-shutter
-camera's `td` looks displaced relative to its global-shutter neighbours,
-suspect this before the hardware.
+insufficient motion the solver cannot separate them. The pair can then land
+anywhere along a ridge (a line of equally good solutions) while the residual
+stays flat. Is a rolling-shutter camera's `td` (its time offset) displaced
+relative to its global-shutter neighbours? Suspect this before the hardware.
 :::
 
 ## Reporting
 
-Readout appears in the HTML report's temporal-calibration section, merged with
-the time offset — they are read together for the reason above. Regression
-comparison reports break out per-collection readout and time offset so drift
-across a dataset family is visible.
+- **HTML report:** readout appears in the temporal-calibration section, merged
+  with the time offset. We read them together for the reason above.
+- **Regression comparison reports:** they break out per-collection readout and
+  time offset. This makes drift across a dataset family visible.
 
-The residual and its Jacobians: [Camera model](/concepts/camera-model/).
+The residual and its Jacobians (its derivatives): [Camera model](/concepts/camera-model/).
