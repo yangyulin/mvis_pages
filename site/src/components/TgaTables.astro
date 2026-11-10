@@ -1,0 +1,65 @@
+---
+// The two small tables of /benchmark/tga/, every number from src/data/tga/tga.json (export_tga.py):
+//   which="zero"   td and the largest IMU scale error each tool reads on the MVIS-corrected bag (no injected delay)
+//   which="shift"  real t_ga on the raw bag and what a tool without t_ga does to td: share x t_ga
+// td is one value per tool, as in the sweep figure: MVIS cam0, Kalibr the mean of its cameras, Basalt its rig offset.
+import data from '../data/tga/tga.json';
+
+interface Props { which: 'zero' | 'shift' }
+const { which } = Astro.props;
+
+const D: any = (data as any).devices;
+const devs = [D.looper, D.t265];
+const tools = [['MVIS', 'M'], ['Kalibr', 'K'], ['Basalt', 'B']] as const;
+// Signed, with a real minus; a value that rounds to zero prints as 0.00.
+const f = (v: number, d = 2) => {
+  const r = Number(v.toFixed(d));
+  return (r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r).toFixed(d);
+};
+const i0 = (d: any) => d.tau.indexOf(0);
+const td0 = (d: any, k: string) =>
+  k === 'M' ? d.mvis_td[i0(d)][0] : k === 'K' ? d.kalibr_td_mean[i0(d)] : d.basalt_td[i0(d)];
+// Largest |scale - 1| over the six IMU axes (gyro x y z, accel x y z), in %.
+const scaleErr = (d: any, k: string) => Math.max(...d.scale_pct[k][i0(d)].map(Math.abs));
+---
+{which === 'zero' && (
+  <>
+    <table>
+      <thead>
+        <tr><th rowspan="2">Tool</th>{devs.map((d) => <th colspan="2">{d.label}</th>)}</tr>
+        <tr>{devs.map(() => <><th>td (ms)</th><th>scale error (%)</th></>)}</tr>
+      </thead>
+      <tbody>
+        {tools.map(([name, k]) => (
+          <tr><td>{name}</td>{devs.map((d) => <><td>{f(td0(d, k))}</td><td>{scaleErr(d, k).toFixed(2)}</td></>)}</tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="tga-foot">Corrected bag, no injected delay. Scale error is the largest |scale − 1| over the six IMU axes.</p>
+  </>
+)}
+{which === 'shift' && (
+  <>
+    <table>
+      <thead>
+        <tr><th>Device</th><th>t_ga on the raw bag (MVIS)</th><th>Kalibr: share → td moved</th><th>Basalt: share → td moved</th></tr>
+      </thead>
+      <tbody>
+        {devs.map((d) => (
+          <tr>
+            <td>{d.label}</td>
+            <td><b>{f(d.raw.mvis_tga)} ± {d.raw.mvis_tga_sigma.toFixed(2)} ms</b></td>
+            <td>{d.slope.kalibr.toFixed(2)} → <b>{f(d.gap.kalibr_predicted)} ms</b></td>
+            <td>{d.slope.basalt.toFixed(2)} → <b>{f(d.gap.basalt_predicted)} ms</b></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="tga-foot">On the raw bags, Kalibr's td really differs from MVIS's by about this much
+      ({f(D.looper.gap.kalibr[0])} ms on Looper, {f(D.t265.gap.kalibr[0])} ms on the T265).</p>
+  </>
+)}
+
+<style>
+  .tga-foot { font-size: 0.8rem; color: var(--rp-mut); }
+</style>
