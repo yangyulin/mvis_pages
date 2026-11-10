@@ -5,11 +5,13 @@ pageType: reference
 wide: true
 ---
 
-MVIS is a Python library, so the CLI is one entry point rather than the only
-one. Every stage is importable.
+Use this page to find which MVIS module to import for each stage.
+
+- **Every stage is importable:** MVIS is a Python library.
+- **The CLI is one entry point:** the command-line interface is not the only way in.
 
 :::note[Not auto-generated yet]
-This page is a hand-written map of the package, not generated API
+This page is a hand-written map of the package. It is not generated API
 documentation. Choosing a docstring-extraction toolchain is open question **O4**
 on the [roadmap](/about/roadmap/). Until then the source is authoritative.
 :::
@@ -27,9 +29,15 @@ on the [roadmap](/about/roadmap/). Until then the source is authoritative.
 | `mvis.recalib` | `apply-calib` — corrected-dataset export |
 | `mvis.cli` | Command-line interface |
 
+Terms in the table:
+
+- **Jacobians:** the derivatives of the projection.
+- **Unprojection:** the reverse of projection, from a pixel back to a viewing ray.
+- **OpenCV PnP:** OpenCV's pose-from-known-points solve, used for the first guess.
+
 ## Kalibr interop
 
-`mvis.io.kalibr` is the one surface for Kalibr files:
+Use `mvis.io.kalibr` for all Kalibr files. It is the one surface for them.
 
 | Function | Does |
 |---|---|
@@ -38,27 +46,36 @@ on the [roadmap](/about/roadmap/). Until then the source is authoritative.
 | `write_camchain_imucam` | Exports a cam-IMU result as a round-trippable camchain-imucam |
 | `apriltag_board.from_kalibr_yaml` | Loads an AprilGrid target definition |
 
-This is the practical path for comparing against, or migrating from, Kalibr.
+A camchain is Kalibr's YAML file of camera parameters. `T_cam_imu` is the
+IMU-to-camera transform. `T_cn_cnm1` is the transform from the previous camera
+to this one.
+
+This module is the practical path for comparing against Kalibr or migrating from it.
 
 ## Regenerating reports
 
-Rebuild HTML reports from saved YAML plus the detection cache, without re-running
-the calibration — useful when only the report template changed:
+This command rebuilds HTML reports without re-running the calibration:
 
 ```bash
 python -m mvis.analysis.regenerate_html
 ```
 
+- **Inputs:** saved YAML plus the detection cache
+- **When to use it:** only the report template changed
+
 ## Why the models live in one place
 
-`camera/CameraModel` holds each model's projection, Jacobian, and unprojection
-together, and `calibration/camera_projection.py` is shared by the optimiser
-*and* the HTML report. That is a deliberate constraint: reported residuals are
-computed by the same code the solver minimised, so a report cannot disagree
-with the fit it describes.
+A report cannot disagree with the fit it describes. Reported residuals are
+computed by the same code the solver minimised.
+
+This is a deliberate constraint:
+
+- **`camera/CameraModel`** holds each model's projection, Jacobian, and unprojection together.
+- **`calibration/camera_projection.py`** is shared by the optimiser *and* the HTML report.
 
 ## Stability
 
-There is no API-stability guarantee yet. The CLI and the config schema are the
-stable surface; treat direct imports as subject to change until this page is
-generated from the source.
+There is no API-stability guarantee yet.
+
+- **Stable surface:** the CLI and the config schema
+- **Subject to change:** direct imports, until this page is generated from the source

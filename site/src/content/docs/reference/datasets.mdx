@@ -8,19 +8,33 @@ wide: true
 import { Image } from 'astro:assets';
 import viRig from '../../../assets/vi_rig.jpg';
 
-All benchmark data lives in the
-[**Calibench** Hugging Face organization](https://huggingface.co/calibench-vi).
-The [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
-repository is the source of truth: it hosts our own VI-Rig captures
-(CC BY-NC 4.0) and ships download recipes for the third-party datasets the
-benchmark evaluates against. The Google Drive links from the legacy site are
-retired.
+Use this page to find the benchmark data, see what each dataset holds, and
+cite it.
+
+- **Where:** all benchmark data lives in the
+  [**Calibench** Hugging Face organization](https://huggingface.co/calibench-vi).
+- **Source of truth:** the
+  [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
+  repository.
+- **Hosted:** our own VI-Rig captures (CC BY-NC 4.0).
+- **Recipes:** download recipes for the third-party datasets the benchmark
+  evaluates against.
+- **Old links:** the Google Drive links from the legacy site are retired.
 
 ## Hosted — VI-Rig captures
 
-Collected on a self-built VI-Rig for research on multi-visual-inertial
-calibration. Reference Kalibr and MVIS results for these captures are published
-in [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
+We collected these on a self-built VI-Rig for research on multi-visual-inertial
+calibration. Reference Kalibr and MVIS results for these captures are in
+[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
+
+Terms in the table:
+
+- **IMU:** inertial measurement unit (a gyroscope and an accelerometer)
+- **GS / global shutter:** the camera exposes the whole image at once
+- **Rolling shutter:** the camera reads the image out row by row
+- **AprilGrid:** a printed grid of AprilTag markers (square codes the software
+  finds in each image)
+- **ArUco:** another family of square marker tags
 
 | Dataset | Sensors | Sequences | Data |
 |---|---|---|---|
@@ -31,19 +45,30 @@ in [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results
 
 ## Third-party datasets (recipes)
 
-Calibench hosts only data we own; every third-party dataset the benchmark
-evaluates ships as a `download.py` recipe (manifest + checksums) that pulls it
-from its original host — EuRoC MAV, TUM VI, TUM RGB-D, TUM VIE, TUM
-Double-Sphere, TUM RS, Monado MSD, Hilti 2022, Hilti 2023 Handheld,
-PennCOSYVIO, and an urban fisheye set. See
+Calibench hosts only data we own. Every third-party dataset the benchmark
+evaluates ships as a `download.py` recipe (manifest + checksums). The recipe
+pulls the data from its original host. The recipes cover:
+
+- EuRoC MAV
+- TUM VI
+- TUM RGB-D
+- TUM VIE
+- TUM Double-Sphere
+- TUM RS
+- Monado MSD
+- Hilti 2022
+- Hilti 2023 Handheld
+- PennCOSYVIO
+- an urban fisheye set
+
+For the exact list and licenses, see
 [`recipes/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/recipes)
 and its
-[`SOURCES.md`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/recipes/SOURCES.md)
-for the exact list and licenses. The [leaderboard](/benchmark/results/)
-evaluates calibration methods across these datasets plus the hosted VI-Rig
-captures.
+[`SOURCES.md`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/recipes/SOURCES.md).
+The [leaderboard](/benchmark/results/) evaluates calibration methods across
+these datasets plus the hosted VI-Rig captures.
 
-Datasets with complete MVIS runs documented as worked examples on this site:
+These datasets have complete MVIS runs, documented as worked examples on this site:
 
 | Dataset | Rig | Example |
 |---|---|---|
@@ -51,12 +76,14 @@ Datasets with complete MVIS runs documented as worked examples on this site:
 | TUM MIC (Monado / Valve Index) | Stereo fisheye + IMU | [Monado](/benchmark/examples/monado/) |
 | looperrobotics SA16 | 2–3 cameras + 400 Hz IMU | [Looper SA16](/benchmark/examples/looper-sa16/) |
 
-Contributing one: [Submit a dataset](/contribute/submit-dataset/).
+To contribute one, see [Submit a dataset](/contribute/submit-dataset/).
 
 ## Citation
 
-If you use the Calibench data, please cite the benchmark, and the MVIS paper
-for the VI-Rig captures:
+If you use the Calibench data, please cite:
+
+- **The benchmark**
+- **The MVIS paper,** for the VI-Rig captures
 
 ```bibtex
 @misc{calibench2026,
@@ -77,13 +104,15 @@ for the VI-Rig captures:
 }
 ```
 
-Third-party datasets keep their own licenses and citations — the
+Third-party datasets keep their own licenses and citations. The
 [dataset card](https://huggingface.co/datasets/calibench-vi/datasets) maps each
 config to its required upstream citation.
 
 ## VI-Rig sensors
 
-We use a self-built VI-Rig to collect data. The rig contains 4 IMUs, one monocular camera, and 2 stereo pairs. Treating each stereo camera as two monocular cameras, we have 5 cameras total.
+We use a self-built VI-Rig to collect data. The rig has 4 IMUs, one monocular
+camera and 2 stereo pairs. Counting each stereo camera as two monocular cameras,
+we have 5 cameras total.
 
 <Image src={viRig} alt="VI-Rig with 4 IMUs and 5 cameras" width="320" />
 
@@ -97,7 +126,7 @@ We use a self-built VI-Rig to collect data. The rig contains 4 IMUs, one monocul
 - RealSense T265 Left & Right cameras
 - ELP Left & Right rolling-shutter cameras
 
-ROS drivers can be found [here](https://github.com/yangyulin/multi_sensor_drivers).
+The ROS drivers can be found [here](https://github.com/yangyulin/multi_sensor_drivers).
 
 ### Dataset info
 

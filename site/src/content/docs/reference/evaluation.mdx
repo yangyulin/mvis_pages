@@ -5,22 +5,28 @@ pageType: reference
 wide: true
 ---
 
-How to tell whether a calibration is good. The same metrics back the
-[leaderboard](/benchmark/results/), so a local run and a published entry are
+Use this page to tell whether a calibration is good. The same metrics back the
+[leaderboard](/benchmark/results/). So a local run and a published entry are
 comparable.
 
 ## Read the report first
 
-Every run writes a self-contained HTML report. The section to read before the
-error numbers is **calibration data quality**: motion-excitation metrics with
-letter grades, rotation-axis spread, angular-velocity timeline, and a
-feature-coverage heatmap with convex hull.
+Every run writes a self-contained HTML report. Read its **calibration data
+quality** section before the error numbers. It shows:
+
+- **Motion-excitation metrics** with letter grades (how well the motion
+  exercised the parameters)
+- **Rotation-axis spread**
+- **Angular-velocity timeline**
+- **Feature-coverage heatmap** with convex hull (where the board corners fell
+  in the image)
 
 :::caution[Reprojection error is not accuracy]
-It measures how well the solution explains the data it was fitted to. A
-parameter the motion never excited settles near its initial value without
-raising the residual. A low error on a poorly-excited sequence means very
-little.
+Reprojection error (the pixel distance between observed and predicted board
+corners) measures how well the solution explains the data it was fitted to.
+A parameter the motion never excited settles near its initial value. It does
+so without raising the residual. A low error on a poorly-excited sequence
+means very little.
 :::
 
 ## Metrics
@@ -35,15 +41,17 @@ little.
 | Runtime | s | — | Wall-clock, hardware reported |
 | Convergence rate | % | repeated runs | Successful / total |
 
-Read convergence first: excellent errors at a 60% convergence rate is not a
+Read convergence first. Excellent errors at a 60% convergence rate is not a
 better toolbox than one that always converges.
 
 ## Ground truth, where it exists
 
-Per-dataset ground-truth YAMLs live under `examples/regression/gt/`. The
-dashboard annotates each parameter with its deviation — `Δ +0.27% GT=190.97` —
-colour-coded by accuracy band. Version 3 results match the published TUM-VI and
-Intel T265 calibrations to under 0.6% on focals.
+- **Where:** per-dataset ground-truth YAMLs live under
+  `examples/regression/gt/`.
+- **Dashboard:** annotates each parameter with its deviation —
+  `Δ +0.27% GT=190.97` — colour-coded by accuracy band.
+- **Result:** version 3 results match the published TUM-VI and Intel T265
+  calibrations to under 0.6% on focals.
 
 ## Round-trip: the strongest check without ground truth
 
@@ -51,26 +59,42 @@ Intel T265 calibrations to under 0.6% on focals.
 mvis roundtrip -c cam_imu.yaml
 ```
 
-PASS requires IMU intrinsics to **collapse** to identity on the corrected bag
-*and* extrinsics and stereo baseline to be **preserved**. Two conditions pulling
-in opposite directions is what makes it hard to satisfy by accident. See
-[Round-trip validation](/guides/roundtrip/).
+PASS requires both:
+
+- IMU intrinsics (the IMU's scale and axis-misalignment corrections) **collapse**
+  to identity on the corrected bag, *and*
+- extrinsics (where each sensor sits relative to the others) and stereo baseline
+  are **preserved**.
+
+The two conditions pull in opposite directions. That makes it hard to satisfy
+by accident. See [Round-trip validation](/guides/roundtrip/).
 
 ## Repeatability across sequences
 
-The most practical field check. Run a
-[batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
-and compare: parameters that move between sequences were not constrained by the
-motion in them. The regression harness reports this directly as mean ± stddev of
+This is the most practical field check.
+
+1. Run a
+   [batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config).
+2. Compare the results. Parameters that move between sequences were not
+   constrained by the motion in them.
+
+The regression harness reports this directly. It gives mean ± stddev of
 intrinsics, distortion, and baseline across a collection.
 
 ## Regression harness
 
-MVIS validates itself with a three-tier regression suite: every row re-solves a
-real recording and compares the result against a committed per-collection
-baseline with per-metric tolerances (focal, distortion, extrinsics, time
-offsets, readout, reprojection). Tiers are supersets — a deeper tier re-runs
-everything above it:
+MVIS validates itself with a three-tier regression suite. Every row re-solves a
+real recording. It compares the result against a committed per-collection
+baseline with per-metric tolerances:
+
+- focal
+- distortion
+- extrinsics
+- time offsets
+- readout
+- reprojection
+
+Tiers are supersets — a deeper tier re-runs everything above it:
 
 | Tier | Command | Rows | Runtime | Role |
 |---|---|---|---|---|
@@ -84,17 +108,22 @@ python scripts/run_regression.py --only mvis_elp/imu_bag1      # one row
 python scripts/run_regression.py --only <row> --update-baseline # re-bless
 ```
 
-The 10 seed rows span the calibration space on five datasets: global- and
-rolling-shutter, mono/stereo/3-camera, single-, two- and mixed-IMU
-configurations. The other 96 row configs are *generated* from the seeds
-(only the recording changes) and drift-guarded by a test that regenerates
-them, so solver settings cannot silently diverge across a family. The design
-story is on the [regression testing](/contribute/regression-testing/) page.
+The 10 seed rows span the calibration space on five datasets:
+
+- global- and rolling-shutter
+- mono/stereo/3-camera
+- single-, two- and mixed-IMU configurations
+
+The other 96 row configs are *generated* from the seeds (only the recording
+changes). A test that regenerates them guards against drift. So solver settings
+cannot silently diverge across a family. The design story is on the
+[regression testing](/contribute/regression-testing/) page.
 
 ## Baselines
 
-One committed JSON per (dataset, collection) under
-`examples/regression/baselines/` holds the blessed metrics. A gate run
-re-solves and compares; `--update-baseline` re-blesses after an intentional
-change, and the diff of the baseline file *is* the review artifact — every
-numeric shift a change causes is visible in the PR.
+- **Storage:** one committed JSON per (dataset, collection) under
+  `examples/regression/baselines/` holds the blessed metrics.
+- **Gate run:** re-solves and compares.
+- **`--update-baseline`:** re-blesses after an intentional change.
+- **Review:** the diff of the baseline file *is* the review artifact. Every
+  numeric shift a change causes is visible in the PR.

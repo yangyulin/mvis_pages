@@ -5,8 +5,13 @@ pageType: reference
 wide: true
 ---
 
-MVIS installs a single entry point, `mvis`, with seven subcommands.
-Everything is config-driven — flags select *what* to run, the YAML says *how*.
+Use this page to look up every `mvis` subcommand and its flags.
+MVIS installs one entry point, `mvis`, with seven subcommands.
+
+Everything is config-driven:
+
+- **Flags** select *what* to run.
+- **The YAML** config file says *how*.
 
 ```bash
 mvis --help
@@ -43,8 +48,8 @@ Config schema: [Configuration](/reference/configuration/).
 
 ## `cam`
 
-Camera-only calibration driven by a `CamRunConfig` YAML — the run-oriented
-variant, used by the batch and regression harnesses.
+Camera-only calibration driven by a `CamRunConfig` YAML.
+This is the run-oriented variant. The batch and regression harnesses use it.
 
 ```bash
 mvis cam --config example_cam_run.yaml
@@ -56,8 +61,13 @@ mvis cam --config example_cam_run.yaml
 
 ## `cam-imu`
 
-Joint camera–IMU calibration: extrinsics `T_CtoI`, time offset `td`,
-rolling-shutter readout, IMU intrinsics, and biases.
+Joint camera–IMU calibration. It estimates:
+
+- **Extrinsics** `T_CtoI`: the pose of the camera relative to the IMU
+- **Time offset** `td` between the camera and IMU clocks
+- **Rolling-shutter readout:** the time the sensor takes to read out one image
+- **IMU intrinsics**
+- **Biases**
 
 ```bash
 mvis cam-imu --config cam_imu.yaml
@@ -68,14 +78,15 @@ mvis cam-imu --config cam_imu.yaml
 | `--config`, `-c` | Path to the cam-IMU config YAML |
 | `--bag` | Override the input bag from the config |
 
-List several sequences under `input.bags` and each is calibrated into its own
-discoverable `bag<NN>/cam_imu.json` — a whole dataset family from one config.
+You can calibrate a whole dataset family from one config.
+List several sequences under `input.bags`.
+Each is calibrated into its own discoverable `bag<NN>/cam_imu.json`.
 See [Camera–IMU calibration](/guides/camera-imu-calibration/).
 
 ## `apply-calib`
 
-Apply a saved cam-IMU calibration back onto a raw ROS1 bag and re-record it
-calibration-corrected.
+Apply a saved cam-IMU calibration back onto a raw ROS1 bag.
+The bag is re-recorded calibration-corrected.
 
 ```bash
 mvis apply-calib -c recalib.yaml
@@ -97,9 +108,14 @@ export](/guides/corrected-datasets/).
 
 ## `roundtrip`
 
-End-to-end validation: calibrate, apply the calibration to its own bag,
-recalibrate the corrected bag, and report PASS/FAIL. Exits non-zero on FAIL, so
-it works in CI.
+End-to-end validation in four steps:
+
+1. Calibrate.
+2. Apply the calibration to its own bag.
+3. Recalibrate the corrected bag.
+4. Report PASS/FAIL.
+
+It exits non-zero on FAIL, so it works in CI.
 
 ```bash
 mvis roundtrip -c cam_imu.yaml
@@ -117,8 +133,8 @@ What PASS means: [Round-trip validation](/guides/roundtrip/).
 
 ## `run`
 
-Runs a calibration, dispatching on the config type so you do not have to pick
-the subcommand yourself.
+Runs a calibration and dispatches on the config type.
+You do not have to pick the subcommand yourself.
 
 ```bash
 mvis run --config any_config.yaml
@@ -142,7 +158,7 @@ mvis analyze --results results/regression/dataset/run/
 
 ## Scripts
 
-Not subcommands, but part of the everyday surface:
+These are not subcommands, but they are part of the everyday surface:
 
 | Script | Purpose |
 |---|---|

@@ -5,19 +5,28 @@ pageType: reference
 wide: true
 ---
 
-MVIS is config-driven: one YAML describes the board, the inputs, and the
-solve. This page documents every key. For the commands that consume them see
-the [CLI reference](/reference/cli/).
+Use this page to look up any key in an MVIS config file. MVIS is
+config-driven: one YAML file describes the board, the inputs and the solve.
+There are two config shapes:
+
+- **Camera-only:** calibrates the cameras alone
+- **Camera–IMU:** adds an IMU (inertial measurement unit: gyroscope and
+  accelerometer) to a calibrated camera rig
+
+For the commands that read these files, see the
+[CLI reference](/reference/cli/).
 
 :::note[Hand-written, and therefore able to drift]
 Generating this page from the config dataclasses is on the
-[roadmap](/about/roadmap/). Where this disagrees with the shipped
+[roadmap](/about/roadmap/). Where this page disagrees with the shipped
 `examples/configs/`, the examples win.
 :::
 
 ## Camera-only config
 
 ### `board`
+
+The calibration target. The "Required for" column says which board types need the key.
 
 | Key | Type | Required for | Description |
 |---|---|---|---|
@@ -32,6 +41,8 @@ Generating this page from the config dataclasses is on the
 | `aruco_dict` | string | aruco | OpenCV dictionary name |
 
 ### `cameras[]`
+
+One entry per camera in the rig.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
@@ -48,6 +59,9 @@ Models may be **mixed across cameras** in one rig.
 
 ### `optimizer`
 
+Settings for the joint solve. LM is the Levenberg–Marquardt least-squares
+solver.
+
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `max_iterations` | int | `15` | LM iterations for the joint solve |
@@ -56,6 +70,9 @@ Models may be **mixed across cameras** in one rig.
 | `huber_threshold` | float | `1.345` | Huber robust-loss threshold |
 
 ### Top-level
+
+Keys that sit at the top of the file, outside any section. Extrinsics are the
+relative poses between sensors; here, between the cameras.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
@@ -69,9 +86,17 @@ Models may be **mixed across cameras** in one rig.
 
 ## Camera–IMU config
 
-A different shape: `input` / `board` / `camera_input` / `solve` / `output`.
+This config has a different shape. Its top-level sections are:
+
+- `input`
+- `board`
+- `camera_input`
+- `solve`
+- `output`
 
 ### `input`
+
+Where the IMU and camera data come from.
 
 | Key | Type | Description |
 |---|---|---|
@@ -87,8 +112,13 @@ A different shape: `input` / `board` / `camera_input` / `solve` / `output`.
 
 ### `camera_input`
 
-Cam-IMU calibration is a **two-step** workflow: calibrate the cameras first,
-then feed that result in here.
+Cam-IMU calibration is a **two-step** workflow:
+
+1. Calibrate the cameras first.
+2. Feed that result in here.
+
+Intrinsics are each camera's own parameters, such as focal length and
+distortion.
 
 | Key | Type | Default | Description |
 |---|---|---|---|
@@ -98,9 +128,16 @@ then feed that result in here.
 
 ### `solve`
 
+Settings for the camera–IMU solve. Three terms first:
+
+- **`td`:** the camera–IMU time offset
+- **`t_ga`:** the time offset between the gyroscope and accelerometer channels
+  of one IMU
+- **Lever:** the lever arm, the position of the camera relative to the IMU
+
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `state_hz` | float | `30.0` | Rate of pose/velocity/bias state nodes. Matters on dynamic rigs — reproj, lever, and `td` alias at low rates and plateau near 30 Hz; flat on gentle sequences |
+| `state_hz` | float | `30.0` | Rate of pose/velocity/bias state nodes. Matters on dynamic rigs. Reproj (reprojection error), lever, and `td` alias at low rates and plateau near 30 Hz. Flat on gentle sequences |
 | `max_iterations` | int | — | LM iterations |
 | `imu_intrinsics` | `dw_da \| …` | — | Which IMU intrinsics to solve |
 | `imu_intrinsics_model` | `kalibr \| rpng \| calyx` | — | Parameterisation. A convention, not a quality lever — all three recover identical extrinsics. See [IMU model](/concepts/imu-model/) |
@@ -117,6 +154,8 @@ then feed that result in here.
 | `path` | path | Result JSON |
 
 ## Worked example
+
+A camera–IMU config for one TUM-VI calibration bag:
 
 ```yaml title="cam_imu_ds.yaml"
 input:
@@ -143,5 +182,9 @@ output:
   path: /tmp/tumvi_imu1_ds.json
 ```
 
-More under `examples/configs/` in the repository — `tumvi_cam_imu/`,
-`tga_t265*/`, `looperrobotics/`, `gilabs/`.
+More examples are under `examples/configs/` in the repository:
+
+- `tumvi_cam_imu/`
+- `tga_t265*/`
+- `looperrobotics/`
+- `gilabs/`
