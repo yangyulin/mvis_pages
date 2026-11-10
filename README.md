@@ -50,6 +50,7 @@ PYTHONNOUSERSITE=1 python3 site/scripts/export_examples.py --private-config <mir
 PYTHONNOUSERSITE=1 python3 site/scripts/export_uzh.py --leaderboard <mira leaderboard dir> --uzh-root <uzh study dir>   # e.g. ~/Project/openmvis-internal/results/datacard/uzh_fpv
 PYTHONNOUSERSITE=1 python3 site/scripts/export_board.py --leaderboard <mira leaderboard dir> --records <snapshot> --results-commit <its full sha>
 PYTHONNOUSERSITE=1 python3 site/scripts/export_repeatability.py --records <snapshot> --stats <three_way_compare_stats.json of that batch> --batch <batch> --results-commit <its full sha> [--leaderboard <mira leaderboard dir>]
+PYTHONNOUSERSITE=1 python3 site/scripts/export_results.py --leaderboard <mira leaderboard dir> --records <snapshot> --stats <its stats file> --batch <batch> --results-commit <its full sha> --uzh-root <uzh study dir>   # after the three above
 cd python && PYTHONNOUSERSITE=1 python3 -m pytest -q     # unit tests; python/cov.sh for coverage
 ```
 
@@ -64,6 +65,7 @@ What each writes:
 | `export_board.py` | `site/src/data/leaderboard/board.json`, `board.css` |
 | `export_uzh.py` | `site/src/data/leaderboard/uzh_fpv.json` |
 | `export_repeatability.py` | `site/src/data/leaderboard/repeatability.json` (matched-recording repeatability per family and group; reads the private per-recording stats file, writes derived spreads only) |
+| `export_results.py` | the Results pages: `site/src/data/eval/index.json` (Leaderboard rows), `eval/<slug>.json` + `site/src/content/docs/benchmark/results/<slug>.mdx` (one Dataset eval page per dataset), `site/src/data/results-nav.json` (sidebar, old-hash jumps); text from `python/data/public_results.yaml`, ◆ counted by the Space's code and checked against `board.json`, only min/max per row and tool from the private stats file |
 
 The page text is public (`python/data/public_sensors.yaml`); the run paths stay private in mira and are passed by
 path. Every sensor text drawn from the data (page JSON, MDX, process figures, sidebar) goes through a public lint
@@ -71,7 +73,7 @@ first; see `python/README.md` for the exact list. Edit the data or the lib, neve
 
 After a build, `check_moves.py` checks that every address in `site/src/data/moved.json` redirects straight to its new page and that no internal link is broken.
 
-Browser and media checks: `nav_check.py`, `responsive_check.py`, `hero_sync_check.py`, `hero_labels_check.py`
+Browser and media checks: `nav_check.py`, `responsive_check.py` (homepage matrix; `--pages /a/,/b/` for content pages at 390 and 1360 px in light and dark), `hero_sync_check.py`, `hero_labels_check.py`
 (Playwright with the system Chrome) and `check_hero_media.py` (ffprobe). Their rules are in `mvis_site/checks.py`.
 
 ---

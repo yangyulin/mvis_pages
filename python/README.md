@@ -23,12 +23,14 @@ python/
 | `export_sensors` | `collect` (reads results) → `render` (pure, returns a Plan) → `write` (the only step that touches the site) |
 | `leaderboard`, `space` | the results tables, made by the leaderboard Space's own renderer; `space.CONTRACT` lists the names it uses |
 | `repeatability` | per family x group of parameters, which tool scatters less on the recordings every compared tool ran (paired label-swap test, Holm within the cell, ties, too few); `gate` refuses records that are not the stats file's blocks; `check_public` keeps recording names and per-recording values out |
+| `results_eval` | the Leaderboard rows and the Dataset eval pages (`collect` → `render`, pure → `write`): solved n of N, per-parameter lanes (median, sd, min/max), ◆ differences per tool pair from the Space's `app.delta` (refused unless equal to the rendered board's), legacy hashes of the old one-page results; every output through `lint` and `repeatability.check_public` |
 | `checks`, `browser/` | rules and printed reports of the nav, layout and hero checks; `browser/` drives Chrome (`run()`) and ffprobe |
 | `assets` | the only reader of `mvis_site/assets/` and of `site/src/styles/custom.css` |
 
 ## Data contract
 
-- **Public** (committed here): `data/public_sensors.yaml` holds every word on a sensor page. It names no run path,
+- **Public** (committed here): `data/public_results.yaml` holds every word on the Results pages that is not computed
+  (page order, titles, chips, images, links, sensor ids). `data/public_sensors.yaml` holds every word on a sensor page. It names no run path,
   recording path, commit or device id; `tests/test_lint.py` checks the committed file.
 - **Private** (stays in mira): `scripts/mvis/huggingface/community_sensors/data/sensors.yaml` holds roots, run
   paths and the recording to hash. It is passed by path; the lib reads only `roots` and, per sensor, `variants`
@@ -57,7 +59,8 @@ cd site && npm test                              # post-build rename steps (node
 
 # real-data tests (skipped without the env)
 MVIS_SENSORS_CONFIG=<mira sensors.yaml> MVIS_MEDIA=<clips> MVIS_LEADERBOARD=<mira leaderboard dir> \
-MVIS_UZH_ROOT=<uzh study dir, e.g. ~/Project/openmvis-internal/results/datacard/uzh_fpv> MVIS_SRC=<openmvis checkout> PYTHONNOUSERSITE=1 python3 -m pytest -q -m real_data
+MVIS_UZH_ROOT=<uzh study dir, e.g. ~/Project/openmvis-internal/results/datacard/uzh_fpv> MVIS_SRC=<openmvis checkout> \
+MVIS_RESULTS_RECORDS=<records snapshot of the batch> MVIS_RESULTS_STATS=<its stats file> PYTHONNOUSERSITE=1 python3 -m pytest -q -m real_data
 
 # exports (run from a worktree, review the diff before it reaches main)
 PYTHONNOUSERSITE=1 python3 site/scripts/export_sensors.py --private-config <mira sensors.yaml> --media <clips dir> [--site <checkout>]

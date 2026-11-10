@@ -1,0 +1,35 @@
+---
+// Opens a fold from its link: repeatability cells (#rp-T6-gyro), tool differences (#diff-mk-T6), and the
+// "Open the parameter table" buttons of RepeatabilityDetails, which jump into the Full tables fold. Without JS the
+// anchors still land on the closed fold. The charts need no script.
+---
+<script>
+  const open = (id: string) => {
+    const d = document.getElementById(id);
+    if (d instanceof HTMLDetailsElement) { d.open = true; d.scrollIntoView({ block: 'start' }); }
+  };
+  const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h.startsWith('rp-') || h.startsWith('diff-')) open(h); };
+  addEventListener('hashchange', fromHash);
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element).closest?.('[data-rp-open]') as HTMLElement | null;
+    if (a?.dataset.rpOpen && location.hash.slice(1) === a.dataset.rpOpen) { e.preventDefault(); open(a.dataset.rpOpen); }
+  });
+  document.querySelectorAll<HTMLDetailsElement>('details.rp-tables details.fam[open]').forEach((d) => { d.open = false; });
+  fromHash();
+  document.addEventListener('click', (e) => {
+    const b = (e.target as Element).closest?.('button.rp-open') as HTMLElement | null;
+    if (!b) return;
+    const wrap = document.querySelector(`details.rp-tables[data-rp-dataset="${b.dataset.rpTable}"]`) as HTMLDetailsElement | null;
+    if (!wrap) return;
+    wrap.open = true;
+    const fam = wrap.querySelectorAll('details.fam')[Number(b.dataset.fold)] as HTMLDetailsElement | undefined;
+    if (!fam) return;
+    fam.open = true;
+    const rows = Array.from(fam.querySelectorAll('tr[data-k]'));
+    const k = b.dataset.k ?? '';
+    const row = k ? rows.find((r) => r.getAttribute('data-k') === k) ?? rows.find((r) => r.getAttribute('data-k') === `m|${k.slice(2)}`) : null;
+    const sn = row?.closest('details.sn') as HTMLDetailsElement | null;
+    if (sn) sn.open = true;
+    (row ?? fam).scrollIntoView({ block: 'center' });
+  });
+</script>

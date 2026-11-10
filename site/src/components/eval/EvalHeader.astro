@@ -1,0 +1,39 @@
+---
+// Top of a Dataset eval page: image, chips, provenance and links, the read-first box and the family bar.
+import '../../styles/results.css';
+interface Props { page: any }
+const { page } = Astro.props;
+const RESULTS = 'https://huggingface.co/datasets/calibench-vi/results';
+const LINKS: [string, string][] = [['example', 'How MVIS calibrates it → Example'], ['dataset', 'Downloads → Dataset page'],
+  ['sensor', 'The sensor → Sensor wiki'], ['hub', 'The data → Hugging Face']];
+const MODE: Record<string, string> = { cam: 'camera only', 'cam+imu': 'camera + IMU' };
+---
+<div class="not-content ev-head">
+  {page.image && (
+    <figure class="ev-img">
+      <img src={page.image.src} alt={page.image.alt} loading="eager" />
+      <figcaption>{page.image.credit}</figcaption>
+    </figure>
+  )}
+  <div class="ev-meta">
+    <p class="ev-intro">{page.intro}</p>
+    <p class="ev-chips">
+      {page.ours && <span class="ev-chip ev-ours">our data</span>}
+      {page.chips.map((c: string) => <span class="ev-chip">{c}</span>)}
+      <span class="ev-chip">{page.licence}</span>
+    </p>
+    <p class="ev-prov">
+      {page.study ? <>Separate study · batch {page.batch} · not part of the leaderboard batch</>
+        : <>Batch {page.batch} · results commit <a href={`${RESULTS}/tree/${page.results_commit}`}><code>{page.results_commit.slice(0, 7)}</code></a> · <a href="/benchmark/results/">Leaderboard</a> · <a href="/benchmark/methodology/">Methodology</a></>}
+    </p>
+    <p class="ev-links">{LINKS.filter(([k]) => page.links[k]).map(([k, t]) => <a href={page.links[k]}>{t}</a>)}</p>
+  </div>
+</div>
+<div class="not-content rp-honest ev-honest">
+  <p><b>Repeatability, not accuracy.</b> There is no ground truth: a small spread shows that a tool repeats, not that
+    it is right, and a difference shows that two tools disagree, not which one is wrong. The MVIS authors made every
+    run, including Kalibr and Basalt.</p>
+</div>
+<nav class="not-content ev-fams" aria-label="Families">
+  {page.families.map((f: any) => <a href={`#${f.id}`}><b>{f.id}</b>&nbsp;· {MODE[f.mode]}</a>)}
+</nav>

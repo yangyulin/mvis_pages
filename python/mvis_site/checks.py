@@ -8,8 +8,9 @@ from urllib.parse import unquote
 
 # --- sidebar (nav_check) ---------------------------------------------------------------------------------------
 SECTIONS = ["Getting started", "Guides", "Benchmark", "Sensor wiki", "Concepts", "Reference", "Contribute", "About"]
-BENCHMARK = ["Examples", "Results", "Methodology"]
-DEEP_PAGES = ["/sensors/intel-t265/", "/benchmark/examples/monado/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
+BENCHMARK = ["Examples", "Why calibrate t_ga", "Results", "Methodology"]
+RESULTS = ["Leaderboard", "Datasets eval"]
+DEEP_PAGES = ["/sensors/intel-t265/", "/benchmark/examples/monado/", "/benchmark/results/tum-vi/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
 NOT_IN_SIDEBAR = {"/"}
 
 
@@ -23,10 +24,16 @@ def routes(docs: Path) -> set[str]:
     return out
 
 
-def sidebar_problems(s: dict, nav: list[dict]) -> list[str]:
+def sidebar_problems(s: dict, nav: list[dict], results_nav: list[dict] | None = None) -> list[str]:
     """Top-level sections, Benchmark, and the Sensor wiki: Overview, then one subgroup per sensor-nav.json group in its
-    order, each holding its sensors once. s is a measured sidebar {sections, children, groups, links}."""
+    order, each holding its sensors once. With results_nav, Benchmark › Results holds Leaderboard and Datasets eval,
+    and Datasets eval one page per results-nav.json entry in its order. s is a measured sidebar
+    {sections, children, groups, links, paths}; paths maps "A › B › C" to the labels inside that group."""
     out = []
+    if results_nav is not None:
+        paths = s.get("paths", {})
+        want = {"Benchmark › Results": RESULTS, "Benchmark › Results › Datasets eval": [n["label"] for n in results_nav]}
+        out += [f"{p} holds {paths.get(p)}, want {w}" for p, w in want.items() if paths.get(p) != w]
     if s["sections"] != SECTIONS:
         out.append(f"sections are {s['sections']}")
     if s["children"].get("Benchmark") != BENCHMARK:
@@ -160,6 +167,25 @@ def evaluate(cls, m):
     vmin = VIDEO_MIN_PHONE if cls == "phone" else VIDEO_MIN
     res["video"] = bool(m.get("video")) and m["video"]["w"] >= vmin * vw
     return res
+
+
+# Content pages (responsive_check --pages): at a phone and a laptop width, in both themes, no horizontal page scroll.
+PAGE_VIEWS = [("phone-390", 390, 844, "light"), ("phone-390", 390, 844, "dark"),
+              ("laptop-1360", 1360, 900, "light"), ("laptop-1360", 1360, 900, "dark")]
+
+
+def page_problems(path: str, view: str, theme: str, m: dict) -> list[str]:
+    """Why a content page fails at one view: it scrolls sideways, or the theme did not apply."""
+    out = []
+    if m["scrollW"] > m["vw"] + 1:
+        out.append(f"{path} {view} {theme}: scrolls sideways ({m['scrollW']} > {m['vw']} px; widest {m.get('wide')})")
+    if m.get("theme") != theme:
+        out.append(f"{path} {view} {theme}: page theme is {m.get('theme')}")
+    return out
+
+
+def shot_name(path: str, view: str, theme: str) -> str:
+    return f"{path.strip('/').replace('/', '_') or 'home'}-{view}-{theme}.png"
 
 
 # --- hero media (check_hero_media) -----------------------------------------------------------------------------

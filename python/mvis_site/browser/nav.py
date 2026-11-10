@@ -17,6 +17,10 @@ SIDEBAR = """() => {
     groups: Object.fromEntries(kids.map(li => [label(li), Object.fromEntries([...(li.querySelector(':scope > details > ul')?.children || [])]
       .filter(c => c.querySelector(':scope > details')).map(c => [label(c), [...c.querySelector(':scope > details > ul').children].map(label)]))])),
     links: [...nav.querySelectorAll('a[href]')].map(a => a.getAttribute('href')),
+    paths: Object.fromEntries([...nav.querySelectorAll('details')].map(d => {
+      const names = []; for (let x = d; x; x = x.parentElement.closest('details')) names.unshift(x.querySelector(':scope > summary span').textContent.trim());
+      return [names.join(' › '), [...d.querySelector(':scope > ul').children].map(label)];
+    })),
   };
 }"""
 CURRENT_OPEN = """() => {
@@ -36,7 +40,8 @@ def run(base: str, out) -> int:  # pragma: no cover - drives Chrome through Play
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.goto(f"{base}/getting-started/overview/")
         s = page.evaluate(SIDEBAR)
-        problems = checks.sidebar_problems(s, json.loads((SITE / "src/data/sensor-nav.json").read_text()))
+        problems = checks.sidebar_problems(s, json.loads((SITE / "src/data/sensor-nav.json").read_text()),
+                                           json.loads((SITE / "src/data/results-nav.json").read_text()))
         links = checks.local_links(s["links"])
         problems += checks.status_problems({link: page.request.get(base + link).status for link in links})
         problems += checks.unlisted(checks.routes(SITE / "src/content/docs"), links)

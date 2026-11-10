@@ -12,6 +12,8 @@ const sensorGroups = [...new Set(sensorNav.map((n) => n.group))].map((group) => 
   collapsed: true,
   items: sensorNav.filter((n) => n.group === group).map(({ label, link }) => ({ label, link })),
 }));
+// Written by site/scripts/export_results.py: one Dataset eval page per dataset, in page order (ours first).
+const resultsNav = JSON.parse(readFileSync(new URL('./src/data/results-nav.json', import.meta.url), 'utf8'));
 
 // GitHub Pages serves `main:/docs`, so the build writes there. A build therefore
 // publishes the site — there is no separate deploy step.
@@ -150,7 +152,14 @@ export default defineConfig({
               items: JSON.parse(readFileSync(new URL('./src/data/examples-nav.json', import.meta.url), 'utf8')),
             },
             { label: 'Why calibrate t_ga', link: '/benchmark/tga/' },
-            { label: 'Results', link: '/benchmark/results/' },
+            {
+              label: 'Results',
+              collapsed: true,
+              items: [
+                { label: 'Leaderboard', link: '/benchmark/results/' },
+                { label: 'Datasets eval', collapsed: true, items: resultsNav.map(({ label, link }) => ({ label, link })) },
+              ],
+            },
             { label: 'Methodology', link: '/benchmark/methodology/' },
           ],
         },

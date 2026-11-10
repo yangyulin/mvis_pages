@@ -21,7 +21,8 @@ from . import REPO
 from . import leaderboard as L
 from .lint import refusals
 
-CONTRACT = (("app", ("load_data", "render_dataset_tab", "how_to_read_html", "READ_FIRST", "READ_MORE", "CSS", "DATA")),
+CONTRACT = (("app", ("load_data", "render_dataset_tab", "how_to_read_html", "READ_FIRST", "READ_MORE", "CSS", "DATA",
+                     "merge_family", "delta", "PAIRS", "cell_state", "missing_reason", "DECIMALS", "read_first", "notes")),
             ("export_threeway", ("DATASETS", "EXCLUDED", "OUT", "build", "write")))
 SPACE_MODULES = ("gradio", *(m for m, _ in CONTRACT))  # imported fresh each time, then removed
 
@@ -118,6 +119,45 @@ def export_uzh_from_root(leaderboard_dir: Path, uzh_root: Path, out: Path | None
     """The UZH table from a study folder in its usual layout: three_way/ stats and hub_stage/<batch>/."""
     uzh_root = Path(uzh_root)
     return export_uzh(leaderboard_dir, uzh_root / L.UZH_STATS, hub_stage or uzh_root / "hub_stage" / L.BATCH, out or REPO / L.UZH_FILE)
+
+
+def _family_rows(app, data, families) -> dict:
+    """Per family the Space's merged rows, each tool cell's state and reason, its ◆ differences and its notes."""
+    out = {}
+    for t in families:
+        rows = []
+        for r in app.merge_family(data, t):
+            cells = {tool: r[tool] and dict(r[tool], state=app.cell_state(tool, r[tool], t),
+                                            reason=app.missing_reason(tool, r[tool], t))
+                     for tool in ("mvis", "calyx", "kalibr", "basalt")}
+            rows.append(dict(r, **cells, deltas={p[0]: app.delta(p[0], r[p[1]], r[p[2]], t) for p in app.PAIRS}))
+        out[t] = {"rows": rows, "read_first": app.read_first(t), "notes": [list(n) for n in app.notes(data, t)]}
+    return out
+
+
+def space_rows(leaderboard_dir: Path, records: Path, results_commit: str | None = None) -> dict:
+    """What the dataset eval pages take from the Space, so they count ◆ with the board's own code: PAIRS, DECIMALS and
+    per family the rows of _family_rows."""
+    check_results_commit(records, results_commit)
+    with space(Path(leaderboard_dir), Path(records)) as load:
+        app = load("app")
+        data = app.DATA
+        fams = [t for ds in data["families"]["datasets"] for t in ds["families"]]
+        return {"pairs": [list(p) for p in app.PAIRS], "decimals": dict(app.DECIMALS),
+                "families": _family_rows(app, data, fams)}
+
+
+def uzh_rows(leaderboard_dir: Path, stats: dict, records_out: Path) -> dict:
+    """The same for the UZH-FPV study: its records are written by the Space's exporter to records_out first (as
+    uzh_text does), with the UZH read-first text in place of the leaderboard's. stats: already rekeyed, notes cleaned."""
+    write_records(leaderboard_dir, stats, L.BATCH, Path(records_out))
+    with space(Path(leaderboard_dir), Path(records_out)) as load:
+        app = load("app")
+        for fid in L.FAMILIES:
+            app.READ_FIRST[fid] = L.READ_FIRST
+            app.READ_MORE[fid] = L.LIKE_FOR_LIKE
+        return {"pairs": [list(p) for p in app.PAIRS], "decimals": dict(app.DECIMALS),
+                "families": _family_rows(app, app.DATA, list(L.FAMILIES))}
 
 
 def board_texts(leaderboard_dir: Path, records: Path | None = None, results_commit: str | None = None) -> tuple[str, str]:

@@ -1,0 +1,6 @@
+---
+// Hand-written reading notes of a study (public_results.yaml, linted at export).
+interface Props { page: any }
+const { page } = Astro.props;
+---
+<ul class="ev-reading">{page.reading.map((r: string) => <li set:html={r} />)}</ul>

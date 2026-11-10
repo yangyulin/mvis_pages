@@ -1,0 +1,7694 @@
+{
+ "slug": "virig-4imus-4cams",
+ "id": "mvis_rig",
+ "label": "VI-Rig 4 IMUs + 4 cams",
+ "title": "VI-Rig: 4 IMUs + 4 cameras",
+ "ours": true,
+ "licence": "CC BY-NC 4.0",
+ "intro": "Our rig with a RealSense T265 fisheye pair (global shutter) and an ELP stereo pair (rolling shutter).",
+ "chips": [
+  "2 global-shutter + 2 rolling-shutter cameras"
+ ],
+ "image": {
+  "src": "/media/hero/hero_virig4_960.jpg",
+  "alt": "MVIS solving a VI-Rig 4-camera recording: board, camera path and one T265 fisheye frame",
+  "credit": "MVIS solve view, from the homepage"
+ },
+ "links": {
+  "dataset": "/reference/datasets/virig-4imus-4cams/",
+  "sensor": "/sensors/intel-t265/",
+  "hub": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams"
+ },
+ "study": false,
+ "batch": "2026-11-08a",
+ "results_commit": "e893730bcb6e8ffa83484ca01265e5f744c1f9ed",
+ "link": "/benchmark/results/virig-4imus-4cams/",
+ "has_repeatability": true,
+ "legacy": [
+  "ds-mvis_rig",
+  "rp-cav-mvis_rig-a",
+  "rp-cav-mvis_rig-b",
+  "rp-cav-mvis_rig-c",
+  "rp-cav-mvis_rig-d",
+  "rp-cav-mvis_rig-e",
+  "rp-cav-mvis_rig-f",
+  "rp-cav-mvis_rig-g",
+  "rp-cav-mvis_rig-h",
+  "rp-T1-focal_pp",
+  "rp-T1-distortion",
+  "rp-T1-baseline",
+  "rp-T2-focal_pp",
+  "rp-T2-distortion",
+  "rp-T2-baseline",
+  "rp-T2-readout",
+  "rp-T7-focal_pp",
+  "rp-T7-distortion",
+  "rp-T7-baseline",
+  "rp-T7-readout",
+  "rp-T7-time_offset",
+  "rp-T7-lever",
+  "rp-T7-gyro",
+  "rp-T7-accel",
+  "rp-T8-focal_pp",
+  "rp-T8-distortion",
+  "rp-T8-baseline",
+  "rp-T8-readout",
+  "rp-T8-time_offset",
+  "rp-T8-lever",
+  "rp-T8-gyro",
+  "rp-T8-accel"
+ ],
+ "families": [
+  {
+   "id": "T1",
+   "title": "t265 GS fisheye stereo",
+   "mode": "cam",
+   "shutter": "global",
+   "n": 15,
+   "columns": [
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS"
+    },
+    {
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr"
+    },
+    {
+     "col": "basalt",
+     "tool": "Basalt",
+     "label": "Basalt"
+    }
+   ],
+   "solved": [
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "MVIS"
+    },
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "Kalibr"
+    },
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "MVIS estimates the board shape; Kalibr assumes a flat board.",
+   "notes": [
+    [
+     "Like for like",
+     "Bag 09: fisheye 2 starts one frame before fisheye 1. Kalibr ran on a copy with that frame dropped, because its 4 Hz sampling of each camera otherwise pairs frames one apart and it diverges."
+    ],
+    [
+     "Basalt",
+     "Basalt groups stereo frames by stamp and the t265 pair never shares one, so its fisheye 2 frames are snapped onto fisheye 1's (1.8–5 ms apart)."
+    ]
+   ],
+   "records": {
+    "MVIS": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/MVIS/2026-11-08a/T1.json",
+    "Kalibr": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Kalibr/2026-11-08a/T1.json",
+    "Basalt": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Basalt/2026-11-08a/T1.json"
+   },
+   "fit": [],
+   "diffs": [
+    {
+     "pair": "mk",
+     "label": "MVIS − Kalibr",
+     "a": "MVIS",
+     "b": "Kalibr",
+     "marked": 5,
+     "compared": 17,
+     "rows": [
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "+1.45",
+       "spread": "2.40",
+       "z": 0.607,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "+2.20",
+       "spread": "2.59",
+       "z": 0.848,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "+1.42",
+       "spread": "0.65",
+       "z": 2.184,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "−1.89",
+       "spread": "0.85",
+       "z": -2.227,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "−0.00292",
+       "spread": "0.04819",
+       "z": -0.061,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00549",
+       "spread": "0.12726",
+       "z": -0.043,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.01610",
+       "spread": "0.12987",
+       "z": 0.124,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.00622",
+       "spread": "0.04414",
+       "z": -0.141,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "+1.61",
+       "spread": "2.42",
+       "z": 0.665,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "+1.60",
+       "spread": "2.57",
+       "z": 0.623,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "+1.18",
+       "spread": "0.67",
+       "z": 1.766,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "−1.81",
+       "spread": "0.84",
+       "z": -2.155,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "−0.00164",
+       "spread": "0.05345",
+       "z": -0.031,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00407",
+       "spread": "0.15804",
+       "z": -0.026,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.01510",
+       "spread": "0.18055",
+       "z": 0.084,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.00712",
+       "spread": "0.06911",
+       "z": -0.103,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "baseline_mm",
+       "label": "baseline to t265 fisheye 1",
+       "unit": "mm",
+       "text": "+0.195",
+       "spread": "0.099",
+       "z": 1.967,
+       "marked": true,
+       "unequal_n": false
+      }
+     ]
+    },
+    {
+     "pair": "bk",
+     "label": "Basalt − Kalibr",
+     "a": "Basalt",
+     "b": "Kalibr",
+     "marked": 2,
+     "compared": 17,
+     "rows": [
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−0.95",
+       "spread": "2.40",
+       "z": -0.396,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−0.63",
+       "spread": "2.59",
+       "z": -0.241,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "−0.37",
+       "spread": "0.68",
+       "z": -0.542,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "+0.92",
+       "spread": "0.85",
+       "z": 1.078,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "−0.00376",
+       "spread": "0.04819",
+       "z": -0.078,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00038",
+       "spread": "0.12726",
+       "z": -0.003,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.00839",
+       "spread": "0.12987",
+       "z": 0.065,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.00327",
+       "spread": "0.04414",
+       "z": -0.074,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−0.91",
+       "spread": "2.42",
+       "z": -0.377,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−1.19",
+       "spread": "2.57",
+       "z": -0.462,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "−0.06",
+       "spread": "0.67",
+       "z": -0.091,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "+1.02",
+       "spread": "0.84",
+       "z": 1.22,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "+0.00034",
+       "spread": "0.05345",
+       "z": 0.006,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00884",
+       "spread": "0.15804",
+       "z": -0.056,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.01230",
+       "spread": "0.18055",
+       "z": 0.068,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.00511",
+       "spread": "0.06911",
+       "z": -0.074,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "baseline_mm",
+       "label": "baseline to t265 fisheye 1",
+       "unit": "mm",
+       "text": "+0.087",
+       "spread": "0.135",
+       "z": 0.646,
+       "marked": false,
+       "unequal_n": false
+      }
+     ]
+    },
+    {
+     "pair": "bm",
+     "label": "Basalt − MVIS",
+     "a": "Basalt",
+     "b": "MVIS",
+     "marked": 10,
+     "compared": 17,
+     "rows": [
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−2.41",
+       "spread": "0.65",
+       "z": -3.701,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−2.82",
+       "spread": "0.79",
+       "z": -3.572,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "−1.79",
+       "spread": "0.68",
+       "z": -2.646,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "+2.81",
+       "spread": "0.80",
+       "z": 3.512,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "−0.00084",
+       "spread": "0.00332",
+       "z": -0.252,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "+0.00512",
+       "spread": "0.00651",
+       "z": 0.787,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "−0.00771",
+       "spread": "0.00637",
+       "z": -1.211,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "+0.00296",
+       "spread": "0.00198",
+       "z": 1.491,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−2.52",
+       "spread": "0.63",
+       "z": -4.004,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−2.79",
+       "spread": "0.75",
+       "z": -3.74,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "−1.24",
+       "spread": "0.65",
+       "z": -1.922,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "+2.83",
+       "spread": "0.78",
+       "z": 3.612,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "+0.00198",
+       "spread": "0.00325",
+       "z": 0.609,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00477",
+       "spread": "0.00889",
+       "z": -0.537,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "−0.00280",
+       "spread": "0.00823",
+       "z": -0.34,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "+0.00200",
+       "spread": "0.00250",
+       "z": 0.802,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "t265 fisheye 2",
+       "sensor_id": "t265_f2",
+       "key": "baseline_mm",
+       "label": "baseline to t265 fisheye 1",
+       "unit": "mm",
+       "text": "−0.107",
+       "spread": "0.135",
+       "z": -0.793,
+       "marked": false,
+       "unequal_n": false
+      }
+     ]
+    }
+   ],
+   "tally": {
+    "mk": [
+     5,
+     17
+    ],
+    "bk": [
+     2,
+     17
+    ],
+    "bm": [
+     10,
+     17
+    ]
+   },
+   "sensors": [
+    {
+     "id": "t265_f1",
+     "label": "t265 fisheye 1",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.088,
+        "h": 6.1831
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.543,
+         "sd": 0.645605,
+         "n": 15,
+         "text": "286.54",
+         "min": 284.75,
+         "max": 287.54
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 285.088,
+         "sd": 2.39713,
+         "n": 15,
+         "text": "285.09",
+         "min": 281.075,
+         "max": 290.709
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 284.138,
+         "sd": 0.64985,
+         "n": 15,
+         "text": "284.14",
+         "min": 282.855,
+         "max": 285.137
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 284.175,
+        "h": 6.5802
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.373,
+         "sd": 0.722418,
+         "n": 15,
+         "text": "286.37",
+         "min": 284.307,
+         "max": 287.352
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 284.175,
+         "sd": 2.59298,
+         "n": 15,
+         "text": "284.18",
+         "min": 280.036,
+         "max": 290.157
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 283.549,
+         "sd": 0.790578,
+         "n": 15,
+         "text": "283.55",
+         "min": 282.147,
+         "max": 284.645
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 414.097,
+        "h": 1.9217
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 415.521,
+         "sd": 0.253386,
+         "n": 15,
+         "text": "415.52",
+         "min": 415.037,
+         "max": 415.844
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 414.097,
+         "sd": 0.651983,
+         "n": 15,
+         "text": "414.10",
+         "min": 413.553,
+         "max": 415.603
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 413.73,
+         "sd": 0.676743,
+         "n": 15,
+         "text": "413.73",
+         "min": 412.608,
+         "max": 414.988
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 406.217,
+        "h": 3.0239
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 404.327,
+         "sd": 0.335623,
+         "n": 15,
+         "text": "404.33",
+         "min": 403.468,
+         "max": 404.626
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 406.217,
+         "sd": 0.848651,
+         "n": 15,
+         "text": "406.22",
+         "min": 404.26,
+         "max": 407.052
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 407.132,
+         "sd": 0.798626,
+         "n": 15,
+         "text": "407.13",
+         "min": 405.299,
+         "max": 407.735
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0077925,
+        "h": 0.133708
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0077925,
+         "sd": 0.0019881,
+         "n": 15,
+         "text": "−0.00779",
+         "min": -0.0100629,
+         "max": -0.00228582
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.00486977,
+         "sd": 0.0481919,
+         "n": 15,
+         "text": "−0.00487",
+         "min": -0.129345,
+         "max": 0.0927518
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.00862966,
+         "sd": 0.00332462,
+         "n": 15,
+         "text": "−0.00863",
+         "min": -0.0156092,
+         "max": -0.00397495
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0411743,
+        "h": 0.358423
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0360563,
+         "sd": 0.00336923,
+         "n": 15,
+         "text": "0.03606",
+         "min": 0.0299262,
+         "max": 0.042181
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.0415507,
+         "sd": 0.127265,
+         "n": 15,
+         "text": "0.04155",
+         "min": -0.223932,
+         "max": 0.367013
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.0411743,
+         "sd": 0.00650701,
+         "n": 15,
+         "text": "0.04117",
+         "min": 0.0313709,
+         "max": 0.0530226
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0415492,
+        "h": 0.373158
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.033836,
+         "sd": 0.00416115,
+         "n": 15,
+         "text": "−0.03384",
+         "min": -0.0430498,
+         "max": -0.0279274
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.04994,
+         "sd": 0.129865,
+         "n": 15,
+         "text": "−0.04994",
+         "min": -0.380784,
+         "max": 0.223842
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0415492,
+         "sd": 0.00636761,
+         "n": 15,
+         "text": "−0.04155",
+         "min": -0.0552762,
+         "max": -0.0338981
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00859434,
+        "h": 0.127965
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00563929,
+         "sd": 0.00157122,
+         "n": 15,
+         "text": "0.00564",
+         "min": 0.00377667,
+         "max": 0.00961733
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.0118616,
+         "sd": 0.0441373,
+         "n": 15,
+         "text": "0.01186",
+         "min": -0.081209,
+         "max": 0.124926
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.00859434,
+         "sd": 0.00198131,
+         "n": 15,
+         "text": "0.00859",
+         "min": 0.00712495,
+         "max": 0.0135115
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265_f2",
+     "label": "t265 fisheye 2",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 284.933,
+        "h": 7.6813
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.543,
+         "sd": 0.630056,
+         "n": 15,
+         "text": "286.54",
+         "min": 284.769,
+         "max": 287.442
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 284.933,
+         "sd": 2.42196,
+         "n": 15,
+         "text": "284.93",
+         "min": 282.341,
+         "max": 291.916
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 284.02,
+         "sd": 0.592662,
+         "n": 15,
+         "text": "284.02",
+         "min": 282.88,
+         "max": 284.897
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 284.478,
+        "h": 7.392
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.079,
+         "sd": 0.707027,
+         "n": 15,
+         "text": "286.08",
+         "min": 284.133,
+         "max": 287.077
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 284.478,
+         "sd": 2.57163,
+         "n": 15,
+         "text": "284.48",
+         "min": 281.47,
+         "max": 291.198
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 283.289,
+         "sd": 0.745942,
+         "n": 15,
+         "text": "283.29",
+         "min": 282.068,
+         "max": 284.388
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 413.88,
+        "h": 1.6863
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 415.061,
+         "sd": 0.233622,
+         "n": 15,
+         "text": "415.06",
+         "min": 414.606,
+         "max": 415.413
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 413.88,
+         "sd": 0.668742,
+         "n": 15,
+         "text": "413.88",
+         "min": 413.145,
+         "max": 415.378
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 413.819,
+         "sd": 0.646185,
+         "n": 15,
+         "text": "413.82",
+         "min": 412.537,
+         "max": 414.749
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 400.45,
+        "h": 2.86
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 398.641,
+         "sd": 0.329382,
+         "n": 15,
+         "text": "398.64",
+         "min": 397.85,
+         "max": 398.901
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 400.45,
+         "sd": 0.839403,
+         "n": 15,
+         "text": "400.45",
+         "min": 398.62,
+         "max": 401.425
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 401.474,
+         "sd": 0.784318,
+         "n": 15,
+         "text": "401.47",
+         "min": 399.565,
+         "max": 402.041
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00739184,
+        "h": 0.200328
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00903358,
+         "sd": 0.00210803,
+         "n": 15,
+         "text": "−0.00903",
+         "min": -0.0113877,
+         "max": -0.00380942
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.00739184,
+         "sd": 0.0534526,
+         "n": 15,
+         "text": "−0.00739",
+         "min": -0.189508,
+         "max": 0.016946
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.00705381,
+         "sd": 0.00324999,
+         "n": 15,
+         "text": "−0.00705",
+         "min": -0.0121894,
+         "max": -0.000913821
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0377502,
+        "h": 0.615312
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0377502,
+         "sd": 0.00336086,
+         "n": 15,
+         "text": "0.03775",
+         "min": 0.0313882,
+         "max": 0.0429842
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.0418188,
+         "sd": 0.158035,
+         "n": 15,
+         "text": "0.04182",
+         "min": -0.0147051,
+         "max": 0.597125
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.0329799,
+         "sd": 0.00888672,
+         "n": 15,
+         "text": "0.03298",
+         "min": 0.0174938,
+         "max": 0.0467491
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0371768,
+        "h": 0.727043
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.034379,
+         "sd": 0.00403116,
+         "n": 15,
+         "text": "−0.03438",
+         "min": -0.0415691,
+         "max": -0.0276097
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.0494791,
+         "sd": 0.180555,
+         "n": 15,
+         "text": "−0.04948",
+         "min": -0.698125,
+         "max": 0.00624068
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0371768,
+         "sd": 0.00822833,
+         "n": 15,
+         "text": "−0.03718",
+         "min": -0.044657,
+         "max": -0.0181377
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00772105,
+        "h": 0.283683
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00571623,
+         "sd": 0.00155495,
+         "n": 15,
+         "text": "0.00572",
+         "min": 0.00297633,
+         "max": 0.00864525
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.0128341,
+         "sd": 0.0691104,
+         "n": 15,
+         "text": "0.01283",
+         "min": -0.0060762,
+         "max": 0.265615
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.00772105,
+         "sd": 0.00250066,
+         "n": 15,
+         "text": "0.00772",
+         "min": 0.0015943,
+         "max": 0.0106437
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 63.5554,
+        "h": 0.49467
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 63.6628,
+         "sd": 0.0337827,
+         "n": 15,
+         "text": "63.663",
+         "min": 63.6229,
+         "max": 63.7226
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 63.4679,
+         "sd": 0.0991039,
+         "n": 15,
+         "text": "63.468",
+         "min": 63.3425,
+         "max": 63.6623
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 63.5554,
+         "sd": 0.135464,
+         "n": 15,
+         "text": "63.555",
+         "min": 63.4104,
+         "max": 64.0051
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [],
+   "has_tga": false
+  },
+  {
+   "id": "T2",
+   "title": "ELP RS stereo + readout",
+   "mode": "cam",
+   "shutter": "rolling",
+   "n": 15,
+   "columns": [
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS"
+    },
+    {
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr"
+    },
+    {
+     "col": "basalt",
+     "tool": "Basalt",
+     "label": "Basalt"
+    }
+   ],
+   "solved": [
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "MVIS"
+    },
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "Kalibr"
+    },
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "Lens models differ, so only readout has a difference, and Kalibr wasn't re-run after the ELP stamp correction. Basalt is shown only.",
+   "notes": [
+    [
+     "Like for like",
+     "Kalibr has 13 of 15 recordings on ELP-R. MVIS uses an equidistant lens model, Kalibr and Basalt radtan, so fx, fy, cx, cy and distortion have no difference, and the dist[2] and dist[3] rows hold different coefficients per tool. Basalt solves this rolling-shutter pair as global shutter. Kalibr wasn't re-run after the ELP stamp correction; we expect it to be unchanged, but that wasn't tested. MVIS estimates the board shape; Kalibr assumes a flat board."
+    ],
+    [
+     "Note",
+     "Kalibr's rolling-shutter model calibrates one camera at a time, so it has no ELP stereo baseline. ELP-R bags 8 and 13 failed (autodiff overflow at bag-freq 15; the bag-freq-10 retry overflowed again on bag 8 and converged to a non-physical basin on bag 13) and are excluded."
+    ],
+    [
+     "Basalt",
+     "Basalt has no rolling-shutter model: it solves the ELP pair as global shutter with pinhole-radtan8 (seeded from kb4), so its T2 values are shown only. Since 2026-11-01 MVIS solves the ELP with the equidistant model while the Kalibr RS runs are radtan: readout is compared; fx, fy, cx, cy and distortion are shown without a difference because the lens models differ."
+    ]
+   ],
+   "records": {
+    "MVIS": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/MVIS/2026-11-08a/T2.json",
+    "Kalibr": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Kalibr/2026-11-08a/T2.json",
+    "Basalt": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Basalt/2026-11-08a/T2.json"
+   },
+   "fit": [],
+   "diffs": [
+    {
+     "pair": "mk",
+     "label": "MVIS − Kalibr",
+     "a": "MVIS",
+     "b": "Kalibr",
+     "marked": 1,
+     "compared": 2,
+     "rows": [
+      {
+       "sensor": "ELP-L",
+       "sensor_id": "elp_l",
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "text": "−1.755",
+       "spread": "1.999",
+       "z": -0.878,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "ELP-R",
+       "sensor_id": "elp_r",
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "text": "−2.771",
+       "spread": "1.423",
+       "z": -1.947,
+       "marked": true,
+       "unequal_n": true
+      }
+     ]
+    }
+   ],
+   "tally": {
+    "mk": [
+     1,
+     2
+    ]
+   },
+   "sensors": [
+    {
+     "id": "elp_l",
+     "label": "ELP-L",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 428.022,
+        "h": 1.5598
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 428.022,
+         "sd": 0.770657,
+         "n": 15,
+         "text": "428.02",
+         "min": 426.665,
+         "max": 429.44
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 427.699,
+         "sd": 6.58819,
+         "n": 15,
+         "text": "427.70",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 427.07,
+         "sd": 1.90609,
+         "n": 15,
+         "text": "427.07",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 427.206,
+        "h": 1.6797
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 427.206,
+         "sd": 0.75627,
+         "n": 15,
+         "text": "427.21",
+         "min": 425.679,
+         "max": 428.383
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 426.313,
+         "sd": 6.41699,
+         "n": 15,
+         "text": "426.31",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 427.471,
+         "sd": 2.23308,
+         "n": 15,
+         "text": "427.47",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 351.056,
+        "h": 1.1033
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 351.056,
+         "sd": 0.463378,
+         "n": 15,
+         "text": "351.06",
+         "min": 350.053,
+         "max": 351.878
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 338.22,
+         "sd": 2.93619,
+         "n": 15,
+         "text": "338.22",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 348.63,
+         "sd": 1.4626,
+         "n": 15,
+         "text": "348.63",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 267.798,
+        "h": 2.2869
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 267.798,
+         "sd": 0.744294,
+         "n": 15,
+         "text": "267.80",
+         "min": 266.995,
+         "max": 269.877
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 271.036,
+         "sd": 8.3261,
+         "n": 15,
+         "text": "271.04",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 274.374,
+         "sd": 1.47853,
+         "n": 15,
+         "text": "274.37",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.091257,
+        "h": 0.00398849
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.091257,
+         "sd": 0.0017153,
+         "n": 15,
+         "text": "−0.09126",
+         "min": -0.0948829,
+         "max": -0.0883706
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": -0.366947,
+         "sd": 0.0236061,
+         "n": 15,
+         "text": "−0.36695",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 8.54347,
+         "sd": 11.8855,
+         "n": 15,
+         "text": "8.54347",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0294595,
+        "h": 0.0128568
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0294595,
+         "sd": 0.00595494,
+         "n": 15,
+         "text": "−0.029",
+         "min": -0.0382689,
+         "max": -0.0177715
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 0.101163,
+         "sd": 0.0204117,
+         "n": 15,
+         "text": "0.101",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 30.7212,
+         "sd": 18.7658,
+         "n": 15,
+         "text": "30.721",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist[2] (MVIS k3, radtan p1)",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0203894,
+        "h": 0.0217351
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0203894,
+         "sd": 0.0122713,
+         "n": 15,
+         "text": "0.02039",
+         "min": 0.00107848,
+         "max": 0.0401486
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": -0.000409352,
+         "sd": 0.00284682,
+         "n": 15,
+         "text": "−0.00041",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": -0.00195406,
+         "sd": 0.000537156,
+         "n": 15,
+         "text": "−0.00195",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist[3] (MVIS k4, radtan p2)",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00530959,
+        "h": 0.0193612
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00530959,
+         "sd": 0.00866486,
+         "n": 15,
+         "text": "−0.00531",
+         "min": -0.0229107,
+         "max": 0.00570812
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 0.00223963,
+         "sd": 0.000788347,
+         "n": 15,
+         "text": "0.00224",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 0.000220745,
+         "sd": 0.000285871,
+         "n": 15,
+         "text": "0.00022",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 15.477,
+        "h": 4.69683
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 14.5997,
+         "sd": 0.409046,
+         "n": 15,
+         "text": "14.600",
+         "min": 13.7717,
+         "max": 15.3413
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 16.3544,
+         "sd": 1.99949,
+         "n": 15,
+         "text": "16.354",
+         "min": 11.2072,
+         "max": 18.9002
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "missing",
+         "note": "different model, no value"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "elp_r",
+     "label": "ELP-R",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 424.785,
+        "h": 1.7105
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 424.785,
+         "sd": 0.771622,
+         "n": 15,
+         "text": "424.79",
+         "min": 423.621,
+         "max": 426.34
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 424.567,
+         "sd": 3.89067,
+         "n": 13,
+         "text": "424.57",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 423.529,
+         "sd": 1.86172,
+         "n": 15,
+         "text": "423.53",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 424.091,
+        "h": 1.7545
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 424.091,
+         "sd": 0.759965,
+         "n": 15,
+         "text": "424.09",
+         "min": 422.496,
+         "max": 425.271
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 424.566,
+         "sd": 3.84333,
+         "n": 13,
+         "text": "424.57",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 423.699,
+         "sd": 2.13452,
+         "n": 15,
+         "text": "423.70",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 336.847,
+        "h": 1.0395
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 336.847,
+         "sd": 0.458311,
+         "n": 15,
+         "text": "336.85",
+         "min": 336.276,
+         "max": 337.792
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 328.458,
+         "sd": 2.33767,
+         "n": 13,
+         "text": "328.46",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 336.191,
+         "sd": 1.47199,
+         "n": 15,
+         "text": "336.19",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 259.0,
+        "h": 2.2869
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 259.0,
+         "sd": 0.740108,
+         "n": 15,
+         "text": "259.00",
+         "min": 258.185,
+         "max": 261.079
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 261.012,
+         "sd": 3.16984,
+         "n": 13,
+         "text": "261.01",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 266.062,
+         "sd": 1.48786,
+         "n": 15,
+         "text": "266.06",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0898545,
+        "h": 0.00266365
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0898545,
+         "sd": 0.00129269,
+         "n": 15,
+         "text": "−0.08985",
+         "min": -0.092276,
+         "max": -0.0874627
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": -0.358379,
+         "sd": 0.00363108,
+         "n": 13,
+         "text": "−0.35838",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": -3.68841,
+         "sd": 8.37771,
+         "n": 15,
+         "text": "−3.68841",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0245641,
+        "h": 0.0117729
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0245641,
+         "sd": 0.00553047,
+         "n": 15,
+         "text": "−0.025",
+         "min": -0.0333973,
+         "max": -0.0138615
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 0.094402,
+         "sd": 0.00264567,
+         "n": 13,
+         "text": "0.094",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": 26.1673,
+         "sd": 16.3065,
+         "n": 15,
+         "text": "26.167",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist[2] (MVIS k3, radtan p1)",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00629015,
+        "h": 0.0246979
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00629015,
+         "sd": 0.0112555,
+         "n": 15,
+         "text": "0.00629",
+         "min": -0.0161625,
+         "max": 0.0283817
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": -0.000718067,
+         "sd": 0.00144289,
+         "n": 13,
+         "text": "−0.00072",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": -0.00213325,
+         "sd": 0.00050646,
+         "n": 15,
+         "text": "−0.00213",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist[3] (MVIS k4, radtan p2)",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.000152315,
+        "h": 0.0167519
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.000152315,
+         "sd": 0.00738273,
+         "n": 15,
+         "text": "0.00015",
+         "min": -0.0117907,
+         "max": 0.0153813
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 0.000770788,
+         "sd": 0.000514816,
+         "n": 13,
+         "text": "0.00077",
+         "note": "different model, not compared"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "shown",
+         "med": -0.000440267,
+         "sd": 0.000337622,
+         "n": 15,
+         "text": "−0.00044",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 15.9831,
+        "h": 3.54019
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 14.5976,
+         "sd": 0.408379,
+         "n": 15,
+         "text": "14.598",
+         "min": 13.7372,
+         "max": 15.3005
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 17.3685,
+         "sd": 1.42294,
+         "n": 13,
+         "text": "17.369",
+         "min": 12.7647,
+         "max": 18.1427
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "missing",
+         "note": "different model, no value"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [],
+   "has_tga": false
+  },
+  {
+   "id": "T7",
+   "title": "Mixed t265-f1 + ELP-L, aux Xsens",
+   "mode": "cam+imu",
+   "shutter": "mixed",
+   "n": 15,
+   "columns": [
+    {
+     "col": "calyx",
+     "tool": "MVIS",
+     "label": "MVIS"
+    },
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)"
+    },
+    {
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr"
+    }
+   ],
+   "solved": [
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "MVIS"
+    },
+    {
+     "n": 14,
+     "of": 15,
+     "tool": "Kalibr"
+    },
+    {
+     "n": 0,
+     "of": 15,
+     "reason": "not run: one IMU per run and no rolling-shutter model; no run holds the whole rig",
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "Kalibr treats ELP-L as global shutter; its intrinsics and baselines are inputs from an MVIS export. Data settings differ: see Notes.",
+   "notes": [
+    [
+     "Basalt not run",
+     "Basalt cannot calibrate T7 — no rolling-shutter model for ELP-L, one IMU per run, and one time offset shared by all cameras (the t265 and ELP clocks share no frame stamps)."
+    ],
+    [
+     "Like for like",
+     "Kalibr has 14 of 15 recordings (bag 8 failed). Its ELP-L readout is fixed at 0, and ELP-L's stamps were shifted by the MVIS td of the same bag before each Kalibr run. Its td and lever are solved given these inputs. MVIS uses two corners per tag, non-base cameras at 4 Hz or lower and an estimated board shape; Kalibr has none of these."
+    ],
+    [
+     "Note",
+     "MVIS solves t265 fisheye 1 (GS) + ELP-L (rolling shutter, readout estimated) + both IMUs. Kalibr's camera + IMU solver is global-shutter only, so its runs take ELP-L as a GS camera and its readout tr is reported as 0 (its global-shutter model, not an estimate). Kalibr bag 8 is excluded: its base gyro scales (1.23 / 2.23) are far from the other 14 bags (about 1.01), a failed solve; MVIS keeps bag 8, so its n is 15 and Kalibr's is 14."
+    ]
+   ],
+   "records": {
+    "MVIS": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/MVIS/2026-11-08a/T7.json",
+    "Kalibr": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Kalibr/2026-11-08a/T7.json",
+    "Basalt": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Basalt/2026-11-08a/T7.json"
+   },
+   "fit": [
+    {
+     "sensor": "t265 fisheye 1",
+     "by_col": {
+      "calyx": "0.200",
+      "mvis": "0.200",
+      "kalibr": "0.367"
+     }
+    },
+    {
+     "sensor": "ELP-L",
+     "by_col": {
+      "calyx": "0.181",
+      "mvis": "0.181",
+      "kalibr": "0.795"
+     }
+    }
+   ],
+   "diffs": [
+    {
+     "pair": "mk",
+     "label": "MVIS (K-IMU) − Kalibr",
+     "a": "MVIS",
+     "b": "Kalibr",
+     "marked": 13,
+     "compared": 22,
+     "rows": [
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+2.729",
+       "spread": "0.301",
+       "z": 9.075,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 fisheye 1",
+       "sensor_id": "t265_f1",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+3.69",
+       "spread": "2.83",
+       "z": 1.304,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.01342",
+       "spread": "0.00365",
+       "z": -3.679,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00928",
+       "spread": "0.00268",
+       "z": -3.459,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00134",
+       "spread": "0.00049",
+       "z": -2.735,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00169",
+       "spread": "0.00280",
+       "z": -0.602,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "+0.00856",
+       "spread": "0.00327",
+       "z": 2.616,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "+0.00048",
+       "spread": "0.00274",
+       "z": 0.177,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "+0.00128",
+       "spread": "0.00143",
+       "z": 0.893,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "+0.00185",
+       "spread": "0.00177",
+       "z": 1.047,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.00010",
+       "spread": "0.00221",
+       "z": -0.045,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.01256",
+       "spread": "0.00356",
+       "z": -3.525,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00103",
+       "spread": "0.00044",
+       "z": -2.357,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00967",
+       "spread": "0.00274",
+       "z": -3.528,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00661",
+       "spread": "0.00283",
+       "z": -2.332,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "−0.00148",
+       "spread": "0.00232",
+       "z": -0.64,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "−0.00007",
+       "spread": "0.00264",
+       "z": -0.027,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "−0.00154",
+       "spread": "0.00520",
+       "z": -0.296,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.01073",
+       "spread": "0.00478",
+       "z": -2.245,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.00220",
+       "spread": "0.00316",
+       "z": -0.697,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "text": "−0.019",
+       "spread": "0.146",
+       "z": -0.132,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+9.99",
+       "spread": "2.96",
+       "z": 3.378,
+       "marked": true,
+       "unequal_n": true
+      }
+     ]
+    }
+   ],
+   "tally": {
+    "mk": [
+     13,
+     22
+    ]
+   },
+   "sensors": [
+    {
+     "id": "t265_f1",
+     "label": "t265 fisheye 1",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 287.204,
+        "h": 1.221
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 287.205,
+         "sd": 0.444384,
+         "n": 14,
+         "text": "287.20",
+         "min": 286.095,
+         "max": 288.003
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 287.201,
+         "sd": 0.428161,
+         "n": 15,
+         "text": "287.20",
+         "min": 286.094,
+         "max": 287.995
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 287.204,
+         "sd": 0.444213,
+         "n": 14,
+         "text": "287.20",
+         "note": "input",
+         "min": 286.094,
+         "max": 287.995
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 287.088,
+        "h": 1.4388
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 287.089,
+         "sd": 0.538963,
+         "n": 14,
+         "text": "287.09",
+         "min": 285.78,
+         "max": 288.145
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 287.002,
+         "sd": 0.520445,
+         "n": 15,
+         "text": "287.00",
+         "min": 285.78,
+         "max": 288.136
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 287.088,
+         "sd": 0.538428,
+         "n": 14,
+         "text": "287.09",
+         "note": "input",
+         "min": 285.78,
+         "max": 288.136
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 415.777,
+        "h": 0.8426
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 415.776,
+         "sd": 0.360569,
+         "n": 14,
+         "text": "415.78",
+         "min": 415.011,
+         "max": 416.319
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 415.801,
+         "sd": 0.347244,
+         "n": 15,
+         "text": "415.80",
+         "min": 415.017,
+         "max": 416.319
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 415.777,
+         "sd": 0.359878,
+         "n": 14,
+         "text": "415.78",
+         "note": "input",
+         "min": 415.017,
+         "max": 416.319
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 403.621,
+        "h": 0.7887
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 403.617,
+         "sd": 0.281351,
+         "n": 14,
+         "text": "403.62",
+         "min": 402.904,
+         "max": 404.007
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 403.623,
+         "sd": 0.275648,
+         "n": 15,
+         "text": "403.62",
+         "min": 402.905,
+         "max": 404.008
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 403.621,
+         "sd": 0.282253,
+         "n": 14,
+         "text": "403.62",
+         "note": "input",
+         "min": 402.905,
+         "max": 404.008
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0058747,
+        "h": 0.00343562
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00585963,
+         "sd": 0.001282,
+         "n": 14,
+         "text": "−0.00586",
+         "min": -0.00898944,
+         "max": -0.00407562
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00587943,
+         "sd": 0.00124743,
+         "n": 15,
+         "text": "−0.00588",
+         "min": -0.00899799,
+         "max": -0.00408683
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.0058747,
+         "sd": 0.00128196,
+         "n": 14,
+         "text": "−0.00587",
+         "note": "input",
+         "min": -0.00899799,
+         "max": -0.00408683
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0341105,
+        "h": 0.00697389
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0341039,
+         "sd": 0.00393583,
+         "n": 14,
+         "text": "0.03410",
+         "min": 0.0283208,
+         "max": 0.04045
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.0341654,
+         "sd": 0.00387389,
+         "n": 15,
+         "text": "0.03417",
+         "min": 0.0283719,
+         "max": 0.0404504
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.0341105,
+         "sd": 0.00393125,
+         "n": 14,
+         "text": "0.03411",
+         "note": "input",
+         "min": 0.0283719,
+         "max": 0.0404504
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0314281,
+        "h": 0.0113038
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0314281,
+         "sd": 0.0049852,
+         "n": 14,
+         "text": "−0.03143",
+         "min": -0.0417043,
+         "max": -0.0243873
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.031568,
+         "sd": 0.00488725,
+         "n": 15,
+         "text": "−0.03157",
+         "min": -0.0416912,
+         "max": -0.0243947
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.0314266,
+         "sd": 0.0049785,
+         "n": 14,
+         "text": "−0.03143",
+         "note": "input",
+         "min": -0.0416912,
+         "max": -0.0243947
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00453979,
+        "h": 0.00497392
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00453979,
+         "sd": 0.00201058,
+         "n": 14,
+         "text": "0.00454",
+         "min": 0.00160699,
+         "max": 0.00906154
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00456662,
+         "sd": 0.00196908,
+         "n": 15,
+         "text": "0.00457",
+         "min": 0.00160821,
+         "max": 0.00905483
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.00452843,
+         "sd": 0.00200857,
+         "n": 14,
+         "text": "0.00453",
+         "note": "input",
+         "min": 0.00160821,
+         "max": 0.00905483
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 2.03644,
+        "h": 3.48979
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 2.03644,
+         "sd": 0.187882,
+         "n": 14,
+         "text": "2.036",
+         "min": 1.72911,
+         "max": 2.3378
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 2.04541,
+         "sd": 0.182221,
+         "n": 15,
+         "text": "2.045",
+         "min": 1.74665,
+         "max": 2.34889
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.683931,
+         "sd": 0.300766,
+         "n": 14,
+         "text": "−0.684",
+         "min": -1.1361,
+         "max": -0.283776
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 11.918,
+        "h": 7.18073
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 11.9861,
+         "sd": 0.440496,
+         "n": 14,
+         "text": "11.99",
+         "min": 10.9837,
+         "max": 12.564
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 11.918,
+         "sd": 0.429028,
+         "n": 15,
+         "text": "11.92",
+         "min": 10.9717,
+         "max": 12.5706
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 8.22386,
+         "sd": 2.8338,
+         "n": 14,
+         "text": "8.22",
+         "min": 6.01843,
+         "max": 16.0224
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "elp_l",
+     "label": "ELP-L",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 428.22,
+        "h": 2.1802
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 428.22,
+         "sd": 0.736545,
+         "n": 14,
+         "text": "428.22",
+         "min": 426.238,
+         "max": 429.372
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 428.34,
+         "sd": 0.710727,
+         "n": 15,
+         "text": "428.34",
+         "min": 426.244,
+         "max": 429.358
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 428.22,
+         "sd": 0.734672,
+         "n": 14,
+         "text": "428.22",
+         "note": "input",
+         "min": 426.244,
+         "max": 429.358
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 427.893,
+        "h": 2.3628
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 427.893,
+         "sd": 0.895477,
+         "n": 14,
+         "text": "427.89",
+         "min": 425.745,
+         "max": 429.517
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 427.915,
+         "sd": 0.860259,
+         "n": 15,
+         "text": "427.92",
+         "min": 425.753,
+         "max": 429.503
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 427.889,
+         "sd": 0.892695,
+         "n": 14,
+         "text": "427.89",
+         "note": "input",
+         "min": 425.753,
+         "max": 429.503
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 351.007,
+        "h": 0.6908
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 351.005,
+         "sd": 0.361152,
+         "n": 14,
+         "text": "351.00",
+         "min": 350.379,
+         "max": 351.593
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 351.025,
+         "sd": 0.347396,
+         "n": 15,
+         "text": "351.02",
+         "min": 350.382,
+         "max": 351.59
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 351.007,
+         "sd": 0.360487,
+         "n": 14,
+         "text": "351.01",
+         "note": "input",
+         "min": 350.382,
+         "max": 351.59
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 266.474,
+        "h": 0.5742
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 266.472,
+         "sd": 0.229836,
+         "n": 14,
+         "text": "266.47",
+         "min": 266.197,
+         "max": 266.994
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 266.487,
+         "sd": 0.24595,
+         "n": 15,
+         "text": "266.49",
+         "min": 266.197,
+         "max": 266.996
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 266.474,
+         "sd": 0.230189,
+         "n": 14,
+         "text": "266.47",
+         "note": "input",
+         "min": 266.197,
+         "max": 266.996
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0942793,
+        "h": 0.00473935
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0942793,
+         "sd": 0.00199103,
+         "n": 14,
+         "text": "−0.09428",
+         "min": -0.0985878,
+         "max": -0.0918596
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0940495,
+         "sd": 0.00193617,
+         "n": 15,
+         "text": "−0.09405",
+         "min": -0.0985817,
+         "max": -0.091892
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.094308,
+         "sd": 0.00199503,
+         "n": 14,
+         "text": "−0.09431",
+         "note": "input",
+         "min": -0.0985817,
+         "max": -0.091892
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0243499,
+        "h": 0.016689
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0243499,
+         "sd": 0.00719781,
+         "n": 14,
+         "text": "−0.02435",
+         "min": -0.0343878,
+         "max": -0.00917805
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0249409,
+         "sd": 0.00706814,
+         "n": 15,
+         "text": "−0.02494",
+         "min": -0.0343919,
+         "max": -0.00928162
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.024279,
+         "sd": 0.00719593,
+         "n": 14,
+         "text": "−0.02428",
+         "note": "input",
+         "min": -0.0343919,
+         "max": -0.00928162
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0202036,
+        "h": 0.0427507
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0202036,
+         "sd": 0.0163993,
+         "n": 14,
+         "text": "0.02020",
+         "min": -0.0186607,
+         "max": 0.0472261
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.0215018,
+         "sd": 0.01592,
+         "n": 15,
+         "text": "0.02150",
+         "min": -0.0184567,
+         "max": 0.0470783
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.0201308,
+         "sd": 0.0163796,
+         "n": 14,
+         "text": "0.02013",
+         "note": "input",
+         "min": -0.0184567,
+         "max": 0.0470783
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.010054,
+        "h": 0.0277675
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00999766,
+         "sd": 0.0117396,
+         "n": 14,
+         "text": "−0.01000",
+         "min": -0.0341942,
+         "max": 0.0151892
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0105824,
+         "sd": 0.011333,
+         "n": 15,
+         "text": "−0.01058",
+         "min": -0.0341347,
+         "max": 0.0150566
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.010054,
+         "sd": 0.0117198,
+         "n": 14,
+         "text": "−0.01005",
+         "note": "input",
+         "min": -0.0341347,
+         "max": 0.0150566
+        }
+       ]
+      },
+      {
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 16.6685,
+        "h": 18.3354
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 16.6698,
+         "sd": 0.090502,
+         "n": 14,
+         "text": "16.670",
+         "min": 16.5637,
+         "max": 16.8627
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 16.6685,
+         "sd": 0.0863581,
+         "n": 15,
+         "text": "16.669",
+         "min": 16.5676,
+         "max": 16.862
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.0,
+         "sd": 0.0,
+         "n": 14,
+         "text": "0.000",
+         "note": "input",
+         "min": 0.0,
+         "max": 0.0
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 153.504,
+        "h": 0.3289
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 153.5,
+         "sd": 0.17344,
+         "n": 14,
+         "text": "153.500",
+         "min": 153.208,
+         "max": 153.803
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 153.51,
+         "sd": 0.164497,
+         "n": 15,
+         "text": "153.510",
+         "min": 153.21,
+         "max": 153.798
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 153.504,
+         "sd": 0.17019,
+         "n": 14,
+         "text": "153.504",
+         "note": "input",
+         "min": 153.21,
+         "max": 153.798
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -115.898,
+        "h": 1.74735
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -115.876,
+         "sd": 0.640299,
+         "n": 14,
+         "text": "−115.876",
+         "min": -116.28,
+         "max": -114.31
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -115.919,
+         "sd": 0.631574,
+         "n": 15,
+         "text": "−115.919",
+         "min": -116.273,
+         "max": -114.309
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": -107.879,
+         "sd": 0.887662,
+         "n": 14,
+         "text": "−107.879",
+         "note": "different model, not compared"
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 141.997,
+        "h": 0.9306
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 141.977,
+         "sd": 0.446873,
+         "n": 14,
+         "text": "141.98",
+         "min": 141.315,
+         "max": 142.827
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 142.017,
+         "sd": 0.433051,
+         "n": 15,
+         "text": "142.02",
+         "min": 141.33,
+         "max": 142.843
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "other_model",
+         "med": 146.456,
+         "sd": 2.21099,
+         "n": 14,
+         "text": "146.46",
+         "note": "different model, not compared"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_t265",
+     "label": "t265 IMU",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00672,
+        "h": 0.015103
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00001,
+         "sd": 0.00112055,
+         "n": 15,
+         "text": "1.00001",
+         "min": 0.998236,
+         "max": 1.00207
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01343,
+         "sd": 0.00364755,
+         "n": 14,
+         "text": "1.01343",
+         "min": 1.00682,
+         "max": 1.02045
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00785,
+        "h": 0.009075
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00321,
+         "sd": 0.00140589,
+         "n": 15,
+         "text": "1.00321",
+         "min": 1.00049,
+         "max": 1.00573
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01249,
+         "sd": 0.00268295,
+         "n": 14,
+         "text": "1.01249",
+         "min": 1.00808,
+         "max": 1.0161
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00493,
+        "h": 0.001815
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00426,
+         "sd": 0.000274591,
+         "n": 15,
+         "text": "1.00426",
+         "min": 1.00381,
+         "max": 1.0047
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.0056,
+         "sd": 0.000489879,
+         "n": 14,
+         "text": "1.00560",
+         "min": 1.00455,
+         "max": 1.00658
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00293887,
+        "h": 0.00909055
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00209485,
+         "sd": 0.00131616,
+         "n": 15,
+         "text": "0.00209",
+         "min": 0.000224723,
+         "max": 0.00444819
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00378288,
+         "sd": 0.00280417,
+         "n": 14,
+         "text": "0.00378",
+         "min": 0.00037852,
+         "max": 0.011203
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00170789,
+        "h": 0.00934418
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00257222,
+         "sd": 0.000658336,
+         "n": 15,
+         "text": "0.00257",
+         "min": 0.0015292,
+         "max": 0.0042003
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.005988,
+         "sd": 0.00327184,
+         "n": 14,
+         "text": "−0.00599",
+         "min": -0.0102026,
+         "max": 0.00159708
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.000190216,
+        "h": 0.00652148
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00043258,
+         "sd": 0.000539889,
+         "n": 15,
+         "text": "0.00043",
+         "min": -0.000561735,
+         "max": 0.00137385
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -5.21473e-05,
+         "sd": 0.00274345,
+         "n": 14,
+         "text": "−0.00005",
+         "min": -0.0057384,
+         "max": 0.00519234
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01934,
+        "h": 0.004433
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.01998,
+         "sd": 0.000362739,
+         "n": 15,
+         "text": "1.01998",
+         "min": 1.01942,
+         "max": 1.02083
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.0187,
+         "sd": 0.00143336,
+         "n": 14,
+         "text": "1.01870",
+         "min": 1.01531,
+         "max": 1.0208
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01809,
+        "h": 0.0040755
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.01901,
+         "sd": 0.000719139,
+         "n": 15,
+         "text": "1.01901",
+         "min": 1.01776,
+         "max": 1.0205
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01716,
+         "sd": 0.00176748,
+         "n": 14,
+         "text": "1.01716",
+         "min": 1.01438,
+         "max": 1.01949
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01704,
+        "h": 0.004895
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.01699,
+         "sd": 0.00092022,
+         "n": 15,
+         "text": "1.01699",
+         "min": 1.01539,
+         "max": 1.01906
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01709,
+         "sd": 0.00220968,
+         "n": 14,
+         "text": "1.01709",
+         "min": 1.01259,
+         "max": 1.01949
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -6.6932,
+        "h": 0.24398
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -6.6932,
+         "sd": 0.108223,
+         "n": 15,
+         "text": "−6.693",
+         "min": -6.915,
+         "max": -6.49
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not in this tool's model"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_xsens",
+     "label": "Xsens MTi",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00724,
+        "h": 0.014179
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00096,
+         "sd": 0.00110044,
+         "n": 15,
+         "text": "1.00096",
+         "min": 0.999402,
+         "max": 1.00312
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01352,
+         "sd": 0.00356292,
+         "n": 14,
+         "text": "1.01352",
+         "min": 1.00734,
+         "max": 1.02013
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.99934,
+        "h": 0.00137555
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.998825,
+         "sd": 0.000206344,
+         "n": 15,
+         "text": "0.99882",
+         "min": 0.998396,
+         "max": 0.999089
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.999854,
+         "sd": 0.000436541,
+         "n": 14,
+         "text": "0.99985",
+         "min": 0.999098,
+         "max": 1.00059
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.0051,
+        "h": 0.0093115
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00027,
+         "sd": 0.00117005,
+         "n": 15,
+         "text": "1.00027",
+         "min": 0.998373,
+         "max": 1.0024
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00994,
+         "sd": 0.00274094,
+         "n": 14,
+         "text": "1.00994",
+         "min": 1.00514,
+         "max": 1.01357
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00228524,
+        "h": 0.00766157
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00101798,
+         "sd": 0.00041693,
+         "n": 15,
+         "text": "−0.00102",
+         "min": -0.00190138,
+         "max": -0.000556741
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00558847,
+         "sd": 0.00283287,
+         "n": 14,
+         "text": "0.00559",
+         "min": -0.0011219,
+         "max": 0.00925031
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.0032935,
+        "h": 0.00657033
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00255192,
+         "sd": 0.000832312,
+         "n": 15,
+         "text": "0.00255",
+         "min": 0.000518306,
+         "max": 0.00402251
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00403507,
+         "sd": 0.0023171,
+         "n": 14,
+         "text": "0.00404",
+         "min": 0.000517398,
+         "max": 0.00926652
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.000544291,
+        "h": 0.0054625
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.000580329,
+         "sd": 0.000604845,
+         "n": 15,
+         "text": "−0.00058",
+         "min": -0.00151808,
+         "max": 0.000361314
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.000508254,
+         "sd": 0.00263737,
+         "n": 14,
+         "text": "−0.00051",
+         "min": -0.00487741,
+         "max": 0.00442162
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00082,
+        "h": 0.0145365
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00005,
+         "sd": 0.000324153,
+         "n": 15,
+         "text": "1.00005",
+         "min": 0.999631,
+         "max": 1.00079
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00159,
+         "sd": 0.00520347,
+         "n": 14,
+         "text": "1.00159",
+         "min": 0.987605,
+         "max": 1.00421
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.0052,
+        "h": 0.0136032
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.999837,
+         "sd": 0.000737016,
+         "n": 15,
+         "text": "0.99984",
+         "min": 0.998883,
+         "max": 1.00144
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01057,
+         "sd": 0.00478067,
+         "n": 14,
+         "text": "1.01057",
+         "min": 1.00029,
+         "max": 1.01757
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00177,
+        "h": 0.007887
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00067,
+         "sd": 0.000675052,
+         "n": 15,
+         "text": "1.00067",
+         "min": 0.999344,
+         "max": 1.00136
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00287,
+         "sd": 0.00315817,
+         "n": 14,
+         "text": "1.00287",
+         "min": 0.998212,
+         "max": 1.00894
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 7.24029,
+        "h": 0.311267
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 7.22752,
+         "sd": 0.152251,
+         "n": 14,
+         "text": "7.228",
+         "min": 7.1073,
+         "max": 7.49392
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 7.24029,
+         "sd": 0.146192,
+         "n": 15,
+         "text": "7.240",
+         "min": 7.11995,
+         "max": 7.49618
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 7.25965,
+         "sd": 0.121828,
+         "n": 14,
+         "text": "7.260",
+         "min": 7.1717,
+         "max": 7.52326
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 124.09,
+        "h": 18.8969
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 124.097,
+         "sd": 0.328835,
+         "n": 14,
+         "text": "124.10",
+         "min": 123.431,
+         "max": 124.584
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 124.09,
+         "sd": 0.319424,
+         "n": 15,
+         "text": "124.09",
+         "min": 123.432,
+         "max": 124.591
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 114.102,
+         "sd": 2.95692,
+         "n": 14,
+         "text": "114.10",
+         "min": 106.911,
+         "max": 119.414
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.483,
+        "h": 0.70939
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.483,
+         "sd": 0.218113,
+         "n": 15,
+         "text": "−0.483",
+         "min": -1.1279,
+         "max": -0.2265
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not in this tool's model"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [
+    {
+     "sensor": "t265 IMU",
+     "sensor_id": "imu_t265",
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)",
+     "cells": {
+      "00": {
+       "med": -0.0475543,
+       "sd": 0.105908,
+       "text": "−0.048"
+      },
+      "01": {
+       "med": -0.625982,
+       "sd": 0.120941,
+       "text": "−0.626"
+      },
+      "02": {
+       "med": -0.0086532,
+       "sd": 0.132928,
+       "text": "−0.009"
+      },
+      "10": {
+       "med": 0.192966,
+       "sd": 0.0964572,
+       "text": "0.193"
+      },
+      "11": {
+       "med": -0.0883981,
+       "sd": 0.108155,
+       "text": "−0.088"
+      },
+      "12": {
+       "med": -0.0597604,
+       "sd": 0.142765,
+       "text": "−0.060"
+      },
+      "20": {
+       "med": -0.0111658,
+       "sd": 0.0487558,
+       "text": "−0.011"
+      },
+      "21": {
+       "med": -0.267996,
+       "sd": 0.0748075,
+       "text": "−0.268"
+      },
+      "22": {
+       "med": -0.0942919,
+       "sd": 0.098663,
+       "text": "−0.094"
+      }
+     }
+    },
+    {
+     "sensor": "t265 IMU",
+     "sensor_id": "imu_t265",
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr",
+     "cells": {
+      "00": {
+       "med": 0.0398265,
+       "sd": 0.279485,
+       "text": "0.040"
+      },
+      "01": {
+       "med": 2.41491,
+       "sd": 0.894418,
+       "text": "2.415"
+      },
+      "02": {
+       "med": -0.844314,
+       "sd": 0.717162,
+       "text": "−0.844"
+      },
+      "10": {
+       "med": -1.01359,
+       "sd": 0.164905,
+       "text": "−1.014"
+      },
+      "11": {
+       "med": -1.29269,
+       "sd": 0.35118,
+       "text": "−1.293"
+      },
+      "12": {
+       "med": 2.63923,
+       "sd": 0.517547,
+       "text": "2.639"
+      },
+      "20": {
+       "med": -0.100563,
+       "sd": 0.407436,
+       "text": "−0.101"
+      },
+      "21": {
+       "med": -2.8856,
+       "sd": 0.833335,
+       "text": "−2.886"
+      },
+      "22": {
+       "med": 2.0279,
+       "sd": 0.593187,
+       "text": "2.028"
+      }
+     }
+    },
+    {
+     "sensor": "Xsens MTi",
+     "sensor_id": "imu_xsens",
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)",
+     "cells": {
+      "00": {
+       "med": 0.013356,
+       "sd": 0.0150981,
+       "text": "0.013"
+      },
+      "01": {
+       "med": -0.0267132,
+       "sd": 0.0753091,
+       "text": "−0.027"
+      },
+      "02": {
+       "med": -0.0325138,
+       "sd": 0.0774249,
+       "text": "−0.033"
+      },
+      "10": {
+       "med": -0.00596261,
+       "sd": 0.0204282,
+       "text": "−0.006"
+      },
+      "11": {
+       "med": 0.0520713,
+       "sd": 0.0580811,
+       "text": "0.052"
+      },
+      "12": {
+       "med": 0.0588401,
+       "sd": 0.0669217,
+       "text": "0.059"
+      },
+      "20": {
+       "med": 0.0154379,
+       "sd": 0.0211656,
+       "text": "0.015"
+      },
+      "21": {
+       "med": 0.00882864,
+       "sd": 0.0762706,
+       "text": "0.009"
+      },
+      "22": {
+       "med": -0.00134321,
+       "sd": 0.0428189,
+       "text": "−0.001"
+      }
+     }
+    },
+    {
+     "sensor": "Xsens MTi",
+     "sensor_id": "imu_xsens",
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr",
+     "cells": {
+      "00": {
+       "med": -0.120941,
+       "sd": 0.140035,
+       "text": "−0.121"
+      },
+      "01": {
+       "med": 0.832332,
+       "sd": 0.569998,
+       "text": "0.832"
+      },
+      "02": {
+       "med": 0.79094,
+       "sd": 0.46198,
+       "text": "0.791"
+      },
+      "10": {
+       "med": -0.637857,
+       "sd": 0.30649,
+       "text": "−0.638"
+      },
+      "11": {
+       "med": 0.708203,
+       "sd": 0.413358,
+       "text": "0.708"
+      },
+      "12": {
+       "med": 1.11948,
+       "sd": 0.429444,
+       "text": "1.119"
+      },
+      "20": {
+       "med": -0.0959444,
+       "sd": 0.150401,
+       "text": "−0.096"
+      },
+      "21": {
+       "med": -1.20707,
+       "sd": 0.293993,
+       "text": "−1.207"
+      },
+      "22": {
+       "med": -0.799284,
+       "sd": 0.253583,
+       "text": "−0.799"
+      }
+     }
+    }
+   ],
+   "has_tga": true
+  },
+  {
+   "id": "T8",
+   "title": "ELP RS stereo + two IMUs (IMUs only)",
+   "mode": "cam+imu",
+   "shutter": "rolling",
+   "n": 15,
+   "columns": [
+    {
+     "col": "calyx",
+     "tool": "MVIS",
+     "label": "MVIS"
+    },
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)"
+    },
+    {
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr"
+    }
+   ],
+   "solved": [
+    {
+     "n": 15,
+     "of": 15,
+     "tool": "MVIS"
+    },
+    {
+     "n": 3,
+     "of": 15,
+     "tool": "Kalibr"
+    },
+    {
+     "n": 0,
+     "of": 15,
+     "reason": "not run: no rolling-shutter model",
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "Kalibr has 3 of 15 recordings, IMUs only, from earlier runs with an MVIS export as camera input. Data settings differ: see Notes.",
+   "notes": [
+    [
+     "Basalt not run",
+     "Basalt has no rolling-shutter model."
+    ],
+    [
+     "Like for like",
+     "Kalibr's values come from separate earlier runs of bags 1–3 with t265 fisheye 1 only, so MVIS − Kalibr compares 15 recordings with 3. MVIS uses two corners per tag, non-base cameras at 4 Hz or lower and an estimated board shape; Kalibr has none of these."
+    ],
+    [
+     "Note",
+     "No RS-anchored Kalibr run exists: Kalibr's camera + IMU solver cannot use the ELP rolling-shutter cameras. T8's IMUs (t265 base, Xsens aux) are the same physical IMUs on the same bags as T7, so they are compared with separate earlier Kalibr runs of bags 1–3 (t265 fisheye 1 only), not the T7 runs. Its ELP cameras have no Kalibr counterpart and are listed with MVIS values only."
+    ]
+   ],
+   "records": {
+    "MVIS": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/MVIS/2026-11-08a/T8.json",
+    "Kalibr": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Kalibr/2026-11-08a/T8.json",
+    "Basalt": "https://huggingface.co/datasets/calibench-vi/results/blob/e893730bcb6e8ffa83484ca01265e5f744c1f9ed/Basalt/2026-11-08a/T8.json"
+   },
+   "fit": [
+    {
+     "sensor": "ELP-L",
+     "by_col": {
+      "calyx": "0.163",
+      "mvis": "0.162"
+     }
+    },
+    {
+     "sensor": "ELP-R",
+     "by_col": {
+      "calyx": "0.183",
+      "mvis": "0.182"
+     }
+    }
+   ],
+   "diffs": [
+    {
+     "pair": "mk",
+     "label": "MVIS (K-IMU) − Kalibr",
+     "a": "MVIS",
+     "b": "Kalibr",
+     "marked": 16,
+     "compared": 20,
+     "rows": [
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.01289",
+       "spread": "0.00388",
+       "z": -3.32,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00841",
+       "spread": "0.00259",
+       "z": -3.253,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00024",
+       "spread": "0.00030",
+       "z": -0.808,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00356",
+       "spread": "0.00141",
+       "z": -2.525,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "+0.00551",
+       "spread": "0.00161",
+       "z": 3.426,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "−0.00559",
+       "spread": "0.00312",
+       "z": -1.791,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "+0.00264",
+       "spread": "0.00204",
+       "z": 1.295,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.00092",
+       "spread": "0.00206",
+       "z": -0.447,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "t265 IMU",
+       "sensor_id": "imu_t265",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.00345",
+       "spread": "0.00141",
+       "z": -2.447,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.01104",
+       "spread": "0.00357",
+       "z": -3.094,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00044",
+       "spread": "0.00025",
+       "z": -1.767,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00714",
+       "spread": "0.00219",
+       "z": -3.264,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00294",
+       "spread": "0.00075",
+       "z": -3.921,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "−0.00303",
+       "spread": "0.00170",
+       "z": -1.778,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "+0.00582",
+       "spread": "0.00261",
+       "z": 2.226,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "+0.01090",
+       "spread": "0.00999",
+       "z": 1.091,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.00815",
+       "spread": "0.00680",
+       "z": -1.199,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.00280",
+       "spread": "0.00376",
+       "z": -0.745,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "text": "−0.006",
+       "spread": "0.115",
+       "z": -0.05,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "Xsens MTi",
+       "sensor_id": "imu_xsens",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+8.09",
+       "spread": "1.24",
+       "z": 6.536,
+       "marked": true,
+       "unequal_n": true
+      }
+     ]
+    }
+   ],
+   "tally": {
+    "mk": [
+     16,
+     20
+    ]
+   },
+   "sensors": [
+    {
+     "id": "elp_l",
+     "label": "ELP-L",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 428.062,
+        "h": 1.3948
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 428.07,
+         "sd": 0.616713,
+         "n": 15,
+         "text": "428.07",
+         "min": 427.175,
+         "max": 429.33
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 428.054,
+         "sd": 0.614722,
+         "n": 15,
+         "text": "428.05",
+         "min": 427.175,
+         "max": 429.307
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 427.903,
+        "h": 1.80235
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 427.907,
+         "sd": 0.770372,
+         "n": 15,
+         "text": "427.91",
+         "min": 426.677,
+         "max": 429.541
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 427.898,
+         "sd": 0.767181,
+         "n": 15,
+         "text": "427.90",
+         "min": 426.681,
+         "max": 429.515
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 350.936,
+        "h": 0.9526
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 350.935,
+         "sd": 0.379901,
+         "n": 15,
+         "text": "350.94",
+         "min": 350.307,
+         "max": 351.802
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 350.937,
+         "sd": 0.3771,
+         "n": 15,
+         "text": "350.94",
+         "min": 350.313,
+         "max": 351.796
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 266.087,
+        "h": 0.68805
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 266.085,
+         "sd": 0.315565,
+         "n": 15,
+         "text": "266.08",
+         "min": 265.767,
+         "max": 266.712
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 266.088,
+         "sd": 0.312967,
+         "n": 15,
+         "text": "266.09",
+         "min": 265.772,
+         "max": 266.712
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0936698,
+        "h": 0.00545331
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0936832,
+         "sd": 0.00220143,
+         "n": 15,
+         "text": "−0.09368",
+         "min": -0.0986274,
+         "max": -0.091203
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0936565,
+         "sd": 0.00219434,
+         "n": 15,
+         "text": "−0.09366",
+         "min": -0.0985766,
+         "max": -0.0911935
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0256154,
+        "h": 0.0164359
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0256533,
+         "sd": 0.00741517,
+         "n": 15,
+         "text": "−0.02565",
+         "min": -0.0384382,
+         "max": -0.0107077
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0255774,
+         "sd": 0.0074038,
+         "n": 15,
+         "text": "−0.02558",
+         "min": -0.0384022,
+         "max": -0.0106736
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0153454,
+        "h": 0.0292929
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0154039,
+         "sd": 0.0150353,
+         "n": 15,
+         "text": "0.01540",
+         "min": -0.00965653,
+         "max": 0.0419753
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.0152869,
+         "sd": 0.0150233,
+         "n": 15,
+         "text": "0.01529",
+         "min": -0.00971767,
+         "max": 0.0419378
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00730572,
+        "h": 0.0192316
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00723115,
+         "sd": 0.00997909,
+         "n": 15,
+         "text": "−0.00723",
+         "min": -0.0226504,
+         "max": 0.0101335
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00738028,
+         "sd": 0.00997251,
+         "n": 15,
+         "text": "−0.00738",
+         "min": -0.0226503,
+         "max": 0.0101776
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 16.6191,
+        "h": 0.256135
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 16.6176,
+         "sd": 0.122193,
+         "n": 15,
+         "text": "16.618",
+         "min": 16.3862,
+         "max": 16.8371
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 16.6205,
+         "sd": 0.121319,
+         "n": 15,
+         "text": "16.620",
+         "min": 16.3972,
+         "max": 16.8429
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -115.864,
+        "h": 1.6995
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -115.884,
+         "sd": 0.622766,
+         "n": 15,
+         "text": "−115.884",
+         "min": -116.236,
+         "max": -114.325
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -115.844,
+         "sd": 0.616902,
+         "n": 15,
+         "text": "−115.844",
+         "min": -116.23,
+         "max": -114.319
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 142.997,
+        "h": 1.03455
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 142.979,
+         "sd": 0.392592,
+         "n": 15,
+         "text": "142.98",
+         "min": 142.31,
+         "max": 143.894
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 143.014,
+         "sd": 0.401797,
+         "n": 15,
+         "text": "143.01",
+         "min": 142.316,
+         "max": 143.937
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "elp_r",
+     "label": "ELP-R",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 424.861,
+        "h": 1.4806
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 424.867,
+         "sd": 0.647401,
+         "n": 15,
+         "text": "424.87",
+         "min": 423.9,
+         "max": 426.207
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 424.855,
+         "sd": 0.645308,
+         "n": 15,
+         "text": "424.86",
+         "min": 423.9,
+         "max": 426.183
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 424.72,
+        "h": 1.7908
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 424.726,
+         "sd": 0.798977,
+         "n": 15,
+         "text": "424.73",
+         "min": 423.36,
+         "max": 426.348
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 424.714,
+         "sd": 0.795269,
+         "n": 15,
+         "text": "424.71",
+         "min": 423.367,
+         "max": 426.321
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 336.803,
+        "h": 0.8448
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 336.803,
+         "sd": 0.340526,
+         "n": 15,
+         "text": "336.80",
+         "min": 336.295,
+         "max": 337.571
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 336.803,
+         "sd": 0.339098,
+         "n": 15,
+         "text": "336.80",
+         "min": 336.294,
+         "max": 337.565
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 257.248,
+        "h": 0.6292
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 257.243,
+         "sd": 0.300603,
+         "n": 15,
+         "text": "257.24",
+         "min": 256.856,
+         "max": 257.82
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 257.253,
+         "sd": 0.298278,
+         "n": 15,
+         "text": "257.25",
+         "min": 256.861,
+         "max": 257.819
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0914568,
+        "h": 0.00514651
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0914691,
+         "sd": 0.00236393,
+         "n": 15,
+         "text": "−0.09147",
+         "min": -0.0961354,
+         "max": -0.0882001
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0914444,
+         "sd": 0.00235716,
+         "n": 15,
+         "text": "−0.09144",
+         "min": -0.096101,
+         "max": -0.0882066
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0208513,
+        "h": 0.0127663
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.020871,
+         "sd": 0.00544421,
+         "n": 15,
+         "text": "−0.02087",
+         "min": -0.032457,
+         "max": -0.0124475
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0208316,
+         "sd": 0.00544748,
+         "n": 15,
+         "text": "−0.02083",
+         "min": -0.0323064,
+         "max": -0.0124057
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.000751217,
+        "h": 0.022899
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.000881351,
+         "sd": 0.00937572,
+         "n": 15,
+         "text": "0.00088",
+         "min": -0.0133457,
+         "max": 0.0215685
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.000621083,
+         "sd": 0.0093891,
+         "n": 15,
+         "text": "0.00062",
+         "min": -0.013441,
+         "max": 0.0213279
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00248265,
+        "h": 0.0130061
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00245448,
+         "sd": 0.00604661,
+         "n": 15,
+         "text": "0.00245",
+         "min": -0.00934106,
+         "max": 0.0132943
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00251082,
+         "sd": 0.00606032,
+         "n": 15,
+         "text": "0.00251",
+         "min": -0.00924478,
+         "max": 0.0133553
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "tr_ms",
+       "label": "readout tr",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 16.5953,
+        "h": 0.214885
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 16.5944,
+         "sd": 0.110642,
+         "n": 15,
+         "text": "16.594",
+         "min": 16.4198,
+         "max": 16.7907
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 16.5963,
+         "sd": 0.108856,
+         "n": 15,
+         "text": "16.596",
+         "min": 16.4313,
+         "max": 16.7874
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to ELP-L",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 59.2056,
+        "h": 0.224125
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 59.2072,
+         "sd": 0.0842408,
+         "n": 15,
+         "text": "59.207",
+         "min": 59.007,
+         "max": 59.3535
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 59.2039,
+         "sd": 0.0849988,
+         "n": 15,
+         "text": "59.204",
+         "min": 59.0018,
+         "max": 59.3526
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -115.905,
+        "h": 1.6797
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -115.931,
+         "sd": 0.604325,
+         "n": 15,
+         "text": "−115.931",
+         "min": -116.214,
+         "max": -114.385
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -115.879,
+         "sd": 0.59811,
+         "n": 15,
+         "text": "−115.879",
+         "min": -116.207,
+         "max": -114.378
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 202.122,
+        "h": 1.0296
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 202.123,
+         "sd": 0.409968,
+         "n": 15,
+         "text": "202.12",
+         "min": 201.382,
+         "max": 203.023
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 202.121,
+         "sd": 0.422275,
+         "n": 15,
+         "text": "202.12",
+         "min": 201.378,
+         "max": 203.058
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not run"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_t265",
+     "label": "t265 IMU",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00628,
+        "h": 0.0113579
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.999833,
+         "sd": 0.00116598,
+         "n": 15,
+         "text": "0.99983",
+         "min": 0.998075,
+         "max": 1.00213
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01272,
+         "sd": 0.00388182,
+         "n": 3,
+         "text": "1.01272",
+         "min": 1.00611,
+         "max": 1.01294
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00714,
+        "h": 0.00746931
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00294,
+         "sd": 0.00127998,
+         "n": 15,
+         "text": "1.00294",
+         "min": 1.00093,
+         "max": 1.00549
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01135,
+         "sd": 0.00258528,
+         "n": 3,
+         "text": "1.01135",
+         "min": 1.00722,
+         "max": 1.01198
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00427,
+        "h": 0.000737
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00415,
+         "sd": 0.000297094,
+         "n": 15,
+         "text": "1.00415",
+         "min": 1.0036,
+         "max": 1.00456
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00439,
+         "sd": 7.02437e-05,
+         "n": 3,
+         "text": "1.00439",
+         "min": 1.00428,
+         "max": 1.00441
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00362637,
+        "h": 0.00512297
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00184732,
+         "sd": 0.00111274,
+         "n": 15,
+         "text": "0.00185",
+         "min": -0.00103088,
+         "max": 0.00386395
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00540541,
+         "sd": 0.00140898,
+         "n": 3,
+         "text": "0.00541",
+         "min": 0.00322164,
+         "max": 0.00585594
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.0005454,
+        "h": 0.00479606
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00220752,
+         "sd": 0.000734819,
+         "n": 15,
+         "text": "0.00221",
+         "min": 0.000963475,
+         "max": 0.00328703
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.00329832,
+         "sd": 0.00160713,
+         "n": 3,
+         "text": "−0.00330",
+         "min": -0.00460211,
+         "max": -0.00140587
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00179102,
+        "h": 0.00651384
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00100626,
+         "sd": 0.00100703,
+         "n": 15,
+         "text": "−0.00101",
+         "min": -0.00230562,
+         "max": 0.0015816
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00458831,
+         "sd": 0.00312439,
+         "n": 3,
+         "text": "0.00459",
+         "min": 0.00049961,
+         "max": 0.00663631
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01857,
+        "h": 0.00369424
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.01989,
+         "sd": 0.000383145,
+         "n": 15,
+         "text": "1.01989",
+         "min": 1.0194,
+         "max": 1.02087
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01725,
+         "sd": 0.0020384,
+         "n": 3,
+         "text": "1.01725",
+         "min": 1.01697,
+         "max": 1.02063
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01951,
+        "h": 0.003399
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.01905,
+         "sd": 0.000634872,
+         "n": 15,
+         "text": "1.01905",
+         "min": 1.01804,
+         "max": 1.02044
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01997,
+         "sd": 0.00206029,
+         "n": 3,
+         "text": "1.01997",
+         "min": 1.01642,
+         "max": 1.02001
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01841,
+        "h": 0.00344835
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.01668,
+         "sd": 0.00108807,
+         "n": 15,
+         "text": "1.01668",
+         "min": 1.01564,
+         "max": 1.01925
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.02013,
+         "sd": 0.00140986,
+         "n": 3,
+         "text": "1.02013",
+         "min": 1.01807,
+         "max": 1.02077
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -6.6976,
+        "h": 0.35805
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -6.6976,
+         "sd": 0.134733,
+         "n": 15,
+         "text": "−6.698",
+         "min": -7.0231,
+         "max": -6.403
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not in this tool's model"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_xsens",
+     "label": "Xsens MTi",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00637,
+        "h": 0.00999747
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00085,
+         "sd": 0.00119382,
+         "n": 15,
+         "text": "1.00085",
+         "min": 0.999086,
+         "max": 1.0032
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.01189,
+         "sd": 0.00356861,
+         "n": 3,
+         "text": "1.01189",
+         "min": 1.00677,
+         "max": 1.01364
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.998838,
+        "h": 0.0007535
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.99862,
+         "sd": 0.000246769,
+         "n": 15,
+         "text": "0.99862",
+         "min": 0.998153,
+         "max": 0.99908
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.999056,
+         "sd": 0.000132031,
+         "n": 3,
+         "text": "0.99906",
+         "min": 0.998868,
+         "max": 0.999123
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00396,
+        "h": 0.00633359
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00039,
+         "sd": 0.00131116,
+         "n": 15,
+         "text": "1.00039",
+         "min": 0.998655,
+         "max": 1.00292
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00753,
+         "sd": 0.00218781,
+         "n": 3,
+         "text": "1.00753",
+         "min": 1.00499,
+         "max": 1.00934
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00136335,
+        "h": 0.00264893
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.000104418,
+         "sd": 0.000541488,
+         "n": 15,
+         "text": "−0.00010",
+         "min": -0.00104477,
+         "max": 0.000416748
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00283112,
+         "sd": 0.000748605,
+         "n": 3,
+         "text": "0.00283",
+         "min": 0.00186163,
+         "max": 0.00333445
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00406874,
+        "h": 0.00354037
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00255404,
+         "sd": 0.000692679,
+         "n": 15,
+         "text": "0.00255",
+         "min": 0.00098542,
+         "max": 0.00377865
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00558343,
+         "sd": 0.00170382,
+         "n": 3,
+         "text": "0.00558",
+         "min": 0.00313233,
+         "max": 0.00640801
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00194183,
+        "h": 0.00607675
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.000968229,
+         "sd": 0.000785433,
+         "n": 15,
+         "text": "0.00097",
+         "min": -0.000668118,
+         "max": 0.00217819
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.00485188,
+         "sd": 0.00261426,
+         "n": 3,
+         "text": "−0.00485",
+         "min": -0.0067189,
+         "max": -0.00155588
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.99452,
+        "h": 0.0169797
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.999968,
+         "sd": 0.000365502,
+         "n": 15,
+         "text": "0.99997",
+         "min": 0.999308,
+         "max": 1.00091
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.989071,
+         "sd": 0.0099876,
+         "n": 3,
+         "text": "0.98907",
+         "min": 0.987747,
+         "max": 1.00567
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.0034,
+        "h": 0.0159868
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.999323,
+         "sd": 0.000959489,
+         "n": 15,
+         "text": "0.99932",
+         "min": 0.998389,
+         "max": 1.00112
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00747,
+         "sd": 0.00679507,
+         "n": 3,
+         "text": "1.00747",
+         "min": 1.00518,
+         "max": 1.01793
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00233,
+        "h": 0.00567246
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00093,
+         "sd": 0.000491843,
+         "n": 15,
+         "text": "1.00093",
+         "min": 0.999668,
+         "max": 1.00137
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00373,
+         "sd": 0.00375678,
+         "n": 3,
+         "text": "1.00373",
+         "min": 0.999189,
+         "max": 1.00664
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 7.24804,
+        "h": 0.247423
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 7.17576,
+         "sd": 0.0377547,
+         "n": 3,
+         "text": "7.176",
+         "min": 7.1494,
+         "max": 7.22386
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 7.24804,
+         "sd": 0.114532,
+         "n": 15,
+         "text": "7.248",
+         "min": 7.14364,
+         "max": 7.47297
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 7.25374,
+         "sd": 0.0270678,
+         "n": 3,
+         "text": "7.254",
+         "min": 7.20692,
+         "max": 7.25386
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 123.938,
+        "h": 10.6931
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 124.185,
+         "sd": 0.183022,
+         "n": 3,
+         "text": "124.19",
+         "min": 124.102,
+         "max": 124.452
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 123.938,
+         "sd": 0.302933,
+         "n": 15,
+         "text": "123.94",
+         "min": 123.52,
+         "max": 124.478
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 115.849,
+         "sd": 1.23756,
+         "n": 3,
+         "text": "115.85",
+         "min": 114.217,
+         "max": 116.644
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.4658,
+        "h": 0.78958
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.4658,
+         "sd": 0.237055,
+         "n": 15,
+         "text": "−0.466",
+         "min": -1.1836,
+         "max": -0.2261
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not in this tool's model"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [
+    {
+     "sensor": "t265 IMU",
+     "sensor_id": "imu_t265",
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)",
+     "cells": {
+      "00": {
+       "med": -0.0743572,
+       "sd": 0.092881,
+       "text": "−0.074"
+      },
+      "01": {
+       "med": -0.432642,
+       "sd": 0.259973,
+       "text": "−0.433"
+      },
+      "02": {
+       "med": 0.211257,
+       "sd": 0.206694,
+       "text": "0.211"
+      },
+      "10": {
+       "med": 0.253228,
+       "sd": 0.118954,
+       "text": "0.253"
+      },
+      "11": {
+       "med": -0.0735559,
+       "sd": 0.162092,
+       "text": "−0.074"
+      },
+      "12": {
+       "med": 0.242998,
+       "sd": 0.236054,
+       "text": "0.243"
+      },
+      "20": {
+       "med": -0.114023,
+       "sd": 0.0635244,
+       "text": "−0.114"
+      },
+      "21": {
+       "med": -0.0893056,
+       "sd": 0.104897,
+       "text": "−0.089"
+      },
+      "22": {
+       "med": -0.0342762,
+       "sd": 0.101635,
+       "text": "−0.034"
+      }
+     }
+    },
+    {
+     "sensor": "t265 IMU",
+     "sensor_id": "imu_t265",
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr",
+     "cells": {
+      "00": {
+       "med": 0.067704,
+       "sd": 0.443488,
+       "text": "0.068"
+      },
+      "01": {
+       "med": 1.88506,
+       "sd": 1.22456,
+       "text": "1.885"
+      },
+      "02": {
+       "med": -1.39326,
+       "sd": 1.04118,
+       "text": "−1.393"
+      },
+      "10": {
+       "med": -0.803058,
+       "sd": 0.236069,
+       "text": "−0.803"
+      },
+      "11": {
+       "med": -0.967954,
+       "sd": 0.717504,
+       "text": "−0.968"
+      },
+      "12": {
+       "med": 2.3431,
+       "sd": 0.10378,
+       "text": "2.343"
+      },
+      "20": {
+       "med": 0.679211,
+       "sd": 0.445585,
+       "text": "0.679"
+      },
+      "21": {
+       "med": -2.23849,
+       "sd": 1.00032,
+       "text": "−2.238"
+      },
+      "22": {
+       "med": 1.65675,
+       "sd": 0.501868,
+       "text": "1.657"
+      }
+     }
+    },
+    {
+     "sensor": "Xsens MTi",
+     "sensor_id": "imu_xsens",
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)",
+     "cells": {
+      "00": {
+       "med": -0.00783225,
+       "sd": 0.0295173,
+       "text": "−0.008"
+      },
+      "01": {
+       "med": -0.0118714,
+       "sd": 0.092124,
+       "text": "−0.012"
+      },
+      "02": {
+       "med": -0.00112229,
+       "sd": 0.0498932,
+       "text": "−0.001"
+      },
+      "10": {
+       "med": -0.0137898,
+       "sd": 0.0210232,
+       "text": "−0.014"
+      },
+      "11": {
+       "med": -0.0115326,
+       "sd": 0.0537748,
+       "text": "−0.012"
+      },
+      "12": {
+       "med": 0.00368562,
+       "sd": 0.0477325,
+       "text": "0.004"
+      },
+      "20": {
+       "med": 0.0235291,
+       "sd": 0.0198965,
+       "text": "0.024"
+      },
+      "21": {
+       "med": -0.0578665,
+       "sd": 0.0783323,
+       "text": "−0.058"
+      },
+      "22": {
+       "med": -0.0309748,
+       "sd": 0.0364339,
+       "text": "−0.031"
+      }
+     }
+    },
+    {
+     "sensor": "Xsens MTi",
+     "sensor_id": "imu_xsens",
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr",
+     "cells": {
+      "00": {
+       "med": 0.0184824,
+       "sd": 0.121292,
+       "text": "0.018"
+      },
+      "01": {
+       "med": 1.22091,
+       "sd": 0.745645,
+       "text": "1.221"
+      },
+      "02": {
+       "med": 0.721756,
+       "sd": 0.526844,
+       "text": "0.722"
+      },
+      "10": {
+       "med": -0.962686,
+       "sd": 0.153978,
+       "text": "−0.963"
+      },
+      "11": {
+       "med": 1.05738,
+       "sd": 0.271331,
+       "text": "1.057"
+      },
+      "12": {
+       "med": 1.1239,
+       "sd": 0.513615,
+       "text": "1.124"
+      },
+      "20": {
+       "med": -0.0119901,
+       "sd": 0.129153,
+       "text": "−0.012"
+      },
+      "21": {
+       "med": -0.861583,
+       "sd": 0.330102,
+       "text": "−0.862"
+      },
+      "22": {
+       "med": -0.736644,
+       "sd": 0.295673,
+       "text": "−0.737"
+      }
+     }
+    }
+   ],
+   "has_tga": true
+  }
+ ]
+}
