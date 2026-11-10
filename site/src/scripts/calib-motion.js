@@ -15,8 +15,8 @@
 // The 3D view draws in D = diag(-1, -1, 1) B: x to the operator's right, y up, z toward the operator.
 
 export const VARIANTS = {
-  guide06c_60: { set: 'v4', label: 'Guide motion, 60 s', why: 'Four moves at a comfortable hand pace, built from the AprilGrid example.' },
-  guide60b: { set: 'v3', label: 'Chessboard version, 60 s', why: 'Smaller swings so the whole chessboard stays in view, and a corner square instead of the loop.' },
+  guide06c_60: { set: 'v4', label: 'AprilGrid', start: 'Start the AprilGrid motion', why: 'Four moves at a comfortable hand pace, built from the AprilGrid example.' },
+  guide60b: { set: 'v3', label: 'Chessboard', start: 'Start the chessboard motion', why: 'Smaller swings so the whole chessboard stays in view, and a corner square instead of the loop.' },
   aprilgrid_06: { set: 'real', label: 'AprilGrid example', why: 'Our 41 s hand-held take in front of a monitor AprilGrid, the take the guide motion is built from.',
     diff: 'The same four moves in the same order, but in 41 s: about twice the guide’s speed (up to 0.75 m/s and 5 rad/s) and closer to the board (16 cm).' },
   chessboard_1107_01: { set: 'realc', label: 'Chessboard example', why: 'Our 61 s hand-held take in front of a monitor chessboard, the whole board kept in view.',
@@ -340,8 +340,10 @@ export function screenStep(screen, ev) {
 // What the primary button offers: play, pause (also during the 3-2-1), or again at the end of the take.
 export const playMode = ({ playing, counting, t, dur }) => (playing || counting ? 'pause' : t >= dur - 1e-3 ? 'again' : 'play');
 export const PLAY_TEXT = { play: ['▶\uFE0E', 'Play'], pause: ['❚❚', 'Pause'], again: ['↺', 'Again'] };
-// The start screen's button: the guides are followed, the real examples watched; each says its length.
-export const startLabel = (d, real) => `${real ? 'Play the real recording' : 'Start the guided motion'} · ${Math.round(d.dur)} s`;
+// The start screen's button: the guides are followed (named after their board), the real examples watched; each says
+// its length.
+export const startLabel = (d, real) =>
+  `${real ? 'Play the real recording' : VARIANTS[d.vid]?.start || 'Start the guided motion'} · ${Math.round(d.dur)} s`;
 // The 3-2-1 before the first move: where to stand, from the camera's distance to the board plane at the start.
 export function getReadyText(d) {
   const p = d.s.p_C[0], c = d.raw.board.center;
