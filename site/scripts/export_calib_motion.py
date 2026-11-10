@@ -40,7 +40,8 @@ smoothed value; half-cycles shorter than 0.8 s or under 20 % of the largest swin
   up-down (ud)           elevation                                             going up / going down
   back-forth (bf)        distance to the board centre                          coming in / going out
   roll in place (roll)   roll of the camera about its optical axis             rolling one way / rolling back
-  loop (circle)          angle of the camera centre in the board plane         one beat per full turn
+  loop (circle)          angle of the camera centre in the board plane, round  one beat per full turn
+                         the loop's own mean centre
   corner square (mix)    angle of the optical-axis hit point on the board      one beat per quarter turn (a corner)
   rest                   none                                                  "Count 3"
 
@@ -185,6 +186,8 @@ def seg_beats(g, s, hz, center):
         return {"unit": None, "nbeat": 0, "beats": []}
     P = s["p_C"][i0:i1 + 1]
     c = center
+    if role == "circle":    # turns round the loop's own centre: a hand-held loop is often beside the board centre
+        c = [sum(p[0] for p in P) / len(P), sum(p[1] for p in P) / len(P), 0.0]
     if role in ("circle", "mix"):
         pts = []
         for p, q in zip(P, s["q_wxyz"][i0:i1 + 1]):
