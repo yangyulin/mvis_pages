@@ -204,8 +204,8 @@ model a single IMU. There, a four-IMU rig has to be calibrated pairwise and
 composed. That accumulates error and throws away the correlations.</li>
 <li><strong>It fits the gyro–accel offset.</strong> <code dir="auto">t_ga</code> is the time offset between the
 gyroscope and accelerometer channels. Kalibr and Basalt have one IMU clock.
-On the same bags their <code dir="auto">td</code> differs from MVIS by about 3.2 ms on Looper
-Insight 9 and 1.9–2.0 ms on the T265; an injection sweep predicts 3.0–3.2 and
+On the same bags their <code dir="auto">td</code> differs from MVIS by about 2.9–3.2 ms on Looper
+Insight 9 and 1.9–2.0 ms on the T265 (first camera); an injection sweep predicts 3.0–3.2 and
 1.6–1.7 ms of that from the offset alone. Whose <code dir="auto">td</code> is closer to the truth is
 not yet tested. <a href="/benchmark/tga/">Details</a>.</li>
 <li><strong>Validation is a command, not a habit.</strong> <code dir="auto">mvis roundtrip</code> gives a
