@@ -51,7 +51,7 @@ def run(base: str, out) -> int:  # pragma: no cover - drives Chrome through Play
             opened[link] = page.evaluate(CURRENT_OPEN)
         problems += checks.closed_problems(opened)
         phone = browser.new_page(viewport={"width": 320, "height": 640})
-        phone.goto(f"{base}/sensors/")
+        phone.goto(f"{base}/devices/")
         problems += checks.maker_heights_problem(phone.evaluate("[...document.querySelectorAll('.sg-maker')].map(m => Math.round(m.getBoundingClientRect().height))"))
         browser.close()
     report, lines = checks.nav_report(links, problems)

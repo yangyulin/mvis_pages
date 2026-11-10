@@ -51,7 +51,7 @@ datasets:
     image: {src: /media/hero/hero_virig4_960.jpg, alt: "MVIS solving a VI-Rig 4-camera recording: board, camera path and one T265 fisheye frame", credit: "MVIS solve view, from the homepage"}
     links:
       dataset: /reference/datasets/virig-4imus-4cams/
-      sensor: /sensors/intel-t265/
+      sensor: /devices/intel-t265/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams
     families:
       - {id: T1, shutter: global}
@@ -83,7 +83,7 @@ datasets:
     chips: ["4 global-shutter fisheye cameras", "5 IMUs, 100–500 Hz", "7 recordings", "MVIS only"]
     links:
       dataset: /reference/datasets/
-      sensor: /sensors/intel-t265/
+      sensor: /devices/intel-t265/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams
     no_repeatability: "This study has no repeatability cells: a cell compares how much each tool's estimates scatter, and only MVIS was run here. The spread of each MVIS value is in Parameters by sensor."
     read_first: "MVIS only: Kalibr and Basalt were not run on this set, so nothing is compared. The spread shows how much MVIS repeats over the 7 recordings, not that it is right."
@@ -137,7 +137,7 @@ datasets:
     image: {src: /media/sensors/looper-insight9/looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page"}
     links:
       example: /benchmark/examples/looper-insight9/
-      sensor: /sensors/looper-insight9/
+      sensor: /devices/looper-insight9/
     families:
       - {id: T4, shutter: global}
       - {id: T11, shutter: mixed}
@@ -158,7 +158,7 @@ datasets:
     image: {src: /media/sensors/hp-reverb-g2/hp-reverb-g2.jpg, alt: "HP Reverb G2 headset, front view", credit: "Photo: HP, Reverb G2 press release"}
     links:
       example: /benchmark/examples/monado/
-      sensor: /sensors/hp-reverb-g2/
+      sensor: /devices/hp-reverb-g2/
     families:
       - {id: T5, shutter: global}
       - {id: T12, shutter: global}

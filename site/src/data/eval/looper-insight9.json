@@ -18,7 +18,7 @@
  },
  "links": {
   "example": "/benchmark/examples/looper-insight9/",
-  "sensor": "/sensors/looper-insight9/"
+  "sensor": "/devices/looper-insight9/"
  },
  "study": false,
  "batch": "2026-11-08a",

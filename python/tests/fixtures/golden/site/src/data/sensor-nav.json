@@ -1,17 +1,17 @@
 [
  {
   "label": "Rig photo",
-  "link": "/sensors/rig-photo/",
+  "link": "/devices/rig-photo/",
   "group": "Group One"
  },
  {
   "label": "Rig groups",
-  "link": "/sensors/rig-groups/",
+  "link": "/devices/rig-groups/",
   "group": "Group One"
  },
  {
   "label": "Rig old",
-  "link": "/sensors/rig-old/",
+  "link": "/devices/rig-old/",
   "group": "Group Two"
  }
 ]

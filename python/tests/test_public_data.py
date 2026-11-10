@@ -16,8 +16,8 @@ def _cards(pub):
 
 def test_nav_lists_every_public_sensor_once_in_overview_order(pub):
     links = [n["link"] for n in sensor_nav(pub)]
-    assert sorted(links) == sorted(f"/sensors/{s}/" for s in pub["sensors"])
-    assert links == [f"/sensors/{s}/" for g in sensor_groups(pub) for s in g["slugs"]]
+    assert sorted(links) == sorted(f"/devices/{s}/" for s in pub["sensors"])
+    assert links == [f"/devices/{s}/" for g in sensor_groups(pub) for s in g["slugs"]]
 
 
 def test_t265_is_first_and_labels_keep_full_names(pub):

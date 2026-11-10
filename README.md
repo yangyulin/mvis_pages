@@ -60,7 +60,7 @@ What each writes:
 
 | Script | Writes |
 |---|---|
-| `export_sensors.py` | `site/src/data/sensors/*.json`, `sensor.css`, `site/src/scripts/sensor-page.js`, `site/src/data/sensor-nav.json`, `site/src/content/docs/sensors/*.mdx`, `site/public/media/sensors/<slug>/` |
+| `export_sensors.py` | `site/src/data/sensors/*.json`, `sensor.css`, `site/src/scripts/sensor-page.js`, `site/src/data/sensor-nav.json`, `site/src/content/docs/devices/*.mdx`, `site/public/media/sensors/<slug>/` |
 | `export_examples.py` | `site/src/data/examples/*.json`, `site/src/data/examples-nav.json`, `site/src/content/docs/benchmark/examples/*.mdx`, `site/public/media/examples/<slug>/` (reads the `examples:` run map of mira's sensors.yaml; an example whose run has no views yet is written without player, map and result) |
 | `export_board.py` | `site/src/data/leaderboard/board.json`, `board.css` |
 | `export_uzh.py` | `site/src/data/leaderboard/uzh_fpv.json` |

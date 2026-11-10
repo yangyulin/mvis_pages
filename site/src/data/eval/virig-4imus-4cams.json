@@ -16,7 +16,7 @@
  },
  "links": {
   "dataset": "/reference/datasets/virig-4imus-4cams/",
-  "sensor": "/sensors/intel-t265/",
+  "sensor": "/devices/intel-t265/",
   "hub": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams"
  },
  "study": false,
