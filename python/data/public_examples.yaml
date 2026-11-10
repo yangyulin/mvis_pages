@@ -14,7 +14,6 @@ examples:
     title: "VI-Rig: 4 IMUs + 3 cameras"
     nav: VI-Rig 4 IMUs + 3 cams
     description: One MVIS camera + IMU run on our own rig, with three global-shutter cameras and four IMUs solved together.
-    featured: true
     ours: true
     maker: OpenMVIS
     image: {file: vi-rig.jpg, alt: "VI-Rig: three cameras and four IMUs on one white frame", credit: "Photo: OpenMVIS"}
