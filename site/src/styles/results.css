@@ -118,6 +118,8 @@ a.lb-d:hover .lb-n b, a.lb-d:focus-visible .lb-n b { text-decoration: underline;
 .ev-fold { border: 1px solid var(--ev-line); border-radius: 0.4rem; padding: 0 0.8rem; margin-block: 0.5rem; }
 .ev-fold > summary, .ev-pair > summary, .ev-full > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .ev-fold[open] { padding-bottom: 0.6rem; }
+.ev-fold > summary::before, .ev-pair > summary::before, .ev-full > summary::before { content: '▸'; color: var(--sl-color-gray-3); }
+.ev-fold[open] > summary::before, .ev-pair[open] > summary::before, .ev-full[open] > summary::before { content: '▾'; }
 .ev-tw { overflow-x: auto; }
 .ev-table { border-collapse: collapse; font-size: 0.85rem; }
 .ev-table :is(th, td) { padding: 0.25rem 0.8rem 0.25rem 0; border-bottom: 1px solid var(--ev-line); text-align: left; font-variant-numeric: tabular-nums; }

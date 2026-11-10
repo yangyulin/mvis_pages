@@ -1,14 +1,19 @@
 ---
-// Opens a fold from its link: repeatability cells (#rp-T6-gyro), tool differences (#diff-mk-T6), and the
+// Opens a fold from its link: repeatability cells (#rp-T6-gyro), tool differences (#diff-mk-T6), parameters
+// (#params-T6), model notes (#notes-T6), any element inside a closed fold, and the
 // "Open the parameter table" buttons of RepeatabilityDetails, which jump into the Full tables fold. Without JS the
 // anchors still land on the closed fold. The charts need no script.
 ---
 <script>
+  // Open the target if it is a fold, and every closed fold around it, then scroll to it.
   const open = (id: string) => {
-    const d = document.getElementById(id);
-    if (d instanceof HTMLDetailsElement) { d.open = true; d.scrollIntoView({ block: 'start' }); }
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el instanceof HTMLDetailsElement) el.open = true;
+    for (let d = el.parentElement?.closest('details'); d; d = d.parentElement?.closest('details')) d.open = true;
+    el.scrollIntoView({ block: 'start' });
   };
-  const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h.startsWith('rp-') || h.startsWith('diff-')) open(h); };
+  const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (h) open(h); };
   addEventListener('hashchange', fromHash);
   document.addEventListener('click', (e) => {
     const a = (e.target as Element).closest?.('[data-rp-open]') as HTMLElement | null;

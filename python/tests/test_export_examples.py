@@ -328,6 +328,16 @@ def test_no_photo_carries_gps_exif():
         assert not exif.get_ifd(0x8825) and 0x8825 not in exif, f.name
 
 
+def test_no_site_photo_carries_gps_exif():
+    site = DATA.parent.parent / "site"
+    photos = [f for d in ("public", "src/assets") for f in (site / d).rglob("*")
+              if f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")]
+    assert any(f.name.lower() == "vi_rig.jpg" for f in photos)
+    for f in photos:
+        exif = Image.open(f).getexif()
+        assert not exif.get_ifd(0x8825) and 0x8825 not in exif, f.relative_to(site)
+
+
 def test_tum_vi_names_kb4_and_monado_and_uzh_equidistant():
     ex = PUB["examples"]
     assert "kb4" in " ".join(ex["tum-vi"]["data"]) and "equidistant" not in " ".join(ex["tum-vi"]["data"]).replace("pinhole-equidistant", "")
