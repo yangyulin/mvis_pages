@@ -142,10 +142,45 @@ main.app{padding:0}
 FIXED = "Its camera + IMU runs take intrinsics and baselines as input from an MVIS export, and T7 ELP-L readout is held at 0."
 
 
+PAIRS = (("mk", "mvis", "kalibr", "MVIS", "− Kalibr"), ("bk", "basalt", "kalibr", "Basalt", "− Kalibr"),
+         ("bm", "basalt", "mvis", "Basalt", "− MVIS"))
+DECIMALS = {"fx": 2, "td_ms": 3}
+NONE = {"value": None, "marked": False, "unequal_n": False, "reason": None}
+
+
 def load_data():
     d = os.environ.get("CALIBENCH_LOCAL")
     fams = json.load(open(os.path.join(d, "families.json"))) if d else {"batch": "", "datasets": []}
-    return {"families": fams, "version": "local" if d else "?", "sha": None, "run_configs": {}}
+    rows = os.path.join(d, "rows.json") if d else ""
+    return {"families": fams, "version": "local" if d else "?", "sha": None, "run_configs": {},
+            "rows": json.load(open(rows)) if os.path.exists(rows) else {}}
+
+
+def merge_family(data, t):
+    return [dict(r) for r in data["rows"].get(t, [])]
+
+
+def cell_state(tool, row, t, N=None):
+    return row.get("status") or "ok"
+
+
+def missing_reason(tool, row, t):
+    return "not in one run" if t == "T1" else "no data"
+
+
+def delta(pair, a, b, t):
+    if not a or not b or a.get("med") is None or b.get("med") is None:
+        return dict(NONE)
+    v = a["med"] - b["med"]
+    return {"value": v, "marked": abs(v) > max(a["sd"], b["sd"]), "unequal_n": a["n"] != b["n"], "reason": None}
+
+
+def read_first(t):
+    return READ_FIRST.get(t, "")
+
+
+def notes(data, t):
+    return [("Like for like", READ_MORE[t])] if t in READ_MORE else []
 
 
 def render_dataset_tab(data, ds):

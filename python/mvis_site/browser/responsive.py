@@ -54,3 +54,33 @@ def run(base: str, out: str, only: str | None = None) -> int:  # pragma: no cove
     json.dump(report, open(os.path.join(out, "report.json"), "w"), indent=1)
     print(checks.devices_summary(len(report), failed))
     return 1 if failed else 0
+
+
+PAGE_MEASURE = r"""
+() => ({ vw: innerWidth, scrollW: document.documentElement.scrollWidth, theme: document.documentElement.dataset.theme,
+         wide: [...document.querySelectorAll('main *')].filter(e => e.getBoundingClientRect().right > innerWidth + 1
+                 && !e.closest('[style*=overflow], .ev-tw, .rp-tw, .tw')).slice(0, 3).map(e => e.tagName + '.' + e.className) })
+"""
+
+
+def run_pages(base: str, out: str, pages: list[str]) -> int:  # pragma: no cover - drives Chrome through Playwright; run against a served build
+    """Full-page screenshots of each content page at checks.PAGE_VIEWS, and checks.page_problems."""
+    from playwright.sync_api import sync_playwright
+    os.makedirs(out, exist_ok=True)
+    problems = []
+    with sync_playwright() as p:
+        browser = p.chromium.launch(channel="chrome", headless=True)
+        for view, w, h, theme in checks.PAGE_VIEWS:
+            ctx = browser.new_context(viewport={"width": w, "height": h}, is_mobile=w < 600, has_touch=w < 600, reduced_motion="reduce")
+            ctx.add_init_script(f"localStorage.setItem('starlight-theme', '{theme}')")
+            page = ctx.new_page()
+            for path in pages:
+                page.goto(base.rstrip("/") + path, wait_until="networkidle")
+                bad = checks.page_problems(path, view, theme, page.evaluate(PAGE_MEASURE))
+                page.screenshot(path=os.path.join(out, checks.shot_name(path, view, theme)), full_page=True)
+                print(checks.verdict(not bad), path, view, theme)
+                problems += bad
+            ctx.close()
+        browser.close()
+    print("\n".join(problems) or f"{len(pages)} pages x {len(checks.PAGE_VIEWS)} views pass")
+    return 1 if problems else 0

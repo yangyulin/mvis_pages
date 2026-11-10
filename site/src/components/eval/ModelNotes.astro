@@ -1,0 +1,48 @@
+---
+// Model notes from the rows' kinds and states (inputs, other models, terms one tool has and the others do not), the
+// Kalibr IMU-model terms Tg as folded 3x3 tiles (never on the Dw scale), then the family's notes from the Space.
+import RpShape from '../RpShape.astro';
+interface Props { page: any; i: number }
+const { page, i } = Astro.props;
+const f = page.families[i];
+const count = (state: string) => {
+  const by: Record<string, number> = {};
+  for (const s of f.sensors) for (const p of s.params) for (const l of p.lanes) if (l.state === state) by[l.label] = (by[l.label] ?? 0) + 1;
+  return Object.entries(by);
+};
+const inputs = count('fixed');
+const other = [...count('shown'), ...count('other_model')];
+const tiles = f.model_terms;
+const maxAbs = (t: any) => Math.max(1e-12, ...Object.values(t.cells).map((c: any) => Math.abs(c.med)));
+const tint = (v: number, m: number) => `--ev-a:${Math.round((Math.abs(v) / m) * 60)}%`;
+---
+<div class="not-content ev-model">
+  <ul class="ev-ml">
+    {inputs.map(([who, n]) => <li><b>{who}</b>: {n} {n === 1 ? 'value is' : 'values are'} input, not estimated (hollow boxes). Their spread copies the input, so it is not that tool's repeatability.</li>)}
+    {other.map(([who, n]) => <li><b>{who}</b>: {n} {n === 1 ? 'value comes' : 'values come'} from another model (hatched lanes), so {n === 1 ? 'it is' : 'they are'} printed and not compared.</li>)}
+    {f.has_tga && <li><b>t_ga</b>, the gyro–accel delay, is estimated by MVIS only; Kalibr and Basalt have no such term, so MVIS's td is not quite the same quantity.</li>}
+    {tiles.length > 0 && <li><b>Tg</b>, the IMU g-sensitivity, is a term of Kalibr's IMU model, here from {[...new Set(tiles.map((t: any) => t.label))].join(' and ')}; the MVIS default model has no counterpart, so it is not compared.</li>}
+    {inputs.length + other.length === 0 && !f.has_tga && tiles.length === 0 && <li>No charted value is an input or comes from another model.</li>}
+  </ul>
+  {tiles.length > 0 && (
+    <details class="ev-fold">
+      <summary>Kalibr IMU-model terms Tg (median; sd on hover)</summary>
+      <div class="ev-tiles">
+        {tiles.map((t: any) => {
+          const m = maxAbs(t);
+          return (
+            <figure class="ev-tile">
+              <figcaption><RpShape tool={t.tool} /> {t.label} · {t.sensor}</figcaption>
+              <div class="ev-tg">{['0', '1', '2'].flatMap((r) => ['0', '1', '2'].map((c) => {
+                const v = t.cells[r + c];
+                return v ? <span class={v.med < 0 ? 'ev-neg' : 'ev-pos'} style={tint(v.med, m)} title={`Tg[${r},${c}] median ${v.text}, sd ${Number(v.sd.toPrecision(2))}`}>{v.text}</span> : <span class="ev-tg0">–</span>;
+              }))}</div>
+            </figure>
+          );
+        })}
+      </div>
+    </details>
+  )}
+  {f.notes.length > 0 && <ul class="ev-notes">{f.notes.map(([a, b]: [string, string]) => <li><b>{a}:</b> {b}</li>)}</ul>}
+  <p class="ev-small">Run configs, commands and the full parameter tables are in <a href="#full-tables">Full tables</a> at the end of this page.</p>
+</div>

@@ -1,0 +1,32 @@
+---
+// Solved n of N per tool (one square per recording, anonymous order), the reason where a tool did not run, the
+// record files behind every number, and the fit (reprojection median) folded: fit of each tool's own model.
+import RpShape from '../RpShape.astro';
+interface Props { page: any; i: number }
+const { page, i } = Astro.props;
+const f = page.families[i];
+const label = (c: string) => f.columns.find((x: any) => x.col === c)?.label ?? c;
+---
+<div class="not-content ev-cov">
+  <ul class="ev-solved">
+    {f.solved.map((s: any) => (
+      <li>
+        <span class="ev-tool"><RpShape tool={s.tool} /> {s.tool}</span>
+        <span class="ev-sq" aria-hidden="true">{Array.from({ length: s.of }, (_, k) => <i class={k < s.n ? `rp-bg-${s.tool}` : 'ev-empty'}></i>)}</span>
+        <span class="ev-n">{s.n} of {s.of}</span>
+        {s.reason && <span class="ev-why">{s.reason}</span>}
+      </li>
+    ))}
+  </ul>
+  {f.mode === 'cam+imu' && <p class="ev-small">MVIS made two runs per recording: its default IMU model ("MVIS") and Kalibr's IMU model ("MVIS (K-IMU)"), so the IMU terms of the second mean the same thing as Kalibr's.</p>}
+  {Object.keys(f.records).length > 0 && <p class="ev-small">Records behind these numbers: {Object.entries(f.records).map(([t, u]: [string, any], k: number) => <>{k ? ' · ' : ''}<a href={u}>{t} {f.id}.json</a></>)}</p>}
+  {f.fit.length > 0 && (
+    <details class="ev-fold">
+      <summary>Fit: reprojection median, px <small>(fit of each tool's own model, not accuracy)</small></summary>
+      <div class="ev-tw"><table class="ev-table">
+        <thead><tr><th scope="col">Camera</th>{f.columns.map((c: any) => <th scope="col"><RpShape tool={c.tool} /> {c.label}</th>)}</tr></thead>
+        <tbody>{f.fit.map((r: any) => <tr><th scope="row">{r.sensor}</th>{f.columns.map((c: any) => <td>{r.by_col[c.col] ?? '–'}</td>)}</tr>)}</tbody>
+      </table></div>
+    </details>
+  )}
+</div>

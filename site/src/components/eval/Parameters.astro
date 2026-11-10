@@ -1,0 +1,61 @@
+---
+// Parameters by sensor: one tab per sensor (radio buttons + CSS), one chart per parameter, one lane per tool column.
+// A lane: whisker min–max, box median ± sd, tick at the median, value and n printed. The axis is shared by the lanes
+// of one parameter and centred on the cross-tool median. Hollow box = input, not estimated; hatched = another model,
+// printed, not drawn; dashed = no value. Tool colour marks identity only. Inline SVG at build time, no script.
+import RpShape from '../RpShape.astro';
+interface Props { page: any; i: number }
+const { page, i } = Astro.props;
+const f = page.families[i];
+const W = 200, H = 14, M = W / 2, R = M - 4;
+const id = (k: number) => `pr-${page.slug}-${f.id}-${k}`;
+const p2 = (v: number) => Number(v.toPrecision(2)).toString().replace('-', '−');
+const p3 = (v: number) => Number(v.toPrecision(3)).toString().replace('-', '−');
+const css = f.sensors.map((_: any, k: number) => `#${id(k)}:checked~.ev-panels>#${id(k)}-p{display:block}#${id(k)}:checked+label{border-color:var(--sl-color-accent);color:var(--sl-color-accent-high);background:var(--sl-color-accent-low)}`).join('');
+const REF: Record<string, number> = { time: 0, scale: 1 };
+const xOf = (ax: any) => (v: number) => M + ((v - ax.c) / ax.h) * R;
+const inAxis = (v: number | undefined, ax: any) => v !== undefined && !(Math.abs(v - ax.c) > ax.h);
+---
+<div class="not-content ev-params">
+  <style set:html={css}></style>
+  {f.sensors.map((s: any, k: number) => <><input type="radio" class="ev-tab-in" name={`pr-${page.slug}-${f.id}`} id={id(k)} checked={k === 0} /><label for={id(k)} class="ev-tab">{s.label}</label></>)}
+  <div class="ev-panels">
+    {f.sensors.map((s: any, k: number) => (
+      <div class="ev-panel" id={`${id(k)}-p`}>
+        {s.params.map((p: any) => {
+          const x = xOf(p.axis);
+          const ref = REF[p.cls];
+          const showRef = inAxis(ref, p.axis);
+          return (
+            <div class="ev-param">
+              <p class="ev-ph"><b>{p.label}</b>{p.unit && <span class="ev-u"> {p.unit}</span>}
+                <small>axis {p3(p.axis.c)} ± {p3(p.axis.h)}{showRef && ` · line at ${ref}`}</small></p>
+              {p.lanes.map((l: any) => {
+                const drawn = l.state === 'ok' || l.state === 'fixed';
+                const title = drawn ? `${l.label}: median ${l.text}, sd ${p2(l.sd)}, n ${l.n}${l.min !== undefined ? `, range ${p3(l.min)} to ${p3(l.max)}` : ''}${l.note ? ` (${l.note})` : ''}` : `${l.label}: ${l.note}${l.text ? `, ${l.text}` : ''}`;
+                return (
+                  <div class={`ev-lane ev-${l.state}`} title={title}>
+                    <span class="ev-ll"><RpShape tool={l.tool} /> {l.label}</span>
+                    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" class={`ev-pr rp-t-${l.tool}`} role="img" aria-label={title}>
+                      <line class="ev-mid" x1={M} x2={M} y1="0" y2={H} />
+                      {showRef && <line class="ev-ref" x1={x(ref)} x2={x(ref)} y1="0" y2={H} />}
+                      {drawn && l.min !== undefined && <line class="ev-wh" x1={x(l.min)} x2={x(l.max)} y1={H / 2} y2={H / 2} />}
+                      {drawn && <rect class={l.state === 'fixed' ? 'ev-box ev-hollow' : 'ev-box'} x={x(l.med - l.sd)} y="3" width={Math.max(0.8, x(l.med + l.sd) - x(l.med - l.sd))} height={H - 6} />}
+                      {drawn && <line class="ev-tick" x1={x(l.med)} x2={x(l.med)} y1="1" y2={H - 1} />}
+                      {!drawn && l.state !== 'missing' && <rect class="ev-hatch" x="2" y="3" width={W - 4} height={H - 6} />}
+                      {l.state === 'missing' && <line class="ev-none" x1="4" x2={W - 4} y1={H / 2} y2={H / 2} />}
+                    </svg>
+                    <span class="ev-lv">{drawn ? <><b>{l.text}</b><span class="ev-sd"> ± {p2(l.sd)} <small>({l.n})</small></span></> : l.text ? <>{l.text}</> : null}{l.note && <small class="ev-ln"> {l.note}</small>}</span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    ))}
+  </div>
+  <p class="ev-small">Whisker = lowest to highest value over the tool's solved recordings; box = median ± sd; tick =
+    median. Min and max come from the per-recording values behind each record's median; only these two numbers are
+    published, not the values. Rotations are not shown: the records do not hold them yet.</p>
+</div>

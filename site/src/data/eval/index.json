@@ -1,0 +1,560 @@
+{
+ "batch": "2026-11-08a",
+ "results_commit": "e893730bcb6e8ffa83484ca01265e5f744c1f9ed",
+ "honest": [
+  "<b>Repeatability, not accuracy.</b> These datasets have no ground truth, so no tool is the reference. A cell shows whose estimates scatter least over the recordings every compared tool ran, not who is right.",
+  "<b>Who ran it:</b> the MVIS authors ran every tool, including Kalibr and Basalt, with its documented defaults unless a family's notes say otherwise.",
+  "<b>No totals:</b> nothing is added up across cells, families or datasets, and rows are never ordered by a value."
+ ],
+ "study_note": "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here.",
+ "datasets": [
+  {
+   "slug": "virig-4imus-3cams",
+   "id": "virig",
+   "label": "VI-Rig 4 IMUs + 3 cams",
+   "ours": true,
+   "link": "/benchmark/results/virig-4imus-3cams/",
+   "families": [
+    {
+     "id": "T6",
+     "title": "3 GS cameras + 4 IMUs",
+     "mode": "cam+imu",
+     "shutter": "global",
+     "n": 10,
+     "solved": [
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "MVIS"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 0,
+       "of": 10,
+       "reason": "not run: one IMU per run; no run holds the whole rig",
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 21,
+       "compared": 48
+      }
+     }
+    },
+    {
+     "id": "T6c",
+     "title": "3 GS cameras — camera calibration",
+     "mode": "cam",
+     "shutter": "global",
+     "n": 10,
+     "solved": [
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "MVIS"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS − Kalibr",
+       "marked": 5,
+       "compared": 24
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 2,
+       "compared": 16
+      },
+      "bm": {
+       "label": "Basalt − MVIS",
+       "marked": 6,
+       "compared": 16
+      }
+     }
+    }
+   ]
+  },
+  {
+   "slug": "virig-4imus-4cams",
+   "id": "mvis_rig",
+   "label": "VI-Rig 4 IMUs + 4 cams",
+   "ours": true,
+   "link": "/benchmark/results/virig-4imus-4cams/",
+   "families": [
+    {
+     "id": "T1",
+     "title": "t265 GS fisheye stereo",
+     "mode": "cam",
+     "shutter": "global",
+     "n": 15,
+     "solved": [
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "MVIS"
+      },
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS − Kalibr",
+       "marked": 5,
+       "compared": 17
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 2,
+       "compared": 17
+      },
+      "bm": {
+       "label": "Basalt − MVIS",
+       "marked": 10,
+       "compared": 17
+      }
+     }
+    },
+    {
+     "id": "T2",
+     "title": "ELP RS stereo + readout",
+     "mode": "cam",
+     "shutter": "rolling",
+     "n": 15,
+     "solved": [
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "MVIS"
+      },
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS − Kalibr",
+       "marked": 1,
+       "compared": 2
+      }
+     }
+    },
+    {
+     "id": "T7",
+     "title": "Mixed t265-f1 + ELP-L, aux Xsens",
+     "mode": "cam+imu",
+     "shutter": "mixed",
+     "n": 15,
+     "solved": [
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "MVIS"
+      },
+      {
+       "n": 14,
+       "of": 15,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 0,
+       "of": 15,
+       "reason": "not run: one IMU per run and no rolling-shutter model; no run holds the whole rig",
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 13,
+       "compared": 22
+      }
+     }
+    },
+    {
+     "id": "T8",
+     "title": "ELP RS stereo + two IMUs (IMUs only)",
+     "mode": "cam+imu",
+     "shutter": "rolling",
+     "n": 15,
+     "solved": [
+      {
+       "n": 15,
+       "of": 15,
+       "tool": "MVIS"
+      },
+      {
+       "n": 3,
+       "of": 15,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 0,
+       "of": 15,
+       "reason": "not run: no rolling-shutter model",
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 16,
+       "compared": 20
+      }
+     }
+    }
+   ]
+  },
+  {
+   "slug": "tum-vi",
+   "id": "tum_vi",
+   "label": "TUM-VI",
+   "ours": false,
+   "link": "/benchmark/results/tum-vi/",
+   "families": [
+    {
+     "id": "T3",
+     "title": "Camera stereo (raw)",
+     "mode": "cam",
+     "shutter": "global",
+     "n": 8,
+     "solved": [
+      {
+       "n": 8,
+       "of": 8,
+       "tool": "MVIS"
+      },
+      {
+       "n": 8,
+       "of": 8,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 8,
+       "of": 8,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS − Kalibr",
+       "marked": 2,
+       "compared": 17
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 0,
+       "compared": 17
+      },
+      "bm": {
+       "label": "Basalt − MVIS",
+       "marked": 4,
+       "compared": 17
+      }
+     }
+    },
+    {
+     "id": "T9",
+     "title": "Camera + IMU, raw stream",
+     "mode": "cam+imu",
+     "shutter": "global",
+     "n": 4,
+     "solved": [
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "MVIS"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 9,
+       "compared": 13
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 6,
+       "compared": 13
+      },
+      "bm": {
+       "label": "Basalt − MVIS (K-IMU)",
+       "marked": 10,
+       "compared": 30
+      }
+     }
+    },
+    {
+     "id": "T10",
+     "title": "Camera + IMU, standard-512",
+     "mode": "cam+imu",
+     "shutter": "global",
+     "n": 4,
+     "solved": [
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "MVIS"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 10,
+       "compared": 13
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 6,
+       "compared": 13
+      },
+      "bm": {
+       "label": "Basalt − MVIS (K-IMU)",
+       "marked": 16,
+       "compared": 30
+      }
+     }
+    }
+   ]
+  },
+  {
+   "slug": "looper-insight9",
+   "id": "looper_insight9",
+   "label": "Looper Insight 9",
+   "ours": false,
+   "link": "/benchmark/results/looper-insight9/",
+   "families": [
+    {
+     "id": "T4",
+     "title": "Camera stereo",
+     "mode": "cam",
+     "shutter": "global",
+     "n": 10,
+     "solved": [
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "MVIS"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS − Kalibr",
+       "marked": 6,
+       "compared": 17
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 3,
+       "compared": 17
+      },
+      "bm": {
+       "label": "Basalt − MVIS",
+       "marked": 2,
+       "compared": 17
+      }
+     }
+    },
+    {
+     "id": "T11",
+     "title": "3-cam + IMU",
+     "mode": "cam+imu",
+     "shutter": "mixed",
+     "n": 10,
+     "solved": [
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "MVIS"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 10,
+       "of": 10,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 7,
+       "compared": 13
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 3,
+       "compared": 13
+      },
+      "bm": {
+       "label": "Basalt − MVIS (K-IMU)",
+       "marked": 15,
+       "compared": 30
+      }
+     }
+    }
+   ]
+  },
+  {
+   "slug": "monado-mgc",
+   "id": "monado_msd",
+   "label": "Monado MGC",
+   "ours": false,
+   "link": "/benchmark/results/monado-mgc/",
+   "families": [
+    {
+     "id": "T5",
+     "title": "cam0 + cam1 stereo",
+     "mode": "cam",
+     "shutter": "global",
+     "n": 4,
+     "solved": [
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "MVIS"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS − Kalibr",
+       "marked": 4,
+       "compared": 17
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 0,
+       "compared": 17
+      },
+      "bm": {
+       "label": "Basalt − MVIS",
+       "marked": 2,
+       "compared": 17
+      }
+     }
+    },
+    {
+     "id": "T12",
+     "title": "cam0 + cam1 + IMU",
+     "mode": "cam+imu",
+     "shutter": "global",
+     "n": 4,
+     "solved": [
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "MVIS"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Kalibr"
+      },
+      {
+       "n": 4,
+       "of": 4,
+       "tool": "Basalt"
+      }
+     ],
+     "diffs": {
+      "mk": {
+       "label": "MVIS (K-IMU) − Kalibr",
+       "marked": 3,
+       "compared": 13
+      },
+      "bk": {
+       "label": "Basalt − Kalibr",
+       "marked": 0,
+       "compared": 13
+      },
+      "bm": {
+       "label": "Basalt − MVIS (K-IMU)",
+       "marked": 16,
+       "compared": 30
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "studies": [
+  {
+   "label": "UZH-FPV",
+   "link": "/benchmark/results/uzh-fpv/",
+   "batch": "2026-11-04"
+  }
+ ]
+}

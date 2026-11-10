@@ -1,0 +1,160 @@
+# Every word on the Results pages (Leaderboard + one Dataset eval page per dataset) that is not computed from the
+# records. Read by mvis_site/results_eval.py; every string goes through lint.public_problems before anything is written.
+# Order is page order: our VI-Rig datasets first. Nothing is ever ordered by a measured value.
+#
+#   slug       URL under /benchmark/results/ (the same slug as the dataset reference pages)
+#   id         the record id in families.json (never in a URL)
+#   families   in page order, with the shutter of the family's cameras (global | rolling | mixed) for the filter
+#   sensors    record sensor label -> stable sensor id, explicit, never guessed; an unmapped label stops the export
+#   image      a file already served under site/public, with its alt text and credit
+#   legacy     filled by the export: old hashes on /benchmark/results/ that now live on this page
+
+leaderboard:
+  honest:
+    - "<b>Repeatability, not accuracy.</b> These datasets have no ground truth, so no tool is the reference. A cell shows whose estimates scatter least over the recordings every compared tool ran, not who is right."
+    - "<b>Who ran it:</b> the MVIS authors ran every tool, including Kalibr and Basalt, with its documented defaults unless a family's notes say otherwise."
+    - "<b>No totals:</b> nothing is added up across cells, families or datasets, and rows are never ordered by a value."
+  uzh: "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here."
+
+datasets:
+  - slug: virig-4imus-3cams
+    id: virig
+    label: VI-Rig 4 IMUs + 3 cams
+    title: "VI-Rig: 4 IMUs + 3 cameras"
+    ours: true
+    licence: CC BY-NC 4.0
+    intro: "Our rig: a FLIR Blackfly and a RealSense T265 fisheye pair, all global shutter, with four IMUs from 100 to 500 Hz."
+    chips: ["3 global-shutter cameras", "4 IMUs, 100–500 Hz"]
+    image: {src: /media/hero/vi_rig.jpg, alt: "The VI-Rig: a Blackfly camera, a RealSense T265 and four IMUs on one plate", credit: "Photo: Open MVIS"}
+    links:
+      dataset: /reference/datasets/virig-4imus-3cams/
+      hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams
+    families:
+      - {id: T6, shutter: global}
+      - {id: T6c, shutter: global}
+    sensors:
+      "cam0 – Blackfly": cam0
+      "cam1 – t265 fisheye 1": cam1
+      "cam2 – t265 fisheye 2": cam2
+      "base IMU – Xsens MTi": imu_base
+      "aux IMU – GX3-25": imu_gx3_25
+      "aux IMU – GX3-35": imu_gx3_35
+      "aux IMU – t265 IMU": imu_t265
+
+  - slug: virig-4imus-4cams
+    id: mvis_rig
+    label: VI-Rig 4 IMUs + 4 cams
+    title: "VI-Rig: 4 IMUs + 4 cameras"
+    ours: true
+    licence: CC BY-NC 4.0
+    intro: "Our rig with a RealSense T265 fisheye pair (global shutter) and an ELP stereo pair (rolling shutter)."
+    chips: ["2 global-shutter + 2 rolling-shutter cameras"]
+    image: {src: /media/hero/hero_virig4_960.jpg, alt: "MVIS solving a VI-Rig 4-camera recording: board, camera path and one T265 fisheye frame", credit: "MVIS solve view, from the homepage"}
+    links:
+      dataset: /reference/datasets/virig-4imus-4cams/
+      sensor: /sensors/intel-t265/
+      hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams
+    families:
+      - {id: T1, shutter: global}
+      - {id: T2, shutter: rolling}
+      - {id: T7, shutter: mixed}
+      - {id: T8, shutter: rolling}
+    sensors:
+      "cam0 – t265 fisheye 1": t265_f1
+      "cam2 – t265 fisheye 1": t265_f1
+      "cam3 – t265 fisheye 2": t265_f2
+      "cam0 – ELP-L": elp_l
+      "cam1 – ELP-L": elp_l
+      "cam1 – ELP-R": elp_r
+      "base IMU – t265 IMU": imu_t265
+      "aux IMU – Xsens MTi": imu_xsens
+
+  - slug: tum-vi
+    id: tum_vi
+    label: TUM-VI
+    title: TUM-VI
+    ours: false
+    licence: CC BY 4.0
+    intro: "The calibration bags of the TUM visual-inertial dataset: a global-shutter fisheye stereo pair and a BMI160 IMU."
+    chips: ["2 global-shutter fisheye cameras, 20 Hz", "BMI160 IMU, 200 Hz", "AprilGrid 6×6, 88 mm"]
+    image: {src: /media/hero/hero_tumvi_960.jpg, alt: "MVIS solving a TUM-VI calibration bag: board, camera path and one fisheye frame", credit: "MVIS solve view, from the homepage"}
+    links:
+      example: /benchmark/examples/tum-vi/
+    families:
+      - {id: T3, shutter: global}
+      - {id: T9, shutter: global}
+      - {id: T10, shutter: global}
+    sensors:
+      "cam0 – TUM-VI cam0": cam0
+      "cam1 – TUM-VI cam1": cam1
+      "base IMU – BMI160 imu0": imu0
+
+  - slug: looper-insight9
+    id: looper_insight9
+    label: Looper Insight 9
+    title: Looper Insight 9
+    ours: false
+    licence: CC BY-NC 4.0
+    intro: "Two global-shutter cameras, one rolling-shutter camera and a MEMS IMU, from Looper Robotics."
+    chips: ["2 global-shutter + 1 rolling-shutter camera", "MEMS IMU, 400 Hz", "AprilGrid 6×6, 55 mm"]
+    image: {src: /media/sensors/looper-insight9/looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page"}
+    links:
+      example: /benchmark/examples/looper-sa16/
+      sensor: /sensors/looper-insight9/
+    families:
+      - {id: T4, shutter: global}
+      - {id: T11, shutter: mixed}
+    sensors:
+      "cam0 – Looper GS cam0": cam0
+      "cam1 – Looper GS cam1": cam1
+      "cam2 – Looper RS cam2": cam2
+      "base IMU – Looper MEMS imu0": imu0
+
+  - slug: monado-mgc
+    id: monado_msd
+    label: Monado MGC
+    title: "Monado MGC (HP Reverb G2)"
+    ours: false
+    licence: CC BY 4.0
+    intro: "The MGC calibration recordings of the Monado SLAM Datasets, made with an HP Reverb G2 headset."
+    chips: ["2 headset cameras", "headset IMU", "AprilGrid 6×6, 30 mm"]
+    image: {src: /media/sensors/hp-reverb-g2/hp-reverb-g2.jpg, alt: "HP Reverb G2 headset, front view", credit: "Photo: HP, Reverb G2 press release"}
+    links:
+      example: /benchmark/examples/monado/
+      sensor: /sensors/hp-reverb-g2/
+    families:
+      - {id: T5, shutter: global}
+      - {id: T12, shutter: global}
+    sensors:
+      "cam0 – Reverb G2 cam0": cam0
+      "cam1 – Reverb G2 cam1": cam1
+      "base IMU – Reverb G2 IMU": imu0
+
+  - slug: uzh-fpv
+    id: uzh_fpv
+    label: UZH-FPV
+    title: UZH-FPV
+    ours: false
+    study: true
+    licence: CC BY-NC-SA 3.0
+    intro: "The camera–IMU calibration bags of the UZH-FPV Drone Racing dataset: an mDAVIS346 and a Snapdragon Flight, each recorded indoors and outdoors, at 45° and facing forward. A one-off study, not part of the leaderboard batch or the regression suite."
+    chips: ["2 devices, 4 bags each", "AprilGrid 5×4, 75 mm"]
+    image: {src: /media/hero/hero_uzhd_960.jpg, alt: "MVIS solving a UZH-FPV Davis bag: board, camera path and one camera frame", credit: "MVIS solve view, from the homepage"}
+    links:
+      example: /benchmark/examples/uzh-fpv/
+    no_repeatability: "This study has no repeatability cells: it was made before the current schema, and 4 bags per device are too few for the test (it needs 6)."
+    reading:
+      - "<b>IMU weights.</b> All three tools use IMU sigmas taken from the residuals in UZH's own Kalibr results, not the MVIS defaults. The example page explains how they are derived."
+      - "<b>One Basalt solve is left out.</b> On davis_indoor_forward with these weights, Basalt gives a 120 mm lever and an accel scale (accelerometer scale factor) of 0.84. So its Davis column has 3 of 4 bags. At Basalt's default noise that bag is plausible, but snapdragon_indoor_45 then fails with a broken spline."
+      - "<b>Basalt's Davis distance stands out.</b> Its camera-to-IMU distance is 33.6 mm. Kalibr gives 23.2 mm and MVIS 22.8 mm on the same 3 bags. We haven't established why. At default noise Basalt's lever z is 14–25 mm."
+      - "<b>Each device's 4 bags form one family</b>, because the camera and IMU are on the same device. That assumes the camera–IMU geometry stayed the same across recordings, which we can't confirm."
+      - "<b>Snapdragon's time offset really does differ between bags</b>, with an sd (standard deviation) near 4.7 ms in every tool. So a small difference between tools on that row says little about each bag."
+    families:
+      - {id: DAVIS, shutter: global}
+      - {id: SNAP, shutter: global}
+    sensors:
+      "cam0 – mDAVIS346": cam0
+      "base IMU – DAVIS IMU": imu0
+      "cam0 – Snapdragon left": cam0
+      "cam1 – Snapdragon right": cam1
+      "base IMU – Snapdragon IMU": imu0
