@@ -4,10 +4,16 @@ description: Apply a calibration back onto a raw bag and re-record it calibratio
 pageType: guide
 ---
 
-`mvis apply-calib` takes a cam-IMU calibration and a raw ROS1 bag and writes
-a new bag with the calibration already applied — IMU intrinsics and bias
-removed, every stream on one timeline. Downstream consumers then get corrected
-data without having to know anything about the calibration.
+Use this page to turn a raw recording into a calibration-corrected one.
+`mvis apply-calib` takes a cam-IMU calibration and a raw ROS1 bag. It writes a
+new bag with the calibration already applied:
+
+- **IMU intrinsics** removed (its scale, misalignment and g-sensitivity)
+- **Bias** removed
+- **One timeline** for every stream
+
+Downstream consumers then get corrected data. They do not need to know
+anything about the calibration.
 
 ## Run it
 
@@ -23,10 +29,10 @@ Or by flags:
 mvis apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
 ```
 
-Output defaults to `<bag>.corrected.bag`. The calibration records each sensor's
-**source topic**, so the topic→sensor mapping is derived automatically — there
-is no map to hand-write. `--map` exists for the cases where you must override
-it.
+- **Output:** defaults to `<bag>.corrected.bag`.
+- **Topics:** the calibration records each sensor's **source topic**. So the
+  topic→sensor mapping is derived automatically; there is no map to hand-write.
+- **Override:** `--map` exists for the cases where you must override it.
 
 ## What gets corrected
 
@@ -38,25 +44,38 @@ it.
 | Gyro↔accel offset | Base-IMU accel channel re-interpolated at `t + t_ga`, when `t_ga` was calibrated |
 | Undistortion | Images undistorted, with `--undistort` |
 
-A provenance sidecar is written alongside the bag recording what was applied.
+The terms in the table:
+
+- **`Dw` / `Da`:** the scale and misalignment of the gyroscope and the
+  accelerometer.
+- **`Tg`:** the g-sensitivity, how linear acceleration leaks into the gyroscope.
+- **`td`:** the time offset of a sensor against the base IMU.
+- **`t_ga`:** the time offset between the gyroscope and the accelerometer.
+
+A provenance sidecar is written alongside the bag. It records what was applied.
 
 :::caution[Re-stamping uses the header clock, not record time]
-Correction is applied on each message's **header** clock. Re-stamping on
-record time would bake every topic's differential receive latency into the
-corrected bag — turning a driver artefact into permanent data. This is the
-single most important detail of the tool.
+Correction is applied on each message's **header** clock. This is the single
+most important detail of the tool. Re-stamping on record time would bake every
+topic's differential receive latency into the corrected bag. That turns a
+driver artefact into permanent data.
 :::
 
 ## Batch
 
-A batch runner applies one calibration across a whole dataset family, which is
+A batch runner applies one calibration across a whole dataset family. This is
 the usual case: one calibration per rig, many recordings.
 
 ## Check it worked
 
-A correct calibration, applied to its own bag, must make that bag recalibrate to
-*nothing left to correct* — every `Dw`/`Da` at identity, biases at zero, while
-the extrinsics and stereo baseline stay put. That check is automated:
+Apply a correct calibration to its own bag, then recalibrate that bag. It must
+show *nothing left to correct*:
+
+- every `Dw`/`Da` at identity
+- biases at zero
+- the extrinsics and stereo baseline stay put
+
+That check is automated:
 
 ```bash
 mvis roundtrip -c cam_imu.yaml
@@ -66,10 +85,15 @@ See [Round-trip validation](/guides/roundtrip/).
 
 ## Validated on
 
-TUM MIC05 and TUM-VI raw, where the correction is bit-exact and the corrected
-bag recalibrates to near-identity IMU intrinsics. On the T265, `t_ga` goes
-from −6.32 ms to +0.53 ms and camera `td` from −7.6 ms to −0.37 ms after
-correction.
+On TUM MIC05 and TUM-VI raw, the correction is bit-exact. The corrected bag
+recalibrates to near-identity IMU intrinsics.
 
-Implementation: `src/mvis/recalib/`; example config
-`examples/configs/recalib_example.yaml`.
+On the T265, the time offsets change as follows:
+
+| Offset | Before correction | After correction |
+|---|---|---|
+| `t_ga` | −6.32 ms | +0.53 ms |
+| camera `td` | −7.6 ms | −0.37 ms |
+
+- **Implementation:** `src/mvis/recalib/`
+- **Example config:** `examples/configs/recalib_example.yaml`
