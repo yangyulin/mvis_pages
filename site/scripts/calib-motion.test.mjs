@@ -7,7 +7,7 @@ import {
   kb4Project, boardDetections, nowState, prep, segSecs, segAt, largestRegion, mergeSegs, prepCams, bracket,
   lerpOutline, camFrame, cardNote,
   camCoverage, fillNext, advance, quatToR, screenStep, playMode, startLabel, getReadyText, hardestMove, enterPractice,
-  exitPractice, practiceBadge, PRACTICE_SPEED, followPractice, toggleRepeat,
+  exitPractice, practiceBadge, PRACTICE_SPEED, followPractice, toggleRepeat, VARIANTS,
 } from '../src/scripts/calib-motion.js';
 
 const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
@@ -433,11 +433,16 @@ test('primary button: Play, Pause while playing or counting, Again at the end', 
   assert.equal(playMode({ playing: false, counting: 0, t: 59.9, dur: 60 }), 'play');
 });
 
-test('start labels say the length: 60 s guides, 41 s and 61 s real takes', () => {
-  assert.equal(startLabel(guide, false), 'Start the guided motion · 60 s');
-  assert.equal(startLabel(chess, false), 'Start the guided motion · 60 s');
+test('start labels name the board and say the length: 60 s guides, 41 s and 61 s real takes', () => {
+  assert.equal(startLabel(guide, false), 'Start the AprilGrid motion · 60 s');
+  assert.equal(startLabel(chess, false), 'Start the chessboard motion · 60 s');
   assert.equal(startLabel(realAG, true), 'Play the real recording · 41 s');
   assert.equal(startLabel(realCB, true), 'Play the real recording · 61 s');
+});
+
+test('guide chips are named after their board', () => {
+  assert.equal(VARIANTS.guide06c_60.label, 'AprilGrid');
+  assert.equal(VARIANTS.guide60b.label, 'Chessboard');
 });
 
 test('get-ready line: the start distance to the board plane, as in the setup line and the first cue', () => {

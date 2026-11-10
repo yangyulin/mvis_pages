@@ -13,35 +13,10 @@ Looper Insight 9 and checked it with a **noisy digital twin**: the twin simulate
 it and compares the result with the truth. A motion is good if the twin still converges on every
 calibration parameter.
 
-## The motion
+## <span id="boards-we-used" class="cm-anchor"></span>1. Set up the board
 
-<CalibMotionPlayer />
-
-Follow the **Now** panel: it names the move, says what to do, counts down and shows what comes next; the
-camera card on the right shows what the camera sees and which parts of the image are still empty.
-
-## Step by step
-
-Four moves in order, blended into each other, with a short rest at each end:
-
-| # | Move | Time | What to do |
-|---|---|---|---|
-| 0 | Rest | 0–3 s | Hold still in front of the board, count 3. |
-| 1 | Left–right + yaw | 3–20 s | Swing left and right around the board, 2 times (about 43° each side), turning about 22° past facing it at each end so the board slides to the picture edge. Turn round sharply. |
-| 2 | Up–down + pitch | 20–32 s | Move up and down, 2 times (about 33° above and below), tipping about 34° past the board so it reaches the top or bottom edge. |
-| 3 | Back–forth + roll | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times, rolling like a steering wheel up to about 65°. Hold the board off-centre so the roll carries it into the corners. |
-| 4 | Loop + roll | 47–57 s | Move round a loop parallel to the board, about 40 cm across, 2 times, turning a little against the loop and rolling about 25°, so the board runs into every corner. |
-| 5 | Rest | 57–60 s | Hold still, count 3. |
-
-- **Vary the speed** on every sweep: push through the middle, brake into the ends.
-- **Keep most of the board in view.** An AprilGrid may run partly off the edge; a chessboard may not.
-- **Don't add shake.** The natural wobble of a hand is all the motion needs.
-
-**Setup:** AprilGrid upright and flat (we used 6 × 6 tags of 43.47 mm on a monitor; [download it
-below](#boards-we-used)), short exposure (about 2 ms), start about 0.42 m away, face-on. The motion stays at a
-comfortable hand pace (about 0.4 m/s and 1.9 rad/s at most). 50 s also works: drop one in-out and one loop.
-
-## Boards we used
+The main motion is built for an AprilGrid, which may run partly off the edge of the picture; a chessboard is only
+detected with every corner in the picture, so it has its own, smaller motion (see [step 2](#2-watch-and-practise-the-motion)).
 
 Both boards are full-screen images for a 2560 × 1440 monitor, with configs for MVIS and Kalibr.
 
@@ -72,6 +47,42 @@ and no zoom, so one image pixel is one screen pixel. On our monitor 160 px (one 
 size in the config (`tag_size` / `square_size` for MVIS, `tagSize` / `rowSpacingMeters` and `colSpacingMeters`
 for Kalibr).
 
+**Setup:** board upright and flat, enough light for a short exposure (about 2 ms); start face-on, about 0.42 m
+away for the AprilGrid motion (0.46 m for the chessboard).
+
+## <span id="the-motion" class="cm-anchor"></span><span id="chessboard-version" class="cm-anchor"></span>2. Watch and practise the motion
+
+<CalibMotionPlayer />
+
+Pick the chip for your board. Follow the **Now** panel: it names the move, says what to do, counts down and
+shows what comes next; the camera card on the right shows what the camera sees and which parts of the image are
+still empty. The chessboard motion swings less so the whole board stays in view, and adds a short corner square
+instead of the loop; same rules otherwise, and it also passes the twin.
+
+## <span id="step-by-step" class="cm-anchor"></span>3. Step by step
+
+Four moves in order, blended into each other, with a short rest at each end, at a comfortable hand pace (about
+0.4 m/s and 1.9 rad/s at most):
+
+| # | Move | Time | What to do |
+|---|---|---|---|
+| 0 | Rest | 0–3 s | Hold still in front of the board, count 3. |
+| 1 | Left–right + yaw | 3–20 s | Swing left and right around the board, 2 times (about 43° each side), turning about 22° past facing it at each end so the board slides to the picture edge. Turn round sharply. |
+| 2 | Up–down + pitch | 20–32 s | Move up and down, 2 times (about 33° above and below), tipping about 34° past the board so it reaches the top or bottom edge. |
+| 3 | Back–forth + roll | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times, rolling like a steering wheel up to about 65°. Hold the board off-centre so the roll carries it into the corners. |
+| 4 | Loop + roll | 47–57 s | Move round a loop parallel to the board, about 40 cm across, 2 times, turning a little against the loop and rolling about 25°, so the board runs into every corner. |
+| 5 | Rest | 57–60 s | Hold still, count 3. |
+
+- **Vary the speed** on every sweep: push through the middle, brake into the ends.
+- **Keep most of the board in view.** An AprilGrid may run partly off the edge; a chessboard may not.
+- **Don't add shake.** The natural wobble of a hand is all the motion needs.
+
+## 4. Record and check
+
+Record the 60 s motion with your rig. 50 s also works: drop one in-out and one loop. Then calibrate with the
+board config from [step 1](#1-set-up-the-board) and check the result, as in the
+[camera–IMU calibration guide](/guides/camera-imu-calibration/).
+
 ## Real examples
 
 Two hand-held recordings of our Looper Insight 9, solved with MVIS; both pass the twin. The cards show the
@@ -80,11 +91,6 @@ corners MVIS detected in each of the three cameras, drawn without the camera ima
 <CalibMotionPlayer mode="real" />
 
 Both move faster than the guide motion; at a comfortable pace, follow the 60 s guide.
-
-## Chessboard version
-
-A chessboard is only detected with every corner in the picture, so its motion swings less and adds a
-short corner square instead of the loop. Same rules otherwise; it also passes the twin.
 
 ## Motions that fail
 

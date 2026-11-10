@@ -45,7 +45,7 @@ const main = mode === 'main';
       <div class="cm-over cm-start" data-role="start">
         <button type="button" class="cm-bigplay" data-role="startbtn">
           <span class="cm-bigic" aria-hidden="true"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
-          <span class="cm-biglab" data-role="startlab">{main ? 'Start the guided motion · 60 s' : 'Play the real recording'}</span>
+          <span class="cm-biglab" data-role="startlab">{main ? 'Start the AprilGrid motion · 60 s' : 'Play the real recording'}</span>
         </button>
         <p class="cm-steps3" data-role="steps3">{main
           ? <><span><b>1</b> Watch it once</span><span><b>2</b> Practise each move</span><span><b>3</b> Follow along with your rig</span></>
@@ -57,7 +57,7 @@ const main = mode === 'main';
         <div class="cm-endbtns">
           <button type="button" class="cm-primary" data-role="again"><span class="cm-ic" aria-hidden="true">↺</span>Watch again</button>
           {main && <button type="button" class="cm-second" data-role="hard">Practise the hardest move</button>}
-          <a class="cm-second" href="#step-by-step">Read the steps</a>
+          <a class="cm-second" href="#3-step-by-step">Read the steps</a>
         </div>
       </div>
     </div>
@@ -318,7 +318,7 @@ const main = mode === 'main';
     text-decoration: underline; text-underline-offset: 2px;
   }
 
-  /* the guide's "Boards we used" previews (outside the player, styled here with it) */
+  /* the guide's board previews ("1. Set up the board") (outside the player, styled here with it) */
   .cm-boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin-block: 1rem; }
   .cm-boards figure { margin: 0; }
   .cm-boards img { display: block; width: 100%; height: auto; border: 1px solid var(--sl-color-gray-5); border-radius: 0.4rem; background: #fff; }
