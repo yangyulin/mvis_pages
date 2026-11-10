@@ -148,13 +148,8 @@ export default defineConfig({
             {
               label: 'Examples',
               collapsed: true,
-              items: [
-                { label: 'Overview', link: '/benchmark/examples/' },
-                { label: 'TUM VI', link: '/benchmark/examples/tum-vi/' },
-                { label: 'Monado', link: '/benchmark/examples/monado/' },
-                { label: 'Looper SA16', link: '/benchmark/examples/looper-sa16/' },
-                { label: 'UZH-FPV', link: '/benchmark/examples/uzh-fpv/' },
-              ],
+              // Written by site/scripts/export_examples.py with the Examples overview, so both list examples in one order.
+              items: JSON.parse(readFileSync(new URL('./src/data/examples-nav.json', import.meta.url), 'utf8')),
             },
             { label: 'Why calibrate t_ga', link: '/benchmark/tga/' },
             {

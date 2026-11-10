@@ -99,7 +99,7 @@ datasets:
     chips: ["2 global-shutter + 1 rolling-shutter camera", "MEMS IMU, 400 Hz", "AprilGrid 6×6, 55 mm"]
     image: {src: /media/sensors/looper-insight9/looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page"}
     links:
-      example: /benchmark/examples/looper-sa16/
+      example: /benchmark/examples/looper-insight9/
       sensor: /sensors/looper-insight9/
     families:
       - {id: T4, shutter: global}

@@ -1,0 +1,274 @@
+# Text for the public openmvis.com example pages (/benchmark/examples/<slug>/). No internal path, code hash or device id.
+# Numbers come from the run named in the private mira sensors.yaml `examples:` section (passed to export_examples.py by
+# path), never from here. The config shown on a page is that run's own config with paths cut to file names.
+# The order below is the order on the site: overview cards and sidebar. Every photo lives in data/photos, 800×533.
+steps:
+  - {name: Demo and values, text: "what the page shows, the scene MVIS recovered from the dataset, and the run's headline values."}
+  - {name: Calibration process, text: "MVIS's own player: the detected corners, then the rig's path as the solve refines it."}
+  - {name: Solved rig, text: "a 3D map of the solved rig and a table of every camera and IMU: intrinsics, lever arm, rotation as log(R), time offsets."}
+  - {name: Check against a reference, text: "MVIS beside a published calibration and the difference, where one exists. Where none does, the page says so."}
+  - {name: Config and run, text: "the run's own config with the lines that matter marked and explained, the command, and what you need to get the same numbers."}
+  - {name: Dataset, text: "the recording, its board drawn to scale, and where to download it."}
+examples:
+  virig-4imus-3cams:
+    title: "VI-Rig: 4 IMUs + 3 cameras"
+    nav: VI-Rig 4 IMUs + 3 cams
+    description: One MVIS camera + IMU run on our own rig, with three global-shutter cameras and four IMUs solved together.
+    featured: true
+    ours: true
+    maker: OpenMVIS
+    image: {file: vi-rig.jpg, alt: "VI-Rig: three cameras and four IMUs on one white frame", credit: "Photo: OpenMVIS"}
+    clip: virig3
+    card:
+      rig: 3 global-shutter cameras + 4 IMUs (100–500 Hz) on one frame
+      format: ROS1 bag
+      shows: Every camera and IMU solved together in one run, the multi-IMU case
+      tags: [Global shutter, 3 cameras, 4 IMUs, CC BY-NC 4.0]
+    facts:
+      - [Cameras, "3 global shutter: Blackfly S + T265 fisheye pair"]
+      - [IMUs, "4: Xsens MTi (base), 2 MicroStrain, T265"]
+      - [Board, "AprilGrid 6×6, tag 88 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY-NC 4.0"]
+    lead: "One MVIS camera + IMU run on recording april_01: every camera and all four IMUs solved together."
+    dataset: {url: /reference/datasets/virig-4imus-3cams/, label: VI-Rig 4 IMUs + 3 cams dataset page}
+    eval: {slug: virig-4imus-3cams, label: All 10 recordings and three tools}
+    data:
+      - "Recording april_01, one of the 10 recordings of this rig. MVIS picks the 80 s window with the most motion."
+      - "Cameras: a Blackfly S (pinhole with radial-tangential distortion) and the two T265 fisheye cameras (equidistant lens model)."
+      - "IMUs: the Xsens MTi is the base IMU; the two MicroStrain units and the T265's own IMU are solved against it."
+      - "Board: AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11."
+    config:
+      name: virig_4imus_3cams_cam_imu.yaml
+      why:
+        input.imu_topics: Four IMU topics. The first is the base IMU; the other three are solved against it.
+        input.window_mode: MVIS picks the 80 s window with the most motion.
+        camera_input.cameras: The two T265 cameras are added to the graph at 4 Hz, which keeps the solve small.
+        solve.sigma_g: IMU noise from a still recording of this rig, measured density × 2.5. The other three sigmas are set the same way.
+        estimate.board_points: The printed board is not quite flat, so its shape is estimated too.
+        estimate.camera.intrinsics: Camera intrinsics stay free in the camera + IMU solve.
+    reference:
+      none: >-
+        No published calibration exists for this rig, so this page has nothing to compare against. What we can show is
+        how much each value moves from one recording to the next.
+    reproduce:
+      batch: MVIS main, measured-noise batch of 2026-11-08
+  tum-vi:
+    title: TUM VI
+    nav: TUM VI
+    description: One MVIS camera + IMU run on the TUM VI calibration data, compared with TUM's published Kalibr calibration.
+    maker: TUM Computer Vision Group
+    image: {file: tum-vi-rig.jpg, alt: "TUM VI sensor rig: two fisheye cameras, IMU board and a small PC, with motion-capture markers", credit: "Photo: TUM Computer Vision Group, TUM VI dataset page, CC BY 4.0", url: "https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset"}
+    clip: tumvi
+    card:
+      rig: Stereo 1024² fisheye + BMI160 @ 200 Hz
+      format: ROS1 bag
+      shows: One MVIS run vs TUM's published Kalibr calibration
+      tags: [Global shutter, 2 cameras, 200 Hz IMU, CC BY 4.0]
+    facts:
+      - [Cameras, "2 × 1024² global-shutter fisheye, 20 Hz"]
+      - [IMU, "Bosch BMI160, 200 Hz"]
+      - [Board, "AprilGrid 6×6, tag 88 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY 4.0"]
+    lead: "One MVIS camera + IMU run on dataset-calib-imu1, and how close it lands to TUM's published Kalibr calibration."
+    dataset: {url: "https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset", label: TUM VI dataset page}
+    eval: {slug: tum-vi, label: All recordings and tools}
+    data:
+      - "Recording dataset-calib-imu1, the first of TUM's four camera + IMU calibration recordings, at 1024 × 1024."
+      - "Cameras: two global-shutter fisheye cameras at 20 Hz, fitted with the kb4 (Kannala-Brandt) lens model. IMU: Bosch BMI160 at 200 Hz."
+      - "Board: AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11."
+    config:
+      name: tum_vi_imu1_cam_imu.yaml
+      why:
+        input.window_mode: MVIS picks the 80 s window with the most motion.
+        camera_input.path: "Seed intrinsics: kb4 values from MVIS camera-only solves of TUM's eight camera recordings."
+        camera_input.cameras: cam1 is added to the graph at 8 Hz, which keeps the solve small.
+        solve.estimate_t_ga: Estimates t_ga, the time offset between the gyroscope and the accelerometer.
+        estimate.camera.intrinsics: Camera intrinsics stay free in the camera + IMU solve.
+        estimate.imu: The gyro and accelerometer scale and misalignment (dw_da) are estimated too. IMU noise is left at the MVIS defaults.
+    reference:
+      label: TUM (Kalibr)
+      source: "TUM's published camera + IMU calibration for the 1024 × 1024 data, Kalibr pinhole-equidistant (the kb4 model), from the TUM VI dataset page"
+      url: "https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset"
+      cams:
+        - {name: cam0, p_mm: [45.38, -72.68, -45.07], rotvec: [-0.04129, -2.17242, 2.24813], fx: 380.81}
+        - {name: cam1, p_mm: [-55.52, -71.1, -47.83], rotvec: [-0.0417, -2.22426, 2.19622], fx: 379.29}
+      td_text: not in TUM's calibration file
+      notes:
+        - "The rotation differs by about 9.4 mrad on both cameras. That offset is systematic: MVIS gives the same rotation on all four TUM calibration recordings. It is not explained yet. One possible cause, not verified: this run uses the raw IMU, while TUM's Kalibr run used an IMU model it had already calibrated, so the two IMU frames may differ by a small rotation."
+        - "Lens model note: on these lenses the kb4 polynomial folds back inside the image, past about 114° (682 px from the centre) on cam0 and 119° (705 px) on cam1. The model gives no ray beyond that radius."
+    reproduce:
+      batch: MVIS main, example solves of 2026-11-10
+    folds:
+      - title: Other lens models
+        key: kb4 is shown here
+        text: >-
+          This page uses kb4, the default MVIS fisheye model. How other lens models fit these cameras is covered on the
+          camera model page.
+        link: {url: /concepts/camera-model/, label: Camera model}
+  monado:
+    title: "Monado: HP Reverb G2"
+    nav: Monado (Reverb G2)
+    description: One MVIS camera + IMU run on the Monado SLAM calibration data of an HP Reverb G2, compared with Monado's own calibration.
+    maker: Collabora · Monado SLAM Datasets
+    image: {file: hp-reverb-g2.jpg, alt: "HP Reverb G2 headset, front view", credit: "Photo: HP, Reverb G2 press release", url: "https://www.hp.com/us-en/newsroom/press-releases/2020/hp-valve-microsoft-next-gen-virtual-reality-headset.html"}
+    clip: mgc
+    card:
+      rig: HP Reverb G2, tracking-camera pair + IMU @ 1 kHz
+      format: EuRoC mav0
+      shows: A consumer headset from public data, vs Monado's own calibration
+      tags: [2 cameras, 1 kHz IMU, CC BY 4.0]
+    facts:
+      - [Cameras, "2 × 640×480 grayscale, 30 Hz (front pair)"]
+      - [IMU, "About 1 kHz"]
+      - [Board, "AprilGrid 6×6, tag 30 mm"]
+      - [Format, "EuRoC mav0"]
+      - [Licence, "CC BY 4.0"]
+    lead: "One MVIS camera + IMU run on the HP Reverb G2 recording imucalib01 (round 1), and how close it lands to the calibration Monado ships with the data."
+    dataset: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: Monado SLAM Datasets}
+    sensor: {url: /sensors/hp-reverb-g2/, label: HP Reverb G2 in the Sensor wiki}
+    eval: {slug: monado-mgc, label: All recordings and tools}
+    data:
+      - "Recording MGC imucalib01, round 1, from the Monado SLAM Datasets (Collabora). It shows the board to the front camera pair, cam0 and cam1."
+      - "Cameras: 640 × 480 grayscale at 30 Hz, fitted with the equidistant lens model, as in the MVIS regression config for this headset. IMU at about 1 kHz."
+      - "Board: AprilGrid 6×6, tag 30 mm, spacing 0.3, t36h11. The tag is much smaller than the usual 88 mm, and board size scales every translation."
+    config:
+      name: monado_mgc_imucalib01_cam_imu.yaml
+      why:
+        board.tag_size: "The 30 mm tag. A wrong tag size gives a calibration that converges cleanly and is uniformly wrong in scale."
+        input.window_mode: MVIS picks the 80 s window with the most motion.
+        camera_input.cameras: cam1 is added to the graph at 8 Hz, which keeps the solve small.
+        solve.estimate_t_ga: Estimates t_ga, the time offset between the gyroscope and the accelerometer.
+        estimate.camera.intrinsics: Camera intrinsics stay free in the camera + IMU solve.
+    reference:
+      label: Monado (Basalt)
+      source: "The Basalt calibration Monado ships with the HP Reverb G2 data (MG_reverb_g2, extras, calibration)"
+      url: "https://huggingface.co/datasets/collabora/monado-slam-datasets"
+      cams:
+        - {name: cam0, p_mm: [-51.95, 12.66, 5.7], rotvec: [-0.34563, 0.07561, 1.5383]}
+        - {name: cam1, p_mm: [56.45, 13.37, 5.82], rotvec: [-0.07256, 0.34453, 1.59451]}
+      fx_text: "not comparable: Basalt used an 8-parameter radial-tangential lens"
+      td_text: "fixed at 0 in that file, not an estimate"
+      notes:
+        - "Monado ships a second, equidistant calibration of the same headset. Its rotations differ from this file's by about 4.5 mrad, so a few mrad is within how much the references themselves disagree."
+    reproduce:
+      batch: MVIS main, example solves of 2026-11-10
+    folds:
+      - title: The other two camera pairs
+        key: Sensor wiki
+        text: >-
+          The headset has four cameras, and each recording shows the board to one pair. The sensor page stitches all
+          four together from three pair recordings.
+        link: {url: /sensors/hp-reverb-g2/, label: HP Reverb G2}
+      - title: t_ga on and off
+        key: Why calibrate t_ga
+        text: >-
+          This run estimates t_ga, the time offset between the gyroscope and the accelerometer, as every MVIS camera +
+          IMU run does by default. What happens to tools that cannot model it is shown on its own page.
+        link: {url: /benchmark/tga/, label: Why calibrate t_ga}
+  looper-insight9:
+    title: Looper Insight 9
+    nav: Looper Insight 9
+    description: One MVIS camera + IMU run on a hand-held Looper Insight 9 recording, with the rolling-shutter colour camera solved alongside the global-shutter pair.
+    maker: LooperRobotics
+    image: {file: looper-insight9.jpg, alt: "LooperRobotics Insight 9, front view", credit: "Photo: LooperRobotics, Insight 9 product page", url: "https://looper-robotics.com/home/product/insight-9/"}
+    clip: looper
+    card:
+      rig: 2 mono + 1 rolling-shutter colour camera + IMU @ 400 Hz
+      format: ROS bag → EuRoC mav0
+      shows: The rolling-shutter readout solved alongside the global-shutter cameras
+      tags: [Global + rolling shutter, 3 cameras, 400 Hz IMU, CC BY-NC 4.0]
+    facts:
+      - [Cameras, "2 × 544×640 mono global shutter + 1920×1088 colour rolling shutter"]
+      - [IMU, "400 Hz"]
+      - [Board, "AprilGrid 6×6, tag 55 mm"]
+      - [Format, "EuRoC mav0"]
+      - [Licence, "CC BY-NC 4.0"]
+    lead: "One MVIS camera + IMU run on hand-held recording 1: the two mono cameras, the rolling-shutter colour camera and its readout time, solved together."
+    dataset: {url: "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9", label: "Calibench, looper-insight9/"}
+    sensor: {url: /sensors/looper-insight9/, label: Looper Insight 9 in the Sensor wiki}
+    eval: {slug: looper-insight9, label: All 10 recordings and tools}
+    data:
+      - "Hand-held recording 1 of 10, about 66 s. The run uses the whole recording."
+      - "Cameras: two 544 × 640 global-shutter mono cameras at 20 Hz and a 1920 × 1088 rolling-shutter colour camera at about 4.3 Hz, all fitted with the equidistant lens model. IMU at 400 Hz."
+      - "Board: AprilGrid 6×6, tag 55 mm, spacing 0.3, t36h11."
+      - "Access is by automatic approval on the Hub; the data is CC BY-NC 4.0, commercial use by request."
+    config:
+      name: looper_insight9_bag1_cam_imu.yaml
+      why:
+        camera_input.free_intrinsics: Camera intrinsics stay free in the camera + IMU solve.
+        camera_input.cameras: The colour camera (cam2) has a rolling shutter, so its readout time is estimated.
+        solve.estimate_t_ga: Estimates t_ga, the time offset between the gyroscope and the accelerometer.
+        solve.sigma_g: IMU noise from a still recording of this unit, measured density × 2.5. The other three sigmas are set the same way.
+    reference:
+      none: >-
+        No published calibration exists for this device, so this page has nothing to compare against. What we can show
+        is how much each value moves over the 10 hand-held recordings.
+    reproduce:
+      batch: MVIS main, measured-noise batch of 2026-11-08
+    folds:
+      - title: Chessboard and robot-arm recordings
+        key: Sensor wiki
+        text: >-
+          The sensor page also shows our own unit on a chessboard and two robot-arm recordings, each solved on its own.
+        link: {url: /sensors/looper-insight9/, label: Looper Insight 9}
+  uzh-fpv:
+    title: UZH-FPV
+    nav: UZH-FPV
+    description: One MVIS camera + IMU run per device on the UZH-FPV drone racing calibration data, compared with the dataset's own Kalibr calibration.
+    maker: UZH Robotics and Perception Group
+    image: {file: uzh-fpv-drone.jpg, alt: "The UZH-FPV racing quadrotor with its Snapdragon Flight board, mDAVIS346 camera and motion-capture prism", credit: "Photo: UZH Robotics and Perception Group, Delmerico et al., ICRA 2019, Fig. 4", url: "https://rpg.ifi.uzh.ch/docs/ICRA19_Delmerico.pdf"}
+    clip: uzhs
+    card:
+      rig: Snapdragon Flight stereo + IMU; mDAVIS346 + IMU
+      format: ROS1 bag
+      shows: One MVIS run per device on a racing drone
+      tags: [Global shutter, Event camera, Drone, CC BY-NC-SA 3.0]
+    facts:
+      - [Cameras, "Snapdragon: 2 × 640×480 global shutter. mDAVIS346: 1 × 346×260"]
+      - [IMU, "About 500 Hz (Snapdragon), about 1 kHz (mDAVIS346)"]
+      - [Board, "AprilGrid 5×4, tag 75 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY-NC-SA 3.0"]
+    lead: "One MVIS camera + IMU run on the Snapdragon Flight's outdoor forward calibration recording, and one on the mDAVIS346's, each against the Kalibr calibration the dataset ships."
+    dataset: {url: "https://fpv.ifi.uzh.ch/datasets/", label: UZH-FPV datasets page}
+    eval: {slug: uzh-fpv, label: MVIS, Kalibr and Basalt on all 8 calibration recordings}
+    data:
+      - "Recording outdoor_forward_calib_snapdragon: the Snapdragon Flight's two 640 × 480 global-shutter cameras, fitted with the equidistant lens model as in UZH's own calibration, and its IMU at about 500 Hz."
+      - "IMU noise: UZH publishes no measured noise density, so the sigmas come from the residuals of UZH's own Kalibr results. They are estimates."
+      - "Board: AprilGrid 5×4, tag 75 mm, spacing 0.2, t36h11."
+      - "Cite Delmerico et al., \"Are We Ready for Autonomous Drone Racing? The UZH-FPV Drone Racing Dataset\", ICRA 2019. Licence: CC BY-NC-SA 3.0."
+    config:
+      name: uzh_fpv_snapdragon_outdoor_forward_cam_imu.yaml
+      why:
+        board: "The UZH board: AprilGrid 5×4, tag 75 mm, spacing 0.2."
+        camera_input.path: "Seed intrinsics: UZH's own camera-only Kalibr calibration, equidistant lens. MVIS refines them in this solve."
+        solve.sigma_g: IMU noise from the residuals of UZH's own Kalibr results, as UZH publishes no measured density. The other three sigmas are set the same way.
+        solve.estimate_t_ga: Estimates t_ga, the time offset between the gyroscope and the accelerometer.
+    reference:
+      label: UZH (Kalibr)
+      source: "The Kalibr camera + IMU calibration shipped with this recording on the UZH-FPV datasets page"
+      url: "https://fpv.ifi.uzh.ch/datasets/"
+      cams:
+        - {name: cam0, p_mm: [10.17, 20.8, -0.75], rotvec: [-1.18369, 1.22363, -1.23775], fx: 277.48, td_ms: -7.999}
+        - {name: cam1, p_mm: [8.81, -58.38, -0.79], rotvec: [-1.18902, 1.21606, -1.21392], fx: 276.79, td_ms: -7.984}
+      notes:
+        - "Kalibr held the intrinsics fixed at UZH's camera-only calibration; MVIS refines them, which explains most of the Δfx."
+    reproduce:
+      batch: MVIS main, example solves of 2026-11-10
+    other:
+      title: The other device, mDAVIS346
+      lead: "Recording outdoor_forward_calib_davis: one 346 × 260 camera and the sensor's integrated IMU at about 1 kHz, same board. Its result is a table only; this page has one map."
+      config:
+        name: uzh_fpv_davis_outdoor_forward_cam_imu.yaml
+        why:
+          solve.sigma_g: IMU noise from the residuals of UZH's own Kalibr results for this recording. The other three sigmas are set the same way.
+      reference:
+        label: UZH (Kalibr)
+        source: "The Kalibr camera + IMU calibration shipped with this recording on the UZH-FPV datasets page"
+        url: "https://fpv.ifi.uzh.ch/datasets/"
+        cams:
+          - {name: cam0, p_mm: [1.82, 6.79, 23.09], rotvec: [-0.00679, 0.01432, 0.00538], fx: 174.24, td_ms: 5.808}
+        notes:
+          - "Kalibr held the intrinsics fixed at UZH's camera-only calibration; MVIS refines them."

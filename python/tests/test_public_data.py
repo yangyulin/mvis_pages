@@ -77,10 +77,15 @@ def test_every_page_reports_a_calibrated_fov(pub):
     assert all(p["header"]["key_specs"]["fov"].get("auto") == "fov" for p in pub["sensors"].values())
 
 
-def test_looper_and_valve_link_their_examples(pub):
+def test_looper_valve_and_reverb_link_examples_that_exist(pub):
     pages = pub["sensors"]
-    assert pages["looper-insight9"]["example"]["url"] == "/benchmark/examples/looper-sa16/"
-    assert pages["valve-index"]["example"]["url"] == "/benchmark/examples/monado/"
+    examples = yaml.safe_load((DATA / "public_examples.yaml").read_text(encoding="utf-8"))["examples"]
+    assert pages["looper-insight9"]["example"]["url"] == "/benchmark/examples/looper-insight9/"
+    assert pages["hp-reverb-g2"]["example"]["url"] == pages["valve-index"]["example"]["url"] == "/benchmark/examples/monado/"
+    assert "HP Reverb G2" in pages["valve-index"]["example"]["label"]  # the Index is not the Monado example's headset
+    for slug, p in pages.items():
+        if p.get("example"):
+            assert p["example"]["url"].split("/")[-2] in examples, slug
 
 
 def test_every_sensor_page_links_to_its_hosted_data(pub):

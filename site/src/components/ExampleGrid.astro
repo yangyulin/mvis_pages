@@ -1,51 +1,116 @@
 ---
-// Examples gallery — design plan §1.3 / §4 (scikit-learn gallery pattern).
-//
-// A pick-a-dataset card grid: each card states the rig, the data format, and
-// what the run demonstrates, so a reader can choose an example by their own
-// hardware rather than by name. Cards marked `status: "planned"` are visibly
-// unavailable instead of silently linking to an empty page.
-interface Example {
-  title: string;
-  href: string;
-  sensors: string;
-  format: string;
-  shows: string;
-  status?: 'ready' | 'planned';
-}
-
-interface Props {
-  examples: Example[];
-}
-
-const { examples } = Astro.props;
+// Examples overview: one photo card per example, on the Sensor wiki's card pattern (SensorGrid). Card data is generated
+// by site/scripts/export_examples.py into src/data/examples/<slug>.json. The featured card spans the whole row.
+// Where a pointer can hover and motion is welcome, hovering or focusing a card plays a short muted clip of the MVIS
+// solve over the photo; the clip has no src until then, so phones and reduced-motion visitors never fetch it.
+const all = import.meta.glob('../data/examples/*.json', { eager: true }) as Record<string, { default: any }>;
+interface Props { slugs: string[] }
+const { slugs } = Astro.props;
+const cards = slugs.map((slug) => {
+  const x = all[`../data/examples/${slug}.json`]?.default;
+  if (!x) throw new Error(`no example ${slug}`);
+  return x.card;
+});
 ---
 
-<div class="example-grid" role="list">
-  {
-    examples.map((ex) => {
-      const planned = ex.status === 'planned';
-      const Tag = planned ? 'div' : 'a';
-      return (
-        <Tag
-          role="listitem"
-          class:list={['example-card', { 'is-planned': planned }]}
-          {...(planned ? {} : { href: ex.href })}
-        >
-          <h3 class="example-card__title">
-            {ex.title}
-            {planned && <span class="example-card__badge">planned</span>}
-          </h3>
-          <dl class="example-card__meta">
-            <dt>Rig</dt>
-            <dd>{ex.sensors}</dd>
-            <dt>Format</dt>
-            <dd>{ex.format}</dd>
-            <dt>Shows</dt>
-            <dd>{ex.shows}</dd>
+<ul class="not-content xg" role="list">
+  {cards.map((c) => (
+    <li class:list={['xg-card', { feat: c.featured }]}>
+      <a href={c.href}>
+        <div class="xg-media">
+          <img src={c.image} alt={c.alt} width="800" height="533" loading={c.featured ? 'eager' : 'lazy'} decoding="async" />
+          <video muted playsinline loop preload="none" poster={c.poster} data-src={c.clip} aria-hidden="true" tabindex="-1"></video>
+          {c.ours && <span class="xg-rib">Our rig</span>}
+          <span class="xg-cred">{c.credit}</span>
+        </div>
+        <div class="xg-body">
+          <span class="xg-maker">{c.maker}</span>
+          <span class="xg-name">{c.title}</span>
+          <dl class="xg-meta">
+            <dt>Rig</dt><dd>{c.rig}</dd>
+            <dt>Format</dt><dd>{c.format}</dd>
+            <dt>Shows</dt><dd>{c.shows}</dd>
           </dl>
-        </Tag>
-      );
-    })
+          {c.stats.length > 0 && (
+            <span class="xg-stats">{c.stats.map(([v, k]: [string, string]) => <span><b>{v}</b><small>{k}</small></span>)}</span>
+          )}
+          {c.stats.length === 0 && <span class="xg-wait">Run waiting for a fresh solve</span>}
+          <span class="xg-tags">{c.tags.map((t: string) => <span>{t}</span>)}</span>
+        </div>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<script>
+  const ok = matchMedia('(hover: hover) and (prefers-reduced-motion: no-preference)');
+  document.querySelectorAll<HTMLElement>('.xg-card').forEach((card) => {
+    const v = card.querySelector('video');
+    if (!v) return;
+    const on = () => {
+      if (!ok.matches) return;
+      if (!v.getAttribute('src')) v.src = v.dataset.src || '';
+      // The pointer may have left before play() resolved; only show the clip if it is still wanted.
+      v.play().then(() => { if (card.matches(':hover, :focus-within')) card.classList.add('playing'); else v.pause(); }).catch(() => {});
+    };
+    const off = () => { card.classList.remove('playing'); v.pause(); };
+    card.addEventListener('mouseenter', on);
+    card.addEventListener('mouseleave', off);
+    card.addEventListener('focusin', on);
+    card.addEventListener('focusout', off);
+  });
+</script>
+
+<style>
+  .xg { list-style: none; margin: 1.5rem 0 1.5rem; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11.5rem), 1fr)); }
+  .xg-card { margin: 0; min-width: 0; }
+  .xg-card.feat { grid-column: 1 / -1; }
+  .xg-card a { display: flex; flex-direction: column; height: 100%; color: inherit; text-decoration: none; border: 1px solid var(--sl-color-hairline); border-radius: 0.6rem; overflow: hidden; background: var(--sl-color-bg); transition: border-color 0.15s, transform 0.15s; }
+  .xg-card a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 2px; }
+  .xg-media { position: relative; aspect-ratio: 3 / 2; background: #fff; border-bottom: 1px solid var(--sl-color-hairline); overflow: hidden; }
+  .xg-media img, .xg-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .xg-media video { display: none; opacity: 0; transition: opacity 0.25s; background: #000; }
+  .xg-card.playing .xg-media video { opacity: 1; }
+  .xg-rib { position: absolute; top: 0.6rem; left: 0.6rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 99px; background: var(--sl-color-accent); color: var(--sl-color-black); }
+  /* Solid scrim, not glass: product photos sit on white. */
+  .xg-cred { position: absolute; right: 0; bottom: 0; max-width: 100%; font-size: 0.66rem; line-height: 1.3; padding: 0.15rem 0.45rem; background: rgba(17, 17, 17, 0.78); color: #f3f3f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top-left-radius: 0.35rem; }
+  .xg-body { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.8rem 0.9rem 0.9rem; flex: 1; min-width: 0; }
+  .xg-maker { font-size: 0.75rem; font-weight: 600; color: var(--sl-color-gray-3); line-height: 1.3; text-transform: uppercase; letter-spacing: 0.03em; }
+  .xg-name { font-size: 1.1rem; font-weight: 700; color: var(--sl-color-white); line-height: 1.25; }
+  .xg-meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.15rem 0.6rem; margin: 0.2rem 0 0; font-size: 0.84rem; line-height: 1.4; }
+  .xg-meta dt { color: var(--sl-color-gray-3); margin: 0; }
+  .xg-meta dd { margin: 0; color: var(--sl-color-text); }
+  .xg-stats { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; margin-top: 0.4rem; padding-top: 0.5rem; border-top: 1px solid var(--sl-color-hairline); }
+  .xg-stats span { display: flex; flex-direction: column; }
+  .xg-stats b { font-family: var(--sl-font-mono); font-size: 0.85rem; color: var(--sl-color-white); }
+  .xg-stats small { font-size: 0.68rem; color: var(--sl-color-gray-3); }
+  .xg-wait { margin-top: 0.4rem; padding-top: 0.5rem; border-top: 1px solid var(--sl-color-hairline); font-size: 0.75rem; color: var(--sl-color-gray-3); }
+  .xg-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: auto; padding-top: 0.5rem; }
+  .xg-tags span { font-size: 0.72rem; font-weight: 600; line-height: 1.3; padding: 0.12rem 0.5rem; border-radius: 99px; background: var(--sl-color-bg-nav); color: var(--sl-color-text); }
+  @media (hover: hover) {
+    .xg-card a:hover { border-color: var(--sl-color-accent); transform: translateY(-2px); }
+    .xg-card a:hover .xg-name { color: var(--sl-color-text-accent); }
   }
-</div>
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .xg-media video { display: block; }
+  }
+  /* Wide screens: the featured card puts its photo beside the text. */
+  @media (min-width: 50rem) {
+    .xg-card.feat a { flex-direction: row; }
+    .xg-card.feat .xg-media { flex: 0 0 58%; aspect-ratio: 3 / 2; border-bottom: 0; border-right: 1px solid var(--sl-color-hairline); }
+    .xg-card.feat .xg-body { padding: 1.1rem 1.25rem; }
+    .xg-card.feat .xg-name { font-size: 1.45rem; }
+  }
+  /* Phones: featured full width, the others two per row with title and tags only (the Sensor wiki's phone rule). */
+  @media (max-width: 34rem) {
+    .xg { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+    .xg-body { padding: 0.55rem 0.6rem 0.65rem; gap: 0.15rem; }
+    .xg-maker { font-size: 0.66rem; }
+    .xg-name { font-size: 0.95rem; }
+    .xg-card:not(.feat) .xg-meta, .xg-card:not(.feat) .xg-stats, .xg-card:not(.feat) .xg-wait { display: none; }
+    .xg-cred { font-size: 0.56rem; white-space: normal; padding: 0.1rem 0.3rem; }
+    .xg-tags { gap: 0.25rem; padding-top: 0.4rem; }
+    .xg-tags span { font-size: 0.68rem; padding: 0.1rem 0.4rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .xg-card a { transition: none; } .xg-card a:hover { transform: none; } }
+</style>

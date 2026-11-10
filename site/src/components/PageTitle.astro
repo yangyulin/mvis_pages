@@ -1,11 +1,13 @@
 ---
-// Sensor pages with a `sensor` frontmatter key get the datasheet header in place of the plain title.
-// Styles come from SensorPage in the MDX body, so other pages load nothing extra.
+// Sensor pages with a `sensor` frontmatter key, and example pages with an `example` key, get the datasheet header in
+// place of the plain title. Styles come from SensorPage / ExamplePart in the MDX body, so other pages load nothing extra.
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 
-const all = import.meta.glob('../data/sensors/*.json', { eager: true }) as Record<string, { default: any }>;
-const sensor = (Astro.locals.starlightRoute.entry.data as any).sensor;
-const html = sensor ? all[`../data/sensors/${sensor}.json`]?.default.parts.header : null;
+const sensors = import.meta.glob('../data/sensors/*.json', { eager: true }) as Record<string, { default: any }>;
+const examples = import.meta.glob('../data/examples/*.json', { eager: true }) as Record<string, { default: any }>;
+const data = Astro.locals.starlightRoute.entry.data as any;
+const html = data.sensor ? sensors[`../data/sensors/${data.sensor}.json`]?.default.parts.header
+  : data.example ? examples[`../data/examples/${data.example}.json`]?.default.parts.header : null;
 ---
 
 {html ? <div class="not-content sp" set:html={html} /> : <Default />}

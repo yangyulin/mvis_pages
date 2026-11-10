@@ -19,6 +19,7 @@ python/
 | `markup` | HTML shared with mira's private report pages (tables, SVG charts, the AprilGrid) |
 | `lint` | `public_problems` (BANNED patterns), `refusals` (/home/, HF_TOKEN and the login name of whoever runs it) |
 | `sensor_rig`, `sensor_parts`, `sensor_header`, `site_files` | the parts of a sensor page and the site-wide files |
+| `export_examples` | the example pages: one run per example in seven steps, the overview cards and the sidebar entries; the config shown is the run's own with paths cut to file names |
 | `export_sensors` | `collect` (reads results) → `render` (pure, returns a Plan) → `write` (the only step that touches the site) |
 | `leaderboard`, `space` | the results tables, made by the leaderboard Space's own renderer; `space.CONTRACT` lists the names it uses |
 | `repeatability` | per family x group of parameters, which tool scatters less on the recordings every compared tool ran (paired label-swap test, Holm within the cell, ties, too few); `gate` refuses records that are not the stats file's blocks; `check_public` keeps recording names and per-recording values out |

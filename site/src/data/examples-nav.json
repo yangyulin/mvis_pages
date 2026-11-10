@@ -1,0 +1,26 @@
+[
+ {
+  "label": "Overview",
+  "link": "/benchmark/examples/"
+ },
+ {
+  "label": "VI-Rig 4 IMUs + 3 cams",
+  "link": "/benchmark/examples/virig-4imus-3cams/"
+ },
+ {
+  "label": "TUM VI",
+  "link": "/benchmark/examples/tum-vi/"
+ },
+ {
+  "label": "Monado (Reverb G2)",
+  "link": "/benchmark/examples/monado/"
+ },
+ {
+  "label": "Looper Insight 9",
+  "link": "/benchmark/examples/looper-insight9/"
+ },
+ {
+  "label": "UZH-FPV",
+  "link": "/benchmark/examples/uzh-fpv/"
+ }
+]
