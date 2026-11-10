@@ -47,7 +47,8 @@ def public_results(v, cells=_no_cells, ref_label: str | None = None) -> str:
 
 def rig_json(v, site: bool = True) -> dict:
     """One run for the map script. The site draws fans from the field of view (draw_h/draw_v); the private pages
-    trace image-edge rays instead, so they get the plain values. ref is None unless the run carries reference columns."""
+    trace image-edge rays instead, so they get the plain values. ref is None unless the run carries reference columns.
+    imus (only on multi-IMU runs): the aux IMUs, lever p in mm and rotation r as log(R) in rad, in the base IMU frame."""
     def fov(i):
         f = v["fov"][i]
         return {**f, "draw_h": drawn_fov(f, "h")[0], "draw_v": drawn_fov(f, "v")[0]} if site else f
@@ -56,8 +57,13 @@ def rig_json(v, site: bool = True) -> dict:
     ref = v.get("ref")
     refs = [{"name": f["name"], "p": f["p_CinI_mm"], "r": f["rotvec"], "intr": f["intr"], "size": v["sizes"][i], "td": f["td_ms"]}
             for i, f in enumerate(ref[:len(cams)])] if ref else None
-    return {"cams": cams, "ref": refs, "imu": {"Dw": v["run"].get("Dw_diag"), "Da": v["run"].get("Da_diag"), "tga": v["run"].get("t_ga_ms")},
-            "baseline": baseline_mm(v["run"]["cams"]), "label": v["label"]}
+    out = {"cams": cams, "ref": refs, "imu": {"Dw": v["run"].get("Dw_diag"), "Da": v["run"].get("Da_diag"), "tga": v["run"].get("t_ga_ms")},
+           "baseline": baseline_mm(v["run"]["cams"]), "label": v["label"]}
+    aux = v["run"].get("imus") or []
+    if aux:  # a multi-IMU run: each aux IMU at its pose in the base IMU frame; single-IMU rigs keep the old JSON
+        out["imus"] = [{"name": m["name"], "p": m["p_IsinI_mm"], "r": m["rotvec"], "td": m["td_ms"], "Dw": m.get("Dw_diag"), "Da": m.get("Da_diag"),
+                        "tga": m.get("t_ga_ms")} for m in aux]
+    return out
 
 
 # Section text and markup shared with mira's private pages, so the two can't drift apart.

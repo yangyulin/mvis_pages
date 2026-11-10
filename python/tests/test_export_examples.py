@@ -49,7 +49,7 @@ def pub_doc():
                                 "lead": "L.", "dataset": {"url": "/reference/datasets/a/", "label": "Data page"}, "data": ["One."],
                                 "config": {"name": "a.yaml", "why": {"input.imu_topics": "Two IMUs.", "solve.sigma_g": "Measured."}}, **kw}
     return {"steps": [{"name": n, "text": "t."} for n, _ in X.SECTIONS],
-            "examples": {"ours": base("Ours", card={"rig": "R", "format": "ROS1 bag", "shows": "S", "tags": ["2 cameras", "2 IMUs"]}, featured=True, ours=True, eval={"slug": "ours", "label": "All runs"},
+            "examples": {"ours": base("Ours", card={"rig": "R", "format": "ROS1 bag", "shows": "S", "tags": ["2 cameras", "2 IMUs"]}, ours=True, eval={"slug": "ours", "label": "All runs"},
                                       reference={"none": "No reference."}, reproduce={"batch": "MVIS main, batch X"},
                                       folds=[{"title": "More", "key": "k", "text": "T.", "link": {"url": "/x/", "label": "X"}}]),
                          "theirs": base("Theirs", image={"file": "b.jpg", "alt": "B", "credit": "Photo: them", "url": "https://example.org/b"},
@@ -95,6 +95,9 @@ def test_public_config_drops_private_sections_and_cuts_paths():
     mav = X.public_config({"input": {"path": "${D}/looper/1/mav0"}, "camera_input": {}})
     assert yaml.safe_load(mav)["input"]["path"] == "1/mav0"
     assert yaml.safe_load(X.public_config({"input": {"format": "euroc"}})) == {"input": {"format": "euroc"}}
+    shape = X.public_config({"board": {"rows": 6, "heights_file": "/home/someone/mvis/examples/board_shape.yaml"}})
+    assert yaml.safe_load(shape)["board"] == {"rows": 6, "heights_file": "board_shape.yaml"}
+    assert yaml.safe_load(X.public_config({"board": {"heights_file": None}}))["board"] == {"heights_file": None}
 
 
 def test_key_lines_and_marks():
@@ -229,7 +232,7 @@ def test_eval_link_falls_back_to_results_until_the_page_exists():
 def test_card_stats_come_from_the_run(world):
     card = json.loads(_plan(world).texts[f"{X.EX_DATA}/ours.json"])["card"]
     assert card["stats"] == [["2 cam · 2 IMU", "sensors"], ["2.5 s", "window"], ["0.21 px", "reproj median"], ["+1.50 ms", "cam0 td"]]
-    assert card["featured"] and card["ours"] and card["clip"] == "/media/hero/hero_k_960.mp4" and card["href"] == "/benchmark/examples/ours/"
+    assert "featured" not in card and card["ours"] and card["clip"] == "/media/hero/hero_k_960.mp4" and card["href"] == "/benchmark/examples/ours/"
 
 
 def test_card_counts_must_match_the_run(world):
@@ -264,7 +267,21 @@ def test_nav_and_overview_follow_the_yaml_order(world):
     plan = _plan(world)
     nav = json.loads(plan.texts[X.NAV])
     assert [n["link"] for n in nav] == ["/benchmark/examples/", "/benchmark/examples/ours/", "/benchmark/examples/theirs/", "/benchmark/examples/waiting/"]
-    assert '<ExampleGrid slugs={["ours", "theirs", "waiting"]} />' in plan.texts[f"{X.EX_DOCS}/index.mdx"]
+    mdx = plan.texts[f"{X.EX_DOCS}/index.mdx"]
+    assert mdx.index('## Our rig\n\n<ExampleGrid slugs={["ours"]} />') < mdx.index('## Public datasets\n\n<ExampleGrid slugs={["theirs", "waiting"]} />')
+
+
+def test_overview_leaves_out_an_empty_block(world):
+    for p in world["pub"]["examples"].values():
+        p.pop("ours", None)
+    mdx = X.overview_mdx(world["pub"])
+    assert "## Our rig" not in mdx and '## Public datasets\n\n<ExampleGrid slugs={["ours", "theirs", "waiting"]} />' in mdx
+
+
+def test_map_carries_the_aux_imus_only_on_multi_imu_runs(world):
+    ours = json.loads(_plan(world).texts[f"{X.EX_DATA}/ours.json"])["rigs"][0]
+    assert ours["imus"] == [{"name": "aux0", "p": [1.0, 2.0, 3.0], "r": [0.1, 0.0, 0.0], "td": 0.5, "Dw": None, "Da": None, "tga": 0.1}]
+    assert "imus" not in json.loads(_plan(world).texts[f"{X.EX_DATA}/theirs.json"])["rigs"][0]
 
 
 def test_main_writes_into_a_site_and_lists_pending(world, monkeypatch, tmp_path):
@@ -287,9 +304,10 @@ def test_main_writes_into_a_site_and_lists_pending(world, monkeypatch, tmp_path)
 PUB = X.public_examples()
 
 
-def test_committed_examples_order_and_featured_rig():
-    assert list(PUB["examples"]) == ["virig-4imus-3cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
-    assert [s for s, p in PUB["examples"].items() if p.get("featured")] == ["virig-4imus-3cams"]
+def test_committed_examples_order_and_our_rig_first():
+    assert list(PUB["examples"]) == ["virig-4imus-3cams", "virig-4imus-4cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
+    assert [s for s, p in PUB["examples"].items() if p.get("ours")] == ["virig-4imus-3cams", "virig-4imus-4cams"]
+    assert not any("featured" in p for p in PUB["examples"].values())
     assert [s["name"] for s in PUB["steps"]] == [h for h, _ in X.SECTIONS]
 
 
