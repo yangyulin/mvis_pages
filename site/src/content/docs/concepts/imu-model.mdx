@@ -5,9 +5,16 @@ pageType: concept
 wide: true
 ---
 
-MVIS solves IMU intrinsics — scale and misalignment for gyroscope and
-accelerometer, optional g-sensitivity, and biases — rather than assuming a
-datasheet. Symbols follow [Notation & glossary](/concepts/notation/).
+Use this page to see how MVIS models the IMU and which IMU options to pick.
+
+MVIS solves the IMU intrinsics rather than assuming a datasheet. IMU
+intrinsics are the sensor's own error terms:
+
+- **Scale and misalignment** for the gyroscope and the accelerometer
+- **G-sensitivity** (optional)
+- **Biases**
+
+Symbols follow [Notation & glossary](/concepts/notation/).
 
 ## Measurement model
 
@@ -19,8 +26,9 @@ $$
 \mathbf{a}_m = \mathbf{D}_a\, \mathbf{a} + \mathbf{b}_a + \mathbf{n}_a
 $$
 
-`Dw` / `Da` carry scale and misalignment, `Tg` the g-sensitivity — how linear
-acceleration leaks into the gyro reading — and `b_g` / `b_a` the biases.
+- `Dw` / `Da` carry scale and misalignment.
+- `Tg` is the g-sensitivity: how linear acceleration leaks into the gyro reading.
+- `b_g` / `b_a` are the biases.
 
 ## Three conventions
 
@@ -29,8 +37,8 @@ solve:
   imu_intrinsics_model: kalibr    # kalibr | rpng | calyx
 ```
 
-The nine entries of each `D` are not all identifiable — the frame must be
-pinned to something, and *what* it is pinned to is the convention:
+The nine entries of each `D` are not all identifiable. The frame must be
+pinned to something. *What* it is pinned to is the convention:
 
 | Model | Pins the frame to | Notes |
 |---|---|---|
@@ -41,7 +49,7 @@ pinned to something, and *what* it is pinned to is the convention:
 :::note[The convention is not a quality lever]
 On real data — TUM-VI and MIC, with camera intrinsics pinned or freed — **all
 three recover identical extrinsics and intrinsics**. Choose the one that matches
-whatever you are comparing against; do not expect accuracy from the choice.
+whatever you are comparing against. Do not expect accuracy from the choice.
 :::
 
 The matrices themselves are *not* numerically comparable across conventions.
@@ -49,10 +57,15 @@ Before concluding that two calibrations disagree, check they used the same one.
 
 ## `t_ga` — the gyro↔accel offset
 
-Many IMU drivers publish gyro and accelerometer on one timestamp even though the
-two channels are sampled at different rates and instants. `t_ga` is that
-*internal* offset: the combined stamp is taken as the gyro clock, and the accel
-stored at `t` is modelled as physically sampled at `t − t_ga`.
+`t_ga` is the time offset between the gyroscope and accelerometer channels
+inside one IMU.
+
+Many IMU drivers publish gyro and accelerometer on one timestamp. Yet the two
+channels are sampled at different rates and instants. `t_ga` is that
+*internal* offset:
+
+- The combined stamp is taken as the gyro clock.
+- The accel stored at `t` is modelled as physically sampled at `t − t_ga`.
 
 ```yaml title="cam_imu.yaml"
 solve:
@@ -60,26 +73,32 @@ solve:
   sigma_t_ga: 0.001
 ```
 
-It is estimated **inside the ACI factor** — one extra Jacobian column in the
-preintegration (`∂a/∂t_ga = ȧ` from per-step finite differences, coupled into
-the gyro row through `Tg`) plus an optional sixth factor key with a staged
-prior. With the flag off, the five-key factor is untouched.
+It is estimated **inside the ACI factor**. The factor gains two things:
+
+- One extra Jacobian column in the preintegration (`∂a/∂t_ga = ȧ` from
+  per-step finite differences, coupled into the gyro row through `Tg`)
+- An optional sixth factor key with a staged prior
+
+With the flag off, the five-key factor is untouched.
 
 **In simulation**, injected offsets of −2, +1, and +5 ms recover with |z| ≤ 1.3
-at σ = 0.024 ms, with no `td` / `Dw` / `Da` cross-contamination.
+at σ = 0.024 ms. There is no `td` / `Dw` / `Da` cross-contamination.
 
-**On real data**, the T265's Bosch BMI055 measures `t_ga ≈ −6.2 ms`, stable to
-about 0.2 ms across bags — roughly 16σ. That number is a direct measurement of
-the driver's accel-interpolation artefact.
+**On real data**, the T265's Bosch BMI055 measures `t_ga ≈ −6.2 ms`. It is
+stable to about 0.2 ms across bags — roughly 16σ. That number is a direct
+measurement of the driver's accel-interpolation artefact.
 
-`t_ga` is reported in the result JSON, the calibration YAML, and the text
-report; [`apply-calib`](/guides/corrected-datasets/) corrects it by
-re-interpolating the accel channel at `t + t_ga`, and
-[`roundtrip`](/guides/roundtrip/) checks that it collapses toward zero.
+Where `t_ga` shows up:
+
+- **Reported** in the result JSON, the calibration YAML, and the text report
+- **Corrected** by [`apply-calib`](/guides/corrected-datasets/), which
+  re-interpolates the accel channel at `t + t_ga`
+- **Checked** by [`roundtrip`](/guides/roundtrip/), which tests that it
+  collapses toward zero
 
 ## Gyro-only auxiliaries
 
-The other answer to an untrustworthy accelerometer — skip it:
+The other answer to an untrustworthy accelerometer is to skip it:
 
 ```yaml title="cam_imu.yaml"
 input:
@@ -88,26 +107,36 @@ input:
     - {gyro_only: true}     # aux
 ```
 
-Solves extrinsic rotation, `td`, `Dw`, and gyro bias; lever arm, `Da`, and `Tg`
-are pinned. **Not permitted on the base IMU**, which needs the accelerometer for
-gravity and metric scale. The calibration self-documents with a `gyro_only:
-true` flag per IMU.
+What a gyro-only IMU solves and pins:
+
+- **Solved:** extrinsic rotation, `td` (here the IMU-to-IMU time offset), `Dw`,
+  and gyro bias
+- **Pinned:** lever arm (the translation between the two IMUs), `Da`, and `Tg`
+
+It is **not permitted on the base IMU**. The base IMU needs the accelerometer
+for gravity and metric scale. The calibration self-documents with a
+`gyro_only: true` flag per IMU.
 
 On the T265 this makes the `td` collapse in a correct→recalibrate round-trip
-(+8.6 → −9.0 ms becomes +0.9 → +0.4 ms) and halves the residual lever drift.
+(+8.6 → −9.0 ms becomes +0.9 → +0.4 ms). It also halves the residual lever
+drift.
 
 ## Which to reach for
 
-Both address the same defect. `gyro_only` **avoids** the bad accelerometer;
-`estimate_t_ga` **measures** the offset causing it. Prefer `estimate_t_ga` on
-the base IMU, where you have no choice but to use the accel — and where the
-measured value is itself worth having. Prefer `gyro_only` for an auxiliary whose
-accelerometer adds nothing you need.
+Both address the same defect:
+
+| Option | What it does | Prefer it for |
+|---|---|---|
+| `estimate_t_ga` | **Measures** the offset causing it | The base IMU, where you have no choice but to use the accel — and where the measured value is itself worth having |
+| `gyro_only` | **Avoids** the bad accelerometer | An auxiliary whose accelerometer adds nothing you need |
 
 ## What is actually observable
 
-Scale and misalignment need excitation on every axis. G-sensitivity needs
-simultaneous rotation and strong linear acceleration, which most hand-held
-calibration motions do not produce — when `Tg` returns near its initial value
-with a wide covariance, it was not observed. See
-[Degeneracy](/concepts/degeneracy/).
+Each term needs the right motion to be observed:
+
+- **Scale and misalignment** need excitation on every axis.
+- **G-sensitivity** needs simultaneous rotation and strong linear acceleration.
+  Most hand-held calibration motions do not produce that.
+
+When `Tg` returns near its initial value with a wide covariance, it was not
+observed. See [Degeneracy](/concepts/degeneracy/).

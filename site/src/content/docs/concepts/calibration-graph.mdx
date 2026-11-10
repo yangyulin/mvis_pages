@@ -6,11 +6,22 @@ pageType: concept
 
 ## Main Graph Formulation
 
-This page will explain the main cost functions for the calibration.
+Use this page to see the main cost functions for the calibration. The derivation
+of each residual block has its own page, linked at the end.
 
-The MVIS factor graph jointly optimises camera intrinsics, IMU intrinsics, all
-extrinsics, time offsets, and rolling-shutter readout times in a single
-maximum-a-posteriori estimate. Schematically:
+The MVIS factor graph (a graph that links the unknowns to the measurements that
+constrain them) optimises everything jointly. It finds a single
+maximum-a-posteriori estimate: the most likely values given the measurements
+and the priors. The graph solves for:
+
+- **camera intrinsics** (each camera's own model parameters)
+- **IMU intrinsics** (each IMU's own model parameters)
+- **all extrinsics** (the poses between the sensors)
+- **time offsets**
+- **rolling-shutter readout times** (the time a rolling-shutter camera takes to
+  read out one image)
+
+Schematically:
 
 $$
 \arg\min_{\boldsymbol{x}} \;
@@ -20,9 +31,11 @@ $$
 \Pi(\boldsymbol{x}, \boldsymbol{\mu}_0)
 $$
 
-where $\boldsymbol{x}$ is the full calibration state vector, $\rho(\cdot)$ is a
-robust loss (Huber), and $\Pi$ encodes Gaussian priors on each calibration
-parameter.
+where:
+
+- $\boldsymbol{x}$ is the full calibration state vector;
+- $\rho(\cdot)$ is a robust loss (Huber), which down-weights large residuals;
+- $\Pi$ encodes Gaussian priors on each calibration parameter.
 
 Detailed derivations of each residual block are documented in:
 
