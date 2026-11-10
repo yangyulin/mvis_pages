@@ -7,8 +7,12 @@ wide: true
 
 import ExampleGrid from '../../../../components/ExampleGrid.astro';
 
-Complete runs, each on a released dataset: the configuration used, the result
-produced, and — where a reference calibration exists — how far the two differ.
+Each example is a complete calibration run on a released dataset. It shows:
+
+- the **configuration** we used
+- the **result** it produced
+- how far the result is from a **reference calibration**, where one exists
+
 Pick the one whose rig looks most like yours.
 
 <ExampleGrid examples={[
@@ -46,29 +50,28 @@ Looking for a specific sensor? See the [Sensor wiki](/sensors/).
 
 ## How to read these pages
 
-Every example follows the same structure, so two of them can be compared
-directly:
+Every example has the same sections, so you can compare any two directly:
 
-1. **The rig** — sensors, rates, and what makes the dataset interesting.
-2. **Getting the data** — download and any preparation the bag needs.
-3. **Configuration** — the launch file, in full.
-4. **Running it** — the command and what it prints.
-5. **Result** — the calibration produced.
-6. **Validation** — the same quantities from an independent source, and the
-   difference. This is the part that makes an example evidence rather than a
-   demonstration.
-7. **Reproducibility** — code version, config, and data hash needed to obtain
+1. **The rig:** the sensors, their rates and what makes the dataset interesting.
+2. **Getting the data:** the download, and any preparation the bag needs.
+3. **Configuration:** the full launch file.
+4. **Running it:** the command, and what it prints.
+5. **Result:** the calibration it produced.
+6. **Validation:** the same quantities from an independent source, and the
+   difference. This part makes an example evidence, not just a demonstration.
+7. **Reproducibility:** the code version, config and data hash you need to get
    the same numbers.
 
 :::note[Plots are generated, not screenshotted]
-Figures on these pages come out of the run they document. Re-running the
-reproducibility block regenerates them — if a plot and the text disagree, the
+The figures on these pages come from the run they document. Re-running the
+reproducibility block makes them again. If a plot and the text disagree, the
 plot is right.
 :::
 
 ## Contributing an example
 
-A run on a dataset we do not have is the most useful thing you can send. See
-[Submit a dataset](/contribute/submit-dataset/) for the format, and
-[Submit results](/contribute/submit-results/) if you want it on the
-[leaderboard](/benchmark/results/) as well.
+The most useful thing you can send is a run on a dataset we don't have.
+
+- For the format, see [Submit a dataset](/contribute/submit-dataset/).
+- To put it on the [leaderboard](/benchmark/results/) as well, see
+  [Submit results](/contribute/submit-results/).

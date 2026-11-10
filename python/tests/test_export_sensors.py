@@ -206,7 +206,7 @@ def test_a_run_with_view_data_gets_the_canvas_player(world):
     page = json.loads(plan.texts["site/src/data/sensors/rig-groups.json"])
     assert page["procs"] == [None]                                    # no Plotly figure to fetch
     assert 'data-mvv="scene" data-mode="site" data-src="/media/sensors/rig-groups/views0.json"' in page["parts"]["process"]
-    assert "Explore in 3D (under 1 MB)" in page["parts"]["process"] and "no camera image is published" in page["parts"]["process"]
+    assert "Explore in 3D (under 1 MB)" in page["parts"]["process"] and "We publish no camera images" in page["parts"]["process"]
     other = json.loads(plan.texts["site/src/data/sensors/rig-old.json"])  # runs without view data keep the Plotly figure
     assert other["procs"][0].endswith("process0.json") and "procplot" in other["parts"]["process"]
     assert "/* mvis views.js */" in plan.texts["site/src/scripts/sensor-page.js"]

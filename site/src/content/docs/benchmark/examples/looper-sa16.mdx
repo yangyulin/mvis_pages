@@ -5,11 +5,18 @@ pageType: example
 wide: true
 ---
 
-The looperrobotics **SA16** rig is the example closest to production use: a
-commercial stereo (later three-camera) module recorded four different ways over
-several months. It is the dataset where MVIS was pushed past a single clean
-sequence into rolling shutter, IMU filter changes, and irregular timestamps —
-and where cross-campaign agreement, not a single residual, is the evidence.
+This page shows how we calibrate the looperrobotics **SA16** rig across four
+recording campaigns. It is the example closest to production use. The rig is a
+commercial stereo camera module, later with a third camera, recorded four
+different ways over several months.
+
+This dataset pushed MVIS past a single clean sequence into:
+
+- **rolling shutter** on a third camera
+- **IMU filter changes**
+- **irregular timestamps**
+
+Here the evidence is agreement across campaigns, not a single residual.
 
 The same device has a [sensor page](/sensors/looper-insight9/) with its specs, solved rig and results.
 
@@ -25,8 +32,8 @@ Board: AprilGrid 6×6, `tag_size` 0.055 m, `tag_spacing` 0.3, family `t36h11`.
 
 ## Getting the data into shape
 
-The recordings are not EuRoC, but they are close — one prep step reshapes them
-into a `mav0/` tree, and **no MVIS code changes were needed** for any
+The recordings are not in EuRoC format, but they are close. One prep step
+reshapes them into a `mav0/` tree. **No MVIS code changes were needed** for any
 campaign:
 
 ```bash
@@ -34,10 +41,18 @@ python examples/configs/looperrobotics/build_mav0.py \
   --root '/data/looperrobotics/SA16(96s record)'
 ```
 
-Symlinks images, writes `data.csv`, comments the IMU header. The IMU CSV column
-order is already EuRoC-native.
+The script:
+
+- symlinks the images
+- writes `data.csv`
+- comments out the IMU header
+
+The IMU CSV column order already matches EuRoC.
 
 ## The two-stage recipe
+
+We calibrate in two stages: camera-only first, then camera-IMU. In stage 2,
+`td` is the camera–IMU time offset.
 
 ```bash
 # 1. Camera-only — intrinsics + stereo extrinsics
@@ -47,23 +62,36 @@ mvis cam -c examples/configs/looperrobotics/cam_only.yaml
 mvis cam-imu -c examples/configs/looperrobotics/cam_imu.yaml
 ```
 
-Cam-IMU uses `window_mode: motion`, which auto-picks the most-exciting 80 s of
-the 96.6 s log.
+The camera-IMU stage uses `window_mode: motion`. It picks the most-exciting
+80 s of the 96.6 s log on its own.
 
 :::note[Fit cameras individually, then merge]
-The 96 s campaign's lesson: on this rig, per-camera fits merged afterwards beat
-a joint stereo fit. `merge_cam_only.py` combines them.
+This is the lesson of the 96 s campaign. On this rig, fitting each camera on its
+own and merging afterwards beat a joint stereo fit. `merge_cam_only.py` combines
+them.
 :::
 
 ## Four campaigns
 
+The four campaigns at a glance:
+
+- **SA16 (96 s)**: stereo only, the baseline
+- **SA16 (7.3)**: adds a rolling-shutter third camera
+- **SA16 (OSR4)**: sets the IMU oversampling ratio to 4
+- **SA16 (data-sync)**: uses real hardware timestamps
+
 ### SA16 (96 s) — the baseline
 
-Stereo, `radtan` first then `equidistant`. Baseline **98.42 mm**.
+Stereo only. We fit the `radtan` lens model first, then `equidistant`. The
+baseline (the distance between cam0 and cam1) is **98.42 mm**.
 
 ### SA16 (7.3) — a rolling-shutter third camera
 
-Adds cam2 at 4.29 Hz with rolling shutter and free `tr`.
+This campaign adds cam2 at 4.29 Hz. cam2 has a rolling shutter, so it reads its
+rows one after another. We leave its readout time `tr` free.
+
+In the table, reprojection is the reprojection error: how far, in pixels, the detected
+board corners sit from where the model predicts them.
 
 | Result | Value |
 |---|---|
@@ -74,25 +102,25 @@ Adds cam2 at 4.29 Hz with rolling shutter and free `tr`.
 | Baseline | 98.70 mm (96 s: 98.42) |
 
 :::caution[Un-rotate the rolling-shutter camera at prep time]
-cam2's files are stored 90° rotated relative to the sensor. The rolling-shutter
-model sweeps image **rows**, so on rotated images `tr` collapses to nothing. The
-prep step fixes it:
+cam2's files are stored rotated 90° from the sensor. The rolling-shutter model
+sweeps image **rows**. On rotated images, `tr` collapses to nothing. The prep
+step fixes it:
 
 ```bash
 python examples/configs/looperrobotics/build_mav0.py \
   --root '/data/looperrobotics/SA16(7.3)' --rotate cam2=cw
 ```
 
-The recovered 33.3 ms decomposes cleanly into 30.6 µs/line × 1088 rows, which is
-what tells you the number is physical rather than a fitted artefact.
+The recovered 33.3 ms splits cleanly into 30.6 µs/line × 1088 rows. That tells
+you the number is physical, not a fitted artefact.
 :::
 
-Equidistant beating radtan by 3.7× on reprojection is the recurring result on
-this rig — `equidistant` is canonical here.
+**`equidistant` is canonical here.** It beats radtan by 3.7× on reprojection,
+and that is the recurring result on this rig.
 
 ### SA16 (OSR4) — IMU oversampling ratio 4
 
-Two ~51 s stereo recordings with the IMU's oversampling ratio changed to 4.
+Two ~51 s stereo recordings, with the IMU's oversampling ratio changed to 4.
 
 | Result | Value |
 |---|---|
@@ -102,20 +130,29 @@ Two ~51 s stereo recordings with the IMU's oversampling ratio changed to 4.
 | Camera `td` | shifted **+0.4 ms** common-mode |
 
 **Geometry unchanged, timing shifted.** The OSR4 filter changes the IMU's
-internal group delays — differently for gyro and accel — and `t_ga` plus `td`
-absorb exactly that. The `t_ga` value was confirmed **estimator-free** by
-`studies/tga_correlation_lever.py` (−0.9 to −3.0 ms across bands; 20–80 Hz
-agrees with the solver to ~0.1 ms), so it is a measurement of the hardware, not
-an artefact of the graph.
+internal group delays, differently for gyro and accel. `t_ga` (the time offset
+between the gyroscope and accelerometer channels) and `td` absorb exactly that.
+
+We confirmed the `t_ga` value **estimator-free** with
+`studies/tga_correlation_lever.py`:
+
+- −0.9 to −3.0 ms across bands
+- 20–80 Hz agrees with the solver to ~0.1 ms
+
+So it is a measurement of the hardware, not an artefact of the graph.
 
 ### SA16 (data-sync) — real hardware timestamps
 
-Two recordings (41.7 / 44.5 s) with the IMU hardware-synced to the camera
-trigger. The first looper set with **non-idealised IMU timestamps**: ~68 µs
-jitter, 114/107 dropped samples, and a timebase running **766/783 ppm slow**
-against the camera — independently observable for the first time, because every
-earlier set was quantised to exactly 2.5000 ms and so had a ratio of 20.000000
-by construction.
+Two recordings (41.7 / 44.5 s), with the IMU hardware-synced to the camera
+trigger. This is the first looper set with **non-idealised IMU timestamps**:
+
+- ~68 µs jitter
+- 114/107 dropped samples
+- a timebase running **766/783 ppm slow** against the camera
+
+That clock drift is independently observable for the first time. Every earlier
+set was quantised to exactly 2.5000 ms, so it had a ratio of 20.000000 by
+construction.
 
 | Result | Value |
 |---|---|
@@ -124,15 +161,15 @@ by construction.
 | Resampling needed | none |
 | Code changes needed | none |
 
-**The irregular stream costs nothing.** The jittery, gappy, drifting timestamps
-are consumed natively. A forced-400 Hz control proves the recorded stamps are
-the right ones: imposing the old regular convention costs **7× in reprojection**
-and drags `td` to −15.8 ms.
+**The irregular stream costs nothing.** MVIS reads the jittery, gappy, drifting
+timestamps as they are. A forced-400 Hz control proves the recorded stamps are
+the right ones. Imposing the old regular convention costs **7× in
+reprojection** and drags `td` to −15.8 ms.
 
 ## Round-trip
 
-Every campaign is validated end to end. The `mav0` tree is converted to a bag
-first, since `apply-calib` operates on ROS1 bags:
+We validate every campaign end to end. `apply-calib` works on ROS1 bags, so we
+first convert the `mav0` tree to a bag:
 
 ```bash
 python examples/experiments/convert_mav0_to_bag.py \
@@ -145,20 +182,31 @@ mvis roundtrip -c examples/configs/looperrobotics/sa16_73_cam_imu_ros1.yaml \
 
 ## What the campaigns together show
 
-Baselines of 98.42, 98.70, 99.24, and 99.26 mm across four recording setups —
-different camera counts, IMU filters, and timestamp regimes — with the last two
-matching the robot-arm campaign. That agreement across *independent* recordings
-is a stronger accuracy claim than any single sub-pixel residual, and it is
-exactly what the [batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
+**Agreement across *independent* recordings is the accuracy claim.** Baselines
+are 98.42, 98.70, 99.24, and 99.26 mm across four recording setups. The setups
+differ in:
+
+- camera count
+- IMU filter
+- timestamp regime
+
+The last two match the robot-arm campaign. This agreement is a stronger
+accuracy claim than any single sub-pixel residual. It is exactly what the
+[batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
 workflow is built to produce.
 
 :::note[One honest caveat]
-The OSR4 campaign hit repeated crashes — NumPy `nditer` errors, corrupted int
-constants, GTSAM shape mismatches — traced to **machine-level instability** on
-the recording workstation, not to MVIS. Data, code, and environment were
-each ruled out; the stock system Python and Kalibr crashed on the same box.
-Retries converged and the converged results are cross-consistent, but the
-episode is recorded rather than tidied away.
+The OSR4 campaign hit repeated crashes:
+
+- NumPy `nditer` errors
+- corrupted int constants
+- GTSAM shape mismatches
+
+We traced them to **machine-level instability** on the recording workstation,
+not to MVIS. We ruled out each of data, code, and environment. The stock
+system Python and Kalibr crashed on the same box. Retries converged, and the
+converged results are cross-consistent. We record the episode rather than tidy
+it away.
 :::
 
 ## Reproducibility

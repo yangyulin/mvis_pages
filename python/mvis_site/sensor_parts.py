@@ -61,10 +61,11 @@ def rig_json(v, site: bool = True) -> dict:
 
 
 # Section text and markup shared with mira's private pages, so the two can't drift apart.
-PROCESS_LEAD = "The solved path of the rig around the board. Press Play or drag the bar to follow the calibration."
-MAP_LEAD = "Solved positions and orientations, to scale in the IMU frame. Drag sideways to orbit. Tap a sensor for its values."
-LENS_NOTE = ("Read from the calibrated lens fit at the image edges, through the principal point. ~ marks an axis past the range the corners "
-             "reached, where the fit is extrapolated. Past the fit means an edge lies beyond where the fit holds, so no value is given.")
+PROCESS_LEAD = "The path of the rig around the board, as MVIS solved it. Press Play or drag the bar to follow the calibration."
+MAP_LEAD = "The solved positions and orientations, to scale in the IMU frame. Drag sideways to orbit. Tap a sensor to see its values."
+LENS_NOTE = ("We read these from the calibrated lens fit at the image edges, through the principal point (where the optical axis meets the image). "
+             "~ marks an axis past where the corners reached, so the fit is extrapolated there. "
+             "Past the fit means an edge lies beyond where the fit holds, so we give no value.")
 
 
 def run_tabs(vs) -> str:
@@ -93,15 +94,15 @@ def imu_pinned(r) -> bool:
 def imu_section(vs) -> str:
     def one(v, i):
         r = v["run"]
-        tga = f'Gyro-to-accel time offset <code>t_ga</code>: {num(r.get("t_ga_ms"), 2, True)} ± {num(r.get("t_ga_sigma_ms"), 2)} ms.'
+        tga = f'<code>t_ga</code>, the time offset between the gyroscope and accelerometer channels: {num(r.get("t_ga_ms"), 2, True)} ± {num(r.get("t_ga_sigma_ms"), 2)} ms.'
         if imu_pinned(r):
-            return f'<p>IMU intrinsics pinned at identity in this solve, so no scales were estimated. {tga}</p>'
-        return f'<p>Scale as deviation from 1. Model: {e(r["imu_model"])}. {tga}</p>{imu_bars(r)}'
+            return f'<p>This solve pinned the IMU intrinsics at identity, so it estimated no scales. {tga}</p>'
+        return f'<p>Each bar shows a scale as its deviation from 1. IMU model: {e(r["imu_model"])}. {tga}</p>{imu_bars(r)}'
     return each({"variants": vs}, one)
 
 
 def timing_section(vs) -> str:
-    return '<p>Offsets to scale, with t_imu = t_cam + td.</p>' + each({"variants": vs}, lambda v, i: f'<div class=chart>{timing_svg(v["run"])}</div>')
+    return '<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.</p>' + each({"variants": vs}, lambda v, i: f'<div class=chart>{timing_svg(v["run"])}</div>')
 
 
 def source_note(p: dict) -> str:

@@ -142,6 +142,8 @@ def test_header_parts_rewrites_the_page_for_a_datasheet(variant):
     assert p["_runs"] == 2 and p["_fov_spec"]["item"] == "Calibrated field of view"
     assert {"header", "specifications", "rig", "detail"} <= set(out)
     assert out["glance"].startswith("<div class=vtabs") and "<p class=sd-note>One recording.</p>" in out["glance"]
+    assert H.TILE_TERMS + "<p class=sd-note>One recording.</p>" in out["glance"] and "td is the camera–IMU time offset" in H.TILE_TERMS
+    assert "Gyro–accel time offset t_ga" in out["detail"] and "(camera–IMU position offsets)" in out["rig"]
     assert "▶︎ Play" in out["process"] and "Explore in 3D" in out["process"]
     assert out["detail"].count("<details class=fold") == 4 and lead == out["lead"]
     one = H.header_parts("rig", F.pub_entry("photo"), vs[:1], parts_for("rig", F.pub_entry("photo"), {"board": {"rows": 2, "cols": 2, "tag_mm": 30, "spacing": 0.3}},

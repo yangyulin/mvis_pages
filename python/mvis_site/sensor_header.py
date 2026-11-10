@@ -39,7 +39,7 @@ def _auto(row: dict, v: dict) -> dict:
     return row
 
 
-FOV_FOOT = "~ is read past the range the board corners reached. Past the fit: no value, the edge lies beyond where the lens fit holds."
+FOV_FOOT = "~ marks a value read past where the board corners reached. Past the fit: the edge lies beyond where the lens fit holds, so we give no value."
 
 def _fov_row(k: str, row: dict) -> str:
     html = f'{e(row["v"])}{_tag(row)}'
@@ -129,9 +129,10 @@ def proc_preview(v: dict) -> str:
             f'<polyline points="{S(path)}" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>')
 
 
-PROCESS_VIEWS_LEAD = ("<p>The solved path of the rig around the board. Press Play or drag the bar to follow it, use the buttons to change "
-                      "the view, and pick a camera card to put that camera on the frustum. Each card draws the board from the solved "
-                      "pose with the corners MVIS detected; no camera image is published.</p>")
+PROCESS_VIEWS_LEAD = ("<p>The path of the rig around the board, as MVIS solved it. To explore it:</p><ul class=list>"
+                      "<li>Press <b>Play</b> or drag the bar to follow the path.</li><li>Use the <b>view buttons</b> to change the view.</li>"
+                      "<li>Pick a <b>camera card</b> to put that camera on the frustum, the pyramid that shows its view.</li></ul>"
+                      "<p>Each card draws the board from the solved pose, with the corners MVIS detected. We publish no camera images.</p>")
 
 
 def views_mb(v: dict) -> str:
@@ -196,6 +197,9 @@ def fold(fid: str, title: str, key: str, body: str) -> str:
     return f'<details class=fold id="{fid}"><summary>{e(title)} <span>{key}</span></summary><div>{body}</div></details>'
 
 
+TILE_TERMS = ("<p class=sd-note>Reprojection is how far, in pixels, the detected corners lie from where the solve puts them. "
+              "td is the camera–IMU time offset, and the lever arm is the camera–IMU position offset.</p>")
+
 HEADER_PARTS = [("Demo and values", "glance"), ("Calibration process", "process"), ("Solved rig", "rig"), ("Specifications", "specifications"),
                 ("Dataset", "dataset"), ("Detailed results", "detail"), ("Limits", "limits"), ("How it was run", "run")]
 
@@ -211,16 +215,16 @@ def header_parts(slug: str, p: dict, vs: list, parts: dict) -> dict:
     parts["specifications"] = specs_html(p, vs[0])
     band = re.search(r'<div class=band>.*</div>$', parts["glance"], re.S).group(0)
     tabs = re.search(r'<div class=vtabs.*?</div>', parts["lead"], re.S)
-    parts["glance"] = (tabs.group(0) if tabs else "") + f'<p>{e(p["lead"])}</p>' + band + f'<p class=sd-note>{e(p["limits"][0])}</p>'
+    parts["glance"] = (tabs.group(0) if tabs else "") + f'<p>{e(p["lead"])}</p>' + band + TILE_TERMS + f'<p class=sd-note>{e(p["limits"][0])}</p>'
     r0 = vs[0]["run"]
     parts["process"] = (PROCESS_VIEWS_LEAD if any(x.get("views") for x in vs) else
-                        "<p>The solved path of the rig around the board. Press Play or drag the bar to follow it, and use the buttons to change the view.</p>")
+                        "<p>The path of the rig around the board, as MVIS solved it. Press Play or drag the bar to follow it. Use the buttons to change the view.</p>")
     parts["process"] += each({"variants": vs}, lambda x, i: process_block(slug, x, i))
     if not all(x.get("views") for x in vs):
         parts["process"] += PCHIPS
-    parts["rig"] = (f'<p>The solved rig in 3D, to scale. Tap a sensor for its values. Full screen lets you rotate and zoom. Grid squares are 20 mm.</p>{MAP_STAGE}{map_panel()}'
+    parts["rig"] = (f'<p>The solved rig in 3D, to scale. Tap a sensor to see its values. In full screen you can rotate and zoom. Grid squares are 20 mm.</p>{MAP_STAGE}{map_panel()}'
                     '<h3 class=rig-h>To scale, from above and the front</h3>' + each({"variants": vs}, lambda x, i: rig_drawing(x) + rig_table(x))
-                    + '<p class=rig-note>Solved by MVIS. Lever arms are in the IMU frame. Rotation is log(R), camera in the IMU frame.</p>')
-    parts["detail"] = (fold("lens", "Lens", "Calibrated field of view", parts["lens"]) + fold("imu", "IMU", f'Gyro-to-accel offset {num(r0.get("t_ga_ms"), 2, True)} ms', parts["imu"])
+                    + '<p class=rig-note>Solved by MVIS. Lever arms (camera–IMU position offsets) are in the IMU frame. Rotation is log(R), camera in the IMU frame.</p>')
+    parts["detail"] = (fold("lens", "Lens", "Calibrated field of view", parts["lens"]) + fold("imu", "IMU", f'Gyro–accel time offset t_ga {num(r0.get("t_ga_ms"), 2, True)} ms', parts["imu"])
                        + fold("timing", "Timing", f'cam0 td {num(r0["cams"][0]["td_ms"], 2, True)} ms', parts["timing"]) + fold("full-results", "Full results", "Every solved parameter", parts["results"]))
     return parts

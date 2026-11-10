@@ -32,7 +32,7 @@ sensors:
       - [Board, "AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11"]
       - [Configs and results, "__HUB:community/intel-t265/__"]
     folder: virig-4imus-3cams/
-    method: "Fisheye stereo plus the T265's own IMU, camera intrinsics free, t_ga on. Batch of 2026-11-03."
+    method: "Fisheye stereo plus the T265's own IMU, camera intrinsics free, t_ga estimated. Batch of 2026-11-03."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
       - The T265 gyro-to-accel offset isn't a pure time shift. We measured about −6.8 ms at 2–4 Hz and −1.2 ms at 30–40 Hz, so a single t_ga is a compromise that depends on the motion.
@@ -85,7 +85,7 @@ sensors:
       - [Board, "Chessboard: 10×7 squares (9×6 inner corners), 43.47 mm, shown on a monitor. Hand-held and robot arm: AprilGrid 6×6, tag 55 mm, spacing 0.3, t36h11"]
       - [Configs and results, "__HUB:community/looper-insight9/__"]
     folder: looper-insight9/
-    method: "Camera + IMU with camera intrinsics free, t_ga on and the cam2 rolling-shutter readout estimated. Chessboard recordings of 2026-11-07; hand-held batch of 2026-11-02; robot-arm batch of 2026-11-04."
+    method: "Camera + IMU with camera intrinsics free, t_ga and the cam2 rolling-shutter readout both estimated. Chessboard recordings of 2026-11-07; hand-held batch of 2026-11-02; robot-arm batch of 2026-11-04."
     limits:
       - No reference exists for these recordings, so the values can't be checked for accuracy.
       - Hand-held and robot-arm recordings are kept apart, not pooled. They were solved in different batches and may not come from the same unit.
@@ -123,7 +123,7 @@ sensors:
       - [Board, "AprilGrid 8×8, tag 70 mm, spacing 0.3"]
       - [Licence, "CC BY-NC 4.0; commercial use by request"]
       - [Hosted, "__HUB:community/dibuli-prism-a4l/__"]
-    method: "EUCM camera model, Kalibr IMU model, t_ga on, camera intrinsics free, seeded from the camera-only fit. Batch of 2026-11-03. This solve uses physical camera 1 as its base, so cam0 and cam1 on this page are physical cam1 and cam0."
+    method: "EUCM camera model, Kalibr IMU model, t_ga estimated, camera intrinsics free, seeded from the camera-only fit. Batch of 2026-11-03. This solve uses physical camera 1 as its base, so cam0 and cam1 on this page are physical cam1 and cam0."
     limits:
       - No independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
       - td changes with exposure. The exact slope is still open.
@@ -166,7 +166,7 @@ sensors:
       - [Board, "Chessboard 12×9 squares, 25 mm"]
       - [Licence, None]
       - [Hosted, Not hosted]
-    method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga on, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-06."
+    method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga estimated, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-06."
     limits:
       - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
       - "A simulation of this recording, solved the same way, shows its IMU samples (about 88 Hz, unevenly spaced) can't pin the IMU scales, the lever arm or the gyro-to-accel offset t_ga, even without noise. Treat those values as unreliable. The camera intrinsics and the stereo baseline aren't affected."
@@ -213,7 +213,7 @@ sensors:
       - [Board, "AprilGrid 8×6, tag 50 mm, spacing 0.3"]
       - [Licence, "CC BY-NC 4.0; commercial use by request"]
       - [Hosted, "__HUB:community/hampo/__"]
-    method: "cam0 at 30 Hz, cam1 at 10 Hz, default IMU noise, t_ga on, camera intrinsics free. Batch of 2026-11-03."
+    method: "cam0 at 30 Hz, cam1 at 10 Hz, default IMU noise, t_ga estimated, camera intrinsics free. Batch of 2026-11-03."
     limits:
       - No independent reference, so this shows consistency between the two solves, not accuracy.
       - The recording is H.264 and the USB-3372 sheet lists MJPG and YUY2, so the exact model stays open.
@@ -259,7 +259,7 @@ sensors:
       - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
       - ["Bags, configs and results", "__HUB:community/gi-ego1/__"]
     folder: gilabs-examples/
-    method: "Recording converted to EuRoC layout, camera-only solve per camera, then camera + IMU with camera intrinsics free, t_ga on and the rolling-shutter readout estimated. Batch of 2026-11-03."
+    method: "Recording converted to EuRoC layout, camera-only solve per camera, then camera + IMU with camera intrinsics free, t_ga and the rolling-shutter readout both estimated. Batch of 2026-11-03."
     limits:
       - One recording, with no independent reference. These values show what MVIS solved, not how close they are to the truth.
       - Gyro scale solves 3 to 4 % below 1 on all axes. We have not confirmed the cause.
@@ -302,7 +302,7 @@ sensors:
       - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
       - ["Bags, configs and results", "__HUB:community/gi-ego1gs/__"]
     folder: gilabs-examples/
-    method: "Recording converted to EuRoC layout, camera-only solve per camera, then camera + IMU with camera intrinsics free and t_ga on. Batch of 2026-11-03."
+    method: "Recording converted to EuRoC layout, camera-only solve per camera, then camera + IMU with camera intrinsics free and t_ga estimated. Batch of 2026-11-03."
     limits:
       - No independent reference. These values show what MVIS solved, not how close they are to the truth.
       - Recording 1 lost frames on both cameras at decode, so it has gaps.
@@ -367,7 +367,7 @@ sensors:
       - [Board, "AprilGrid 6×6, tag 35.2 mm, spacing 0.3"]
       - [Licence, "CC BY-NC 4.0; commercial use by request"]
       - [Hosted, "__HUB:community/xq20/__"]
-    method: "cam0 at 30 Hz, cam1 at 10 Hz, t_ga on, camera intrinsics free, IMU intrinsics pinned. IMU noise padded from the measured noise: gyro 6e-4 rad/s/√Hz, accel 0.015 m/s²/√Hz. Batch of 2026-11-07."
+    method: "cam0 at 30 Hz, cam1 at 10 Hz, t_ga estimated, camera intrinsics free, IMU intrinsics pinned. IMU noise padded from the measured noise: gyro 6e-4 rad/s/√Hz, accel 0.015 m/s²/√Hz. Batch of 2026-11-07."
     limits:
       - No independent reference. These values show what MVIS solved, not how close they are to the truth.
       - "The supplier's IMU noise file (gyro 0.002, accel 0.02) is tuned for Kalibr, about 10× and 3× the noise measured at rest. Used as is in MVIS, it put unit A's lever arm 20 to 45 mm too far forward. These results use the measured noise with a 2 to 3× margin."
@@ -415,7 +415,7 @@ sensors:
       - [Hosted copy, "__HUB:datasets/converted/tum_mic/__"]
       - [Configs and results, "__HUB:community/valve-index/__"]
     data_link: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: "Monado SLAM Datasets"}
-    method: "Camera + IMU with camera intrinsics free and t_ga on. Batch of 2026-11-02."
+    method: "Camera + IMU with camera intrinsics free and t_ga estimated. Batch of 2026-11-02."
     limits:
       - One recording shown, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
     header:
@@ -453,7 +453,7 @@ sensors:
       - [Hosted copy, "__HUB:datasets/converted/monado_mgc/__"]
       - [Configs and results, "__HUB:community/hp-reverb-g2/__"]
     data_link: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: "Monado SLAM Datasets"}
-    method: "Each recording shows the board to one camera pair, so three pairs are solved: cam0 + cam1, cam0 + cam2, cam1 + cam3. Each is camera + IMU with camera intrinsics free and t_ga on, on current MVIS, 2026-11-03. cam0, cam1 and all IMU values come from the first pair. cam2 is attached through cam0 and cam3 through cam1."
+    method: "Each recording shows the board to one camera pair, so three pairs are solved: cam0 + cam1, cam0 + cam2, cam1 + cam3. Each is camera + IMU with camera intrinsics free and t_ga estimated, on current MVIS, 2026-11-03. cam0, cam1 and all IMU values come from the first pair. cam2 is attached through cam0 and cam3 through cam1."
     limits:
       - One recording shown, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
       - This rig is stitched from three solves, not one joint solve. Cameras seen in two pairs agree to 0.89 mm and 0.34° (cam0) and 0.54 mm and 0.15° (cam1). cam2 and cam3 move 0.79 and 0.52 mm depending on how they are attached.
@@ -493,7 +493,7 @@ sensors:
       - [Hosted copy, "__HUB:datasets/converted/monado_moc/__"]
       - [Configs and results, "__HUB:community/samsung-odyssey-plus/__"]
     data_link: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: "Monado SLAM Datasets"}
-    method: "Camera + IMU with camera intrinsics free and t_ga on. Batch of 2026-11-02."
+    method: "Camera + IMU with camera intrinsics free and t_ga estimated. Batch of 2026-11-02."
     limits:
       - One recording shown, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
       - In this batch, 2 of the 4 rounds on this headset didn't converge to a usable solve (rounds 1 and 3). Round 4 is shown. Treat these values with that in mind.
