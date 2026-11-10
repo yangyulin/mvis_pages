@@ -370,8 +370,9 @@ def mdx(page: dict) -> str:
              f"import page from '../../../../data/eval/{s}.json';\n",
              "<E.EvalHeader page={page} />\n",
              "## Repeatability\n",
-             (f'<RepeatabilityMatrix id="{page["id"]}" />\n<RepeatabilityDetails id="{page["id"]}" />\n<E.RpOpen />\n' if rep
-              else "<E.NoRepeatability page={page} />\n")]
+             (f'<RepeatabilityMatrix id="{page["id"]}" />\n<RepeatabilityDetails id="{page["id"]}" />\n' if rep
+              else "<E.NoRepeatability page={page} />\n"),
+             "<E.RpOpen />\n"]
     for i, f in enumerate(page["families"]):
         parts.append(f"## {f['id']} · {'camera + IMU' if f['mode'] == 'cam+imu' else 'camera only'}\n")
         parts.append(f"<E.FamilyHead page={{page}} i={{{i}}} />\n")

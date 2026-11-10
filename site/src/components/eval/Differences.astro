@@ -1,7 +1,7 @@
 ---
 // Where the tools differ: per tool pair, every compared row in record order (sensor, then parameter; never by size).
 // Each row is a gauge in units of the larger sd: shaded band = ±1 sd, dot = the median difference Δ, filled and ◆
-// when outside the band (the Space's app.delta). Inline SVG at build time; "only ◆ rows" is a CSS checkbox.
+// when outside the band (the Space's app.delta). Every pair starts folded; its summary carries the ◆ tally. Inline SVG at build time; "only ◆ rows" is a CSS checkbox.
 interface Props { page: any; i: number }
 const { page, i } = Astro.props;
 const f = page.families[i];
@@ -10,8 +10,8 @@ const x = (z: number) => M + Math.max(-LIM, Math.min(LIM, z)) * S;
 ---
 <div class="not-content ev-diffs">
   {f.diffs.length === 0 && <p class="ev-note">No tool pair has a compared row on this family.</p>}
-  {f.diffs.map((d: any, k: number) => (
-    <details class="ev-pair" id={`diff-${d.pair}-${f.id}`} open={k === 0}>
+  {f.diffs.map((d: any) => (
+    <details class="ev-pair" id={`diff-${d.pair}-${f.id}`}>
       <summary><b>{d.label}</b> <span class="ev-tally">◆ {d.marked} of {d.compared} compared rows</span></summary>
       <label class="ev-only"><input type="checkbox" /> only ◆ rows</label>
       <ul class="ev-drows">

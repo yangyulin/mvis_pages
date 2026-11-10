@@ -2,7 +2,7 @@
 // Parameters by sensor: one tab per sensor (radio buttons + CSS), one chart per parameter, one lane per tool column.
 // A lane: whisker min–max, box median ± sd, tick at the median, value and n printed. The axis is shared by the lanes
 // of one parameter and centred on the cross-tool median. Hollow box = input, not estimated; hatched = another model,
-// printed, not drawn; dashed = no value. Tool colour marks identity only. Inline SVG at build time, no script.
+// printed, not drawn; dashed = no value. Folded by default (the summary counts the charts). Tool colour marks identity only. Inline SVG at build time, no script.
 import RpShape from '../RpShape.astro';
 interface Props { page: any; i: number }
 const { page, i } = Astro.props;
@@ -14,9 +14,11 @@ const p3 = (v: number) => Number(v.toPrecision(3)).toString().replace('-', '−'
 const css = f.sensors.map((_: any, k: number) => `#${id(k)}:checked~.ev-panels>#${id(k)}-p{display:block}#${id(k)}:checked+label{border-color:var(--sl-color-accent);color:var(--sl-color-accent-high);background:var(--sl-color-accent-low)}`).join('');
 const REF: Record<string, number> = { time: 0, scale: 1 };
 const xOf = (ax: any) => (v: number) => M + ((v - ax.c) / ax.h) * R;
+const nParams = f.sensors.reduce((a: number, s: any) => a + s.params.length, 0);
 const inAxis = (v: number | undefined, ax: any) => v !== undefined && !(Math.abs(v - ax.c) > ax.h);
 ---
-<div class="not-content ev-params">
+<details class="not-content ev-fold ev-params" id={`params-${f.id}`}>
+  <summary>{f.sensors.length} {f.sensors.length === 1 ? 'sensor' : 'sensors'}, {nParams} parameter {nParams === 1 ? 'chart' : 'charts'} <small>(open to see each tool's spread)</small></summary>
   <style set:html={css}></style>
   {f.sensors.map((s: any, k: number) => <><input type="radio" class="ev-tab-in" name={`pr-${page.slug}-${f.id}`} id={id(k)} checked={k === 0} /><label for={id(k)} class="ev-tab">{s.label}</label></>)}
   <div class="ev-panels">
@@ -58,4 +60,4 @@ const inAxis = (v: number | undefined, ax: any) => v !== undefined && !(Math.abs
   <p class="ev-small">Whisker = lowest to highest value over the tool's solved recordings; box = median ± sd; tick =
     median. Min and max come from the per-recording values behind each record's median; only these two numbers are
     published, not the values. Rotations are not shown: the records do not hold them yet.</p>
-</div>
+</details>
