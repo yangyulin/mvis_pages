@@ -5,31 +5,39 @@ pageType: concept
 wide: true
 ---
 
-What the [leaderboard](/benchmark/results/) numbers mean and how they are
-produced. The metric definitions are shared with
-[Evaluation & metrics](/reference/evaluation/), so a local run and a published
-entry measure the same thing.
+Use this page to read the [leaderboard](/benchmark/results/): what its numbers mean and how we make them.
+The metric definitions are shared with [Evaluation & metrics](/reference/evaluation/).
+So a local run and a published entry measure the same thing.
 
 ## What the board shows
 
-There is one table per dataset, grouped by regression family and then by sensor. MVIS, Kalibr and Basalt each calibrate
-the recordings of a rig, and each cell gives a parameter as median ± sd (n) across the recordings that tool solved.
-The board gives no scores or ranks: a single number would encode a judgement about which parameters matter.
+- **One table per dataset**, grouped by regression family (one test in the MVIS regression suite), then by sensor.
+- **Three tools:** MVIS, Kalibr and Basalt each calibrate the recordings of a rig.
+- **Each cell:** a parameter as median ± sd (n), across the recordings that tool solved.
+  sd is the standard deviation; n is the number of recordings.
+- **No scores or ranks:** a single number would encode a judgement about which parameters matter.
 
 :::caution[Differences are not errors]
-These datasets have no metrological ground truth. A difference shows that two tools disagree, not which one is right,
-and a small spread shows repeatability, not accuracy: a method can repeat the same bias on every recording.
+These datasets have no metrological ground truth.
+A difference shows that two tools disagree, not which one is right.
+A small spread shows repeatability, not accuracy: a method can repeat the same bias on every recording.
 MVIS checks accuracy separately, against known truth, in its digital-twin regression
 ([Regression testing](/contribute/regression-testing/)).
 :::
 
 ## Differences
 
-Each difference column subtracts the medians of two tools. A ◆ marks a difference larger than the larger of the two
-spreads.
+Each difference column subtracts the medians of two tools.
+A ◆ marks a difference larger than the larger of the two spreads.
 
-No difference is shown where it would mislead: values a tool takes as input, values shown only, missing values, and
-rows where the tools' models differ. Reprojection error isn't compared, because it measures fit.
+We show no difference where it would mislead:
+
+- values a tool takes as input
+- values shown only
+- missing values
+- rows where the tools' models differ
+
+Reprojection error isn't compared, because it measures fit.
 
 ## Values that aren't estimates
 
@@ -42,20 +50,28 @@ rows where the tools' models differ. Reprojection error isn't compared, because 
 
 ## Known limits
 
-- MVIS rows and the Kalibr and Basalt runs were not all made on the same date. Data settings differ on T6, T7 and T8.
-- Recording counts differ per tool on some families, so a difference can mix recording sets. These cells are marked.
-- The MVIS column uses Kalibr's IMU model on camera + IMU families, so the IMU rows share one model. The MVIS default
-  fills fewer rows and is in a closed fold under each family.
+- **Dates:** MVIS rows and the Kalibr and Basalt runs were not all made on the same date.
+  Data settings differ on T6, T7 and T8.
+- **Recording counts:** these differ per tool on some families, so a difference can mix recording sets.
+  These cells are marked.
+- **IMU model:** the MVIS column uses Kalibr's IMU model on camera + IMU families, so the IMU rows share one model.
+  The MVIS default fills fewer rows and is in a closed fold under each family.
 
 ## Configs
 
-Each family on the leaderboard has a closed **Run config** section per tool: the command for one recording, the
-settings, and what differs on the others. Kalibr logs no command line, so its camera-only commands are rebuilt from the
-settings the run passed. The Basalt runs use our own headless build. The files are kept with the records in
+Each family on the leaderboard has a closed **Run config** section per tool. It holds:
+
+- the command for one recording
+- the settings
+- what differs on the other recordings
+
+Kalibr logs no command line. So we rebuild its camera-only commands from the settings the run passed.
+The Basalt runs use our own headless build.
+The files are kept with the records in
 [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results/tree/main/configs).
 
 ## Versioning
 
 Each batch is dated and kept in the history of
-[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results), so a comparison can be cited as
-"Open MVIS leaderboard, batch 2026-11-04a, accessed &lt;date&gt;".
+[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
+So a comparison can be cited as "Open MVIS leaderboard, batch 2026-11-04a, accessed &lt;date&gt;".

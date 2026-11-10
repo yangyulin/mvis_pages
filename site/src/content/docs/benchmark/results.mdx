@@ -17,10 +17,29 @@ import { tested } from '../../../components/rp';
 <RepeatabilityHeader />
 
 <div class="not-content rp-honest">
-  <p><b>This page shows repeatability, not accuracy.</b> Repeatability is how much each tool's estimates scatter when the same rig is calibrated from different recordings. These datasets have no ground truth, so no tool is the reference, and a tool can repeat well and still be biased. Tools are compared only on recordings that every compared tool ran. Reprojection error measures how well a model fits its own data; it is not used here. The MVIS authors run this board and made every run, including the Kalibr and Basalt runs.</p>
+  <p><b>This page shows repeatability, not accuracy.</b> Repeatability is how much each tool's estimates scatter when we calibrate the same rig from different recordings.</p>
+  <ul>
+    <li><b>No ground truth:</b> these datasets have none, so no tool is the reference. A tool can repeat well and still be biased.</li>
+    <li><b>Shared recordings only:</b> we compare tools only on recordings that every compared tool ran.</li>
+    <li><b>No reprojection error:</b> it measures how well a model fits its own data, so we do not use it here.</li>
+    <li><b>Who ran it:</b> the MVIS authors run this board and made every run, including the Kalibr and Basalt runs.</li>
+  </ul>
 </div>
 
-<details class="not-content rp-dates"><summary>Run dates and data settings</summary><p>Kalibr camera + IMU on T6 and T11 was re-run on 2026-11-07 from its own camera calibration. On 2026-11-08 MVIS and Kalibr on T6 and T11, and Basalt on T11, were re-run with IMU noise measured at rest (white-noise density × 2.5, the same values for every tool; bias walks at the defaults). MVIS on T2 and T12 was re-run on 2026-11-08 with the current MVIS code. On T3 every tool ran on the same view-filtered bags (≤ 85°) on 2026-11-07, and the T6c MVIS values come from camera-only runs. Kalibr on T7 was re-run on 2026-11-02, and the Kalibr runs for T1 bag 09 on 2026-11-04. Other Kalibr and Basalt runs are from 2026-10-22 or earlier. Data settings still differ from MVIS on T6, T7 and T8.</p></details>
+<details class="not-content rp-dates">
+  <summary>Run dates and data settings</summary>
+  <ul>
+    <li><b>2026-11-08:</b> MVIS and Kalibr on T6 and T11, and Basalt on T11, were re-run with IMU noise measured at rest (white-noise density × 2.5, the same values for every tool; bias walks at the defaults).</li>
+    <li><b>2026-11-08:</b> MVIS on T2 and T12 was re-run with the current MVIS code.</li>
+    <li><b>2026-11-07:</b> Kalibr camera + IMU on T6 and T11 was re-run from its own camera calibration.</li>
+    <li><b>2026-11-07:</b> on T3, every tool ran on the same view-filtered bags (≤ 85°).</li>
+    <li><b>2026-11-04:</b> Kalibr on T1 bag 09 was re-run.</li>
+    <li><b>2026-11-02:</b> Kalibr on T7 was re-run.</li>
+    <li><b>2026-10-22 or earlier:</b> all other Kalibr and Basalt runs.</li>
+    <li><b>T6c:</b> the MVIS values come from camera-only runs.</li>
+  </ul>
+  <p>Data settings still differ from MVIS on T6, T7 and T8.</p>
+</details>
 
 <Overall />
 
@@ -89,14 +108,33 @@ Reverb G2 headset calibration from the Monado SLAM Datasets. [Example](/benchmar
 <details class="rp-fold">
 <summary>How the verdicts are made</summary>
 
-For each family and group of parameters we take only the recordings every compared tool ran. For each tool we measure the scatter (standard deviation) of each parameter across those recordings, and compare two tools by the median ratio of their scatters. A tool is marked more repeatable only if its scatter is at least 20 % smaller and a gap that large would rarely appear (under 5 %, Holm-adjusted within the cell) if we swapped the two tools' results recording by recording. Otherwise it is a tie: either the gap is within chance, or it is under 20 %. With fewer than 6 shared recordings no gap can pass this test (the smallest possible p is 2/2ⁿ), so those cells say "too few recordings". Values a tool received as input, and rows where the tools' models differ, are not compared. Distortion coefficients trade off against each other, so their scatter can overstate differences in the lens mapping. Each cell is a separate 5 % test; across the {tested.cells} tested cells on this page, of which {tested.naming} name a tool, one or two calls may be chance. The intervals are not adjusted for multiple tests.
+For each family and group of parameters, we decide a verdict in five steps:
+
+1. We take only the recordings every compared tool ran.
+2. For each tool, we measure the scatter (standard deviation) of each parameter across those recordings.
+3. We compare two tools by the median ratio of their scatters.
+4. A tool is marked **more repeatable** only if both of these hold:
+   - its scatter is at least 20 % smaller, and
+   - a gap that large would rarely appear (under 5 %, Holm-adjusted within the cell) if we swapped the two tools' results recording by recording.
+5. Otherwise it is a **tie**: either the gap is within chance, or it is under 20 %.
+
+Notes on the test:
+
+- **Too few recordings:** with fewer than 6 shared recordings, no gap can pass this test (the smallest possible p is 2/2ⁿ). Those cells say "too few recordings".
+- **Not compared:** values a tool received as input, and rows where the tools' models differ.
+- **Distortion coefficients** trade off against each other, so their scatter can overstate differences in the lens mapping.
+- **Many tests:** each cell is a separate 5 % test. Across the {tested.cells} tested cells on this page, of which {tested.naming} name a tool, one or two calls may be chance. The intervals are not adjusted for multiple tests.
 
 </details>
 
 <details class="rp-fold">
 <summary>Agreement between tools</summary>
 
-The parameter tables also show the differences between the tools' medians. Where two tools' medians differ by more than either tool's scatter, they disagree. ◆ marks disagreement, not an error in either tool. No tool is the reference. ‡ on a time offset: MVIS splits the gyro (td) and accel (td + t_ga) timelines, so Basalt − Kalibr is the like-for-like check there.
+The parameter tables also show the differences between the tools' medians. No tool is the reference.
+
+- **Disagreement:** two tools disagree where their medians differ by more than either tool's scatter.
+- **◆** marks disagreement, not an error in either tool.
+- **‡** on a time offset: MVIS splits the gyro (td) and accel (td + t_ga) timelines, so Basalt − Kalibr is the like-for-like check there. Here td is the camera–IMU time offset, and t_ga is the time offset between the gyroscope and accelerometer channels.
 
 </details>
 
@@ -110,9 +148,22 @@ The parameter tables also show the differences between the tools' medians. Where
 <details class="rp-fold">
 <summary>Family numbers</summary>
 
-Each family is one test in the MVIS regression suite. The numbers changed on 2026-11-02 so the VI-Rig datasets come
-first, and older material uses the old ones. New (old): T1 (T3), T2 (T4), T3 (T1), T4 (T2), T5 (T5), T6 (T11), T7 (T8),
-T8 (T12), T9 (T6), T10 (T7), T11 (T10), T12 (T9).
+Each family is one test in the MVIS regression suite. On 2026-11-02 the numbers changed so the VI-Rig datasets come first. Older material uses the old numbers.
+
+| New | Old |
+|---|---|
+| T1 | T3 |
+| T2 | T4 |
+| T3 | T1 |
+| T4 | T2 |
+| T5 | T5 |
+| T6 | T11 |
+| T7 | T8 |
+| T8 | T12 |
+| T9 | T6 |
+| T10 | T7 |
+| T11 | T10 |
+| T12 | T9 |
 
 </details>
 

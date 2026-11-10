@@ -5,10 +5,12 @@ pageType: example
 wide: true
 ---
 
-The [TUM Visual-Inertial dataset](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset)
-is the reference check for a camera–IMU calibrator: a stereo-fisheye + IMU rig
-with a **published Kalibr calibration** to score against. It is also the dataset
-where every distortion model can be compared on identical data.
+Use this page to check a camera–IMU calibrator against a published answer. The
+[TUM Visual-Inertial dataset](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset)
+is the reference check: a stereo-fisheye + IMU rig with a **published Kalibr
+calibration** to score against.
+
+It is also the dataset where we compare every distortion model on identical data.
 
 ## The rig
 
@@ -21,9 +23,12 @@ Board: AprilGrid 6×6, `tag_size` 0.088 m, `tag_spacing` 0.3, family `t36h11`.
 
 ## Getting the data
 
-Use the **raw IMU-calibration bags** — `dataset-calib-imu{1,2,3,4}.bag` — for
-the camera–IMU solve, and `standard_1024/dataset-calib-cam1_1024_16.bag` as the
-board bag when a model needs a camera-only fit first.
+You need two kinds of bag:
+
+- **Camera–IMU solve:** the raw IMU-calibration bags,
+  `dataset-calib-imu{1,2,3,4}.bag`.
+- **Camera-only fit:** `standard_1024/dataset-calib-cam1_1024_16.bag` as the
+  board bag, when a model needs a camera-only fit first.
 
 ```
 tum_vi_calib/
@@ -36,8 +41,10 @@ tum_vi_calib/
 
 ## One step, if a camchain exists
 
-`omni_radtan` and `equidistant` ship with a Kalibr camchain for these cameras,
-so the calibration is a single stereo run with intrinsics pinned:
+`omni_radtan` and `equidistant` ship with a Kalibr camchain for these cameras.
+A camchain is Kalibr's YAML file of camera intrinsics and distortion. With
+it, the calibration is a single stereo run with the intrinsics pinned (held
+fixed):
 
 ```bash
 mvis cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_omni.yaml
@@ -46,8 +53,8 @@ mvis cam-imu -c examples/configs/tumvi_cam_imu/cam_imu_equi.yaml
 
 ## Two steps, otherwise
 
-`double_sphere`, `eucm`, and `fov` have no shipped camchain, so fit the camera
-first and feed the result in:
+`double_sphere`, `eucm`, and `fov` have no shipped camchain. Fit the camera
+first, then feed the result into the camera–IMU step:
 
 ```bash
 mvis calibrate -c examples/configs/tumvi_cam_imu/mvis_cam0_ds.yaml
@@ -56,12 +63,22 @@ mvis cam-imu   -c examples/configs/tumvi_cam_imu/cam_imu_ds.yaml
 
 :::caution[Fit cam0 alone for the wide-FoV models]
 Stereo camera-only fits **diverge** on this dataset for `double_sphere` and
-`eucm` — the fx–xi / alpha basin. The single-camera fit is stable, so the recipe
-fits cam0 only and runs a single-camera camera–IMU solve. See
-[Camera model](/concepts/camera-model/).
+`eucm`. They slide into the fx–xi / alpha basin, a fit that looks converged
+and is not.
+
+The single-camera fit is stable. So the recipe fits cam0 only and runs a
+single-camera camera–IMU solve. See [Camera model](/concepts/camera-model/).
 :::
 
 ## Results — imu1, 45 s window
+
+The columns:
+
+- **Reproj:** reprojection error, the pixel distance between detected and
+  predicted corners.
+- **cam0 lever:** the lever arm, the camera–IMU position offset of cam0.
+- **Baseline:** the distance between the two cameras.
+- **`td`:** the camera–IMU time offset.
 
 | Model | Mode | Reproj | cam0 lever (mm) | Baseline | `td` |
 |---|---|---|---|---|---|
@@ -74,32 +91,33 @@ fits cam0 only and runs a single-camera camera–IMU solve. See
 
 ## What the table says
 
-**Every model lands on the same physical rig.** Lever ~[44, −68, −44] mm and
-`td` ~−0.7 ms across all six. Model choice changes how easily you get a good
-fit, not the geometry a good fit recovers.
+- **Every model lands on the same physical rig.** Lever ~[44, −68, −44] mm
+  and `td` ~−0.7 ms across all six. Model choice changes how easily you get a
+  good fit. It does not change the geometry a good fit recovers.
+- **Agreement with Kalibr:** `omni_radtan` and `equidistant` reproduce the
+  reference lever to **≤2 mm** and the stereo baseline to **≤0.15 mm**. The
+  time offset is inside 1 ms.
+- **Across all four bags**, `omni_radtan` holds: baseline 100.8–101.1 mm,
+  lever within ~1 mm, and the freed IMU intrinsics (`Dw`/`Da`) consistent to
+  under 1%. That cross-sequence spread is the honest error bar. It is better
+  evidence than any single run's residual.
 
-**Agreement with Kalibr**: `omni_radtan` and `equidistant` reproduce the
-reference lever to **≤2 mm** and the stereo baseline to **≤0.15 mm**, with the
-time offset inside 1 ms.
-
-**Across all four bags**, `omni_radtan` holds: baseline 100.8–101.1 mm, lever
-within ~1 mm, and the freed IMU intrinsics (`Dw`/`Da`) consistent to under 1%.
-That cross-sequence spread is the honest error bar — better evidence than any
-single run's residual.
-
-MVIS's reprojection error is higher than Kalibr's 0.11 px because the two
-are not measuring the same thing: different corner subsampling and robust
-statistics. Compare the **parameters**, not the residuals.
+Compare the **parameters**, not the residuals. MVIS's reprojection error is
+higher than Kalibr's 0.11 px because the two do not measure the same thing.
+They use different corner subsampling and robust statistics.
 
 :::note[Pin the intrinsics in the camera–IMU step]
-Freeing them (`free_intrinsics: true`) lets the fx–xi (omni, ds) or alpha (eucm)
-gauge drift along its equivalence class on a single sequence while reprojection
-stays flat. Extrinsics and `td` stay correct, but the intrinsics are no longer
-uniquely pinned. Freeing the *IMU* intrinsics (`imu_intrinsics: dw_da`) is
-stable.
+Freeing them (`free_intrinsics: true`) lets the fx–xi (omni, ds) or alpha
+(eucm) gauge drift on a single sequence. It drifts along its equivalence class,
+a family of values that fit equally well, while reprojection stays flat.
+
+Extrinsics and `td` stay correct, but the intrinsics are no longer uniquely
+pinned. Freeing the *IMU* intrinsics (`imu_intrinsics: dw_da`) is stable.
 :::
 
 ## Reproducibility
+
+The settings behind the imu1 results above:
 
 | Item | Value |
 |---|---|

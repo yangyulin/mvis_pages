@@ -114,7 +114,15 @@ def test_imu_section_pinned_says_so():
     from mvis_site.sensor_parts import imu_section
     run = {"imu_model": "calyx", "Dw_diag": [1.0, 1.0, 1.0], "Da_diag": [1.0, 1.0, 1.0], "t_ga_ms": -1.0, "t_ga_sigma_ms": 0.5}
     html = imu_section([{"label": "Unit A", "run": run}])
-    assert "pinned at identity" in html and "Gyro scale" not in html
+    assert "pinned the IMU intrinsics at identity" in html and "Gyro scale" not in html
     run_free = dict(run, Dw_diag=[1.002, 1.0, 1.0])
     html = imu_section([{"label": "Unit A", "run": run_free}])
-    assert "Model: calyx" in html and "Gyro scale" in html
+    assert "IMU model: calyx" in html and "Gyro scale" in html
+
+
+def test_imu_and_timing_explain_their_terms():
+    from mvis_site.sensor_parts import imu_section, timing_section
+    run = {"imu_model": "calyx", "Dw_diag": [1.002, 1.0, 1.0], "Da_diag": [1.0, 1.0, 1.0], "t_ga_ms": -1.0, "t_ga_sigma_ms": 0.5,
+           "cams": [{"name": "cam0", "td_ms": 2.0}]}
+    assert "<code>t_ga</code>, the time offset between the gyroscope and accelerometer channels: −1.00 ± 0.50 ms." in imu_section([{"label": "A", "run": run}])
+    assert timing_section([{"label": "A", "run": run}]).startswith("<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.</p>")
