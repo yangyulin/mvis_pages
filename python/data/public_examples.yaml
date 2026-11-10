@@ -168,7 +168,7 @@ examples:
       - [Licence, "CC BY 4.0"]
     lead: "One MVIS camera + IMU run on the HP Reverb G2 recording imucalib01 (round 1), and how close it lands to the calibration Monado ships with the data."
     dataset: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: Monado SLAM Datasets}
-    sensor: {url: /sensors/hp-reverb-g2/, label: HP Reverb G2 in the Sensor wiki}
+    sensor: {url: /devices/hp-reverb-g2/, label: HP Reverb G2 in the Device wiki}
     eval: {slug: monado-mgc, label: All recordings and tools}
     data:
       - "Recording MGC imucalib01, round 1, from the Monado SLAM Datasets (Collabora). It shows the board to the front camera pair, cam0 and cam1."
@@ -197,11 +197,11 @@ examples:
       batch: MVIS main, example solves of 2026-11-10
     folds:
       - title: The other two camera pairs
-        key: Sensor wiki
+        key: Device wiki
         text: >-
           The headset has four cameras, and each recording shows the board to one pair. The sensor page stitches all
           four together from three pair recordings.
-        link: {url: /sensors/hp-reverb-g2/, label: HP Reverb G2}
+        link: {url: /devices/hp-reverb-g2/, label: HP Reverb G2}
       - title: t_ga on and off
         key: Why calibrate t_ga
         text: >-
@@ -228,7 +228,7 @@ examples:
       - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on hand-held recording 1: the two mono cameras, the rolling-shutter colour camera and its readout time, solved together."
     dataset: {url: "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9", label: "Calibench, looper-insight9/"}
-    sensor: {url: /sensors/looper-insight9/, label: Looper Insight 9 in the Sensor wiki}
+    sensor: {url: /devices/looper-insight9/, label: Looper Insight 9 in the Device wiki}
     eval: {slug: looper-insight9, label: All 10 recordings and tools}
     data:
       - "Hand-held recording 1 of 10, about 66 s. The run uses the whole recording."
@@ -250,10 +250,10 @@ examples:
       batch: MVIS main, measured-noise batch of 2026-11-08
     folds:
       - title: Chessboard and robot-arm recordings
-        key: Sensor wiki
+        key: Device wiki
         text: >-
           The sensor page also shows our own unit on a chessboard and two robot-arm recordings, each solved on its own.
-        link: {url: /sensors/looper-insight9/, label: Looper Insight 9}
+        link: {url: /devices/looper-insight9/, label: Looper Insight 9}
   uzh-fpv:
     title: UZH-FPV
     nav: UZH-FPV

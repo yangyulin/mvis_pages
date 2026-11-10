@@ -4,9 +4,9 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { readFileSync } from 'node:fs';
 
-// Written by site/scripts/export_sensors.py (python/mvis_site) with the Sensors overview, so both list sensors in one order.
+// Written by site/scripts/export_sensors.py (python/mvis_site) with the Device wiki overview, so both list devices in one order.
 const sensorNav = JSON.parse(readFileSync(new URL('./src/data/sensor-nav.json', import.meta.url), 'utf8'));
-// Sensor wiki subgroups, one per sensor-nav.json group in file order.
+// Device wiki subgroups, one per sensor-nav.json group in file order.
 const sensorGroups = [...new Set(sensorNav.map((n) => n.group))].map((group) => ({
   label: group,
   collapsed: true,
@@ -42,7 +42,7 @@ export default defineConfig({
   // a redirects key ending in `.html` builds as a directory, so /Foo.html would
   // 404. They are static files in `public/` instead.
   redirects: {
-    '/benchmark/sensors/looper-insight9-arm': '/sensors/looper-insight9/',
+    '/benchmark/sensors/looper-insight9-arm': '/devices/looper-insight9/',
     '/compilation': '/getting-started/installation/',
     '/quick-start': '/getting-started/quickstart/',
     '/contributors': '/about/contributors/',
@@ -68,17 +68,17 @@ export default defineConfig({
     '/math/degeneracy': '/concepts/degeneracy/',
     '/leaderboard': '/benchmark/results/',
     '/leaderboard/submit': '/contribute/submit-results/',
-    '/examples/hanpo': '/sensors/hampo/',
-    '/examples/hampo': '/sensors/hampo/',
-    '/examples/a4n': '/sensors/xq20/',
-    '/benchmark/sensors/a4n': '/sensors/xq20/',
-    '/examples/dibuli-prism-a4l': '/sensors/dibuli-prism-a4l/',
-    '/examples/gi-ego1': '/sensors/gi-ego1/',
-    '/examples/gi-ego1gs': '/sensors/gi-ego1gs/',
-    '/examples/gi-ego1-gs-module': '/sensors/gi-ego1gs/',
-    '/benchmark/sensors/gi-ego1-gs-module': '/sensors/gi-ego1gs/',
-    '/examples/looper-insight9': '/sensors/looper-insight9/',
-    // Pages moved on 2026-11-09 (Benchmark and Sensor wiki split) are not here: scripts/moved-pages.mjs writes
+    '/examples/hanpo': '/devices/hampo/',
+    '/examples/hampo': '/devices/hampo/',
+    '/examples/a4n': '/devices/xq20/',
+    '/benchmark/sensors/a4n': '/devices/xq20/',
+    '/examples/dibuli-prism-a4l': '/devices/dibuli-prism-a4l/',
+    '/examples/gi-ego1': '/devices/gi-ego1/',
+    '/examples/gi-ego1gs': '/devices/gi-ego1gs/',
+    '/examples/gi-ego1-gs-module': '/devices/gi-ego1gs/',
+    '/benchmark/sensors/gi-ego1-gs-module': '/devices/gi-ego1gs/',
+    '/examples/looper-insight9': '/devices/looper-insight9/',
+    // Pages moved on 2026-11-09 (Benchmark and Sensor wiki split) and on 2026-11-10 (/sensors/ to /devices/) are not here: scripts/moved-pages.mjs writes
     // their redirects from src/data/moved.json after the build, keeping the #fragment of old deep links.
   },
 
@@ -116,7 +116,7 @@ export default defineConfig({
         PageTitle: './src/components/PageTitle.astro',
       },
 
-      // Sidebar — design plan §3. Eight sections (Benchmark then Sensor wiki since 2026-11-09), ordered concepts → how-to →
+      // Sidebar — design plan §3. Eight sections (Benchmark then Device wiki: Sensor wiki until 2026-11-10), ordered concepts → how-to →
       // reference (COLMAP's spine, §1.1). Every leaf declares its pageType in
       // its own frontmatter, enforced by the §3.1 rule.
       sidebar: [
@@ -165,8 +165,8 @@ export default defineConfig({
         },
         {
           // Open, with collapsed device-kind subgroups: 4 rows on a phone; a sensor page opens its own subgroup.
-          label: 'Sensor wiki',
-          items: [{ label: 'Overview', link: '/sensors/' }, ...sensorGroups],
+          label: 'Device wiki',
+          items: [{ label: 'Overview', link: '/devices/' }, ...sensorGroups],
         },
         {
           label: 'Concepts',

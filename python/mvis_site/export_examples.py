@@ -1,4 +1,4 @@
-"""Example pages for openmvis.com (/benchmark/examples/): one MVIS run per example, in the Sensor wiki's page layout, plus the overview cards.
+"""Example pages for openmvis.com (/benchmark/examples/): one MVIS run per example, in the Device wiki's page layout, plus the overview cards.
 
 The words come from data/public_examples.yaml. The run of each example is named in the private mira sensors.yaml
 `examples:` section (passed by path); only its run folders and config files are read, through example_config. An example
@@ -192,7 +192,7 @@ def _btn(x: dict, primary: bool = False) -> str:
 
 def header(slug: str, p: dict, ev: dict | None) -> str:
     """The sensor pages' datasheet header (sensor_header.css): maker, title, rig line, photo with its credit, buttons
-    to the downloads, the Results and the Sensor wiki, and the key facts."""
+    to the downloads, the Results and the Device wiki, and the key facts."""
     img = p["image"]
     cap = f'<a href="{e(img["url"])}">{e(img["credit"])} ↗</a>' if img.get("url") else e(img["credit"])
     ours = "<span class=ex-ours>Our rig</span>" if p.get("ours") else ""
@@ -356,7 +356,7 @@ SECTIONS = [("Demo and values", "glance"), ("Calibration process", "process"), (
 
 
 def example_mdx(slug: str, p: dict, fences: dict, other: dict | None) -> str:
-    """The page in the Sensor wiki's layout: the header in the title slot (PageTitle reads `example:`), then the sections."""
+    """The page in the Device wiki's layout: the header in the title slot (PageTitle reads `example:`), then the sections."""
     q = lambda t: json.dumps(t, ensure_ascii=False)
     part = lambda k: f'<ExamplePart example="{slug}" part="{k}" />\n\n'
     body = "".join(f"## {h}\n\n" + fences.get(k, "") + part(k) for h, k in SECTIONS)
@@ -382,8 +382,8 @@ def overview_mdx(pub: dict) -> str:
             "- the **configuration** we used\n- the **result** it produced\n- how far the result is from a **reference calibration**, where one exists\n\n"
             "Pick the one whose rig looks most like yours.\n\n"
             + grid("Our rig", ours) + grid("Public datasets", rest) +
-            "Looking for a specific sensor? See the [Sensor wiki](/sensors/). All tools on all recordings? See [Results](/benchmark/results/).\n\n"
-            "## How to read these pages\n\nEvery example page is laid out like a Sensor wiki page: a header card with the photo, the key facts and links, then the same sections in this order:\n\n" + steps +
+            "Looking for a specific device? See the [Device wiki](/devices/). All tools on all recordings? See [Results](/benchmark/results/).\n\n"
+            "## How to read these pages\n\nEvery example page is laid out like a Device wiki page: a header card with the photo, the key facts and links, then the same sections in this order:\n\n" + steps +
             "\nDownloads are on each dataset's own page, and comparisons across tools are on the Results pages.\n\n"
             ":::note[Figures come from the run]\nThe player, the map and the tables on each page are generated from the run they document. "
             "If a figure and the text disagree, the figure is right.\n:::\n\n"
