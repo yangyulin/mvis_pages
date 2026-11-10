@@ -5,20 +5,36 @@ pageType: reference
 wide: true
 ---
 
-Every MVIS run works out of a single SQLite file per capture — the `.mvisdb`.
-A sealed, content-hashed **capture core** holds everything expensive (board
-detections, full IMU streams); each solve writes a disposable per-`run_id`
-**overlay** recording every decision (which frames, boards and corners were
-used, and why the rest were excluded) and every estimate. Deleting a run
-cascades its whole story away; the core is never touched after sealing, so
-detection work is paid once per recording.
+Use this page to understand the `.mvisdb` file behind every MVIS run. It covers
+the in-memory object model, the run overlay and the SQL form on disk.
+
+Every MVIS run works out of a single SQLite file per capture: the `.mvisdb`.
+It has two parts:
+
+- **Capture core:** sealed and content-hashed (tagged with a hash of its
+  contents). It holds everything expensive: board detections and full IMU
+  streams.
+- **Overlay:** one per `run_id`, written by each solve and disposable. It
+  records every decision and every estimate. Decisions are which frames,
+  boards and corners were used, and why the rest were excluded.
+
+What this gives us:
+
+- **Deleting a run** cascades its whole story away.
+- **The core** is never touched after sealing. So detection work is paid
+  once per recording.
 
 ## Design view — the one container
 
-The in-memory object model the pipeline actually touches: one `MVISDatabase`
-per capture, with one run's overlay folded into inline flags. Annotations on
-the right; <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> fields are computed, never
-stored; D-numbers reference internal design decisions.
+This is the in-memory object model the pipeline actually touches. There is one
+`MVISDatabase` per capture. One run's overlay is folded into it as inline flags.
+
+How to read the diagram:
+
+- **Annotations** are on the right.
+- <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> fields are computed, never stored.
+- **D-numbers** reference internal design decisions.
+- **PK** marks the primary key (the field that identifies each entry).
 
 <div style="background:var(--sl-color-gray-6);border:1px solid var(--sl-color-gray-5);border-radius:10px;padding:18px 20px;overflow-x:auto">
 <pre style="margin:0;font-size:12.5px;line-height:1.72;background:none;border:none;padding:0"><span style="color:var(--sl-color-gray-3);opacity:.55"></span><span style="color:var(--sl-color-accent-high);font-weight:600">MVISDatabase</span>                            <span style="color:var(--sl-color-gray-3)">the one container (<span style="color:#b98a2e">D55</span>) — live run or loaded via capture.load(run_id) · flags <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">INLINE</span> (<span style="color:#b98a2e">D53</span>) · overlay tables = its on-disk form</span>
@@ -71,26 +87,23 @@ stored; D-numbers reference internal design decisions.
 
 The same container serializes to three SQL layers:
 
-- **Sealed capture core** — `capture`, `camera`, `imu`/`imu_meas`,
-  `board`/`board_pt`, `rig`, `stereo_pair`, and the observation hierarchy
-  `frame` → `board_detection` → `detection` (corner arrays as packed
-  float64 blobs). Immutable once `capture.content_hash` is set.
-- **Run overlay** (per `run_id`, `ON DELETE CASCADE`) — `run`, the sparse
-  *selection story* (`frame_status`, `board_detection_status`,
-  `detection_status`: only rows that differ from selected/valid are
-  written), and the results (`result_camera`, `result_imu`, `extrinsic` —
-  every cam↔cam, cam↔IMU and IMU↔IMU edge with `T`, `td`, and sigmas in
-  one table).
-- **Trajectory** (camera-IMU runs) — `estimate_meta`, `state_knot`/`state_var`
-  (the state timeline and typed variables), `frame_bracket` (which knots
-  bracket each frame and at what interpolation factor), and `world_frame`
-  (the gravity-aligned convention).
+| Layer | Tables | Notes |
+|---|---|---|
+| **Sealed capture core** | `capture`, `camera`, `imu`/`imu_meas`, `board`/`board_pt`, `rig`, `stereo_pair`, and the observation hierarchy `frame` → `board_detection` → `detection` | Corner arrays are packed float64 blobs. Immutable once `capture.content_hash` is set. |
+| **Run overlay** (per `run_id`, `ON DELETE CASCADE`) | `run`; the *selection story*: `frame_status`, `board_detection_status`, `detection_status`; the results: `result_camera`, `result_imu`, `extrinsic` | The selection story is sparse: only rows that differ from selected/valid are written. `extrinsic` holds every cam↔cam, cam↔IMU and IMU↔IMU edge with `T`, `td` (time offset), and sigmas in one table. |
+| **Trajectory** (camera-IMU runs) | `estimate_meta`, `state_knot`/`state_var`, `frame_bracket`, `world_frame` | `state_knot`/`state_var`: the state timeline and typed variables. `frame_bracket`: which knots bracket each frame and at what interpolation factor. `world_frame`: the gravity-aligned convention. |
 
-The status tables mirror the core hierarchy one-for-one, which is what makes
-the write-through selection ledger — and the consistency checks between the
-working set and the stored flags — cheap. Loading folds one run's overlay back
-onto the objects above, so pipeline code never sees SQL.
+`ON DELETE CASCADE` means deleting a run also deletes all of its overlay rows.
 
-The selection story is also what powers the run audit: every excluded frame,
-board pose and corner carries its `exclude_reason` and stage, so a calibration
+The status tables mirror the core hierarchy one-for-one. This makes two things
+cheap:
+
+- the write-through selection ledger
+- the consistency checks between the working set and the stored flags
+
+Loading folds one run's overlay back onto the objects above. So pipeline code
+never sees SQL.
+
+The selection story also powers the run audit. Every excluded frame, board
+pose and corner carries its `exclude_reason` and stage. So a calibration
 result can always answer "why was this observation not used?".
