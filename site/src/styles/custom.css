@@ -393,3 +393,11 @@ section[data-rp-section] .sl-heading-wrapper + p { margin-top: 0.3rem; font-size
   .ov-aspects tbody th:first-child { min-width: 10rem; max-width: 12rem; }
   .ov-card li { grid-template-columns: 5rem 1fr 2.6rem; }
 }
+
+/* Wide display equations scroll inside their own box instead of widening the page on phones. */
+.sl-markdown-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  padding-block: 0.25rem;
+}
