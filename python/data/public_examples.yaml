@@ -94,6 +94,49 @@ examples:
         how much each value moves from one recording to the next.
     reproduce:
       batch: "MVIS main, 2026-11-10"
+  virig-5imus-4cams:
+    title: "VI-Rig: 5 IMUs + 4 cameras"
+    nav: VI-Rig 5 IMUs + 4 cams
+    description: One MVIS camera + IMU run on our own rig, with two T265 fisheye pairs and five IMUs solved together.
+    ours: true
+    maker: OpenMVIS
+    image: {file: vi-rig.jpg, alt: "VI-Rig frame, shown in its 3-camera setup; this recording carries two T265 units and five IMUs", credit: "Photo: OpenMVIS (3-camera setup)"}
+    clip: virig5
+    card:
+      rig: Two T265 fisheye pairs (global) + 5 IMUs (100–500 Hz) on one frame
+      format: ROS1 bag
+      shows: Two T265 units that are not synced to each other, tied through five IMUs in one run
+      tags: [Global shutter, 4 cameras, 5 IMUs, CC BY-NC 4.0]
+    facts:
+      - [Cameras, "4 global shutter: two T265 fisheye pairs"]
+      - [IMUs, "5: Xsens MTi (base), 2 MicroStrain, 2 T265"]
+      - [Board, "AprilGrid 6×6, tag 88 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY-NC 4.0"]
+    lead: "One MVIS camera + IMU run on recording 5imus_4cams_01: all four cameras and all five IMUs solved together."
+    dataset: {url: /reference/datasets/#hosted--vi-rig-captures, label: VI-Rig datasets}
+    eval: {slug: virig-5imus-4cams, label: All 7 recordings}
+    data:
+      - "Recording 5imus_4cams_01, one of the 7 recordings of this rig. It is about 59 s long, shorter than the 80 s window MVIS asks for, so the whole recording is used."
+      - "Cameras: the fisheye pairs of two T265 units, all global shutter, with the equidistant lens model. Each pair is synced inside its unit, but the two units are not synced to each other; their time offsets are solved against the base IMU."
+      - "IMUs: the Xsens MTi is the base IMU; the two MicroStrain units and the two T265 IMUs are solved against it."
+      - "Board: AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11."
+    config:
+      name: virig_5imus_4cams_cam_imu.yaml
+      why:
+        input.imu_topics: Five IMU topics. The first is the base IMU; the other four are solved against it.
+        input.window_mode: MVIS picks the 80 s window with the most motion; this recording is shorter, so all of it is used.
+        camera_input.cameras: The three cameras after the first are added to the graph at 4 Hz, which keeps the solve small.
+        camera_input.path: The starting camera intrinsics, from camera-only solves of all 7 recordings.
+        solve.estimate_t_ga: Estimates t_ga, the time offset between the gyroscope and the accelerometer. The T265 IMUs need it most.
+        estimate.board_points: The printed board is not quite flat, so its shape is estimated too.
+        estimate.camera.intrinsics: Camera intrinsics stay free in the camera + IMU solve.
+    reference:
+      none: >-
+        No published calibration exists for this rig, so this page has nothing to compare against. What we can show is
+        how much each value moves from one recording to the next.
+    reproduce:
+      batch: "MVIS main, 2026-11-10"
   tum-vi:
     title: TUM VI
     nav: TUM VI
