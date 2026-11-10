@@ -52,6 +52,48 @@ examples:
         how much each value moves from one recording to the next.
     reproduce:
       batch: MVIS main, measured-noise batch of 2026-11-08
+  virig-4imus-4cams:
+    title: "VI-Rig: 4 IMUs + 4 cameras"
+    nav: VI-Rig 4 IMUs + 4 cams
+    description: One MVIS camera + IMU run on our own rig, with two global-shutter and two rolling-shutter cameras and four IMUs solved together.
+    ours: true
+    maker: OpenMVIS
+    image: {file: vi-rig.jpg, alt: "VI-Rig frame, shown in its 3-camera setup; this recording swaps the Blackfly for an ELP rolling-shutter stereo pair", credit: "Photo: OpenMVIS (3-camera setup)"}
+    clip: virig4
+    card:
+      rig: T265 fisheye pair (global) + ELP stereo (rolling) + 4 IMUs (100–500 Hz) on one frame
+      format: ROS1 bag
+      shows: Global and rolling shutter cameras with four IMUs in one run, readout included
+      tags: [Global + rolling shutter, 4 cameras, 4 IMUs, CC BY-NC 4.0]
+    facts:
+      - [Cameras, "4: T265 fisheye pair (global shutter) + ELP stereo pair (rolling shutter)"]
+      - [IMUs, "4: Xsens MTi (base), 2 MicroStrain, T265"]
+      - [Board, "AprilGrid 6×6, tag 88 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY-NC 4.0"]
+    lead: "One MVIS camera + IMU run on recording 4imus_4cams_01: all four cameras and all four IMUs solved together."
+    dataset: {url: /reference/datasets/virig-4imus-4cams/, label: VI-Rig 4 IMUs + 4 cams dataset page}
+    eval: {slug: virig-4imus-4cams, label: All 15 recordings and tools}
+    data:
+      - "Recording 4imus_4cams_01, one of the 15 recordings of this rig. MVIS picks the 80 s window with the most motion."
+      - "Cameras: the two T265 fisheye cameras (global shutter) and the ELP stereo pair (rolling shutter), all with the equidistant lens model."
+      - "IMUs: the Xsens MTi is the base IMU; the two MicroStrain units and the T265's own IMU are solved against it."
+      - "Board: AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11."
+    config:
+      name: virig_4imus_4cams_cam_imu.yaml
+      why:
+        input.imu_topics: Four IMU topics. The first is the base IMU; the other three are solved against it.
+        input.window_mode: MVIS picks the 80 s window with the most motion.
+        camera_input.cameras: The ELP cameras are rolling shutter, so their readout time is estimated. The three cameras after the first are added to the graph at 4 Hz, which keeps the solve small.
+        solve.sigma_g: The same IMU noise values as the 3-camera example, which has the same Xsens base IMU.
+        estimate.board_points: The printed board is not quite flat, so its shape is estimated too.
+        estimate.camera.intrinsics: Camera intrinsics stay free in the camera + IMU solve.
+    reference:
+      none: >-
+        No published calibration exists for this rig, so this page has nothing to compare against. What we can show is
+        how much each value moves from one recording to the next.
+    reproduce:
+      batch: "MVIS main, 2026-11-10"
   tum-vi:
     title: TUM VI
     nav: TUM VI

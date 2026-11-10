@@ -95,6 +95,9 @@ def test_public_config_drops_private_sections_and_cuts_paths():
     mav = X.public_config({"input": {"path": "${D}/looper/1/mav0"}, "camera_input": {}})
     assert yaml.safe_load(mav)["input"]["path"] == "1/mav0"
     assert yaml.safe_load(X.public_config({"input": {"format": "euroc"}})) == {"input": {"format": "euroc"}}
+    shape = X.public_config({"board": {"rows": 6, "heights_file": "/home/someone/mvis/examples/board_shape.yaml"}})
+    assert yaml.safe_load(shape)["board"] == {"rows": 6, "heights_file": "board_shape.yaml"}
+    assert yaml.safe_load(X.public_config({"board": {"heights_file": None}}))["board"] == {"heights_file": None}
 
 
 def test_key_lines_and_marks():
@@ -302,8 +305,8 @@ PUB = X.public_examples()
 
 
 def test_committed_examples_order_and_our_rig_first():
-    assert list(PUB["examples"]) == ["virig-4imus-3cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
-    assert [s for s, p in PUB["examples"].items() if p.get("ours")] == ["virig-4imus-3cams"]
+    assert list(PUB["examples"]) == ["virig-4imus-3cams", "virig-4imus-4cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
+    assert [s for s, p in PUB["examples"].items() if p.get("ours")] == ["virig-4imus-3cams", "virig-4imus-4cams"]
     assert not any("featured" in p for p in PUB["examples"].values())
     assert [s["name"] for s in PUB["steps"]] == [h for h, _ in X.SECTIONS]
 

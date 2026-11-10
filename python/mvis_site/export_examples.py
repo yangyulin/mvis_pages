@@ -114,6 +114,8 @@ def public_config(cfg: dict) -> str:
         inp["path"] = _short(inp["path"])
     if "path" in c.get("camera_input", {}):
         c["camera_input"]["path"] = _short(c["camera_input"]["path"])
+    if c.get("board", {}).get("heights_file"):  # the board-shape seed (null stays null)
+        c["board"]["heights_file"] = _short(c["board"]["heights_file"])
     if "output" in c:
         c["output"] = {"path": "cam_imu.json"}
     return yaml.safe_dump(c, sort_keys=False, allow_unicode=True, default_flow_style=False, width=110)
