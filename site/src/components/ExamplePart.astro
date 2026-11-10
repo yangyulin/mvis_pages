@@ -19,13 +19,7 @@ const data = part === 'result' && x.rigs.length ? JSON.stringify({ rigs: x.rigs,
 <script src="../scripts/sensor-page.js"></script>
 
 <style is:global>
-  .sp.ex .ex-head { display: grid; grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
-  .sp.ex .ex-photo { margin: 0; }
-  .sp.ex .ex-photo img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 0.6rem; background: #fff; border: 1px solid var(--line); }
-  .sp.ex .ex-photo figcaption { font-size: 0.78rem; color: var(--muted); margin-top: 0.35rem; }
-  .sp.ex .ex-photo figcaption a { color: inherit; }
-  .sp.ex .ex-head .chips { margin: 0 0 0.75rem; }
-  .sp.ex .ex-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin: 0.75rem 0 0; }
+  .sp .ex-ours { display: inline-block; margin-right: 0.5rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 99px; background: var(--accent); color: var(--bg); }
   .sp.ex .ex-callout { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 0.4rem; padding: 0.75rem 1rem; background: var(--soft); }
   .sp.ex .ex-callout p { margin: 0; }
   .sp.ex .ex-kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.35rem 1rem; margin: 0; }
@@ -33,7 +27,4 @@ const data = part === 'result' && x.rigs.length ? JSON.stringify({ rigs: x.rigs,
   .sp.ex .ex-kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
   .sp.ex table.num { font-size: 0.85rem; }
   .sp.ex table.num th { text-align: left; white-space: nowrap; }
-  @media (max-width: 44rem) {
-    .sp.ex .ex-head { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
-  }
 </style>

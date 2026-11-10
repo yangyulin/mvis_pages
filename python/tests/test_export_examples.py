@@ -26,7 +26,7 @@ def write_views(d, cams=("cam0", "cam1"), frames=False):
 
 CFG = {"mode": "cam-imu", "input": {"format": "ros1", "path": "/data/somewhere/rec_01.bag", "imu_topics": ["/imu0", "/imu1"],
                                     "cache_dir": "/scratch/cache", "window_mode": "motion"},
-       "board": {"tag_size": 0.088}, "camera_input": {"path": "/x/y/seed_calib.yaml", "cameras": [{}, {"factor_hz": 4.0}]},
+       "board": {"rows": 2, "cols": 3, "tag_size": 0.088, "tag_spacing": 0.3}, "camera_input": {"path": "/x/y/seed_calib.yaml", "cameras": [{}, {"factor_hz": 4.0}]},
        "solve": {"sigma_g": 0.001, "estimate_t_ga": True}, "estimate": {"camera": {"intrinsics": True}},
        "reference": {"camchain": "/private/ref.yaml"}, "output": {"path": "/deep/out/cam_imu.json"}}
 
@@ -45,10 +45,10 @@ def pub_doc():
            "cams": [{"name": "cam0", "p_mm": [-31.0, 2.0, 5.0], "rotvec": [0.02, -0.01, 0.001], "fx": 299.5, "td_ms": 1.0},
                     {"name": "cam1", "p_mm": [32.0, 1.0, 4.0], "rotvec": [0.01, 0.02, 0.0]}], "td_text": "fixed at 0", "notes": ["A note."]}
     base = lambda title, **kw: {"title": title, "nav": title, "description": "D.", "maker": "Maker", "image": {"file": "a.jpg", "alt": "A rig", "credit": "Photo: us"},
-                                "clip": "k", "card": {"rig": "R", "format": "ROS1 bag", "shows": "S", "tags": ["2 cameras"]}, "chips": ["c"],
+                                "clip": "k", "card": {"rig": "R", "format": "ROS1 bag", "shows": "S", "tags": ["2 cameras"]}, "facts": [["Board", "AprilGrid"]],
                                 "lead": "L.", "dataset": {"url": "/reference/datasets/a/", "label": "Data page"}, "data": ["One."],
                                 "config": {"name": "a.yaml", "why": {"input.imu_topics": "Two IMUs.", "solve.sigma_g": "Measured."}}, **kw}
-    return {"steps": [{"name": n, "text": "t."} for n in ["Data", "Config", "Run", "Watch", "Result", "Check", "Reproduce"]],
+    return {"steps": [{"name": n, "text": "t."} for n, _ in X.SECTIONS],
             "examples": {"ours": base("Ours", card={"rig": "R", "format": "ROS1 bag", "shows": "S", "tags": ["2 cameras", "2 IMUs"]}, featured=True, ours=True, eval={"slug": "ours", "label": "All runs"},
                                       reference={"none": "No reference."}, reproduce={"batch": "MVIS main, batch X"},
                                       folds=[{"title": "More", "key": "k", "text": "T.", "link": {"url": "/x/", "label": "X"}}]),
@@ -148,7 +148,7 @@ def test_render_writes_every_example_and_one_map_per_page(world):
         page = json.loads(plan.texts[f"{X.EX_DATA}/{s}.json"])
         mdx = plan.texts[f"{X.EX_DOCS}/{s}.mdx"]
         assert mdx.count('part="result"') == 1 and len(page["rigs"]) <= 1
-        assert [h for h in re.findall(r"^## (\d)\. (.+)$", mdx, re.M)] == [(str(i), n) for i, n in enumerate(["Data", "Config", "Run", "Watch", "Result", "Check", "Reproduce"], 1)]
+        assert re.findall(r"^## (.+)$", mdx, re.M)[:6] == [h for h, _ in X.SECTIONS] and f"example: {s}\n" in mdx
         assert not re.search(r'"(roll|pitch|yaw|rpy)"', plan.texts[f"{X.EX_DATA}/{s}.json"], re.I)
     ours = json.loads(plan.texts[f"{X.EX_DATA}/ours.json"])
     assert len(ours["rigs"]) == 1 and ours["pending"] == [] and 'data-src="/media/examples/ours/views0.json"' in ours["parts"]["process"]
@@ -162,7 +162,7 @@ def test_pending_example_has_no_player_map_or_stats(world):
     assert "mvv" not in w["parts"]["process"] and "stage" not in w["parts"]["result"] and "waiting for the solve" in w["parts"]["result"]
     assert "comparison table appears with the solve" in w["parts"]["check"]
     mdx = plan.texts[f"{X.EX_DOCS}/waiting.mdx"]
-    assert "```yaml" not in mdx and "```bash" not in mdx
+    assert "```yaml" not in mdx and "```bash" not in mdx and "waiting for the solve" in w["parts"]["glance"] and "<svg" not in w["parts"]["dataset"]
 
 
 def test_config_fence_marks_the_explained_lines(world):
@@ -177,6 +177,19 @@ def test_config_fence_marks_the_explained_lines(world):
 def test_a_note_on_a_missing_config_key_is_a_problem(world):
     world["pub"]["examples"]["ours"]["config"]["why"]["solve.nope"] = "x"
     assert any("solve.nope" in p for p in _plan(world).problems)
+
+
+def test_header_is_the_sensor_datasheet_with_our_rig_mark_and_links(world):
+    plan = _plan(world)
+    ours = json.loads(plan.texts[f"{X.EX_DATA}/ours.json"])["parts"]
+    th = json.loads(plan.texts[f"{X.EX_DATA}/theirs.json"])["parts"]
+    assert "class=ex-ours>Our rig<" in ours["header"] and "ex-ours" not in th["header"]
+    assert 'class="sd-btn primary" href="/reference/datasets/a/">Downloads: Data page →' in ours["header"]
+    assert 'href="/benchmark/results/">All runs: Results →' in ours["header"] and 'href="/sensors/b/">B wiki →' in th["header"]
+    assert "<dt>Board</dt><dd>AprilGrid</dd>" in ours["header"] and 'href="https://example.org/b">Photo: them ↗' in th["header"]
+    assert "class=tiles" in ours["glance"] and "/media/hero/hero_k_960.mp4" in ours["glance"]
+    assert "AprilGrid 2 × 3" in ours["dataset"] and "Solve window: 2.5 s." in ours["dataset"]
+    assert "Run date" in ours["config"] and "MVIS main, batch X" in ours["config"]
 
 
 def test_results_table_holds_every_sensor_with_rotation_vectors(world):
@@ -277,7 +290,7 @@ PUB = X.public_examples()
 def test_committed_examples_order_and_featured_rig():
     assert list(PUB["examples"]) == ["virig-4imus-3cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
     assert [s for s, p in PUB["examples"].items() if p.get("featured")] == ["virig-4imus-3cams"]
-    assert len(PUB["steps"]) == 7
+    assert [s["name"] for s in PUB["steps"]] == [h for h, _ in X.SECTIONS]
 
 
 @pytest.mark.parametrize("slug", list(PUB["examples"]))

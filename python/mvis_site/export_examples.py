@@ -1,4 +1,4 @@
-"""Example pages for openmvis.com (/benchmark/examples/): one MVIS run per example, in seven steps, plus the overview cards.
+"""Example pages for openmvis.com (/benchmark/examples/): one MVIS run per example, in the Sensor wiki's page layout, plus the overview cards.
 
 The words come from data/public_examples.yaml. The run of each example is named in the private mira sensors.yaml
 `examples:` section (passed by path); only its run folders and config files are read, through example_config. An example
@@ -20,14 +20,14 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from . import DATA
+from . import DATA, assets
 from .export_sensors import Plan, write
 from .geometry import rot_angle_between
 from .lint import process_strings, public_problems, strip_urls
-from .markup import MAP_STAGE, e, num, reproj, vec
+from .markup import MAP_STAGE, board_svg, e, num, reproj, vec
 from .results import expand_root, load_variant, refuse_frames
-from .sensor_header import process_block
-from .sensor_parts import MAP_LEAD, PLOTLY_LOCAL, map_panel, rig_json
+from .sensor_header import TILE_TERMS, process_block
+from .sensor_parts import MAP_LEAD, PLOTLY_LOCAL, clip, glance, map_panel, rig_json
 
 EX_DATA = "site/src/data/examples"
 EX_MEDIA = "site/public/media/examples"
@@ -183,27 +183,56 @@ def eval_link(p: dict, have: set[str]) -> dict | None:
     return {"url": EVAL, "label": f"{ev['label']}: Results"}
 
 
+def _btn(x: dict, primary: bool = False) -> str:
+    out = " ↗" if x["url"].startswith("http") else " →"
+    return f'<a class="sd-btn{" primary" if primary else ""}" href="{e(x["url"])}">{e(x["label"])}{out}</a>'
+
+
 def header(slug: str, p: dict, ev: dict | None) -> str:
+    """The sensor pages' datasheet header (sensor_header.css): maker, title, rig line, photo with its credit, buttons
+    to the downloads, the Results and the Sensor wiki, and the key facts."""
     img = p["image"]
     cap = f'<a href="{e(img["url"])}">{e(img["credit"])} ↗</a>' if img.get("url") else e(img["credit"])
-    links = [x for x in (ev, p.get("sensor"), {"url": p["dataset"]["url"], "label": f'Downloads: {p["dataset"]["label"]}'}) if x]
-    return (f'<div class=ex-head><figure class=ex-photo><img src="/media/examples/{slug}/{e(img["file"])}" alt="{e(img["alt"])}" width="800" height="533">'
-            f'<figcaption>{cap}</figcaption></figure><div><div class=chips>' + "".join(f"<span class=chip>{e(c)}</span>" for c in p["chips"])
-            + f'</div><p class=lead><b>What you\'ll see:</b> {e(p["lead"])}</p><p class=ex-links>' + " ".join(link(x) for x in links) + "</p></div></div>")
+    ours = "<span class=ex-ours>Our rig</span>" if p.get("ours") else ""
+    btns = _btn({"url": p["dataset"]["url"], "label": f'Downloads: {p["dataset"]["label"]}'}, True) + "".join(_btn(x) for x in (ev, p.get("sensor")) if x)
+    rows = "".join(f"<div class=sd-row><dt>{e(a)}</dt><dd>{e(b)}</dd></div>" for a, b in p["facts"])
+    return (f'<div class="sd ex-sd"><div class=sd-grid><div class=sd-head><span class="sd-maker none">{ours}{e(p["maker"])}</span><h1 id="_top">{e(p["title"])}</h1>'
+            f'<p class=sd-type>{e(p["card"]["rig"])}</p></div>'
+            f'<figure class=sd-plate><div class=sd-frame><img src="/media/examples/{slug}/{e(img["file"])}" alt="{e(img["alt"])}" width="800" height="533"></div><figcaption>{cap}</figcaption></figure>'
+            f'<div class=sd-cta><div class=sd-buttons>{btns}</div></div>'
+            f'<div class=sd-specs><dl class=sd-rows>{rows}</dl></div></div></div>')
 
 
-def data_part(p: dict, v: dict | None) -> str:
+def glance_part(p: dict, v: dict | None) -> str:
+    """What the page shows, the MVIS-rendered clip of this dataset beside the run's value tiles (sensor_parts.glance)."""
+    lead = f'<p>{e(p["lead"])}</p>'
+    demo = clip(f"{CLIPS}/hero_{p['clip']}_960.mp4", f"{CLIPS}/hero_{p['clip']}_960.jpg",
+                "The scene MVIS recovered from this dataset, as on the homepage. The values beside it come from this page's run.")
+    if not v:
+        return lead + f'<div class=band>{demo}<div class="demo empty"><b>Values waiting for the solve.</b> {PENDING}</div></div>'
+    return lead + glance(demo, [v]) + TILE_TERMS
+
+
+def dataset_part(p: dict, v: dict | None) -> str:
+    """The recording, its download, and the board drawn to scale from the run's own config."""
     items = list(p["data"])
     if v:
         items.append(f"Solve window: {num(window_s(v), 1)} s.")
-    return ("<ul class=list>" + "".join(f"<li>{e(x)}</li>" for x in items) + "</ul>"
+    text = ("<ul class=list>" + "".join(f"<li>{e(x)}</li>" for x in items) + "</ul>"
             + f'<p>Download: {link(p["dataset"])} The recordings are listed there, not copied here.</p>')
-
-
-def run_part(v: dict | None) -> str:
     if not v:
-        return f"<p class=note>{PENDING}</p>"
-    return f'<p>The solve took about {max(1, round(v["run"]["solve_s"] / 60))} min on one desktop. It writes <code>cam_imu.json</code>, a calibration YAML and a report beside the config.</p>'
+        return text
+    b = v["config"]["board"]
+    board = board_svg({"rows": b["rows"], "cols": b["cols"], "tag_mm": 1000 * b["tag_size"], "spacing": b["tag_spacing"]}, assets.apriltag())
+    return f"<div class=two><div>{text}</div><div>{board}</div></div>"
+
+
+def config_run_part(notes: str, p: dict, v: dict | None) -> str:
+    """Under the config and command fences: what the marked lines do, the runtime and what to reproduce."""
+    if not v:
+        return notes
+    return (notes + f'<p>The solve took about {max(1, round(v["run"]["solve_s"] / 60))} min on one desktop. It writes <code>cam_imu.json</code>, '
+            "a calibration YAML and a report beside the config.</p>" + reproduce_part(p, v, p["config"]["name"]))
 
 
 def process_part(slug: str, v: dict | None) -> str:
@@ -273,11 +302,9 @@ def check_part(ref: dict, v: dict | None, ev: dict | None) -> str:
     return src + check_table(ref, v)
 
 
-def reproduce_part(p: dict, v: dict | None, name: str) -> str:
-    if not v:
-        return f"<p class=note>{PENDING}</p>"
+def reproduce_part(p: dict, v: dict, name: str) -> str:
     batch = (p.get("reproduce") or {}).get("batch", "MVIS main")
-    rows = [("MVIS", batch), ("Run date", v["date"]), ("Data", link(p["dataset"])), ("Config", f"<code>{e(name)}</code>, step 2"),
+    rows = [("MVIS", batch), ("Run date", v["date"]), ("Data", link(p["dataset"])), ("Config", f"<code>{e(name)}</code>, above"),
             ("Command", f"<code>mvis cam-imu -c {e(name)}</code>")]
     return "<dl class=ex-kv>" + "".join(f"<dt>{a}</dt><dd>{b if b.startswith('<') else e(b)}</dd>" for a, b in rows) + "</dl>"
 
@@ -291,12 +318,6 @@ def other_part(o: dict, v: dict | None) -> str:
     """A second device: its lead, result table and check, no map (one map per page)."""
     body = result_table(v) + check_part(o["reference"], v, None) if v else f"<div class=\"demo empty\"><b>Waiting for the solve.</b> {PENDING}</div>"
     return f"<p>{e(o['lead'])}</p>{body}"
-
-
-def next_part(slug: str, pub: dict, ev: dict | None, p: dict) -> str:
-    others = [f'<a href="{BASE}{s}/">{e(x["nav"])}</a>' for s, x in pub["examples"].items() if s != slug]
-    nxt = [link(x) for x in (ev, p.get("sensor")) if x]
-    return f'<p class=ex-links>{" ".join(nxt)}</p><p class=note>Other examples: {" · ".join(others)}</p>'
 
 
 # --- card, MDX, sidebar ------------------------------------------------------------------------------------------
@@ -328,25 +349,26 @@ def card_problems(slug: str, tags: list[str], v: dict | None) -> list[str]:
     return out
 
 
-def example_mdx(slug: str, p: dict, steps: list[dict], fences: dict, other: dict | None) -> str:
+SECTIONS = [("Demo and values", "glance"), ("Calibration process", "process"), ("Solved rig", "result"), ("Check against a reference", "check"),
+            ("Config and run", "config"), ("Dataset", "dataset")]
+
+
+def example_mdx(slug: str, p: dict, fences: dict, other: dict | None) -> str:
+    """The page in the Sensor wiki's layout: the header in the title slot (PageTitle reads `example:`), then the sections."""
     q = lambda t: json.dumps(t, ensure_ascii=False)
     part = lambda k: f'<ExamplePart example="{slug}" part="{k}" />\n\n'
-    keys = ["data", "config", "run", "process", "result", "check", "reproduce"]
-    body = ""
-    for n, (s, k) in enumerate(zip(steps, keys), 1):
-        body += f"## {n}. {s['name']}\n\n" + (fences.get(k, "")) + part(k)
+    body = "".join(f"## {h}\n\n" + fences.get(k, "") + part(k) for h, k in SECTIONS)
     if other:
         body += f"## {other['title']}\n\n" + fences.get("other", "") + part("other")
     if p.get("folds"):
         body += "## More on this data\n\n" + part("more")
-    body += "## Next\n\n" + part("next")
-    return (f"---\ntitle: {q(p['title'])}\ndescription: {q(p['description'])}\npageType: example\nwide: true\n---\n\n"
+    return (f"---\ntitle: {q(p['title'])}\ndescription: {q(p['description'])}\npageType: example\nwide: true\nexample: {slug}\n---\n\n"
             "{/* Generated by export_examples.py. Edit python/data/public_examples.yaml, not this file. */}\n"
-            "import ExamplePart from '../../../../components/ExamplePart.astro';\n\n" + part("header") + body)
+            "import ExamplePart from '../../../../components/ExamplePart.astro';\n\n" + body)
 
 
 def overview_mdx(pub: dict) -> str:
-    steps = "".join(f"{n}. **{s['name']}:** {s['text']}\n" for n, s in enumerate(pub["steps"], 1))
+    steps = "".join(f"- **{s['name']}:** {s['text']}\n" for s in pub["steps"])
     return ("---\ntitle: Examples\ndescription: Complete MVIS calibration runs on released datasets. Pick the one whose rig looks most like yours.\npageType: reference\nwide: true\n---\n\n"
             "{/* Generated by export_examples.py. Edit python/data/public_examples.yaml, not this file. */}\n"
             "import ExampleGrid from '../../../../components/ExampleGrid.astro';\n\n"
@@ -355,7 +377,7 @@ def overview_mdx(pub: dict) -> str:
             "Pick the one whose rig looks most like yours.\n\n"
             f"<ExampleGrid slugs={{{json.dumps(list(pub['examples']))}}} />\n\n"
             "Looking for a specific sensor? See the [Sensor wiki](/sensors/). All tools on all recordings? See [Results](/benchmark/results/).\n\n"
-            "## How to read these pages\n\nEvery example has the same seven steps, in this order:\n\n" + steps +
+            "## How to read these pages\n\nEvery example page is laid out like a Sensor wiki page: a header card with the photo, the key facts and links, then the same sections in this order:\n\n" + steps +
             "\nDownloads are on each dataset's own page, and comparisons across tools are on the Results pages.\n\n"
             ":::note[Figures come from the run]\nThe player, the map and the tables on each page are generated from the run they document. "
             "If a figure and the text disagree, the figure is right.\n:::\n\n"
@@ -376,11 +398,10 @@ def render(pub: dict, collected: dict, photos: Path, have_eval: set[str]) -> Pla
         ev = eval_link(p, have_eval)
         fence, notes, probs = config_block(p["config"], v)
         fences, plan.problems = {"config": fence}, plan.problems + [f"{slug}: {x}" for x in probs]
-        parts = {"header": header(slug, p, ev), "data": data_part(p, v), "config": notes, "run": run_part(v), "process": process_part(slug, v),
-                 "result": result_part(v), "check": check_part(p["reference"], v, ev), "reproduce": reproduce_part(p, v, p["config"]["name"]),
-                 "more": more_part(p), "next": next_part(slug, pub, ev, p)}
+        parts = {"header": header(slug, p, ev), "glance": glance_part(p, v), "process": process_part(slug, v), "result": result_part(v),
+                 "check": check_part(p["reference"], v, ev), "config": config_run_part(notes, p, v), "dataset": dataset_part(p, v), "more": more_part(p)}
         if v:
-            fences["run"] = f'```bash title="shell"\nmvis cam-imu -c {p["config"]["name"]}\n```\n\n'
+            fences["config"] += f'```bash title="shell"\nmvis cam-imu -c {p["config"]["name"]}\n```\n\n'
         o = p.get("other")
         if o:
             ofence, onotes, oprobs = config_block(o["config"], ov)
@@ -391,7 +412,7 @@ def render(pub: dict, collected: dict, photos: Path, have_eval: set[str]) -> Pla
         page = {"title": p["title"], "parts": parts, "rigs": [rig_json(v)] if v else [], "procs": [None] if v else [], "plotly": PLOTLY_LOCAL,
                 "card": card(slug, p, v), "pending": (["main"] if not v else []) + (["other"] if o and not ov else [])}
         txt = json.dumps(page, ensure_ascii=False)
-        m = example_mdx(slug, p, pub["steps"], fences, o)
+        m = example_mdx(slug, p, fences, o)
         plan.problems += [f"{slug}: {x}" for x in public_problems(strip_links("\n".join(parts.values()) + json.dumps(page["card"], ensure_ascii=False))) + public_problems(strip_links(m))]
         out = f"{EX_MEDIA}/{slug}"
         plan.clear.append(out)

@@ -3,13 +3,12 @@
 # path), never from here. The config shown on a page is that run's own config with paths cut to file names.
 # The order below is the order on the site: overview cards and sidebar. Every photo lives in data/photos, 800×533.
 steps:
-  - {name: Data, text: "which recording and why, its board, and where to download it."}
-  - {name: Config, text: "the run's own config, with the lines that matter for that rig marked and explained."}
-  - {name: Run, text: "the one command, and roughly how long it takes."}
-  - {name: Watch MVIS calibrate, text: "MVIS's own player: the detected corners, then the rig's path as the solve refines it."}
-  - {name: Result, text: "a 3D map of the solved rig and a table of every camera and IMU: intrinsics, lever arm, rotation as log(R), time offsets."}
+  - {name: Demo and values, text: "what the page shows, the scene MVIS recovered from the dataset, and the run's headline values."}
+  - {name: Calibration process, text: "MVIS's own player: the detected corners, then the rig's path as the solve refines it."}
+  - {name: Solved rig, text: "a 3D map of the solved rig and a table of every camera and IMU: intrinsics, lever arm, rotation as log(R), time offsets."}
   - {name: Check against a reference, text: "MVIS beside a published calibration and the difference, where one exists. Where none does, the page says so."}
-  - {name: Reproduce, text: "the MVIS version, the run date, the data and the command, to get the same numbers."}
+  - {name: Config and run, text: "the run's own config with the lines that matter marked and explained, the command, and what you need to get the same numbers."}
+  - {name: Dataset, text: "the recording, its board drawn to scale, and where to download it."}
 examples:
   virig-4imus-3cams:
     title: "VI-Rig: 4 IMUs + 3 cameras"
@@ -17,7 +16,7 @@ examples:
     description: One MVIS camera + IMU run on our own rig, with three global-shutter cameras and four IMUs solved together.
     featured: true
     ours: true
-    maker: OpenMVIS · our rig
+    maker: OpenMVIS
     image: {file: vi-rig.jpg, alt: "VI-Rig: three cameras and four IMUs on one white frame", credit: "Photo: OpenMVIS"}
     clip: virig3
     card:
@@ -25,7 +24,12 @@ examples:
       format: ROS1 bag
       shows: Every camera and IMU solved together in one run, the multi-IMU case
       tags: [Global shutter, 3 cameras, 4 IMUs, CC BY-NC 4.0]
-    chips: [3 global-shutter cameras, "4 IMUs, 100–500 Hz", "AprilGrid 6×6, 88 mm", ROS1 bag, CC BY-NC 4.0]
+    facts:
+      - [Cameras, "3 global shutter: Blackfly S + T265 fisheye pair"]
+      - [IMUs, "4: Xsens MTi (base), 2 MicroStrain, T265"]
+      - [Board, "AprilGrid 6×6, tag 88 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on recording april_01: every camera and all four IMUs solved together."
     dataset: {url: /reference/datasets/virig-4imus-3cams/, label: VI-Rig 4 IMUs + 3 cams dataset page}
     eval: {slug: virig-4imus-3cams, label: All 10 recordings and three tools}
@@ -61,7 +65,12 @@ examples:
       format: ROS1 bag
       shows: One MVIS run vs TUM's published Kalibr calibration
       tags: [Global shutter, 2 cameras, 200 Hz IMU, CC BY 4.0]
-    chips: [2 global-shutter fisheye cameras, 200 Hz IMU, "AprilGrid 6×6, 88 mm", ROS1 bag, CC BY 4.0]
+    facts:
+      - [Cameras, "2 × 1024² global-shutter fisheye, 20 Hz"]
+      - [IMU, "Bosch BMI160, 200 Hz"]
+      - [Board, "AprilGrid 6×6, tag 88 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY 4.0"]
     lead: "One MVIS camera + IMU run on dataset-calib-imu1, and how close it lands to TUM's published Kalibr calibration."
     dataset: {url: "https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset", label: TUM VI dataset page}
     eval: {slug: tum-vi, label: All recordings and tools}
@@ -110,7 +119,12 @@ examples:
       format: EuRoC mav0
       shows: A consumer headset from public data, vs Monado's own calibration
       tags: [2 cameras, 1 kHz IMU, CC BY 4.0]
-    chips: [Tracking-camera pair, 1 kHz IMU, "AprilGrid 6×6, 30 mm", EuRoC mav0, CC BY 4.0]
+    facts:
+      - [Cameras, "2 × 640×480 grayscale, 30 Hz (front pair)"]
+      - [IMU, "About 1 kHz"]
+      - [Board, "AprilGrid 6×6, tag 30 mm"]
+      - [Format, "EuRoC mav0"]
+      - [Licence, "CC BY 4.0"]
     lead: "One MVIS camera + IMU run on the HP Reverb G2 recording imucalib01 (round 1), and how close it lands to the calibration Monado ships with the data."
     dataset: {url: "https://huggingface.co/datasets/collabora/monado-slam-datasets", label: Monado SLAM Datasets}
     sensor: {url: /sensors/hp-reverb-g2/, label: HP Reverb G2 in the Sensor wiki}
@@ -165,7 +179,12 @@ examples:
       format: ROS bag → EuRoC mav0
       shows: The rolling-shutter readout solved alongside the global-shutter cameras
       tags: [Global + rolling shutter, 3 cameras, 400 Hz IMU, CC BY-NC 4.0]
-    chips: [2 global-shutter mono cameras, 1 rolling-shutter colour camera, 400 Hz IMU, "AprilGrid 6×6, 55 mm", CC BY-NC 4.0]
+    facts:
+      - [Cameras, "2 × 544×640 mono global shutter + 1920×1088 colour rolling shutter"]
+      - [IMU, "400 Hz"]
+      - [Board, "AprilGrid 6×6, tag 55 mm"]
+      - [Format, "EuRoC mav0"]
+      - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on hand-held recording 1: the two mono cameras, the rolling-shutter colour camera and its readout time, solved together."
     dataset: {url: "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9", label: "Calibench, looper-insight9/"}
     sensor: {url: /sensors/looper-insight9/, label: Looper Insight 9 in the Sensor wiki}
@@ -199,14 +218,19 @@ examples:
     nav: UZH-FPV
     description: One MVIS camera + IMU run per device on the UZH-FPV drone racing calibration data, compared with the dataset's own Kalibr calibration.
     maker: UZH Robotics and Perception Group
-    image: {file: uzh-fpv-frame.jpg, alt: "MVIS view of the Snapdragon Flight solve: the board, the camera path and one camera's view", credit: "Frame: UZH-FPV Drone Racing Dataset, CC BY-NC-SA 3.0"}
+    image: {file: uzh-fpv-drone.jpg, alt: "The UZH-FPV racing quadrotor with its Snapdragon Flight board, mDAVIS346 camera and motion-capture prism", credit: "Photo: UZH Robotics and Perception Group, Delmerico et al., ICRA 2019, Fig. 4", url: "https://rpg.ifi.uzh.ch/docs/ICRA19_Delmerico.pdf"}
     clip: uzhs
     card:
       rig: Snapdragon Flight stereo + IMU; mDAVIS346 + IMU
       format: ROS1 bag
       shows: One MVIS run per device on a racing drone
       tags: [Global shutter, Event camera, Drone, CC BY-NC-SA 3.0]
-    chips: [Snapdragon Flight stereo + IMU, mDAVIS346 + IMU, "AprilGrid 5×4, 75 mm", ROS1 bag, CC BY-NC-SA 3.0]
+    facts:
+      - [Cameras, "Snapdragon: 2 × 640×480 global shutter. mDAVIS346: 1 × 346×260"]
+      - [IMU, "About 500 Hz (Snapdragon), about 1 kHz (mDAVIS346)"]
+      - [Board, "AprilGrid 5×4, tag 75 mm"]
+      - [Format, "ROS1 bag"]
+      - [Licence, "CC BY-NC-SA 3.0"]
     lead: "One MVIS camera + IMU run on the Snapdragon Flight's outdoor forward calibration recording, and one on the mDAVIS346's, each against the Kalibr calibration the dataset ships."
     dataset: {url: "https://fpv.ifi.uzh.ch/datasets/", label: UZH-FPV datasets page}
     eval: {slug: uzh-fpv, label: MVIS, Kalibr and Basalt on all 8 calibration recordings}

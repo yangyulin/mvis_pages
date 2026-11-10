@@ -8,7 +8,8 @@
 import Default from '@astrojs/starlight/components/Head.astro';
 
 const wide = Astro.locals.starlightRoute.entry.data.wide === true;
-const sensor = Boolean((Astro.locals.starlightRoute.entry.data as any).sensor);
+const data = Astro.locals.starlightRoute.entry.data as any;
+const sensor = Boolean(data.sensor || data.example);
 ---
 
 <Default><slot /></Default>
