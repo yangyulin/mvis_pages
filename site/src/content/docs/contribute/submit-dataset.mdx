@@ -4,17 +4,26 @@ description: Contribute a calibration dataset — required format, dataset card,
 pageType: guide
 ---
 
-A rig we do not have is more useful than another run on a rig we do. Datasets
-are what make the benchmark meaningful, and contributed ones are cited and
-credited.
+Use this page to give us a calibration dataset. The steps are:
+
+1. Check it is usable.
+2. Package it.
+3. Write a dataset card.
+4. Check the licence.
+5. Send it.
+
+A rig we do not have is more useful than another run on a rig we do.
+Datasets are what make the benchmark meaningful. We cite and credit every
+contributed dataset.
 
 ## 1. Check it is usable
 
-A dataset only helps if a calibration can actually be run on it:
+A dataset only helps if we can actually run a calibration on it. It needs:
 
 - **Raw, synchronised sensor streams** — no pre-rectified images, no
-  vendor-corrected IMU output. Corrections you cannot undo make intrinsics
-  uncalibratable.
+  vendor-corrected IMU output. (The IMU is the inertial measurement unit: the
+  gyroscope and accelerometer.) Corrections you cannot undo make intrinsics
+  (the camera's own lens and sensor parameters) uncalibratable.
 - **A visible calibration target** for a meaningful part of the recording, with
   its geometry stated (tag family, tag size, spacing).
 - **Well-excited motion** — rotation about all three axes, not just translation.
@@ -33,48 +42,56 @@ A dataset only helps if a calibration can actually be run on it:
 | Timing | Whether streams are hardware-synchronised; rolling-shutter convention if applicable |
 | Reference | Any existing calibration, and what produced it |
 
-If a reference calibration exists — even an imperfect one — include it and say
-how it was obtained. It turns the dataset into something a method can be
-validated *against* rather than merely run on.
+Include any reference calibration, even an imperfect one, and say how it was
+obtained. Then a method can be validated *against* the dataset, not merely run
+on it.
 
 ## 3. Write a dataset card
 
-One page, alongside the data:
+Put one page alongside the data. It covers:
 
-- What the rig is and what makes it interesting
-- How and where the recording was made
-- Known problems — dropped frames, clock glitches, saturated segments,
+- **Rig:** what it is and what makes it interesting
+- **Recording:** how and where it was made
+- **Known problems:** dropped frames, clock glitches, saturated segments,
   soft-synchronised streams
-- Licence and how to cite it
-- Contact for questions
+- **Licence:** the licence and how to cite it
+- **Contact:** who to ask with questions
 
 :::note[Say what is wrong with it]
 The known-problems section is the most valuable part. A documented flaw is a
-usable dataset; an undocumented one produces results nobody can explain, and
+usable dataset. An undocumented one produces results nobody can explain, and
 costs every later user the same debugging.
 :::
 
 ## 4. Licensing
 
 Datasets need a licence that permits redistribution and derivative results.
-Contributed recordings hosted in
-[`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
-are CC BY-NC 4.0, with access by automatic approval. Data you can't license that
-way comes in as a download recipe that points to where it's hosted. Recordings containing identifiable people or
-private spaces need that resolved before submission, not after.
+
+- **Community repository:** contributed recordings hosted in
+  [`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
+  are CC BY-NC 4.0, with access by automatic approval.
+- **Otherwise:** data you can't license that way comes in as a download
+  recipe that points to where it's hosted.
+- **People and private spaces:** recordings containing identifiable people or
+  private spaces need that resolved before submission, not after.
 
 ## 5. Send it
 
-Open an issue on [the site repository](https://github.com/yangyulin/mvis_pages)
-describing the dataset and linking the data. Hosting is arranged from there:
-large datasets go to Hugging Face with a Zenodo DOI so they are citable.
+Open an issue on [the site repository](https://github.com/yangyulin/mvis_pages).
+Describe the dataset and link the data.
+
+We arrange hosting from there. Large datasets go to Hugging Face with a Zenodo
+DOI (a permanent digital object identifier) so they are citable.
 
 ## Credit
 
-Contributed datasets get a per-dataset DOI and citation, a named entry on
-[Contributors](/about/contributors/), and — where the dataset drives a
-benchmark or dataset paper — co-authorship. Details in
-[Governance](/contribute/governance/).
+Contributed datasets get:
+
+- a per-dataset DOI and citation
+- a named entry on [Contributors](/about/contributors/)
+- co-authorship, where the dataset drives a benchmark or dataset paper
+
+Details are in [Governance](/contribute/governance/).
 
 To submit a *result* on an existing dataset instead, see
 [Submit results](/contribute/submit-results/).

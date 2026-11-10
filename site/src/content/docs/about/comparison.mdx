@@ -5,9 +5,12 @@ pageType: reference
 wide: true
 ---
 
-Where MVIS sits relative to the toolboxes most people already use. Kalibr is
-mature and widely validated; MVIS is not trying to displace it on the
-single-IMU case it does well.
+Use this page to see where MVIS sits next to Kalibr and Basalt, the toolboxes
+most people already use. Kalibr is mature and widely validated. MVIS is not
+trying to displace it on the single-IMU case it does well.
+
+An IMU (inertial measurement unit) is the sensor with a gyroscope and an
+accelerometer.
 
 ## Feature matrix
 
@@ -34,48 +37,48 @@ single-IMU case it does well.
 
 ## What is actually different
 
-**No ROS.** Pure Python via `pip`, on Windows, macOS, and Linux. Bags are read
-with `rosbags`. For anyone calibrating outside a ROS environment this is the
-whole story.
-
-**More than one IMU.** Kalibr and Basalt model a single IMU; a four-IMU rig has
-to be calibrated pairwise and composed, which accumulates error and throws away
-the correlations. MVIS puts every IMU in one graph.
-
-**It measures driver artefacts instead of working around them.** `t_ga`
-quantifies the gyro-vs-accel timing offset a driver's interpolation introduces —
-the T265 reads −6.2 ms, stable to ~0.2 ms. Kalibr has no equivalent; the usual
-alternative is to discard the sensor.
-
-**Validation is a command, not a habit.** `mvis roundtrip` gives a PASS/FAIL
-that requires IMU intrinsics to collapse *and* geometry to hold. Nothing
-comparable ships with the others.
-
-**Discrete-time.** Kalibr and Basalt fit a B-spline; MVIS places state nodes
-at `state_hz`. The trade-off is in
-[Continuous-time refinement](/concepts/continuous-time/).
+- **No ROS.** MVIS is pure Python via `pip`, on Windows, macOS, and Linux.
+  Bags are read with `rosbags`. If you calibrate outside a ROS environment,
+  this is the whole story.
+- **More than one IMU.** MVIS puts every IMU in one graph. Kalibr and Basalt
+  model a single IMU. There, a four-IMU rig has to be calibrated pairwise and
+  composed. That accumulates error and throws away the correlations.
+- **It measures driver artefacts instead of working around them.** `t_ga` is
+  the time offset between the gyroscope and accelerometer channels. MVIS
+  measures the offset a driver's interpolation introduces. The T265 reads
+  −6.2 ms, stable to ~0.2 ms. Kalibr has no equivalent; the usual alternative
+  is to discard the sensor.
+- **Validation is a command, not a habit.** `mvis roundtrip` gives a
+  PASS/FAIL. A PASS requires IMU intrinsics to collapse *and* geometry to
+  hold. Nothing comparable ships with the others.
+- **Discrete-time.** MVIS places state nodes at `state_hz`. Kalibr and Basalt
+  fit a B-spline (a smooth continuous-time curve). The trade-off is in
+  [Continuous-time refinement](/concepts/continuous-time/).
 
 ## Where the others are still ahead
 
-**Maturity.** Kalibr has a decade of use across the field. MVIS's 228-run
-benchmark is strong evidence, not the same thing as that.
-
-**Ecosystem.** Kalibr's target generators, tutorials, and community answers have
-no MVIS equivalent yet.
-
-**Continuous-time.** If your sensors are genuinely asynchronous at high rate, a
-B-spline handles it natively; MVIS does not yet offer it.
+- **Maturity.** Kalibr has a decade of use across the field. MVIS's 228-run
+  benchmark is strong evidence, but not the same thing as that.
+- **Ecosystem.** Kalibr's target generators, tutorials, and community answers
+  have no MVIS equivalent yet.
+- **Continuous-time.** Are your sensors genuinely asynchronous at high rate?
+  Then a B-spline handles it natively. MVIS does not yet offer it.
 
 ## Agreement with Kalibr
 
-Not a rival claim — a validation. On TUM-VI raw IMU bags, `omni_radtan` and
-`equidistant` reproduce the Kalibr camera–IMU extrinsics to **≤2 mm lever,
-≤0.15 mm stereo baseline, ≤1 ms time offset**. Camera parameters match the
-published TUM-VI and Intel T265 calibrations to under 0.6% on focals.
+This is not a rival claim; it is a validation. On TUM-VI raw IMU bags,
+`omni_radtan` and `equidistant` reproduce the Kalibr camera–IMU extrinsics to:
 
-Kalibr output also reads directly (`mvis.io.kalibr`), so it is a natural
-source of initial values — refinement from a Kalibr camchain is a supported
-workflow, not a migration.
+- **≤2 mm lever**
+- **≤0.15 mm stereo baseline**
+- **≤1 ms time offset**
+
+Camera parameters match the published TUM-VI and Intel T265 calibrations to
+under 0.6% on focals.
+
+MVIS also reads Kalibr output directly (`mvis.io.kalibr`). So Kalibr is a
+natural source of initial values. Refinement from a Kalibr camchain is a
+supported workflow, not a migration.
 
 ## Which to use
 
@@ -88,5 +91,5 @@ workflow, not a migration.
 
 Results on shared datasets are on the
 [leaderboard](/benchmark/results/). Read
-[Methodology](/benchmark/methodology/) first: these datasets have no ground truth,
-so differences show disagreement, not accuracy.
+[Methodology](/benchmark/methodology/) first. These datasets have no ground
+truth, so differences show disagreement, not accuracy.

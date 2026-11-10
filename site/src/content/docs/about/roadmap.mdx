@@ -5,13 +5,17 @@ pageType: reference
 wide: true
 ---
 
-Intentions, not commitments with dates.
+Use this page to see what we plan next for MVIS, the datasets, the benchmark and this site.
+
+- **Intentions,** not commitments with dates
+- **Each table** lists an item and its status
+- **Not planned** lists what we will not do, and why
 
 ## Documentation
 
 | Item | Status |
 |---|---|
-| Theory pages — full derivations and Jacobians | in progress; ported from `camera/CameraModel`, the unified factor, and the ACI / `t_ga` derivation |
+| Theory pages — full derivations and Jacobians | in progress; ported from `camera/CameraModel`, the unified factor, and the ACI / `t_ga` derivation (`t_ga` = time offset between the gyroscope and accelerometer channels) |
 | **Generated** CLI reference | planned — [CLI](/reference/cli/) is hand-written and can drift |
 | **Generated** configuration reference | planned — [Configuration](/reference/configuration/) is hand-written and can drift |
 | Generated Python API from docstrings | undecided (**O4**) — [Python API](/reference/python-api/) is a hand-written map today |
@@ -22,7 +26,7 @@ Intentions, not commitments with dates.
 | Item | Status |
 |---|---|
 | Continuous-time refinement | planned — see [Continuous-time refinement](/concepts/continuous-time/) |
-| Authored-trajectory synthetic generator | planned — would let degeneracy be studied without recording restricted motion |
+| Authored-trajectory synthetic generator | planned — would let us study degeneracy (when the motion leaves some parameters undetermined) without recording restricted motion |
 | API stability guarantee | not yet — the CLI and config schema are the stable surface |
 | `omni_radtan` out of experimental | in progress — already validated on TUM-VI camera–IMU |
 
@@ -56,12 +60,12 @@ Intentions, not commitments with dates.
 
 ## Not planned
 
-- **Replacing Kalibr for single-IMU rigs.** It is mature and widely validated;
+- **Replacing Kalibr for single-IMU rigs.** Kalibr is mature and widely validated.
   MVIS exists for the multi-IMU, multi-model, no-ROS case. See
   [Comparison](/about/comparison/).
-- **A composite leaderboard score.** Weighting parameters against each other is
-  the reader's judgement, not the benchmark's — see
+- **A composite leaderboard score.** How to weight parameters against each other is
+  the reader's judgement, not the benchmark's. See
   [Methodology](/benchmark/methodology/).
 
-Something missing that you need? Open an issue on
+**Missing something you need?** Open an issue on
 [the repository](https://github.com/yangyulin/mvis_pages).

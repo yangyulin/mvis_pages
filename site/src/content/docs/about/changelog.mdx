@@ -4,39 +4,54 @@ description: Notable changes to the Open MVIS toolbox, datasets, and documentati
 pageType: reference
 ---
 
-Notable changes, newest first. The toolbox has not yet cut tagged releases —
-entries below track the documentation site and the datasets. Toolbox changes are
-in the [commit history](https://github.com/yangyulin/mvis_pages/commits/master).
+Use this page to see what changed on the documentation site and in the datasets.
+Notable changes come newest first.
+
+- **No tagged releases yet:** the toolbox has not cut any. Entries here track the
+  documentation site and the datasets.
+- **Toolbox changes:** see the
+  [commit history](https://github.com/yangyulin/mvis_pages/commits/master).
 
 ## Documentation site
 
 ### Leaderboard shows results, not scores (2026-11-03)
 
-The leaderboard no longer gives scores or ranks. Each dataset now shows the calibration results of MVIS, Kalibr and
-Basalt side by side, with the differences between them. See [Methodology](/benchmark/methodology/).
+The leaderboard no longer gives scores or ranks. Each dataset now shows the
+calibration results of MVIS, Kalibr and Basalt side by side. The differences
+between them are shown too. See [Methodology](/benchmark/methodology/).
 
 ### Guide-site restructure
 
-The documentation was reorganised from five sections into eight, following a
-tutorial / guide / concept / reference / example separation
-([Governance](/contribute/governance/) states the rule). Practical consequences:
+We reorganised the documentation from five sections into eight. It now follows a
+tutorial / guide / concept / reference / example separation.
+[Governance](/contribute/governance/) states the rule. Practical consequences:
 
-- **Getting started** now separates Requirements, Installation, and Quickstart —
-  previously one Compilation page and a mixed Quick Start.
+- **Getting started** now separates Requirements, Installation, and Quickstart.
+  Before, it was one Compilation page and a mixed Quick Start.
 - **Guides** are task-oriented and no longer explain theory. Camera calibration,
-  rolling shutter, multi-sensor rigs, and simulation each have their own page.
+  rolling shutter (the sensor reads the image row by row), multi-sensor rigs,
+  and simulation each have their own page.
 - **Concepts** collects the maths, with a shared
   [notation and glossary](/concepts/notation/).
-- **Reference** holds the exhaustive material — configuration, CLI, result
-  formats, evaluation, datasets.
-- **Examples** became a per-dataset gallery with validation against external
-  references.
-- Old URLs redirect. The legacy `openmvis.com/*.html` pages redirect too.
+- **Reference** holds the exhaustive material:
+  - configuration
+  - CLI
+  - result formats
+  - evaluation
+  - datasets
+- **Examples** became a per-dataset gallery. It includes validation against
+  external references.
+- **Old URLs** redirect. The legacy `openmvis.com/*.html` pages redirect too.
 
 ### Initial Starlight site
 
-Migrated from jemdoc to Astro + Starlight: KaTeX maths, search, dark mode,
-edit-this-page links, and the first leaderboard prototype.
+We migrated from jemdoc to Astro + Starlight. The first site brought:
+
+- KaTeX maths
+- search
+- dark mode
+- edit-this-page links
+- the first leaderboard prototype
 
 ## Datasets
 
