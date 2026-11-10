@@ -7,8 +7,9 @@ const RESULTS = 'https://huggingface.co/datasets/calibench-vi/results';
 const LINKS: [string, string][] = [['example', 'How MVIS calibrates it → Example'], ['dataset', 'Downloads → Dataset page'],
   ['sensor', 'The sensor → Sensor wiki'], ['hub', 'The data → Hugging Face']];
 const MODE: Record<string, string> = { cam: 'camera only', 'cam+imu': 'camera + IMU' };
+const others = page.families.some((f: any) => f.columns.some((c: any) => c.tool !== 'MVIS'));
 ---
-<div class="not-content ev-head">
+<div class={`not-content ev-head${page.image ? '' : ' ev-noimg'}`}>
   {page.image && (
     <figure class="ev-img">
       <img src={page.image.src} alt={page.image.alt} loading="eager" />
@@ -31,8 +32,9 @@ const MODE: Record<string, string> = { cam: 'camera only', 'cam+imu': 'camera + 
 </div>
 <div class="not-content rp-honest ev-honest">
   <p><b>Repeatability, not accuracy.</b> There is no ground truth: a small spread shows that a tool repeats, not that
-    it is right, and a difference shows that two tools disagree, not which one is wrong. The MVIS authors made every
-    run, including Kalibr and Basalt.</p>
+    it is right, and a difference shows that two tools disagree, not which one is wrong. {others
+      ? 'The MVIS authors made every run, including Kalibr and Basalt.'
+      : 'The MVIS authors made every run; only MVIS was run on this set.'}</p>
 </div>
 <nav class="not-content ev-fams" aria-label="Families">
   {page.families.map((f: any) => <a href={`#${f.id}`}><b>{f.id}</b>&nbsp;· {MODE[f.mode]}</a>)}

@@ -92,6 +92,7 @@ a.lb-d:hover .lb-n b, a.lb-d:focus-visible .lb-n b { text-decoration: underline;
 
 /* ---- Dataset eval */
 .ev-head { display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); gap: 1.2rem; align-items: start; margin-block: 0.5rem 1rem; }
+.ev-head.ev-noimg { grid-template-columns: minmax(0, 1fr); }
 .ev-img { margin: 0; }
 .ev-img img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 0.4rem; border: 1px solid var(--ev-line); display: block; }
 .ev-img figcaption { font-size: 0.75rem; color: var(--ev-mut); margin-top: 0.25rem; }

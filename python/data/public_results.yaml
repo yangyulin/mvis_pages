@@ -14,7 +14,6 @@ leaderboard:
     - "<b>Repeatability, not accuracy.</b> These datasets have no ground truth, so no tool is the reference. A cell shows whose estimates scatter least over the recordings every compared tool ran, not who is right."
     - "<b>Who ran it:</b> the MVIS authors ran every tool, including Kalibr and Basalt, with its documented defaults unless a family's notes say otherwise."
     - "<b>No totals:</b> nothing is added up across cells, families or datasets, and rows are never ordered by a value."
-  uzh: "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here."
 
 datasets:
   - slug: virig-4imus-3cams
@@ -68,6 +67,44 @@ datasets:
       "cam1 – ELP-R": elp_r
       "base IMU – t265 IMU": imu_t265
       "aux IMU – Xsens MTi": imu_xsens
+
+  - slug: virig-5imus-4cams
+    id: virig5
+    stats_key: virig5          # the dataset key inside the study's stats file (--study)
+    label: VI-Rig 5 IMUs + 4 cams
+    title: "VI-Rig: 5 IMUs + 4 cameras"
+    ours: true
+    study: true
+    batch: "2026-11-02"
+    not_run: "not run on this set"
+    study_note: "Separate study (batch 2026-11-02), MVIS only: Kalibr and Basalt were not run on this set, so it has no row here."
+    licence: CC BY-NC 4.0 (gated)
+    intro: "Our rig with two RealSense T265 units (two global-shutter fisheye pairs) and five IMUs: an Xsens MTi as base, a GX3-25, a GX3-35 and the two T265 IMUs. A one-off MVIS study of 7 recordings, not part of the leaderboard batch or the regression suite. Kalibr and Basalt were not run on it."
+    chips: ["4 global-shutter fisheye cameras", "5 IMUs, 100–500 Hz", "7 recordings", "MVIS only"]
+    links:
+      dataset: /reference/datasets/
+      sensor: /sensors/intel-t265/
+      hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams
+    no_repeatability: "This study has no repeatability cells: a cell compares how much each tool's estimates scatter, and only MVIS was run here. The spread of each MVIS value is in Parameters by sensor."
+    read_first: "MVIS only: Kalibr and Basalt were not run on this set, so nothing is compared. The spread shows how much MVIS repeats over the 7 recordings, not that it is right."
+    like_for_like: "One MVIS configuration for all 7 recordings (the fast settings of the 4-IMU rows); there is no other tool to match."
+    reading:
+      - "<b>Two T265 units, one board.</b> They never see the board at the same time, so each camera-only solve holds one pair (time offset off: each pair is hardware-synced). The camera + IMU solves hold all four cameras and five IMUs, and their intrinsics start from the 7-recording median of the camera-only solves."
+      - "<b>T265 IMU timing.</b> The T265 IMUs' gyro–accel delay t_ga is about −6.6 ms, far from the other IMUs. MVIS estimates it per IMU; it is not a pure time shift (it depends on the motion's frequency), so read it as a compromise value."
+      - "<b>The results files</b> (calibration numbers and run configs, no images) are on Hugging Face beside the data, in its results folder dated 2026-11-02 (see the link above)."
+    families:
+      - {id: V5, shutter: global}
+      - {id: V5c, shutter: global}
+    sensors:
+      "cam0 – t265 A fisheye 1": t265a_f1
+      "cam1 – t265 A fisheye 2": t265a_f2
+      "cam2 – t265 B fisheye 1": t265b_f1
+      "cam3 – t265 B fisheye 2": t265b_f2
+      "base IMU – Xsens MTi": imu_xsens
+      "aux IMU – GX3-25": imu_gx3_25
+      "aux IMU – GX3-35": imu_gx3_35
+      "aux IMU – t265 A IMU": imu_t265a
+      "aux IMU – t265 B IMU": imu_t265b
 
   - slug: tum-vi
     id: tum_vi
@@ -136,6 +173,7 @@ datasets:
     title: UZH-FPV
     ours: false
     study: true
+    study_note: "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here."
     licence: CC BY-NC-SA 3.0
     intro: "The camera–IMU calibration bags of the UZH-FPV Drone Racing dataset: an mDAVIS346 and a Snapdragon Flight, each recorded indoors and outdoors, at 45° and facing forward. A one-off study, not part of the leaderboard batch or the regression suite."
     chips: ["2 devices, 4 bags each", "AprilGrid 5×4, 75 mm"]

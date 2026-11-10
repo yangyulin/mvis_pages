@@ -2,7 +2,8 @@
 the Results sidebar (results-nav.json). Records are local (a snapshot of one batch); there is no Hub read.
 
   PYTHONNOUSERSITE=1 python3 site/scripts/export_results.py --leaderboard <Space folder> --records <results snapshot> \
-      --stats <the batch's stats file> --batch <batch> --results-commit <full sha of the snapshot> --uzh-root <uzh study dir>
+      --stats <the batch's stats file> --batch <batch> --results-commit <full sha of the snapshot> --uzh-root <uzh study dir> \
+      --study virig-5imus-4cams=<its stats file>
 
 Run after export_board.py, export_uzh.py and export_repeatability.py of the same batch: it refuses when those files,
 the records and the stats file are not one batch and one commit, when a ◆ count differs from the rendered board, and
@@ -25,10 +26,15 @@ ap.add_argument("--stats", type=Path, required=True, help="the stats file those 
 ap.add_argument("--batch", required=True)
 ap.add_argument("--results-commit", required=True, help="the snapshot's full 40-hex sha")
 ap.add_argument("--uzh-root", type=Path, required=True, help="the UZH-FPV study folder (three_way/ stats)")
+ap.add_argument("--study", action="append", default=[], metavar="SLUG=FILE",
+                help="stats file of another separate study (public_results.yaml study: true); one per study")
 ap.add_argument("--site", type=Path, default=_lib.REPO, help="the checkout to write into")
 a = ap.parse_args()
+if any("=" not in s for s in a.study):
+    ap.error("--study takes SLUG=FILE, e.g. virig-5imus-4cams=stats.json")
 x = lambda p: p.expanduser()
-pages, pub, pairs, boards, private = R.collect(x(a.leaderboard), x(a.records), x(a.stats), a.batch, a.results_commit, x(a.uzh_root), x(a.site))
+pages, pub, pairs, boards, private = R.collect(x(a.leaderboard), x(a.records), x(a.stats), a.batch, a.results_commit, x(a.uzh_root), x(a.site),
+                                           {k: x(Path(v)) for k, v in (s.split("=", 1) for s in a.study)})
 files = R.render(pages, pub, a.batch, a.results_commit, boards, pairs)
 for p in R.write(files, x(a.site), a.results_commit, private):
     print("wrote", p)

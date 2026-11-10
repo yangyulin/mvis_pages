@@ -1,0 +1,3516 @@
+{
+ "slug": "virig-5imus-4cams",
+ "id": "virig5",
+ "label": "VI-Rig 5 IMUs + 4 cams",
+ "title": "VI-Rig: 5 IMUs + 4 cameras",
+ "ours": true,
+ "licence": "CC BY-NC 4.0 (gated)",
+ "intro": "Our rig with two RealSense T265 units (two global-shutter fisheye pairs) and five IMUs: an Xsens MTi as base, a GX3-25, a GX3-35 and the two T265 IMUs. A one-off MVIS study of 7 recordings, not part of the leaderboard batch or the regression suite. Kalibr and Basalt were not run on it.",
+ "chips": [
+  "4 global-shutter fisheye cameras",
+  "5 IMUs, 100–500 Hz",
+  "7 recordings",
+  "MVIS only"
+ ],
+ "links": {
+  "dataset": "/reference/datasets/",
+  "sensor": "/sensors/intel-t265/",
+  "hub": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams"
+ },
+ "reading": [
+  "<b>Two T265 units, one board.</b> They never see the board at the same time, so each camera-only solve holds one pair (time offset off: each pair is hardware-synced). The camera + IMU solves hold all four cameras and five IMUs, and their intrinsics start from the 7-recording median of the camera-only solves.",
+  "<b>T265 IMU timing.</b> The T265 IMUs' gyro–accel delay t_ga is about −6.6 ms, far from the other IMUs. MVIS estimates it per IMU; it is not a pure time shift (it depends on the motion's frequency), so read it as a compromise value.",
+  "<b>The results files</b> (calibration numbers and run configs, no images) are on Hugging Face beside the data, in its results folder dated 2026-11-02 (see the link above)."
+ ],
+ "no_repeatability": "This study has no repeatability cells: a cell compares how much each tool's estimates scatter, and only MVIS was run here. The spread of each MVIS value is in Parameters by sensor.",
+ "study_note": "Separate study (batch 2026-11-02), MVIS only: Kalibr and Basalt were not run on this set, so it has no row here.",
+ "study": true,
+ "batch": "2026-11-02",
+ "results_commit": null,
+ "link": "/benchmark/results/virig-5imus-4cams/",
+ "has_repeatability": false,
+ "legacy": [],
+ "families": [
+  {
+   "id": "V5",
+   "title": "4 t265 fisheye cameras + 5 IMUs",
+   "mode": "cam+imu",
+   "shutter": "global",
+   "n": 7,
+   "columns": [
+    {
+     "col": "calyx",
+     "tool": "MVIS",
+     "label": "MVIS"
+    }
+   ],
+   "solved": [
+    {
+     "n": 7,
+     "of": 7,
+     "tool": "MVIS"
+    },
+    {
+     "n": 0,
+     "of": 7,
+     "reason": "not run on this set",
+     "tool": "Kalibr"
+    },
+    {
+     "n": 0,
+     "of": 7,
+     "reason": "not run on this set",
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "MVIS only: Kalibr and Basalt were not run on this set, so nothing is compared. The spread shows how much MVIS repeats over the 7 recordings, not that it is right.",
+   "notes": [
+    [
+     "Basalt not run",
+     "Basalt was not run on this set."
+    ],
+    [
+     "Like for like",
+     "One MVIS configuration for all 7 recordings (the fast settings of the 4-IMU rows); there is no other tool to match."
+    ],
+    [
+     "Note",
+     "Intrinsics start from the 7-recording median of the camera-only solves and are refined; fast settings: the three cameras besides cam0 enter the solve at 4 Hz."
+    ]
+   ],
+   "records": {},
+   "fit": [
+    {
+     "sensor": "t265 A fisheye 1",
+     "by_col": {
+      "calyx": "0.208"
+     }
+    },
+    {
+     "sensor": "t265 A fisheye 2",
+     "by_col": {
+      "calyx": "0.219"
+     }
+    },
+    {
+     "sensor": "t265 B fisheye 1",
+     "by_col": {
+      "calyx": "0.206"
+     }
+    },
+    {
+     "sensor": "t265 B fisheye 2",
+     "by_col": {
+      "calyx": "0.228"
+     }
+    }
+   ],
+   "diffs": [],
+   "tally": {},
+   "sensors": [
+    {
+     "id": "t265a_f1",
+     "label": "t265 A fisheye 1",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.515,
+        "h": 0.9691
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.515,
+         "sd": 0.397009,
+         "n": 7,
+         "text": "286.51",
+         "min": 285.634,
+         "max": 286.725
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.636,
+        "h": 0.7403
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.636,
+         "sd": 0.348169,
+         "n": 7,
+         "text": "285.64",
+         "min": 284.963,
+         "max": 286.013
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 415.139,
+        "h": 0.7073
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 415.139,
+         "sd": 0.317651,
+         "n": 7,
+         "text": "415.14",
+         "min": 414.84,
+         "max": 415.782
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 404.393,
+        "h": 0.6259
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 404.393,
+         "sd": 0.260064,
+         "n": 7,
+         "text": "404.39",
+         "min": 404.299,
+         "max": 404.962
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00757503,
+        "h": 0.00522746
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00757503,
+         "sd": 0.00305565,
+         "n": 7,
+         "text": "−0.00758",
+         "min": -0.0106658,
+         "max": -0.00282279
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.04199,
+        "h": 0.0115425
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.04199,
+         "sd": 0.00724875,
+         "n": 7,
+         "text": "0.04199",
+         "min": 0.0328628,
+         "max": 0.0524832
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0373227,
+        "h": 0.0142528
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0373227,
+         "sd": 0.00698479,
+         "n": 7,
+         "text": "−0.03732",
+         "min": -0.0502798,
+         "max": -0.0305568
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00593056,
+        "h": 0.00528928
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00593056,
+         "sd": 0.0022788,
+         "n": 7,
+         "text": "0.00593",
+         "min": 0.00416422,
+         "max": 0.010739
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.336823,
+        "h": 0.175838
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.336823,
+         "sd": 0.101885,
+         "n": 7,
+         "text": "−0.337",
+         "min": -0.496676,
+         "max": -0.196122
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 194.101,
+        "h": 1.2012
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 194.101,
+         "sd": 0.65053,
+         "n": 7,
+         "text": "194.10",
+         "min": 193.009,
+         "max": 194.67
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265a_f2",
+     "label": "t265 A fisheye 2",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.431,
+        "h": 0.8712
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.431,
+         "sd": 0.382366,
+         "n": 7,
+         "text": "286.43",
+         "min": 285.639,
+         "max": 286.707
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.411,
+        "h": 0.814
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.411,
+         "sd": 0.347348,
+         "n": 7,
+         "text": "285.41",
+         "min": 284.671,
+         "max": 285.683
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 414.41,
+        "h": 0.6391
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 414.41,
+         "sd": 0.375091,
+         "n": 7,
+         "text": "414.41",
+         "min": 413.829,
+         "max": 414.902
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 398.757,
+        "h": 0.6875
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 398.757,
+         "sd": 0.331553,
+         "n": 7,
+         "text": "398.76",
+         "min": 398.381,
+         "max": 399.382
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00639626,
+        "h": 0.00443788
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00639626,
+         "sd": 0.0021902,
+         "n": 7,
+         "text": "−0.00640",
+         "min": -0.0104307,
+         "max": -0.00395063
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0449766,
+        "h": 0.00976613
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0449766,
+         "sd": 0.00616443,
+         "n": 7,
+         "text": "0.04498",
+         "min": 0.0360983,
+         "max": 0.0525862
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.042901,
+        "h": 0.0114714
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.042901,
+         "sd": 0.00628791,
+         "n": 7,
+         "text": "−0.04290",
+         "min": -0.049706,
+         "max": -0.0324725
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00809529,
+        "h": 0.0040158
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00809529,
+         "sd": 0.00217851,
+         "n": 7,
+         "text": "0.00810",
+         "min": 0.00444456,
+         "max": 0.0103718
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 A fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 63.662,
+        "h": 0.19305
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 63.662,
+         "sd": 0.115282,
+         "n": 7,
+         "text": "63.662",
+         "min": 63.4865,
+         "max": 63.7758
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.332116,
+        "h": 0.201347
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.332116,
+         "sd": 0.118951,
+         "n": 7,
+         "text": "−0.332",
+         "min": -0.515159,
+         "max": -0.155804
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 147.977,
+        "h": 1.0395
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 147.977,
+         "sd": 0.686964,
+         "n": 7,
+         "text": "147.98",
+         "min": 147.032,
+         "max": 148.773
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265b_f1",
+     "label": "t265 B fisheye 1",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.211,
+        "h": 0.6666
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.211,
+         "sd": 0.258933,
+         "n": 7,
+         "text": "286.21",
+         "min": 285.605,
+         "max": 286.335
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.36,
+        "h": 0.4356
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.36,
+         "sd": 0.234069,
+         "n": 7,
+         "text": "285.36",
+         "min": 284.964,
+         "max": 285.567
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 416.51,
+        "h": 0.2926
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 416.51,
+         "sd": 0.175086,
+         "n": 7,
+         "text": "416.51",
+         "min": 416.244,
+         "max": 416.721
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 400.438,
+        "h": 0.7832
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 400.438,
+         "sd": 0.462477,
+         "n": 7,
+         "text": "400.44",
+         "min": 399.82,
+         "max": 401.15
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00710501,
+        "h": 0.00533103
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00710501,
+         "sd": 0.00279353,
+         "n": 7,
+         "text": "−0.00711",
+         "min": -0.0119514,
+         "max": -0.00253962
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0459333,
+        "h": 0.0161944
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0459333,
+         "sd": 0.00753128,
+         "n": 7,
+         "text": "0.04593",
+         "min": 0.0312111,
+         "max": 0.0559067
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0441916,
+        "h": 0.0183445
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0441916,
+         "sd": 0.00783239,
+         "n": 7,
+         "text": "−0.04419",
+         "min": -0.0520014,
+         "max": -0.0275148
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00844103,
+        "h": 0.00659969
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00844103,
+         "sd": 0.00276764,
+         "n": 7,
+         "text": "0.00844",
+         "min": 0.00244131,
+         "max": 0.0107824
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 A fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 24.5133,
+        "h": 1.1693
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 24.5133,
+         "sd": 0.527827,
+         "n": 7,
+         "text": "24.513",
+         "min": 23.4503,
+         "max": 24.9545
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.378607,
+        "h": 0.203762
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.378607,
+         "sd": 0.097649,
+         "n": 7,
+         "text": "−0.379",
+         "min": -0.563845,
+         "max": -0.297986
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 201.351,
+        "h": 1.1187
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 201.351,
+         "sd": 0.497302,
+         "n": 7,
+         "text": "201.35",
+         "min": 200.334,
+         "max": 201.739
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265b_f2",
+     "label": "t265 B fisheye 2",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.477,
+        "h": 0.5192
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.477,
+         "sd": 0.265434,
+         "n": 7,
+         "text": "286.48",
+         "min": 286.214,
+         "max": 286.949
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.688,
+        "h": 0.462
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.688,
+         "sd": 0.213293,
+         "n": 7,
+         "text": "285.69",
+         "min": 285.507,
+         "max": 286.108
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 413.05,
+        "h": 0.4048
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 413.05,
+         "sd": 0.24,
+         "n": 7,
+         "text": "413.05",
+         "min": 412.718,
+         "max": 413.418
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 399.1,
+        "h": 0.7634
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 399.1,
+         "sd": 0.409723,
+         "n": 7,
+         "text": "399.10",
+         "min": 398.775,
+         "max": 399.794
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00817948,
+        "h": 0.00608255
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00817948,
+         "sd": 0.00317899,
+         "n": 7,
+         "text": "−0.00818",
+         "min": -0.0118489,
+         "max": -0.00264989
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0425762,
+        "h": 0.0149464
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0425762,
+         "sd": 0.00835442,
+         "n": 7,
+         "text": "0.04258",
+         "min": 0.0310447,
+         "max": 0.0561638
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0388731,
+        "h": 0.0124546
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0388731,
+         "sd": 0.00732835,
+         "n": 7,
+         "text": "−0.03887",
+         "min": -0.0501955,
+         "max": -0.0279679
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00670427,
+        "h": 0.00454474
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00670427,
+         "sd": 0.00225003,
+         "n": 7,
+         "text": "0.00670",
+         "min": 0.00257269,
+         "max": 0.00983731
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 A fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 66.8775,
+        "h": 0.76637
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 66.8775,
+         "sd": 0.426736,
+         "n": 7,
+         "text": "66.877",
+         "min": 66.5154,
+         "max": 67.5742
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.366178,
+        "h": 0.203499
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.366178,
+         "sd": 0.113112,
+         "n": 7,
+         "text": "−0.366",
+         "min": -0.551177,
+         "max": -0.270921
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 157.529,
+        "h": 0.9108
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 157.529,
+         "sd": 0.548748,
+         "n": 7,
+         "text": "157.53",
+         "min": 156.701,
+         "max": 158.141
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_xsens",
+     "label": "Xsens MTi",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00148,
+        "h": 0.0022924
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00148,
+         "sd": 0.000892609,
+         "n": 7,
+         "text": "1.00148",
+         "min": 0.999396,
+         "max": 1.00215
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.998006,
+        "h": 0.0015961
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.998006,
+         "sd": 0.000620253,
+         "n": 7,
+         "text": "0.99801",
+         "min": 0.996555,
+         "max": 0.998553
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997915,
+        "h": 0.0036465
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.997915,
+         "sd": 0.00146641,
+         "n": 7,
+         "text": "0.99791",
+         "min": 0.996801,
+         "max": 1.00123
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.0005383,
+        "h": 0.00559402
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0005383,
+         "sd": 0.00234099,
+         "n": 7,
+         "text": "−0.00054",
+         "min": -0.00209328,
+         "max": 0.00454717
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00112985,
+        "h": 0.00571283
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00112985,
+         "sd": 0.0025769,
+         "n": 7,
+         "text": "−0.00113",
+         "min": -0.00632333,
+         "max": 0.00124996
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.000501531,
+        "h": 0.00297206
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.000501531,
+         "sd": 0.00161512,
+         "n": 7,
+         "text": "−0.00050",
+         "min": -0.00246702,
+         "max": 0.00220034
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00046,
+        "h": 0.0021549
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00046,
+         "sd": 0.00102873,
+         "n": 7,
+         "text": "1.00046",
+         "min": 0.998501,
+         "max": 1.00148
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.99964,
+        "h": 0.003872
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.99964,
+         "sd": 0.00185498,
+         "n": 7,
+         "text": "0.99964",
+         "min": 0.99776,
+         "max": 1.00316
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.995733,
+        "h": 0.0027808
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.995733,
+         "sd": 0.00141855,
+         "n": 7,
+         "text": "0.99573",
+         "min": 0.994461,
+         "max": 0.998261
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.5571,
+        "h": 0.36938
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.5571,
+         "sd": 0.168941,
+         "n": 7,
+         "text": "−0.557",
+         "min": -0.8929,
+         "max": -0.3986
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_gx3_25",
+     "label": "GX3-25",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00156,
+        "h": 0.00099
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00156,
+         "sd": 0.000443683,
+         "n": 7,
+         "text": "1.00156",
+         "min": 1.00066,
+         "max": 1.00195
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00013,
+        "h": 0.001001
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00013,
+         "sd": 0.0005612,
+         "n": 7,
+         "text": "1.00013",
+         "min": 0.999488,
+         "max": 1.00104
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.999993,
+        "h": 0.0011748
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.999993,
+         "sd": 0.000649179,
+         "n": 7,
+         "text": "0.99999",
+         "min": 0.998925,
+         "max": 1.00061
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.000885499,
+        "h": 0.00249776
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.000885499,
+         "sd": 0.0011545,
+         "n": 7,
+         "text": "−0.00089",
+         "min": -0.00315619,
+         "max": -0.000205065
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00252282,
+        "h": 0.00432659
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00252282,
+         "sd": 0.00155173,
+         "n": 7,
+         "text": "−0.00252",
+         "min": -0.00310138,
+         "max": 0.00141044
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00591018,
+        "h": 0.00255278
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00591018,
+         "sd": 0.00155474,
+         "n": 7,
+         "text": "0.00591",
+         "min": 0.00358947,
+         "max": 0.00781432
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997219,
+        "h": 0.0023078
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.997219,
+         "sd": 0.00107465,
+         "n": 7,
+         "text": "0.99722",
+         "min": 0.996744,
+         "max": 0.999317
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00139,
+        "h": 0.001452
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00139,
+         "sd": 0.000733027,
+         "n": 7,
+         "text": "1.00139",
+         "min": 1.00038,
+         "max": 1.00271
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00025,
+        "h": 0.0029018
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00025,
+         "sd": 0.00158919,
+         "n": 7,
+         "text": "1.00025",
+         "min": 0.997612,
+         "max": 1.00241
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.554757,
+        "h": 0.227217
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.554757,
+         "sd": 0.113354,
+         "n": 7,
+         "text": "−0.555",
+         "min": -0.761318,
+         "max": -0.429395
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 130.698,
+        "h": 0.8613
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 130.698,
+         "sd": 0.451314,
+         "n": 7,
+         "text": "130.70",
+         "min": 129.915,
+         "max": 130.977
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 0.1203,
+        "h": 0.2893
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.1203,
+         "sd": 0.122745,
+         "n": 7,
+         "text": "0.120",
+         "min": -0.1427,
+         "max": 0.2051
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_gx3_35",
+     "label": "GX3-35",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00004,
+        "h": 0.001661
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00004,
+         "sd": 0.000831917,
+         "n": 7,
+         "text": "1.00004",
+         "min": 0.999154,
+         "max": 1.00155
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00059,
+        "h": 0.0017369
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00059,
+         "sd": 0.00104556,
+         "n": 7,
+         "text": "1.00059",
+         "min": 0.999011,
+         "max": 1.00179
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997548,
+        "h": 0.0024728
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.997548,
+         "sd": 0.00141418,
+         "n": 7,
+         "text": "0.99755",
+         "min": 0.995755,
+         "max": 0.999796
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00328319,
+        "h": 0.00401685
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00328319,
+         "sd": 0.00213747,
+         "n": 7,
+         "text": "−0.00328",
+         "min": -0.00693487,
+         "max": -0.000633058
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00195738,
+        "h": 0.00426828
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00195738,
+         "sd": 0.00178956,
+         "n": 7,
+         "text": "−0.00196",
+         "min": -0.00268192,
+         "max": 0.00192287
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00386395,
+        "h": 0.00384267
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00386395,
+         "sd": 0.00209932,
+         "n": 7,
+         "text": "0.00386",
+         "min": 0.000960033,
+         "max": 0.00735729
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.999363,
+        "h": 0.0057101
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.999363,
+         "sd": 0.00342143,
+         "n": 7,
+         "text": "0.99936",
+         "min": 0.994172,
+         "max": 1.00445
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00194,
+        "h": 0.0025498
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.00194,
+         "sd": 0.00119529,
+         "n": 7,
+         "text": "1.00194",
+         "min": 0.999622,
+         "max": 1.00246
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.999107,
+        "h": 0.0036388
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.999107,
+         "sd": 0.00180764,
+         "n": 7,
+         "text": "0.99911",
+         "min": 0.995799,
+         "max": 1.00155
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -2.16436,
+        "h": 0.198968
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -2.16436,
+         "sd": 0.136337,
+         "n": 7,
+         "text": "−2.164",
+         "min": -2.34524,
+         "max": -2.00419
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 94.6761,
+        "h": 0.89023
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 94.6761,
+         "sd": 0.383449,
+         "n": 7,
+         "text": "94.68",
+         "min": 93.8668,
+         "max": 95.0081
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.0498,
+        "h": 0.20812
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0498,
+         "sd": 0.130945,
+         "n": 7,
+         "text": "−0.050",
+         "min": -0.239,
+         "max": 0.077
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_t265a",
+     "label": "t265 A IMU",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.993805,
+        "h": 0.0009251
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.993805,
+         "sd": 0.000520417,
+         "n": 7,
+         "text": "0.99381",
+         "min": 0.993368,
+         "max": 0.994646
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997712,
+        "h": 0.00099
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.997712,
+         "sd": 0.000597126,
+         "n": 7,
+         "text": "0.99771",
+         "min": 0.996812,
+         "max": 0.998276
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.0009,
+        "h": 0.000605
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.0009,
+         "sd": 0.000300348,
+         "n": 7,
+         "text": "1.00090",
+         "min": 1.00035,
+         "max": 1.00126
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.0016266,
+        "h": 0.00204746
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0016266,
+         "sd": 0.000932428,
+         "n": 7,
+         "text": "0.00163",
+         "min": -0.000234725,
+         "max": 0.00237254
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.0230482,
+        "h": 0.00206569
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0230482,
+         "sd": 0.000905067,
+         "n": 7,
+         "text": "0.02305",
+         "min": 0.0221174,
+         "max": 0.0249261
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00302717,
+        "h": 0.00296984
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00302717,
+         "sd": 0.00156847,
+         "n": 7,
+         "text": "0.00303",
+         "min": 0.000958211,
+         "max": 0.00572702
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.0197,
+        "h": 0.001375
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.0197,
+         "sd": 0.000724811,
+         "n": 7,
+         "text": "1.01970",
+         "min": 1.01845,
+         "max": 1.02053
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01428,
+        "h": 0.003113
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.01428,
+         "sd": 0.00160433,
+         "n": 7,
+         "text": "1.01428",
+         "min": 1.013,
+         "max": 1.01711
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01637,
+        "h": 0.00165
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.01637,
+         "sd": 0.000935196,
+         "n": 7,
+         "text": "1.01637",
+         "min": 1.01549,
+         "max": 1.01787
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -7.16966,
+        "h": 0.197791
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -7.16966,
+         "sd": 0.115083,
+         "n": 7,
+         "text": "−7.170",
+         "min": -7.34947,
+         "max": -7.02263
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 180.77,
+        "h": 1.0153
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 180.77,
+         "sd": 0.401644,
+         "n": 7,
+         "text": "180.77",
+         "min": 180.414,
+         "max": 181.693
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -6.5898,
+        "h": 0.20735
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -6.5898,
+         "sd": 0.0813441,
+         "n": 7,
+         "text": "−6.590",
+         "min": -6.6503,
+         "max": -6.4013
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu_t265b",
+     "label": "t265 B IMU",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997022,
+        "h": 0.0010615
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.997022,
+         "sd": 0.000673823,
+         "n": 7,
+         "text": "0.99702",
+         "min": 0.996171,
+         "max": 0.997987
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.998353,
+        "h": 0.0008833
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.998353,
+         "sd": 0.00049904,
+         "n": 7,
+         "text": "0.99835",
+         "min": 0.99755,
+         "max": 0.998951
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.996896,
+        "h": 0.0007326
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.996896,
+         "sd": 0.000365277,
+         "n": 7,
+         "text": "0.99690",
+         "min": 0.99623,
+         "max": 0.997088
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.0131552,
+        "h": 0.00296164
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0131552,
+         "sd": 0.00128704,
+         "n": 7,
+         "text": "0.01316",
+         "min": 0.0104628,
+         "max": 0.0142024
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.024333,
+        "h": 0.00260711
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.024333,
+         "sd": 0.00106434,
+         "n": 7,
+         "text": "0.02433",
+         "min": 0.0219629,
+         "max": 0.0248823
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00235696,
+        "h": 0.00259409
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00235696,
+         "sd": 0.00143307,
+         "n": 7,
+         "text": "0.00236",
+         "min": 0.0008785,
+         "max": 0.00471522
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01051,
+        "h": 0.00121
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.01051,
+         "sd": 0.000659722,
+         "n": 7,
+         "text": "1.01051",
+         "min": 1.00998,
+         "max": 1.01161
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.01176,
+        "h": 0.002178
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.01176,
+         "sd": 0.00134036,
+         "n": 7,
+         "text": "1.01176",
+         "min": 1.00978,
+         "max": 1.01322
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.02161,
+        "h": 0.002068
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 1.02161,
+         "sd": 0.00113602,
+         "n": 7,
+         "text": "1.02161",
+         "min": 1.01973,
+         "max": 1.02255
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time delay td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -7.25867,
+        "h": 0.22671
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -7.25867,
+         "sd": 0.120317,
+         "n": 7,
+         "text": "−7.259",
+         "min": -7.46477,
+         "max": -7.11283
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 188.605,
+        "h": 0.8624
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 188.605,
+         "sd": 0.406182,
+         "n": 7,
+         "text": "188.60",
+         "min": 188.171,
+         "max": 189.389
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -6.6533,
+        "h": 0.27753
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -6.6533,
+         "sd": 0.10184,
+         "n": 7,
+         "text": "−6.653",
+         "min": -6.6922,
+         "max": -6.401
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [],
+   "has_tga": true
+  },
+  {
+   "id": "V5c",
+   "title": "4 t265 fisheye cameras — camera only",
+   "mode": "cam",
+   "shutter": "global",
+   "n": 7,
+   "columns": [
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS"
+    }
+   ],
+   "solved": [
+    {
+     "n": 7,
+     "of": 7,
+     "tool": "MVIS"
+    },
+    {
+     "n": 0,
+     "of": 7,
+     "reason": "not run on this set",
+     "tool": "Kalibr"
+    },
+    {
+     "n": 0,
+     "of": 7,
+     "reason": "not run on this set",
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "MVIS only: Kalibr and Basalt were not run on this set, so nothing is compared. The spread shows how much MVIS repeats over the 7 recordings, not that it is right.",
+   "notes": [
+    [
+     "Basalt not run",
+     "Basalt was not run on this set."
+    ],
+    [
+     "Like for like",
+     "One MVIS configuration for all 7 recordings (the fast settings of the 4-IMU rows); there is no other tool to match."
+    ],
+    [
+     "Note",
+     "The two T265 units never see the board at the same time, so each camera-only solve holds one pair; the camera + IMU family ties all four cameras together."
+    ]
+   ],
+   "records": {},
+   "fit": [
+    {
+     "sensor": "t265 A fisheye 1",
+     "by_col": {
+      "mvis": "0.146"
+     }
+    },
+    {
+     "sensor": "t265 A fisheye 2",
+     "by_col": {
+      "mvis": "0.146"
+     }
+    },
+    {
+     "sensor": "t265 B fisheye 1",
+     "by_col": {
+      "mvis": "0.164"
+     }
+    },
+    {
+     "sensor": "t265 B fisheye 2",
+     "by_col": {
+      "mvis": "0.171"
+     }
+    }
+   ],
+   "diffs": [],
+   "tally": {},
+   "sensors": [
+    {
+     "id": "t265a_f1",
+     "label": "t265 A fisheye 1",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.435,
+        "h": 1.1253
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.435,
+         "sd": 0.488969,
+         "n": 7,
+         "text": "286.44",
+         "min": 285.412,
+         "max": 286.568
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.492,
+        "h": 0.7414
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.492,
+         "sd": 0.423746,
+         "n": 7,
+         "text": "285.49",
+         "min": 284.818,
+         "max": 285.865
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 414.769,
+        "h": 0.6138
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 414.769,
+         "sd": 0.315956,
+         "n": 7,
+         "text": "414.77",
+         "min": 414.407,
+         "max": 415.327
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 404.783,
+        "h": 0.4818
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 404.783,
+         "sd": 0.322339,
+         "n": 7,
+         "text": "404.78",
+         "min": 404.407,
+         "max": 405.221
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00710358,
+        "h": 0.00354119
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00710358,
+         "sd": 0.00173789,
+         "n": 7,
+         "text": "−0.00710",
+         "min": -0.00880747,
+         "max": -0.00388432
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0444161,
+        "h": 0.00683001
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0444161,
+         "sd": 0.00335202,
+         "n": 7,
+         "text": "0.04442",
+         "min": 0.038207,
+         "max": 0.0469095
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0424993,
+        "h": 0.00916685
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0424993,
+         "sd": 0.00447475,
+         "n": 7,
+         "text": "−0.04250",
+         "min": -0.0473562,
+         "max": -0.0341658
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00825219,
+        "h": 0.00334439
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00825219,
+         "sd": 0.00172091,
+         "n": 7,
+         "text": "0.00825",
+         "min": 0.00521184,
+         "max": 0.0104874
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265a_f2",
+     "label": "t265 A fisheye 2",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.334,
+        "h": 1.0241
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.334,
+         "sd": 0.434476,
+         "n": 7,
+         "text": "286.33",
+         "min": 285.403,
+         "max": 286.392
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.179,
+        "h": 0.6974
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.179,
+         "sd": 0.394909,
+         "n": 7,
+         "text": "285.18",
+         "min": 284.545,
+         "max": 285.512
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 413.904,
+        "h": 0.6369
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 413.904,
+         "sd": 0.31683,
+         "n": 7,
+         "text": "413.90",
+         "min": 413.543,
+         "max": 414.483
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 399.119,
+        "h": 0.3278
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 399.119,
+         "sd": 0.212625,
+         "n": 7,
+         "text": "399.12",
+         "min": 398.821,
+         "max": 399.402
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00610473,
+        "h": 0.00276433
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00610473,
+         "sd": 0.00137695,
+         "n": 7,
+         "text": "−0.00610",
+         "min": -0.00801905,
+         "max": -0.0035917
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0427411,
+        "h": 0.00957803
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0427411,
+         "sd": 0.00413432,
+         "n": 7,
+         "text": "0.04274",
+         "min": 0.0340338,
+         "max": 0.0449479
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0397148,
+        "h": 0.00717904
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0397148,
+         "sd": 0.00440546,
+         "n": 7,
+         "text": "−0.03971",
+         "min": -0.0441126,
+         "max": -0.0331884
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00705473,
+        "h": 0.0025847
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00705473,
+         "sd": 0.00149089,
+         "n": 7,
+         "text": "0.00705",
+         "min": 0.004705,
+         "max": 0.00885931
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 A fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 63.6101,
+        "h": 0.19228
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 63.6101,
+         "sd": 0.0833992,
+         "n": 7,
+         "text": "63.610",
+         "min": 63.5389,
+         "max": 63.7849
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265b_f1",
+     "label": "t265 B fisheye 1",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.098,
+        "h": 0.9493
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.098,
+         "sd": 0.47261,
+         "n": 7,
+         "text": "286.10",
+         "min": 285.235,
+         "max": 286.358
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.073,
+        "h": 0.7062
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.073,
+         "sd": 0.354179,
+         "n": 7,
+         "text": "285.07",
+         "min": 284.431,
+         "max": 285.245
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 416.094,
+        "h": 0.6666
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 416.094,
+         "sd": 0.285899,
+         "n": 7,
+         "text": "416.09",
+         "min": 415.879,
+         "max": 416.7
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 400.491,
+        "h": 0.6512
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 400.491,
+         "sd": 0.304647,
+         "n": 7,
+         "text": "400.49",
+         "min": 400.13,
+         "max": 401.083
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00779626,
+        "h": 0.0053047
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00779626,
+         "sd": 0.00236783,
+         "n": 7,
+         "text": "−0.00780",
+         "min": -0.00988286,
+         "max": -0.00297381
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0479012,
+        "h": 0.00906301
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0479012,
+         "sd": 0.00439529,
+         "n": 7,
+         "text": "0.04790",
+         "min": 0.0396621,
+         "max": 0.0518278
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0456477,
+        "h": 0.00730367
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0456477,
+         "sd": 0.00385119,
+         "n": 7,
+         "text": "−0.04565",
+         "min": -0.0491874,
+         "max": -0.039008
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00880903,
+        "h": 0.00238651
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00880903,
+         "sd": 0.00123424,
+         "n": 7,
+         "text": "0.00881",
+         "min": 0.00663948,
+         "max": 0.0100551
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "t265b_f2",
+     "label": "t265 B fisheye 2",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 286.386,
+        "h": 0.9834
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 286.386,
+         "sd": 0.436191,
+         "n": 7,
+         "text": "286.39",
+         "min": 285.492,
+         "max": 286.572
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 285.384,
+        "h": 0.7546
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 285.384,
+         "sd": 0.354454,
+         "n": 7,
+         "text": "285.38",
+         "min": 284.698,
+         "max": 285.64
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 412.509,
+        "h": 0.6985
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 412.509,
+         "sd": 0.296021,
+         "n": 7,
+         "text": "412.51",
+         "min": 412.28,
+         "max": 413.144
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 399.515,
+        "h": 0.572
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 399.515,
+         "sd": 0.272554,
+         "n": 7,
+         "text": "399.51",
+         "min": 398.995,
+         "max": 399.818
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0068223,
+        "h": 0.00283437
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0068223,
+         "sd": 0.00158134,
+         "n": 7,
+         "text": "−0.00682",
+         "min": -0.00897841,
+         "max": -0.0042456
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0465636,
+        "h": 0.0119065
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0465636,
+         "sd": 0.00563523,
+         "n": 7,
+         "text": "0.04656",
+         "min": 0.0391474,
+         "max": 0.0573877
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0426633,
+        "h": 0.0161157
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0426633,
+         "sd": 0.0080448,
+         "n": 7,
+         "text": "−0.04266",
+         "min": -0.0573139,
+         "max": -0.0339237
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00812599,
+        "h": 0.00978022
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00812599,
+         "sd": 0.00388718,
+         "n": 7,
+         "text": "0.00813",
+         "min": 0.00493517,
+         "max": 0.0170171
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to t265 B fisheye 1",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 63.0796,
+        "h": 0.36443
+       },
+       "lanes": [
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 63.0796,
+         "sd": 0.198154,
+         "n": 7,
+         "text": "63.080",
+         "min": 62.8947,
+         "max": 63.4109
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [],
+   "has_tga": false
+  }
+ ],
+ "full_tables": null
+}

@@ -200,6 +200,9 @@ def test_committed_diamond_counts_equal_the_committed_board():
     seen = 0
     for p in json.loads((SITE / "results-nav.json").read_text()):
         page = json.loads((SITE / f"eval/{p['slug']}.json").read_text())
+        if page["id"] not in want:  # a study with no board (VI-Rig 5 IMUs, MVIS only) has nothing to count
+            assert page["study"] and all(f["tally"] == {} and f["diffs"] == [] for f in page["families"]), page["id"]
+            continue
         for f in page["families"]:
             assert f["tally"] == want[page["id"]][f["id"]], (page["id"], f["id"])
             seen += 1
@@ -256,19 +259,21 @@ def test_a_dataset_page_and_its_mdx():
 def test_the_public_text_holds_every_dataset_in_page_order_ours_first():
     pub = _pub()
     ds = pub["datasets"]
-    assert [d["slug"] for d in ds] == ["virig-4imus-3cams", "virig-4imus-4cams", "tum-vi", "looper-insight9", "monado-mgc", "uzh-fpv"]
-    assert [d["ours"] for d in ds[:2]] == [True, True] and not any(d["ours"] for d in ds[2:])
-    assert [d["slug"] for d in ds if d.get("study")] == ["uzh-fpv"]
+    assert [d["slug"] for d in ds] == ["virig-4imus-3cams", "virig-4imus-4cams", "virig-5imus-4cams", "tum-vi", "looper-insight9",
+                                       "monado-mgc", "uzh-fpv"]
+    assert [d["ours"] for d in ds[:3]] == [True, True, True] and not any(d["ours"] for d in ds[3:])
+    assert [d["slug"] for d in ds if d.get("study")] == ["virig-5imus-4cams", "uzh-fpv"]
+    assert all(d["study_note"] for d in ds if d.get("study"))
     assert R.problems({"public_results.yaml": (DATA / "public_results.yaml").read_text(encoding="utf-8")}, SHA) == []
     for d in ds:
-        assert (REPO / "site/public" / d["image"]["src"].lstrip("/")).exists(), d["slug"]
+        assert "image" not in d or (REPO / "site/public" / d["image"]["src"].lstrip("/")).exists(), d["slug"]
 
 
 def test_leaderboard_and_nav_keep_the_yaml_order():
     pub = _pub()
     a, b = _page(), dict(_page(), slug="y-rig", id="y", label="Y rig", link="/benchmark/results/y-rig/", study=True)
     lb = R.leaderboard([a, b], pub, "b1", SHA)
-    assert [d["slug"] for d in lb["datasets"]] == ["x-rig"] and lb["studies"] == [{"label": "Y rig", "link": "/benchmark/results/y-rig/", "batch": "b1"}]
+    assert [d["slug"] for d in lb["datasets"]] == ["x-rig"] and lb["studies"] == [{"label": "Y rig", "link": "/benchmark/results/y-rig/", "batch": "b1", "note": ""}]
     assert lb["datasets"][0]["families"][0]["diffs"] == {"mk": {"label": "MVIS (K-IMU) − Kalibr", "marked": 1, "compared": 2}}
     assert [n["slug"] for n in R.nav([a, b])] == ["x-rig", "y-rig"]
     committed = json.loads((SITE / "results-nav.json").read_text())
@@ -302,7 +307,7 @@ def test_our_own_results_paths_and_the_commit_pass_the_lint():
 def test_committed_outputs_pass_the_lint():
     files = {p.name: p.read_text(encoding="utf-8") for p in [*(SITE / "eval").glob("*.json"), SITE / "results-nav.json",
                                                              *(REPO / R.MDX_DIR).glob("*.mdx")]}
-    assert len(files) == 14 and R.problems(files, json.loads((SITE / "eval/index.json").read_text())["results_commit"]) == []
+    assert len(files) == 16 and R.problems(files, json.loads((SITE / "eval/index.json").read_text())["results_commit"]) == []
 
 
 def test_write_writes_all_or_nothing_and_drops_stale_pages(tmp_path):
@@ -382,3 +387,50 @@ def test_a_row_whose_models_differ_draws_only_mvis():
     (s,) = R.sensors([r], R.columns(False), {}, DECS, SID)
     assert [x["state"] for x in s["params"][0]["lanes"]] == ["ok", "other_model", "other_model"]
     assert s["params"][0]["axis"]["c"] == 1.0 and s["params"][0]["lanes"][1]["note"] == "different model, not compared"
+
+
+# ---------------------------------------------------------------- a second separate study (MVIS only)
+def _mvis_only_page():
+    """A study where only MVIS ran, with its default IMU model alone (no K-IMU run): no Kalibr, no mvis values."""
+    sp, st = camimu_family()
+    for r in sp["rows"]:
+        r["mvis"] = r["kalibr"] = None
+        r["deltas"] = {q[0]: NONE for q in PAIRS}   # nothing to compare: the Space gives no difference
+    entry = {"slug": "v-rig", "id": "v", "label": "V rig", "title": "V: a rig", "ours": True, "licence": "CC BY-NC 4.0",
+             "intro": "A rig.", "chips": [], "links": {}, "families": [{"id": "T1", "shutter": "global"}], "sensors": SID,
+             "study": True, "study_note": "MVIS only.", "not_run": "not run on this set"}
+    return R.dataset(entry, {"pairs": PAIRS, "decimals": DECS, "families": {"T1": sp}}, records(ran=("MVIS",)),
+                     {"families": {"T1": st}}, "b9", None, None)
+
+
+def test_an_mvis_only_study_has_one_column_no_differences_and_no_full_tables():
+    p = _mvis_only_page()
+    f = p["families"][0]
+    assert [c["label"] for c in f["columns"]] == ["MVIS"]          # the empty K-IMU method gets no lanes
+    assert f["diffs"] == [] and f["tally"] == {}
+    assert [s.get("reason") for s in f["solved"]] == [None, "not run on this set", "not run on this set"]
+    assert p["full_tables"] is None and p["study_note"] == "MVIS only."
+    text = R.mdx(p)
+    assert "### Parameters by sensor" in text and "Where the tools differ" not in text and "Full tables" not in text
+
+
+def test_render_takes_a_study_without_a_board_only_when_it_has_nothing_to_count():
+    p = _mvis_only_page()
+    files = R.render([p], _pub(), "b1", SHA, {}, PAIRS)
+    assert "site/src/data/eval/v-rig.json" in files
+    assert json.loads(files[f"{R.OUT_DIR}/index.json"])["studies"] == [{"label": "V rig", "link": "/benchmark/results/v-rig/",
+                                                                      "batch": "b9", "note": "MVIS only."}]
+    with pytest.raises(ValueError, match="no rendered board"):
+        R.render([_page()], _pub(), "b1", SHA, {}, PAIRS)          # a leaderboard dataset always needs its board
+
+
+def test_study_rows_write_the_study_board_with_its_own_texts(tmp_path):
+    lb = F.write_leaderboard(tmp_path / "lb")
+    stats = L.rekey(json.loads((F.write_uzh(tmp_path / "uzh") / "three_way/three_way_comparison_stats.json").read_text()))
+    stats = dict(stats, families={k.replace("DAVIS", "V5").replace("SNAP", "V5c"): dict(f, dataset="v5")
+                                  for k, f in stats["families"].items()})
+    out = S.study_rows(lb, stats, tmp_path / "rec", "b9", ("v5id", "v5", "V5 rig"), "MVIS only.", "One config.")
+    fams = json.loads((tmp_path / "rec/families.json").read_text())
+    assert fams["batch"] == "b9" and fams["datasets"] == [{"id": "v5id", "title": "V5 rig", "families": ["V5", "V5c"]}]
+    assert set(out["families"]) == {"V5", "V5c"} and out["families"]["V5"]["read_first"] == "MVIS only."
+    assert ["Like for like", "One config."] in out["families"]["V5"]["notes"]

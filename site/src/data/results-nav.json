@@ -63,6 +63,12 @@
   ]
  },
  {
+  "label": "VI-Rig 5 IMUs + 4 cams",
+  "link": "/benchmark/results/virig-5imus-4cams/",
+  "slug": "virig-5imus-4cams",
+  "legacy": []
+ },
+ {
   "label": "TUM-VI",
   "link": "/benchmark/results/tum-vi/",
   "slug": "tum-vi",

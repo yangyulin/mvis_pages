@@ -26,6 +26,7 @@
   "<b>Snapdragon's time offset really does differ between bags</b>, with an sd (standard deviation) near 4.7 ms in every tool. So a small difference between tools on that row says little about each bag."
  ],
  "no_repeatability": "This study has no repeatability cells: it was made before the current schema, and 4 bags per device are too few for the test (it needs 6).",
+ "study_note": "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here.",
  "study": true,
  "batch": "2026-11-04",
  "results_commit": null,
@@ -4650,5 +4651,6 @@
    ],
    "has_tga": true
   }
- ]
+ ],
+ "full_tables": "study"
 }

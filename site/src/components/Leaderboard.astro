@@ -96,7 +96,7 @@ const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
     {lb.studies.map((s: any) => (
       <div class="lb-ds lb-study" role="rowgroup">
         <div class="lb-dsh" role="row">
-          <span role="cell"><a href={s.link}>{s.label}</a> <span class="lb-tag">separate study · batch {s.batch}</span> <span class="lb-why">{lb.study_note}</span></span>
+          <span role="cell"><a href={s.link}>{s.label}</a> <span class="lb-tag">separate study · batch {s.batch}</span> <span class="lb-why">{s.note}</span></span>
           <a class="lb-open" href={s.link}>Dataset eval →</a>
         </div>
       </div>
