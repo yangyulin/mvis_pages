@@ -1,1 +1,1 @@
-{"variants":[{"kind":"real","duration_s":60.795,"id":"chessboard_1107_01","file":"chessboard_1107_01.json","bytes":427956,"cov_reach":0.6904761904761905,"cov_cam0":0.7143}],"rig":"G3_insight9_chess","hz":30.0}
+{"variants":[{"kind":"real","duration_s":51.150000048,"id":"chessboard_1109_09","file":"chessboard_1109_09.json","cov_reach":0.8095238095238095,"bytes":359794,"cov_cam0":0.8095}],"rig":"G3_insight9_chess","hz":30.0}

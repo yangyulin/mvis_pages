@@ -3,9 +3,9 @@
 // transport with move steps, repeat and speed, and the sensor traces folded away.
 // Data (public/data/calib-motion/, schemas in site/scripts/export_calib_motion.py):
 //   v4/guide06c_60.json          AprilGrid guide motion (calib-motion-demo/anim v1, segments with beats)
-//   v3/guide60b.json             chessboard version
+//   v5/guide09_60.json           chessboard version (built from the chessboard example)
 //   real_takes/aprilgrid_06.json the AprilGrid example (real take 06 of 2026-11-08), + .cams.json (camera cards)
-//   real_chess/chessboard_1107_01.json  the chessboard example (real take 01 of 2026-11-07), + .cams.json
+//   real_chess/chessboard_1109_09.json  the chessboard example (real take 09 of 2026-11-09), + .cams.json
 //   <set>/index.json (length, coverage) and <set>/twin_verdicts.json (passed) for the chip dots and the table.
 // The camera cards draw the board and its detected corners, never a camera image. In the guides they are computed here
 // from the pose (kb4 projection, detection rule of the twin); in the real examples they come from the MVIS-detected
@@ -16,16 +16,16 @@
 
 export const VARIANTS = {
   guide06c_60: { set: 'v4', label: 'AprilGrid', start: 'Start the AprilGrid motion', why: 'Four moves at a comfortable hand pace, built from the AprilGrid example.' },
-  guide60b: { set: 'v3', label: 'Chessboard', start: 'Start the chessboard motion', why: 'Smaller swings so the whole chessboard stays in view, and a corner square instead of the loop.' },
+  guide09_60: { set: 'v5', label: 'Chessboard', start: 'Start the chessboard motion', why: 'The same four moves, built from the chessboard example, with smaller swings so the whole chessboard stays in view.' },
   aprilgrid_06: { set: 'real', label: 'AprilGrid example', why: 'Our 41 s hand-held take in front of a monitor AprilGrid, the take the guide motion is built from.',
     diff: 'The same four moves in the same order, but in 41 s: about twice the guide’s speed (up to 0.75 m/s and 5 rad/s) and closer to the board (16 cm).' },
-  chessboard_1107_01: { set: 'realc', label: 'Chessboard example', why: 'Our 61 s hand-held take in front of a monitor chessboard, the whole board kept in view.',
-    diff: 'A different order (in-out first, a roll in place, then repeats and a mixed corner block), farther from the board (43–73 cm), so cam0 covers less of the image (71 %).' },
+  chessboard_1109_09: { set: 'realc', label: 'Chessboard example', why: 'Our 51 s hand-held take in front of a monitor chessboard, the take the chessboard motion is built from.',
+    diff: 'The same four moves in the same order, but in 51 s: about 1.5× the guide’s speed (up to 0.6 m/s and 2.5 rad/s), with more swings and loops.' },
 };
 const SETS = {
-  v4: { dir: 'v4/' }, v3: { dir: 'v3/' }, real: { dir: 'real_takes/', cams: true }, realc: { dir: 'real_chess/', cams: true },
+  v4: { dir: 'v4/' }, v5: { dir: 'v5/' }, real: { dir: 'real_takes/', cams: true }, realc: { dir: 'real_chess/', cams: true },
 };
-const MODES = { main: ['guide06c_60', 'guide60b'], real: ['aprilgrid_06', 'chessboard_1107_01'] };
+const MODES = { main: ['guide06c_60', 'guide09_60'], real: ['aprilgrid_06', 'chessboard_1109_09'] };
 // One short cue per move (at most 80 characters; real takes: what was done, at most 60), by variant and segment role.
 export const SHORT = {
   guide06c_60: {
@@ -36,12 +36,12 @@ export const SHORT = {
     circle: 'Circle parallel to the board, about 40 cm across, 2×, rolling a little.',
     rest1: 'Hold still. Count 3. Done.',
   },
-  guide60b: {
-    rest0: 'Hold still, face-on, about 46 cm away. Count 3.',
+  guide09_60: {
+    rest0: 'Hold still, face-on, about 47 cm away. Count 3.',
     lr: 'Swing left–right, 2×; turn past the board; keep the whole board in view.',
     ud: 'Swing up–down, 2×; tip past the board; keep the whole board in view.',
-    bf: 'In to 28 cm, out to 80 cm, 3×, rolling; board off-centre.',
-    mix: 'Turn in place round a slow square so the board visits each picture corner.',
+    bf: 'In to 28 cm, out to 60 cm, 3×, rolling; board off-centre.',
+    circle: 'Circle parallel to the board, about 20 × 37 cm, 2×, the whole board in view.',
     rest1: 'Hold still. Count 3. Done.',
   },
   aprilgrid_06: {
@@ -49,11 +49,10 @@ export const SHORT = {
     ud: 'Swung up–down, tipping past the board.', bf: 'In and out 4×, rolling as it went.',
     circle: 'Circled parallel to the board, 3×.', rest1: 'Held still. Done.',
   },
-  chessboard_1107_01: {
-    rest0: 'Held still, face-on.', bf1: 'In and out, rolling, the whole board in view.',
-    lr1: 'Swung left–right, the whole board in view.', ud1: 'Swung up–down, tipping past the board.',
-    roll1: 'Rolled in place, both ways.', ud2: 'Up–down again, shorter.', lr2: 'A short left–right.',
-    mix: 'Turned the board into each picture corner, mixed moves.', rest1: 'Held still. Done.',
+  chessboard_1109_09: {
+    rest0: 'Held still, face-on.', lr: 'Swung left–right, the whole board in view.',
+    ud: 'Swung up–down, tipping past the board.', bf: 'In and out 4×, rolling as it went.',
+    circle: 'Circled parallel to the board, about 4×.', rest1: 'Held still. Done.',
   },
 };
 // Path colours per move (CSS --cm-s-<key>): roll in place counts as back-forth, a corner square or mixed block as the loop.

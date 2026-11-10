@@ -56,8 +56,8 @@ test('nowState: start, a move boundary +-1 ms, last sample', () => {
 });
 
 test('every short cue fits: at most 80 characters (real takes 60)', () => {
-  for (const [f, id, max] of [['v4/guide06c_60', 'guide06c_60', 80], ['v3/guide60b', 'guide60b', 80],
-    ['real_takes/aprilgrid_06', 'aprilgrid_06', 60], ['real_chess/chessboard_1107_01', 'chessboard_1107_01', 60]]) {
+  for (const [f, id, max] of [['v4/guide06c_60', 'guide06c_60', 80], ['v5/guide09_60', 'guide09_60', 80],
+    ['real_takes/aprilgrid_06', 'aprilgrid_06', 60], ['real_chess/chessboard_1109_09', 'chessboard_1109_09', 60]]) {
     for (const g of prep(read(`${DATA}${f}.json`), id).segs) assert.ok(g.short && g.short.length <= max, `${id} ${g.label}: ${g.short}`);
   }
 });
@@ -73,7 +73,7 @@ test('beats: 2 sweeps left-right and up-down, 3 in-outs in the guide motion', ()
 });
 
 test('chessboard detections are all or none', () => {
-  const d = read(`${DATA}v3/guide60b.json`);
+  const d = read(`${DATA}v5/guide09_60.json`);
   const s = d.samples;
   for (let i = 0; i < s.t.length; i += 7) {
     const n = boardDetections(d.board, d.camera.intr8, d.camera.image_size, quatToR(s.q_wxyz[i]), s.p_C[i]).n;
@@ -82,11 +82,14 @@ test('chessboard detections are all or none', () => {
 });
 
 test('labels: chips and the Now panel share names and seconds; repeats get (2nd); the last rest says Done', () => {
-  const chess = prep(read(`${DATA}real_chess/chessboard_1107_01.json`), 'chessboard_1107_01');
+  const chess = prep(read(`${DATA}real_chess/chessboard_1109_09.json`), 'chessboard_1109_09');
   const names = chess.segs.map((g) => g.name);
-  assert.deepEqual(names, ['Hold still', 'Back-forth + roll', 'Left-right', 'Up-down', 'Roll in place', 'Up-down (2nd)',
-    'Left-right (2nd)', 'Corners + mixed', 'Hold still']);
+  assert.deepEqual(names, ['Hold still', 'Left-right', 'Up-down', 'Back-forth + roll', 'Loop', 'Hold still']);
   assert.ok(names.every((x) => !/\s\d+$/.test(x)));
+  // a real take that repeats a move (labels "Left-right 2", as the export writes them) gets "(2nd)"
+  const rep = read(`${DATA}real_chess/chessboard_1109_09.json`);
+  rep.segments[1].label = 'Left-right 1'; rep.segments[2].label = 'Left-right 2'; rep.segments[2].role = 'lr2';
+  assert.deepEqual(prep(rep, 'chessboard_1109_09').segs.slice(1, 3).map((g) => g.name), ['Left-right', 'Left-right (2nd)']);
   const ag = prep(read(`${DATA}real_takes/aprilgrid_06.json`), 'aprilgrid_06');
   const a = nowState(ag, 0);
   assert.equal(a.name, 'Hold still');
@@ -105,8 +108,8 @@ test('fill next: the largest 4-connected empty region', () => {
   assert.equal(largestRegion([3, 4], 4, 3).size, 1);   // 3 and 4 are on different rows, not neighbours
 });
 
-const ALL = [['v4/guide06c_60', 'guide06c_60'], ['v3/guide60b', 'guide60b'], ['real_takes/aprilgrid_06', 'aprilgrid_06'],
-  ['real_chess/chessboard_1107_01', 'chessboard_1107_01']].map(([f, id]) => prep(read(`${DATA}${f}.json`), id));
+const ALL = [['v4/guide06c_60', 'guide06c_60'], ['v5/guide09_60', 'guide09_60'], ['real_takes/aprilgrid_06', 'aprilgrid_06'],
+  ['real_chess/chessboard_1109_09', 'chessboard_1109_09']].map(([f, id]) => prep(read(`${DATA}${f}.json`), id));
 
 test('mergeSegs: same label and cue back to back play as one move, beats renumbered; empty segments dropped', () => {
   const b = (t, i) => ({ t, word: 'w', i });
@@ -180,7 +183,7 @@ test('sidecar: delta-coded corners decode to the exporter pairs and land inside 
   assert.equal(c.uv[1].length, 0);
   assert.deepEqual(c.tt, [0.1, 0, 0]);
   assert.equal(c.nReach, 2);
-  for (const id of ['aprilgrid_06', 'chessboard_1107_01']) {
+  for (const id of ['aprilgrid_06', 'chessboard_1109_09']) {
     const dir = id.startsWith('april') ? 'real_takes' : 'real_chess';
     for (const k of prepCams(read(`${DATA}${dir}/${id}.cams.json`))) {
       const [W, H] = k.size;
@@ -208,7 +211,7 @@ test('coverage: a cell first seen at 0.15 s does not count at 0.11 s (no 0.05 s 
   assert.equal(camCoverage(c, 0.15), 100);
 });
 
-const REAL = [['real_takes', 'aprilgrid_06'], ['real_chess', 'chessboard_1107_01']];
+const REAL = [['real_takes', 'aprilgrid_06'], ['real_chess', 'chessboard_1109_09']];
 const realCams = Object.fromEntries(REAL.map(([dir, id]) => [id, prepCams(read(`${DATA}${dir}/${id}.cams.json`))]));
 const realDur = Object.fromEntries(REAL.map(([dir, id]) => [id, read(`${DATA}${dir}/index.json`).variants.find((v) => v.id === id).duration_s]));
 
@@ -223,7 +226,7 @@ test('sidecar: every frame of the views file (600 per take, with times), an outl
     assert.ok(Math.abs(cams[0].t.at(-1) - realDur[id]) < 0.1, `${id}: frames span the take`);
   }
   assert.ok(Math.abs(realCams.aprilgrid_06[0].period - 0.05) < 1e-9);        // 20 Hz
-  assert.ok(Math.abs(realCams.chessboard_1107_01[0].period - 0.1) < 1e-9);   // 10 Hz
+  assert.ok(Math.abs(realCams.chessboard_1109_09[0].period - 0.1) < 1e-9);   // 10 Hz
 });
 
 test('bracket and outline interpolation: the midpoint between two frames is the mean of their outlines', () => {
@@ -284,20 +287,20 @@ test('corners: a real gap (over two periods) shows none away from its frames, th
 });
 
 test('corners: whole takes, every 1/30 s in a normal gap with corners on both sides shows corners (0 blinks)', () => {
-  let blinks = 0, samples = 0, realGapNone = 0;
+  let blinks = 0, samples = 0, realGap = 0, realGapNone = 0;
   for (const [, id] of REAL) {
     for (const c of realCams[id]) {
       for (let i = 0; i / 30 <= realDur[id]; i++) {
         const t = i / 30, { k0, k1 } = bracket(c.t, t);
         if (k0 === k1 || !c.uv[k0].length || !c.uv[k1].length) continue;
         const none = /^no corners/.test(cardNote({ ...camFrame(c, t), pct: 0 }));
-        if (c.t[k1] - c.t[k0] <= 2 * c.period + 1e-6) { samples++; if (none) blinks++; } else if (none) realGapNone++;
+        if (c.t[k1] - c.t[k0] <= 2 * c.period + 1e-6) { samples++; if (none) blinks++; } else { realGap++; if (none) realGapNone++; }
       }
     }
   }
   assert.ok(samples > 5000, `${samples}`);
   assert.equal(blinks, 0);
-  assert.ok(realGapNone > 0, 'the chessboard take still has real gaps with none');
+  assert.equal(realGapNone, realGap, 'a real gap (longer than 2 frames) shows none');   // synthetic gaps: test above
 });
 
 test('corners: a real cam2 frame without corners between two others without corners: none, outline kept', () => {
@@ -352,8 +355,8 @@ test('outline at 1x: a drawn frame (1/30 s) moves it no further than the frames 
   }
 });
 
-test('coverage: the cam0 card at the end equals the index cov_cam0 (71 % chessboard, 98 % AprilGrid); it grows', () => {
-  for (const [dir, id, want] of [['real_chess', 'chessboard_1107_01', 71], ['real_takes', 'aprilgrid_06', 98]]) {
+test('coverage: the cam0 card at the end equals the index cov_cam0 (81 % chessboard, 98 % AprilGrid); it grows', () => {
+  for (const [dir, id, want] of [['real_chess', 'chessboard_1109_09', 81], ['real_takes', 'aprilgrid_06', 98]]) {
     const ix = read(`${DATA}${dir}/index.json`).variants.find((v) => v.id === id);
     const [c0] = prepCams(read(`${DATA}${dir}/${id}.cams.json`));
     const end = camCoverage(c0, ix.duration_s);
@@ -410,9 +413,9 @@ test('repeat switched off during the hold (another example loaded): the clock re
   assert.ok(Math.abs(st.t - 12.016) < 1e-9);
 });
 
-const chess = prep(read(`${DATA}v3/guide60b.json`), 'guide60b');
+const chess = prep(read(`${DATA}v5/guide09_60.json`), 'guide09_60');
 const realAG = prep(read(`${DATA}real_takes/aprilgrid_06.json`), 'aprilgrid_06');
-const realCB = prep(read(`${DATA}real_chess/chessboard_1107_01.json`), 'chessboard_1107_01');
+const realCB = prep(read(`${DATA}real_chess/chessboard_1109_09.json`), 'chessboard_1109_09');
 
 test('start / end screen: start until the first play or seek, end only after playing to the end, start again on load', () => {
   let s = 'start';
@@ -433,28 +436,28 @@ test('primary button: Play, Pause while playing or counting, Again at the end', 
   assert.equal(playMode({ playing: false, counting: 0, t: 59.9, dur: 60 }), 'play');
 });
 
-test('start labels name the board and say the length: 60 s guides, 41 s and 61 s real takes', () => {
+test('start labels name the board and say the length: 60 s guides, 41 s and 51 s real takes', () => {
   assert.equal(startLabel(guide, false), 'Start the AprilGrid motion · 60 s');
   assert.equal(startLabel(chess, false), 'Start the chessboard motion · 60 s');
   assert.equal(startLabel(realAG, true), 'Play the real recording · 41 s');
-  assert.equal(startLabel(realCB, true), 'Play the real recording · 61 s');
+  assert.equal(startLabel(realCB, true), 'Play the real recording · 51 s');
 });
 
 test('guide chips are named after their board', () => {
   assert.equal(VARIANTS.guide06c_60.label, 'AprilGrid');
-  assert.equal(VARIANTS.guide60b.label, 'Chessboard');
+  assert.equal(VARIANTS.guide09_60.label, 'Chessboard');
 });
 
 test('get-ready line: the start distance to the board plane, as in the setup line and the first cue', () => {
   assert.equal(getReadyText(guide), 'Get in position: board 42 cm ahead, face-on');
-  assert.equal(getReadyText(chess), 'Get in position: board 46 cm ahead, face-on');
+  assert.equal(getReadyText(chess), 'Get in position: board 47 cm ahead, face-on');
   // the first cue of each guide says the same distance
   for (const d of [guide, chess]) assert.ok(d.segs[0].short.includes(getReadyText(d).match(/\d+ cm/)[0]), d.segs[0].short);
 });
 
-test('hardest move: a move (never a rest) with the fastest peak; loop in the AprilGrid guide, in-out in the chessboard', () => {
+test('hardest move: a move (never a rest) with the fastest peak; loop in the AprilGrid guide, left-right in the chessboard', () => {
   assert.equal(hardestMove(guide).name, 'Loop + roll');
-  assert.equal(hardestMove(chess).name, 'Back-forth + roll');
+  assert.equal(hardestMove(chess).name, 'Left-right');
   for (const d of [guide, chess, realAG, realCB]) assert.ok(hardestMove(d).k);
   assert.equal(hardestMove({ ...guide, segs: guide.segs.filter((g) => !g.k) }), null);
 });
