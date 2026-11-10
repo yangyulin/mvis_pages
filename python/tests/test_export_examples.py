@@ -53,7 +53,7 @@ def pub_doc():
                                       reference={"none": "No reference."}, reproduce={"batch": "MVIS main, batch X"},
                                       folds=[{"title": "More", "key": "k", "text": "T.", "link": {"url": "/x/", "label": "X"}}]),
                          "theirs": base("Theirs", image={"file": "b.jpg", "alt": "B", "credit": "Photo: them", "url": "https://example.org/b"},
-                                        sensor={"url": "/sensors/b/", "label": "B wiki"}, reference=ref,
+                                        sensor={"url": "/devices/b/", "label": "B wiki"}, reference=ref,
                                         other={"title": "Other device", "lead": "Second.", "config": {"name": "b2.yaml", "why": {}}, "reference": ref}),
                          "waiting": base("Waiting", reference=ref, eval={"slug": "w", "label": "All"})}}
 
@@ -188,7 +188,7 @@ def test_header_is_the_sensor_datasheet_with_our_rig_mark_and_links(world):
     th = json.loads(plan.texts[f"{X.EX_DATA}/theirs.json"])["parts"]
     assert "class=ex-ours>Our rig<" in ours["header"] and "ex-ours" not in th["header"]
     assert 'class="sd-btn primary" href="/reference/datasets/a/">Downloads: Data page →' in ours["header"]
-    assert 'href="/benchmark/results/">All runs: Results →' in ours["header"] and 'href="/sensors/b/">B wiki →' in th["header"]
+    assert 'href="/benchmark/results/">All runs: Results →' in ours["header"] and 'href="/devices/b/">B wiki →' in th["header"]
     assert "<dt>Board</dt><dd>AprilGrid</dd>" in ours["header"] and 'href="https://example.org/b">Photo: them ↗' in th["header"]
     assert "class=tiles" in ours["glance"] and "/media/hero/hero_k_960.mp4" in ours["glance"]
     assert "AprilGrid 2 × 3" in ours["dataset"] and "Solve window: 2.5 s." in ours["dataset"]

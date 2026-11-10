@@ -18,7 +18,7 @@
  },
  "links": {
   "example": "/benchmark/examples/monado/",
-  "sensor": "/sensors/hp-reverb-g2/"
+  "sensor": "/devices/hp-reverb-g2/"
  },
  "study": false,
  "batch": "2026-11-08a",

@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from mvis_site import checks as C
@@ -10,19 +12,19 @@ def test_routes_from_the_mdx_tree(tmp_path):
     assert C.routes(tmp_path) == {"/", "/a/", "/a/b/"}
 
 
-NAV = [{"label": "T265", "link": "/sensors/t265/", "group": "Tracking"}, {"label": "Ego", "link": "/sensors/ego/", "group": "Head-worn"},
-       {"label": "Ego GS", "link": "/sensors/ego-gs/", "group": "Head-worn"}]
+NAV = [{"label": "T265", "link": "/devices/t265/", "group": "Tracking"}, {"label": "Ego", "link": "/devices/ego/", "group": "Head-worn"},
+       {"label": "Ego GS", "link": "/devices/ego-gs/", "group": "Head-worn"}]
 
 
 def _sidebar(**kw):
-    s = {"sections": C.SECTIONS, "children": {"Benchmark": C.BENCHMARK, "Sensor wiki": ["Overview", "Tracking", "Head-worn"]},
-         "groups": {"Sensor wiki": {"Tracking": ["T265"], "Head-worn": ["Ego", "Ego GS"]}}}
+    s = {"sections": C.SECTIONS, "children": {"Benchmark": C.BENCHMARK, "Device wiki": ["Overview", "Tracking", "Head-worn"]},
+         "groups": {"Device wiki": {"Tracking": ["T265"], "Head-worn": ["Ego", "Ego GS"]}}}
     s.update(kw)
     return s
 
 
 def test_sidebar_has_benchmark_then_sensor_wiki():
-    assert C.SECTIONS.index("Sensor wiki") == C.SECTIONS.index("Benchmark") + 1
+    assert C.SECTIONS.index("Device wiki") == C.SECTIONS.index("Benchmark") + 1
     assert C.BENCHMARK == ["Examples", "Why calibrate t_ga", "Results", "Methodology"]
     assert C.sidebar_problems(_sidebar(), NAV) == []
 
@@ -53,24 +55,24 @@ def test_page_problems_name_a_sideways_scroll_and_a_theme_that_did_not_apply():
 
 def test_sidebar_problems_name_what_is_wrong():
     assert C.sidebar_problems({"sections": ["X"], "children": {}, "groups": {}}, NAV) == [
-        "sections are ['X']", "Benchmark holds None", "Sensor wiki holds None, want ['Overview', 'Tracking', 'Head-worn']",
-        "Sensor wiki › Tracking holds None, want ['T265']", "Sensor wiki › Head-worn holds None, want ['Ego', 'Ego GS']"]
+        "sections are ['X']", "Benchmark holds None", "Device wiki holds None, want ['Overview', 'Tracking', 'Head-worn']",
+        "Device wiki › Tracking holds None, want ['T265']", "Device wiki › Head-worn holds None, want ['Ego', 'Ego GS']"]
 
 
 def test_a_sensor_under_benchmark_fails():
-    s = _sidebar(children={"Benchmark": [*C.BENCHMARK, "Sensors"], "Sensor wiki": ["Overview", "Tracking", "Head-worn"]})
+    s = _sidebar(children={"Benchmark": [*C.BENCHMARK, "Sensors"], "Device wiki": ["Overview", "Tracking", "Head-worn"]})
     assert C.sidebar_problems(s, NAV) == ["Benchmark holds ['Examples', 'Why calibrate t_ga', 'Results', 'Methodology', 'Sensors']"]
 
 
 def test_a_sensor_missing_or_twice_in_the_groups_fails():
-    missing = _sidebar(groups={"Sensor wiki": {"Tracking": ["T265"], "Head-worn": ["Ego"]}})
-    assert C.sidebar_problems(missing, NAV) == ["Sensor wiki › Head-worn holds ['Ego'], want ['Ego', 'Ego GS']"]
-    twice = _sidebar(groups={"Sensor wiki": {"Tracking": ["T265", "Ego"], "Head-worn": ["Ego", "Ego GS"]}})
-    assert C.sidebar_problems(twice, NAV) == ["Sensor wiki › Tracking holds ['T265', 'Ego'], want ['T265']"]
+    missing = _sidebar(groups={"Device wiki": {"Tracking": ["T265"], "Head-worn": ["Ego"]}})
+    assert C.sidebar_problems(missing, NAV) == ["Device wiki › Head-worn holds ['Ego'], want ['Ego', 'Ego GS']"]
+    twice = _sidebar(groups={"Device wiki": {"Tracking": ["T265", "Ego"], "Head-worn": ["Ego", "Ego GS"]}})
+    assert C.sidebar_problems(twice, NAV) == ["Device wiki › Tracking holds ['T265', 'Ego'], want ['T265']"]
 
 
 def test_deep_pages_use_the_new_addresses():
-    assert "/sensors/intel-t265/" in C.DEEP_PAGES and "/benchmark/examples/monado/" in C.DEEP_PAGES
+    assert "/devices/intel-t265/" in C.DEEP_PAGES and "/benchmark/examples/monado/" in C.DEEP_PAGES
     assert not [p for p in C.DEEP_PAGES if p.startswith(("/benchmark/sensors/", "/examples/"))]
 
 
@@ -274,3 +276,20 @@ def test_a_real_page_that_calls_location_replace_is_not_a_redirect():
     page = "<main><button onclick=\"location.replace('/x/')\">go</button></main>"
     assert C.redirect_target(page) is None
 
+
+
+def test_device_wiki_moved_from_sensors_in_one_hop():
+    """Phase 3 (2026-11-10): the device pages live under /devices/; every old /sensors/ and /benchmark/sensors/ address
+    redirects straight there, and no redirect or link points at /sensors/ any more."""
+    import re
+    from mvis_site import REPO
+    moved = json.loads((REPO / "site/src/data/moved.json").read_text(encoding="utf-8"))
+    nav = json.loads((REPO / "site/src/data/sensor-nav.json").read_text(encoding="utf-8"))
+    slugs = [n["link"].removeprefix("/devices/").strip("/") for n in nav]
+    assert all(n["link"].startswith("/devices/") for n in nav)
+    for old in ("/sensors/", "/benchmark/sensors/"):
+        assert moved[old] == "/devices/"
+        assert all(moved[f"{old}{s}/"] == f"/devices/{s}/" for s in slugs)
+    assert not [t for t in moved.values() if t.startswith("/sensors/")]
+    config = (REPO / "site/astro.config.mjs").read_text(encoding="utf-8")
+    assert not re.findall(r":\s*'/sensors/", config), "astro.config redirects must go straight to /devices/"

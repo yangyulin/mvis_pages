@@ -5,7 +5,7 @@ interface Props { page: any }
 const { page } = Astro.props;
 const RESULTS = 'https://huggingface.co/datasets/calibench-vi/results';
 const LINKS: [string, string][] = [['example', 'How MVIS calibrates it → Example'], ['dataset', 'Downloads → Dataset page'],
-  ['sensor', 'The sensor → Sensor wiki'], ['hub', 'The data → Hugging Face']];
+  ['sensor', 'The device → Device wiki'], ['hub', 'The data → Hugging Face']];
 const MODE: Record<string, string> = { cam: 'camera only', 'cam+imu': 'camera + IMU' };
 const others = page.families.some((f: any) => f.columns.some((c: any) => c.tool !== 'MVIS'));
 ---

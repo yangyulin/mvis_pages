@@ -1,5 +1,5 @@
 ---
-// Examples overview: one photo card per example, on the Sensor wiki's card pattern (SensorGrid). Card data is generated
+// Examples overview: one photo card per example, on the Device wiki's card pattern (SensorGrid). Card data is generated
 // by site/scripts/export_examples.py into src/data/examples/<slug>.json. Every card has the same size; our own rig
 // comes first in a block of its own (a separate grid on the overview), marked with the Our rig ribbon.
 // Where a pointer can hover and motion is welcome, hovering or focusing a card plays a short muted clip of the MVIS
@@ -94,7 +94,7 @@ const cards = slugs.map((slug) => {
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .xg-media video { display: block; }
   }
-  /* Phones: two per row with title and tags only (the Sensor wiki's phone rule). */
+  /* Phones: two per row with title and tags only (the Device wiki's phone rule). */
   @media (max-width: 34rem) {
     .xg { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
     .xg-body { padding: 0.55rem 0.6rem 0.65rem; gap: 0.15rem; }

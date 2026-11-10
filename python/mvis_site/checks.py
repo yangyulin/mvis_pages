@@ -7,10 +7,10 @@ from pathlib import Path
 from urllib.parse import unquote
 
 # --- sidebar (nav_check) ---------------------------------------------------------------------------------------
-SECTIONS = ["Getting started", "Guides", "Benchmark", "Sensor wiki", "Concepts", "Reference", "Contribute", "About"]
+SECTIONS = ["Getting started", "Guides", "Benchmark", "Device wiki", "Concepts", "Reference", "Contribute", "About"]
 BENCHMARK = ["Examples", "Why calibrate t_ga", "Results", "Methodology"]
 RESULTS = ["Leaderboard", "Datasets eval"]
-DEEP_PAGES = ["/sensors/intel-t265/", "/benchmark/examples/monado/", "/benchmark/results/tum-vi/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
+DEEP_PAGES = ["/devices/intel-t265/", "/benchmark/examples/monado/", "/benchmark/results/tum-vi/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
 NOT_IN_SIDEBAR = {"/"}
 
 
@@ -25,7 +25,7 @@ def routes(docs: Path) -> set[str]:
 
 
 def sidebar_problems(s: dict, nav: list[dict], results_nav: list[dict] | None = None) -> list[str]:
-    """Top-level sections, Benchmark, and the Sensor wiki: Overview, then one subgroup per sensor-nav.json group in its
+    """Top-level sections, Benchmark, and the Device wiki: Overview, then one subgroup per sensor-nav.json group in its
     order, each holding its sensors once. With results_nav, Benchmark › Results holds Leaderboard and Datasets eval,
     and Datasets eval one page per results-nav.json entry in its order. s is a measured sidebar
     {sections, children, groups, links, paths}; paths maps "A › B › C" to the labels inside that group."""
@@ -42,10 +42,10 @@ def sidebar_problems(s: dict, nav: list[dict], results_nav: list[dict] | None = 
     for n in nav:
         by_group.setdefault(n["group"], []).append(n["label"])
     want = ["Overview", *by_group]
-    if s["children"].get("Sensor wiki") != want:
-        out.append(f"Sensor wiki holds {s['children'].get('Sensor wiki')}, want {want}")
-    got = s["groups"].get("Sensor wiki", {})
-    out += [f"Sensor wiki › {g} holds {got.get(g)}, want {labels}" for g, labels in by_group.items() if got.get(g) != labels]
+    if s["children"].get("Device wiki") != want:
+        out.append(f"Device wiki holds {s['children'].get('Device wiki')}, want {want}")
+    got = s["groups"].get("Device wiki", {})
+    out += [f"Device wiki › {g} holds {got.get(g)}, want {labels}" for g, labels in by_group.items() if got.get(g) != labels]
     return out
 
 
