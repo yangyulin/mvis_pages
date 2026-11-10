@@ -46,5 +46,5 @@ const tint = (v: number, m: number) => `--ev-a:${Math.round((Math.abs(v) / m) * 
     </details>
   )}
   {f.notes.length > 0 && <ul class="ev-notes">{f.notes.map(([a, b]: [string, string]) => <li><b>{a}:</b> {b}</li>)}</ul>}
-  <p class="ev-small">Run configs, commands and the full parameter tables are in <a href="#full-tables">Full tables</a> at the end of this page.</p>
+  {page.full_tables && <p class="ev-small">Run configs, commands and the full parameter tables are in <a href="#full-tables">Full tables</a> at the end of this page.</p>}
 </details>

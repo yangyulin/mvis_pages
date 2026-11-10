@@ -18,7 +18,7 @@ const label = (c: string) => f.columns.find((x: any) => x.col === c)?.label ?? c
       </li>
     ))}
   </ul>
-  {f.mode === 'cam+imu' && <p class="ev-small">MVIS made two runs per recording: its default IMU model ("MVIS") and Kalibr's IMU model ("MVIS (K-IMU)"), so the IMU terms of the second mean the same thing as Kalibr's.</p>}
+  {f.mode === 'cam+imu' && f.columns.some((c: any) => c.col === 'mvis') && <p class="ev-small">MVIS made two runs per recording: its default IMU model ("MVIS") and Kalibr's IMU model ("MVIS (K-IMU)"), so the IMU terms of the second mean the same thing as Kalibr's.</p>}
   {Object.keys(f.records).length > 0 && <p class="ev-small">Records behind these numbers: {Object.entries(f.records).map(([t, u]: [string, any], k: number) => <>{k ? ' · ' : ''}<a href={u}>{t} {f.id}.json</a></>)}</p>}
   {f.fit.length > 0 && (
     <details class="ev-fold">

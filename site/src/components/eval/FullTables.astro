@@ -9,5 +9,5 @@ const { page } = Astro.props;
 ---
 <details class="not-content rp-tables ev-full" data-rp-dataset={page.id}>
   <summary>Every parameter table, tool difference and run config ({page.label})</summary>
-  {page.study ? <UzhFpvResults /> : <><LeaderboardHowTo /><DatasetLeaderboard id={page.id} /></>}
+  {page.full_tables === 'study' ? <UzhFpvResults /> : <><LeaderboardHowTo /><DatasetLeaderboard id={page.id} /></>}
 </details>

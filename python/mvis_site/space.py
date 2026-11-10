@@ -61,11 +61,15 @@ def space(leaderboard_dir: Path, records: Path | None = None):
             os.environ["CALIBENCH_LOCAL"] = saved_env
 
 
-def write_records(leaderboard_dir: Path, stats: dict, batch: str, out: Path) -> None:
-    """Leaderboard-style records of one study, written by the Space's own exporter, with only this dataset on the board."""
+UZH_BOARD = ("uzh_fpv", "uzh", "UZH-FPV")  # (record id, the stats file's dataset key, title)
+
+
+def write_records(leaderboard_dir: Path, stats: dict, batch: str, out: Path, board: tuple = UZH_BOARD) -> None:
+    """Leaderboard-style records of one study, written by the Space's own exporter, with only this dataset on the board.
+    board: (record id, stats dataset key, title); its families are the stats file's, in file order."""
     with space(leaderboard_dir) as load:
         X = load("export_threeway")
-        X.DATASETS = [("uzh_fpv", "uzh", "UZH-FPV", list(L.FAMILIES))]
+        X.DATASETS = [(*board, list(stats["families"]))]
         X.EXCLUDED = []
         X.OUT = Path(out)
         X.write(X.build(stats), stats, batch)
@@ -147,17 +151,24 @@ def space_rows(leaderboard_dir: Path, records: Path, results_commit: str | None 
                 "families": _family_rows(app, data, fams)}
 
 
-def uzh_rows(leaderboard_dir: Path, stats: dict, records_out: Path) -> dict:
-    """The same for the UZH-FPV study: its records are written by the Space's exporter to records_out first (as
-    uzh_text does), with the UZH read-first text in place of the leaderboard's. stats: already rekeyed, notes cleaned."""
-    write_records(leaderboard_dir, stats, L.BATCH, Path(records_out))
+def study_rows(leaderboard_dir: Path, stats: dict, records_out: Path, batch: str, board: tuple, read_first: str,
+               like_for_like: str) -> dict:
+    """The same for a separate study: its records are written by the Space's exporter to records_out first (as
+    uzh_text does), with the study's read-first and like-for-like texts in place of the leaderboard's."""
+    write_records(leaderboard_dir, stats, batch, Path(records_out), board)
+    fams = list(stats["families"])
     with space(Path(leaderboard_dir), Path(records_out)) as load:
         app = load("app")
-        for fid in L.FAMILIES:
-            app.READ_FIRST[fid] = L.READ_FIRST
-            app.READ_MORE[fid] = L.LIKE_FOR_LIKE
+        for fid in fams:
+            app.READ_FIRST[fid] = read_first
+            app.READ_MORE[fid] = like_for_like
         return {"pairs": [list(p) for p in app.PAIRS], "decimals": dict(app.DECIMALS),
-                "families": _family_rows(app, app.DATA, list(L.FAMILIES))}
+                "families": _family_rows(app, app.DATA, fams)}
+
+
+def uzh_rows(leaderboard_dir: Path, stats: dict, records_out: Path) -> dict:
+    """study_rows of UZH-FPV. stats: already rekeyed, notes cleaned."""
+    return study_rows(leaderboard_dir, stats, records_out, L.BATCH, UZH_BOARD, L.READ_FIRST, L.LIKE_FOR_LIKE)
 
 
 def board_texts(leaderboard_dir: Path, records: Path | None = None, results_commit: str | None = None) -> tuple[str, str]:

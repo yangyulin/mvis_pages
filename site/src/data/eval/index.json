@@ -6,7 +6,6 @@
   "<b>Who ran it:</b> the MVIS authors ran every tool, including Kalibr and Basalt, with its documented defaults unless a family's notes say otherwise.",
   "<b>No totals:</b> nothing is added up across cells, families or datasets, and rows are never ordered by a value."
  ],
- "study_note": "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here.",
  "datasets": [
   {
    "slug": "virig-4imus-3cams",
@@ -552,9 +551,16 @@
  ],
  "studies": [
   {
+   "label": "VI-Rig 5 IMUs + 4 cams",
+   "link": "/benchmark/results/virig-5imus-4cams/",
+   "batch": "2026-11-02",
+   "note": "Separate study (batch 2026-11-02), MVIS only: Kalibr and Basalt were not run on this set, so it has no row here."
+  },
+  {
    "label": "UZH-FPV",
    "link": "/benchmark/results/uzh-fpv/",
-   "batch": "2026-11-04"
+   "batch": "2026-11-04",
+   "note": "Separate study (batch 2026-11-04): no repeatability cells on the current schema, so it has no row here."
   }
  ]
 }

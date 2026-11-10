@@ -241,8 +241,9 @@ def family(T: str, meta: dict, shutter: str, sp: dict, pairs: list, decs: dict, 
     of = meta.get("n_recordings") or 0
     done = solved(records, T, of)
     ran = {x["tool"] for x in done if "reason" not in x}
-    cols = [(c, l) for c, l in columns(camimu) if TOOL_OF[c] in ran]  # a tool that did not run gets no lanes
     rows = sp["rows"]
+    # a tool that did not run gets no lanes, nor a method that holds no value (a study without the K-IMU run)
+    cols = [(c, l) for c, l in columns(camimu) if TOOL_OF[c] in ran and any((r.get(c) or {}).get("med") is not None for r in rows)]
     unmapped = sorted({r["sensor"] for r in rows} - set(sid))
     if unmapped:
         raise ValueError(f"{T}: sensors without an id in public_results.yaml: {unmapped}")
@@ -327,11 +328,16 @@ def dataset(entry: dict, sp: dict, records: dict, stats: dict, batch: str, commi
     sid = entry["sensors"]
     fams = [family(f["id"], fams_meta[f["id"]], f["shutter"], sp["families"][f["id"]], sp["pairs"], sp["decimals"],
                    records, stats["families"][f["id"]], sid, hub_links(f["id"], batch, commit)) for f in entry["families"]]
+    for f in fams:  # a study names why the other tools did not run (repeatability.NOT_RUN covers the board's families)
+        for s in f["solved"]:
+            if "reason" in s and entry.get("not_run"):
+                s["reason"] = entry["not_run"]
     keep = ("slug", "id", "label", "title", "ours", "licence", "intro", "chips", "image", "links", "reading",
-            "no_repeatability")
+            "no_repeatability", "study_note")
     return {**{k: entry[k] for k in keep if k in entry}, "study": bool(entry.get("study")), "batch": batch,
             "results_commit": commit, "link": f"{RESULTS}{entry['slug']}/", "has_repeatability": rep_ds is not None,
-            "legacy": legacy(rep_ds, entry["id"]), "families": fams}
+            "legacy": legacy(rep_ds, entry["id"]), "families": fams,
+            "full_tables": "study" if entry["id"] == "uzh_fpv" else None if entry.get("study") else "board"}
 
 
 def leaderboard(pages: list[dict], pub: dict, batch: str, commit: str) -> dict:
@@ -346,9 +352,9 @@ def leaderboard(pages: list[dict], pub: dict, batch: str, commit: str) -> dict:
                                    "n": f["n"], "solved": f["solved"],
                                    "diffs": {d["pair"]: {"label": d["label"], "marked": d["marked"], "compared": d["compared"]}
                                              for d in f["diffs"]}} for f in p["families"]]})
-    study = [{"label": p["label"], "link": p["link"], "batch": p["batch"]} for p in pages if p["study"]]
-    return {"batch": batch, "results_commit": commit, "honest": pub["leaderboard"]["honest"],
-            "study_note": pub["leaderboard"]["uzh"], "datasets": rows, "studies": study}
+    study = [{"label": p["label"], "link": p["link"], "batch": p["batch"], "note": p.get("study_note", "")} for p in pages if p["study"]]
+    return {"batch": batch, "results_commit": commit, "honest": pub["leaderboard"]["honest"], "datasets": rows,
+            "studies": study}
 
 
 def nav(pages: list[dict]) -> list[dict]:
@@ -378,8 +384,9 @@ def mdx(page: dict) -> str:
         parts.append(f"<E.FamilyHead page={{page}} i={{{i}}} />\n")
         parts.append("### Coverage\n")
         parts.append(f"<E.Coverage page={{page}} i={{{i}}} />\n")
-        parts.append("### Where the tools differ\n")
-        parts.append(f"<E.Differences page={{page}} i={{{i}}} />\n")
+        if len({c["tool"] for c in f["columns"]}) > 1:
+            parts.append("### Where the tools differ\n")
+            parts.append(f"<E.Differences page={{page}} i={{{i}}} />\n")
         parts.append("### Parameters by sensor\n")
         parts.append(f"<E.Parameters page={{page}} i={{{i}}} />\n")
         parts.append("### Model notes and how each tool was run\n")
@@ -387,8 +394,9 @@ def mdx(page: dict) -> str:
     if page.get("reading"):
         parts.append("## Reading these results\n")
         parts.append("<E.Reading page={page} />\n")
-    parts.append("## Full tables\n")
-    parts.append("<E.FullTables page={page} />\n")
+    if page["full_tables"]:
+        parts.append("## Full tables\n")
+        parts.append("<E.FullTables page={page} />\n")
     return "\n".join(parts)
 
 
@@ -419,7 +427,10 @@ def render(pages: list[dict], pub: dict, batch: str, commit: str, boards: dict[s
     """{path relative to the checkout: text}. Refuses (ValueError) when a ◆ tally differs from its rendered board."""
     bad = []
     for p in pages:
-        bad += tally_problems(p["families"], board_tallies(boards[p["id"]], pairs))
+        if p["id"] in boards:
+            bad += tally_problems(p["families"], board_tallies(boards[p["id"]], pairs))
+        elif not p["study"] or any(f["tally"] for f in p["families"]):
+            bad.append(f"{p['id']}: no rendered board to check its ◆ counts against")
     if bad:
         raise ValueError("◆ counts differ from the rendered board:\n  " + "\n  ".join(bad))
     files = {f"{OUT_DIR}/index.json": dumps(leaderboard(pages, pub, batch, commit)), NAV_FILE: dumps(nav(pages))}
@@ -430,9 +441,11 @@ def render(pages: list[dict], pub: dict, batch: str, commit: str, boards: dict[s
 
 
 # ---------------------------------------------------------------- reading and writing (the only steps with files)
-def collect(leaderboard_dir, records_dir, stats_file, batch: str, commit: str, uzh_root, site) -> tuple[list[dict], dict, list, dict, tuple]:
+def collect(leaderboard_dir, records_dir, stats_file, batch: str, commit: str, uzh_root, site,
+            studies: dict | None = None) -> tuple[list[dict], dict, list, dict, tuple]:
     """(pages, pub, pairs, boards, private words) from the inputs. Stops when the records, the stats file,
-    repeatability.json and board.json are not one batch and one commit."""
+    repeatability.json and board.json are not one batch and one commit. studies: {slug: stats file} of every separate
+    study other than UZH-FPV (its public_results.yaml entry names batch, read_first and like_for_like)."""
     import tempfile
     from pathlib import Path
 
@@ -462,14 +475,28 @@ def collect(leaderboard_dir, records_dir, stats_file, batch: str, commit: str, u
         usp = space.uzh_rows(leaderboard_dir, ustats, Path(tmp) / "rec")
         urec = load_records(Path(tmp) / "rec", L.BATCH)
     found += gate(ustats, urec, L.BATCH)
+    studies = {k: json.loads(Path(v).read_text()) for k, v in (studies or {}).items()}
+    other = {e["slug"]: e for e in pub["datasets"] if e.get("study") and e["slug"] != "uzh-fpv"}
+    if set(studies) != set(other):
+        found.append(f"study stats given for {sorted(studies)}, public_results.yaml lists {sorted(other)}")
+    srows = {}
+    for slug in set(studies) & set(other):
+        e, st = other[slug], studies[slug]
+        with tempfile.TemporaryDirectory(prefix="results_eval_") as tmp:
+            rows = space.study_rows(leaderboard_dir, st, Path(tmp) / "rec", e["batch"], (e["id"], e["stats_key"], e["label"]),
+                                    e["read_first"], e["like_for_like"])
+            recs = load_records(Path(tmp) / "rec", e["batch"])
+        found += gate(st, recs, e["batch"])
+        srows[slug] = (rows, recs, st)
     if found:
         raise SystemExit("inputs disagree:\n  " + "\n  ".join(found[:40]))
     boards = dict(board["datasets"], uzh_fpv=json.loads((site / L.UZH_FILE).read_text())["fragment"])
     reps = {d["id"]: d for d in rep["datasets"]}
-    pages = [dataset(e, usp, urec, ustats, L.BATCH, None, None) if e.get("study")
+    pages = [dataset(e, *srows[e["slug"]], e["batch"], None, None) if e["slug"] in srows
+             else dataset(e, usp, urec, ustats, L.BATCH, None, None) if e.get("study")
              else dataset(e, sp, records, stats, batch, commit, reps[e["id"]]) for e in pub["datasets"]]
     # UZH bag names are UZH's own public sequence names, already on its page; only the batch's recording names are private.
-    return pages, pub, sp["pairs"], boards, private_words(stats)
+    return pages, pub, sp["pairs"], boards, private_words(stats) + tuple(w for _, _, st in srows.values() for w in private_words(st))
 
 
 def write(files: dict[str, str], site, commit: str, private: tuple = ()) -> list:
