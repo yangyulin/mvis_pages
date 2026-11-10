@@ -305,8 +305,8 @@ PUB = X.public_examples()
 
 
 def test_committed_examples_order_and_our_rig_first():
-    assert list(PUB["examples"]) == ["virig-4imus-3cams", "virig-4imus-4cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
-    assert [s for s, p in PUB["examples"].items() if p.get("ours")] == ["virig-4imus-3cams", "virig-4imus-4cams"]
+    assert list(PUB["examples"]) == ["virig-4imus-3cams", "virig-4imus-4cams", "virig-5imus-4cams", "tum-vi", "monado", "looper-insight9", "uzh-fpv"]
+    assert [s for s, p in PUB["examples"].items() if p.get("ours")] == ["virig-4imus-3cams", "virig-4imus-4cams", "virig-5imus-4cams"]
     assert not any("featured" in p for p in PUB["examples"].values())
     assert [s["name"] for s in PUB["steps"]] == [h for h, _ in X.SECTIONS]
 

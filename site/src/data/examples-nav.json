@@ -12,6 +12,10 @@
   "link": "/benchmark/examples/virig-4imus-4cams/"
  },
  {
+  "label": "VI-Rig 5 IMUs + 4 cams",
+  "link": "/benchmark/examples/virig-5imus-4cams/"
+ },
+ {
   "label": "TUM VI",
   "link": "/benchmark/examples/tum-vi/"
  },

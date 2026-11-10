@@ -85,11 +85,12 @@ datasets:
       dataset: /reference/datasets/
       sensor: /devices/intel-t265/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams
+      example: /benchmark/examples/virig-5imus-4cams/
     no_repeatability: "This study has no repeatability cells: a cell compares how much each tool's estimates scatter, and only MVIS was run here. The spread of each MVIS value is in Parameters by sensor."
     read_first: "MVIS only: Kalibr and Basalt were not run on this set, so nothing is compared. The spread shows how much MVIS repeats over the 7 recordings, not that it is right."
     like_for_like: "One MVIS configuration for all 7 recordings (the fast settings of the 4-IMU rows); there is no other tool to match."
     reading:
-      - "<b>Two T265 units, one board.</b> They never see the board at the same time, so each camera-only solve holds one pair (time offset off: each pair is hardware-synced). The camera + IMU solves hold all four cameras and five IMUs, and their intrinsics start from the 7-recording median of the camera-only solves."
+      - "<b>Two T265 units, one board.</b> Each pair is hardware-synced inside its unit, but the two units are not synced to each other, so each camera-only solve holds one pair (time offset off). The camera + IMU solves hold all four cameras and five IMUs, and their intrinsics start from the 7-recording median of the camera-only solves."
       - "<b>T265 IMU timing.</b> The T265 IMUs' gyro–accel delay t_ga is about −6.6 ms, far from the other IMUs. MVIS estimates it per IMU; it is not a pure time shift (it depends on the motion's frequency), so read it as a compromise value."
       - "<b>The results files</b> (calibration numbers and run configs, no images) are on Hugging Face beside the data, in its results folder dated 2026-11-02 (see the link above)."
     families:
