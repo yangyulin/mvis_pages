@@ -141,12 +141,13 @@ def views_mb(v: dict) -> str:
     return f"about {n:.0f} MB" if n >= 1.5 else "about 1 MB" if n >= 0.5 else "under 1 MB"
 
 
-def process_block(slug: str, v: dict, i: int) -> str:
+def process_block(slug: str, v: dict, i: int, media: str | None = None) -> str:
     """One variant's calibration process: the MVIS canvas player (fetched when scrolled into view) when the run has
-    view data, else the older Plotly figure."""
+    view data, else the older Plotly figure. media is the folder the views file is served from (default: the sensor's)."""
     if v.get("views"):
+        media = media or f"/media/sensors/{slug}"
         return (f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(v)}<span>Explore in 3D ({views_mb(v)})</span></button>'
-                f'<div class="mvv" data-mvv="scene" data-mode="site" data-src="/media/sensors/{slug}/views{i}.json"></div></div>')
+                f'<div class="mvv" data-mvv="scene" data-mode="site" data-src="{media}/views{i}.json"></div></div>')
     return (f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(v)}<span>Explore in 3D (about 5 MB)</span></button>'
             f'{proc_html(v, i).replace("▶ Play", "▶\ufe0e Play")}</div>')
 
