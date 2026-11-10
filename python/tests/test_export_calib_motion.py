@@ -103,7 +103,7 @@ def test_sidecar_budget_fits_a_600_frame_three_camera_take():
     """The budget (1.5 MB raw, 450 kB gzip) holds the real AprilGrid take at full rate (1.36 MB, 426 kB)."""
     assert (X.CAMS_RAW_MAX, X.CAMS_GZ_MAX) == (1_500_000, 450_000)
     site = SCRIPT.parents[1] / "public/data/calib-motion"
-    for f in ("real_takes/aprilgrid_06.cams.json", "real_chess/chessboard_1107_01.cams.json"):
+    for f in ("real_takes/aprilgrid_06.cams.json", "real_chess/chessboard_1109_09.cams.json"):
         txt = (site / f).read_bytes()
         side = json.loads(txt)
         assert side["n"] == len(side["t"]) == 600

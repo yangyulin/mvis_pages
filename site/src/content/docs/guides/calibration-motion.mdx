@@ -48,7 +48,7 @@ size in the config (`tag_size` / `square_size` for MVIS, `tagSize` / `rowSpacing
 for Kalibr).
 
 **Setup:** board upright and flat, enough light for a short exposure (about 2 ms); start face-on, about 0.42 m
-away for the AprilGrid motion (0.46 m for the chessboard).
+away for the AprilGrid motion (0.47 m for the chessboard).
 
 ## <span id="the-motion" class="cm-anchor"></span><span id="chessboard-version" class="cm-anchor"></span>2. Watch and practise the motion
 
@@ -56,8 +56,9 @@ away for the AprilGrid motion (0.46 m for the chessboard).
 
 Pick the chip for your board. Follow the **Now** panel: it names the move, says what to do, counts down and
 shows what comes next; the camera card on the right shows what the camera sees and which parts of the image are
-still empty. The chessboard motion swings less so the whole board stays in view, and adds a short corner square
-instead of the loop; same rules otherwise, and it also passes the twin.
+still empty. The chessboard motion has the same four moves, built from our chessboard example: it swings less,
+comes in only to 0.28 m and turns only a little in the loop, so the whole board stays in view; same rules
+otherwise, and it also passes the twin.
 
 ## <span id="step-by-step" class="cm-anchor"></span>3. Step by step
 
@@ -111,7 +112,7 @@ reference motion.
 
 ## Replay it yourself
 
-The [replay pack](/downloads/calib-motion-replay.zip) (zip, 3.4 MB) holds the four motions at 200 Hz (IMU
+The [replay pack](/downloads/calib-motion-replay.zip) (zip, 3.2 MB) holds the four motions at 200 Hz (IMU
 pose, ideal gyro and accelerometer), the two twin rigs (camera, IMU, truth, noise and detection rules) and our
 twin results with the pass rule, so you can run them through your own simulator and calibration tool. Its
 README gives the frames, units and replay steps; the twin itself ran on MVIS, which is not public yet.
