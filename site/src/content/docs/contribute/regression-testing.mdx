@@ -4,23 +4,45 @@ description: How MVIS validates itself — the three-tier suite, blessed baselin
 pageType: reference
 ---
 
-Every change to the MVIS solvers must demonstrate, on real recordings, that it
-changed only what it intended to change. This page is the design of that
-machinery — read it before touching solver code, and see
-[Evaluation & metrics](/reference/evaluation/) for the metrics themselves.
+Use this page before you touch solver code. It explains how we check every change
+to the MVIS solvers.
+
+- **The rule:** a change must show, on real recordings, that it changed only what
+  it meant to change.
+- **This page:** the design of the test machinery.
+- **The metrics themselves:** see [Evaluation & metrics](/reference/evaluation/).
 
 ## The idea: reproducibility against blessed baselines
 
-A regression **row** is one calibration solve of one recording ("collection")
-of one dataset, with a committed **baseline** JSON holding the blessed result
-metrics. A run re-solves the row and gates every metric against the baseline
-with per-metric tolerances — focal length, distortion coefficients, extrinsics
-and stereo baseline, time offsets (`td`, `t_ga`), rolling-shutter readout, and
-reprojection statistics. Any exceeded tolerance fails the run and the exit code.
+Each test re-solves a recording and compares the result with a saved, approved
+result. Any metric outside its tolerance fails the run.
+
+- **Row:** one calibration solve of one recording ("collection") of one dataset.
+- **Baseline:** a committed JSON file with the blessed result metrics for a row.
+  "Blessed" means reviewed and approved as the reference.
+- **Run:** re-solves the row and gates every metric against the baseline. Each
+  metric has its own tolerance.
+
+The gated metrics are:
+
+- focal length
+- distortion coefficients
+- extrinsics (the poses between sensors) and stereo baseline (the distance
+  between a stereo pair)
+- time offsets: `td` (camera-to-IMU time offset) and `t_ga` (the time offset
+  between the gyroscope and accelerometer channels)
+- rolling-shutter readout (the time a rolling-shutter camera takes to read out
+  one image, row by row)
+- reprojection statistics
+
+Any exceeded tolerance fails the run and the exit code.
 
 Baselines are committed files, so **the diff of a baseline is the review
-artifact**: when a change intentionally moves a number, the re-bless commit
-shows exactly which metrics moved, on which recordings, by how much.
+artifact**. When a change moves a number on purpose, the re-bless commit shows:
+
+- which metrics moved
+- on which recordings
+- by how much
 
 ## Three superset tiers
 
@@ -30,9 +52,11 @@ shows exactly which metrics moved, on which recordings, by how much.
 | **mid** | `--level mid` | 57 | ~3 h | weekly; after solver-behavior changes |
 | **full** | `--level full` | 176 | ~2 h at `--parallel 6` | before releases; after re-blessing events |
 
-Tiers are supersets (`fast ⊂ mid ⊂ full`): each manifest row is tagged with the
-lowest tier that includes it, and running a tier executes every row at or below
-it — no row is ever duplicated.
+Tiers are supersets (`fast ⊂ mid ⊂ full`):
+
+- Each manifest row is tagged with the lowest tier that includes it.
+- Running a tier executes every row at or below it.
+- No row is ever duplicated.
 
 ```bash
 python scripts/run_regression.py --mode all --level fast
@@ -42,8 +66,15 @@ python scripts/run_regression.py --only <row> --update-baseline  # re-bless
 
 ## The twelve families: T1–T12
 
-The families are numbered with our own VI-Rig datasets first in each block: camera-only is T1–T5 and camera + IMU is T6–T12.
+We number the families with our own VI-Rig datasets first in each block:
+
+- **Camera-only:** T1–T5
+- **Camera + IMU:** T6–T12
+
 The numbers changed on 2026-11-02, so older material may use different ones.
+
+In the table, GS is a global-shutter camera (the whole image is exposed at once).
+RS is a rolling-shutter camera (rows are exposed one after another).
 
 | Family | Mode | Seed row | Coverage |
 |---|---|---|---|
@@ -60,58 +91,82 @@ The numbers changed on 2026-11-02, so older material may use different ones.
 | T11 | cam-IMU ×2 | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
 | T12 | cam-IMU ×2 | `monado_mgc/imucalib01` | GS equidistant stereo + IMU |
 
-Every cam-IMU row runs in two IMU-model variants — **calyx** (scale +
-cross-coupling, no g-sensitivity; reported as the decomposed Dw = R·U) and
-**kalibr** (full intrinsics including Tg g-sensitivity and the gyro→accel
-rotation, directly comparable with the Kalibr toolbox).
+Every cam-IMU row runs in two IMU-model variants:
 
-The mid tier re-runs each family on **3 recordings**; the full tier on **every
-recording the dataset has** (all 15 bags of the multi-IMU rig, all 10
-Looper recordings, all 12 TUM-VI calib bags).
+| Variant | IMU model |
+|---|---|
+| **calyx** | scale + cross-coupling, no g-sensitivity; reported as the decomposed Dw = R·U |
+| **kalibr** | full intrinsics including Tg g-sensitivity and the gyro→accel rotation, directly comparable with the Kalibr toolbox |
+
+How many recordings each tier runs per family:
+
+- **mid tier:** 3 recordings
+- **full tier:** **every recording the dataset has** (all 15 bags of the
+  multi-IMU rig, all 10 Looper recordings, all 12 TUM-VI calib bags)
 
 ## Generated row configs, drift-guarded
 
-Only the seed configs are written by hand. All the others (including every kalibr variant) are **generated**
-from their seed, changing nothing but the input recording and the output path
-— one generator script owns the mapping. A unit test regenerates all of them
-in memory and asserts the committed files match byte-for-byte, and that the
-manifests carry exactly the expected tier shape. A family's solver settings
-therefore cannot silently diverge between recordings, and a settings change to
-a family is by construction a one-line seed diff plus a regeneration.
+We write only the seed configs by hand. A seed config is the config of a family's
+seed row (listed in the table above). All the others (including every kalibr variant) are
+**generated** from their seed.
+
+- **What changes:** nothing but the input recording and the output path.
+- **Who owns it:** one generator script owns the mapping.
+- **The guard:** a unit test regenerates all of them in memory. It asserts the
+  committed files match byte-for-byte. It also asserts the manifests carry exactly
+  the expected tier shape.
+
+So a family's solver settings cannot silently diverge between recordings. A
+settings change to a family is, by construction, a one-line seed diff plus a
+regeneration.
 
 ## Blessing discipline
 
-- **Vet before blessing**: a new row is solved once and reviewed (values
-  compared against sibling recordings and physical expectations) before its
-  baseline is written. Unusable recordings are excluded with a manifest note,
-  not left failing.
+- **Vet before blessing**: we solve a new row once and review it before writing
+  its baseline. We compare its values against sibling recordings and physical
+  expectations. Unusable recordings are excluded with a manifest note, not left
+  failing.
 - **Re-bless narrowly**: `--update-baseline --only dataset/collection` touches
-  exactly one row; family-wide re-blessing is scripted and resumable (rows
-  whose baseline already exists are skipped), so an interrupted sweep continues
-  where it stopped.
-- **Cross-validating references**: some rows exist to check each other — the
-  same IMU's gyro↔accel offset is measured both as an auxiliary IMU under
-  rolling-shutter cameras and as the base IMU under a global-shutter camera;
-  both must agree every run.
-- **Repeatability across recordings** is the deepest check the tiers add: a
+  exactly one row. Family-wide re-blessing is scripted and resumable: rows whose
+  baseline already exists are skipped. So an interrupted sweep continues where it
+  stopped.
+- **Cross-validating references**: some rows exist to check each other. We measure
+  the same IMU's gyro↔accel offset twice:
+  - as an auxiliary IMU under rolling-shutter cameras
+  - as the base IMU under a global-shutter camera
+
+  Both must agree every run.
+- **Repeatability across recordings** is the deepest check the tiers add. A
   parameter that is really observable comes out the same on every recording of
-  the same rig (stereo baselines repeat within fractions of a millimetre;
-  time offsets within fractions of a millisecond), and a parameter that
-  scatters across recordings is flagged as weakly constrained rather than
-  trusted.
+  the same rig:
+  - stereo baselines repeat within fractions of a millimetre
+  - time offsets repeat within fractions of a millisecond
+
+  A parameter that scatters across recordings is flagged as weakly constrained
+  rather than trusted.
 
 ## Digital twins: accuracy against known truth
 
-Real recordings show repeatability, not accuracy, because they have no ground truth. So each camera + IMU dataset also has a
-digital twin: its real solve becomes the truth, and the sensors are re-simulated from it with the noise measured on the real
-data. `scripts/run_twin_regression.py` solves each twin once without noise and with 3 noise seeds, then checks the errors against
-saved references. It runs on demand, not on every change.
+Real recordings show repeatability, not accuracy, because they have no ground
+truth. So each camera + IMU dataset also has a digital twin (a simulated copy of
+the recording):
+
+- Its real solve becomes the truth.
+- The sensors are re-simulated from it with the noise measured on the real data.
+- `scripts/run_twin_regression.py` solves each twin once without noise and with 3
+  noise seeds.
+- It then checks the errors against saved references.
+
+It runs on demand, not on every change.
 
 ## What this has caught
 
-The tier build-out itself demonstrated the design: the vetting pass exposed a
-long-standing frame-selection ordering bug that only manifested on 3 of 87
-recordings (caught by a working-set/selection-flag consistency assert), and
-the cross-recording spread immediately separated well-conditioned
-configurations from poorly-conditioned ones (e.g. a weak base IMU under
-rolling-shutter-only anchoring) before any baseline froze bad values.
+The tier build-out itself demonstrated the design. It caught two things before any
+baseline froze bad values:
+
+- **A frame-selection bug:** the vetting pass exposed a long-standing
+  frame-selection ordering bug. It only manifested on 3 of 87 recordings. A
+  working-set/selection-flag consistency assert caught it.
+- **Poorly-conditioned setups:** the cross-recording spread immediately separated
+  well-conditioned configurations from poorly-conditioned ones. One example is a
+  weak base IMU under rolling-shutter-only anchoring.

@@ -4,20 +4,26 @@ description: Install problems, run failures, and results that look wrong.
 pageType: reference
 ---
 
+Use this page when MVIS does not install, a run fails, or a result looks wrong.
+Each entry gives the short answer first, then the reason.
+
 ## Install
 
 ### Segfault when constructing `gtsam.Pose3`
 
-GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2 you get a
-crash, not an exception:
+**Answer:** install NumPy 1.x.
 
 ```bash
 pip install "numpy<2"
 ```
 
+GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2 you get a
+crash, not an exception.
+
 ### `aprilgrid` or ArUco not found
 
-Detector backends are optional extras:
+**Answer:** install the detector extra you need. Detector backends are optional
+extras:
 
 ```bash
 pip install -e ".[apriltag]"    # AprilGrid
@@ -26,103 +32,152 @@ pip install -e ".[aruco]"       # ArUco
 
 ### Cannot read a ROS bag
 
+**Answer:** install `rosbags`.
+
 ```bash
 pip install rosbags
 ```
 
-Pure Python — you do not need ROS installed.
+It is pure Python. You do not need ROS installed.
 
 ### Something else
 
-`bash scripts/setup_env.sh` builds the `mvis` environment and runs the test
-suite, which separates an install problem from a data problem.
+**Answer:** run `bash scripts/setup_env.sh`.
+
+It builds the `mvis` environment and runs the test suite. That separates an
+install problem from a data problem.
 
 ## Running
 
 ### Few or no detections
 
-Check `tag_family`, `rows`, `cols`, and `tag_spacing` against the board you
-actually printed — `rows`/`cols` are **inner corners** for a chessboard but tag
-counts for an AprilGrid. Multi-scale detection handles far and near boards; it
-cannot fix a wrong family.
+**Answer:** check the board settings against the board you actually printed:
+
+- `tag_family`
+- `rows`
+- `cols`
+- `tag_spacing`
+
+`rows`/`cols` are **inner corners** for a chessboard but tag counts for an
+AprilGrid. Multi-scale detection handles far and near boards. It cannot fix a
+wrong family.
 
 ### Quality gating is dropping my frames
 
-By design: pooled-pose filter (≥20% of tags across cameras), per-corner ≥5
-views, per-camera ≥3 views, minimum 6 tags per frame. If most frames are
-dropped the recording is too sparse — get closer, or move more slowly.
+**Answer:** this is by design. Quality gating (the checks that drop weak frames)
+uses these limits:
+
+- **Pooled-pose filter:** ≥20% of tags across cameras
+- **Per corner:** ≥5 views
+- **Per camera:** ≥3 views
+- **Per frame:** minimum 6 tags
+
+If most frames are dropped, the recording is too sparse. Get closer, or move
+more slowly.
 
 ### Stage 1 initialisation fails
 
-The sanity check caught a degenerate init. Common on wide fisheye with the wrong
-model — try `equidistant`. `max_init_frames` caps how many frames the OpenCV
-init uses.
+**Answer:** on wide fisheye, try `equidistant`.
+
+The sanity check caught a degenerate init (an unusable starting estimate). This is common on wide fisheye with the wrong model.
+`max_init_frames` caps how many frames the OpenCV init uses.
 
 ### It is slow
 
-`corner_subsample: top_left` is already the default (3–5× faster). Also:
-`factor_hz` to subsample frames, `--parallel` on the regression runner, and
-`cache_dir`, which makes re-runs skip detection entirely.
+**Answer:** `corner_subsample: top_left` is already the default (3–5× faster).
+You can also use:
+
+- **`factor_hz`** to subsample frames
+- **`--parallel`** on the regression runner
+- **`cache_dir`**, which makes re-runs skip detection entirely
 
 ### A wide-FoV stereo fit diverged
 
-Known: `double_sphere` and `eucm` stereo fits can slide into an fx–xi / alpha
-basin on TUM-VI while single-camera fits stay stable. Fit each camera alone,
-then pin those intrinsics for the joint solve — the recipe is in
-`examples/configs/tumvi_cam_imu/`. See [Camera model](/concepts/camera-model/).
+**Answer:** fit each camera alone, then pin those intrinsics for the joint
+solve. The recipe is in `examples/configs/tumvi_cam_imu/`.
+
+This is known. `double_sphere` and `eucm` stereo fits can slide into an fx–xi /
+alpha basin on TUM-VI. Single-camera fits stay stable. See
+[Camera model](/concepts/camera-model/).
 
 ## Results that look wrong
 
 ### Reprojection error is low but the extrinsics look off
 
+**Answer:** read the **motion-excitation grade** in the HTML report. For
+camera–IMU, also run [`mvis roundtrip`](/guides/roundtrip/).
+
 A low residual means the solution explains its own observations. A parameter the
-motion never constrained settles near its initial value without raising the
-error. Read the **motion-excitation grade** in the HTML report, and for
-camera–IMU run [`mvis roundtrip`](/guides/roundtrip/).
+motion never constrained settles near its initial value. It does so without
+raising the error.
 
 ### Round-trip FAILs
 
-That is a real finding. Usual causes: wrong camera model, wrong IMU convention,
-an interpolated accelerometer corrupting `td` (try `gyro_only` or
-`estimate_t_ga`), or insufficient excitation. See
-[Round-trip validation](/guides/roundtrip/#when-it-fails).
+**Answer:** that is a real finding. Usual causes:
+
+- Wrong camera model
+- Wrong IMU convention
+- An interpolated accelerometer corrupting `td` (the camera–IMU time offset):
+  try `gyro_only` or `estimate_t_ga`
+- Insufficient excitation (not enough motion to constrain the parameters)
+
+See [Round-trip validation](/guides/roundtrip/#when-it-fails).
 
 ### `td` or the lever arm look wrong on a dynamic rig
 
-Check `state_hz`. It defaults to 30 Hz; below that, reprojection, lever, and
-`td` alias on dynamic-motion rigs. Gentle sequences are insensitive to it.
+**Answer:** check `state_hz`.
+
+It defaults to 30 Hz. Below that, reprojection, lever, and `td` alias on
+dynamic-motion rigs. Gentle sequences are insensitive to it.
 
 ### The T265's time offset is unstable
 
-Its Bosch BMI055 publishes a 62.5 Hz accelerometer interpolated to 200 Hz, which
-injects a gyro-accel timing offset. Either set `gyro_only: true` on that IMU or
-turn on `solve.estimate_t_ga`. See [IMU model](/concepts/imu-model/).
+**Answer:** either set `gyro_only: true` on that IMU or turn on
+`solve.estimate_t_ga`. The t_ga term is the time offset between the gyroscope
+and accelerometer channels.
+
+The T265's Bosch BMI055 publishes a 62.5 Hz accelerometer interpolated to 200 Hz.
+That injects a gyro-accel timing offset. See [IMU model](/concepts/imu-model/).
 
 ### IMU intrinsics come back at their initial values
 
-They were not observed. Scale and misalignment need excitation on every axis;
-`Tg` needs simultaneous rotation and strong linear acceleration. See
-[Degeneracy](/concepts/degeneracy/).
+**Answer:** they were not observed.
+
+- Scale and misalignment need excitation on every axis.
+- `Tg` needs simultaneous rotation and strong linear acceleration.
+
+See [Degeneracy](/concepts/degeneracy/).
 
 ### Results differ from Kalibr's
 
-Check the IMU convention first — `kalibr`, `rpng`, and `calyx` produce different
-matrices for the same device — then sensor numbering, then transform direction.
-`mvis.io.kalibr` reads Kalibr camchains directly, which is the reliable way
-to compare.
+**Answer:** check these in order:
+
+1. The IMU convention: `kalibr`, `rpng`, and `calyx` produce different matrices
+   for the same device
+2. Sensor numbering
+3. Transform direction
+
+`mvis.io.kalibr` reads Kalibr camchains directly, which is the reliable way to
+compare.
 
 ### Every translation is off by the same factor
 
-`tag_size` does not match the printed board. Measure a tag with calipers.
+**Answer:** `tag_size` does not match the printed board. Measure a tag with
+calipers.
 
 ### Results differ between sequences of the same rig
 
-Those parameters were not constrained by the motion in them. Run a
-[batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
-— spread across sequences is the most honest accuracy signal available without
+**Answer:** those parameters were not constrained by the motion in them.
+
+Run a
+[batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config).
+Spread across sequences is the most honest accuracy signal available without
 ground truth.
 
 ## Still stuck
 
-Open an issue on [the repository](https://github.com/yangyulin/mvis_pages) with your
-config, the console output, and what the rig is.
+Open an issue on [the repository](https://github.com/yangyulin/mvis_pages). Include:
+
+- Your config
+- The console output
+- What the rig is

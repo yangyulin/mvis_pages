@@ -5,13 +5,17 @@ pageType: guide
 ---
 
 :::caution[Submissions are paused]
-Submissions are not being accepted while this process is replaced by a new kit. The format below is the old one and
-will not appear on the [leaderboard](/benchmark/results/), which is built from the maintainers' runs of MVIS, Kalibr and Basalt.
+Submissions are not being accepted while this process is replaced by a new kit. The format below is the old one.
+Entries in it will not appear on the [leaderboard](/benchmark/results/). The leaderboard is built from the
+maintainers' runs of MVIS, Kalibr and Basalt.
 :::
 
-Submissions are made via pull request against the Open MVIS site repo. Each
-submission is a single YAML file following the schema below. The CI on the PR
-validates the schema and rebuilds the site with your entry included.
+Use this page to submit your calibration method to the Open MVIS leaderboard. In short:
+
+- **How:** open a pull request (PR, a request to merge your change) against the Open MVIS site repo.
+- **What:** add a single YAML file that follows the schema below (the fixed set of fields a submission has).
+- **Checks:** the CI on the PR (the checks that run automatically) validates the schema. It then rebuilds the
+  site with your entry included.
 
 ## Submission schema
 
@@ -66,25 +70,26 @@ Use one of these `sensor_config.category` values:
 
 Use one of these `method.family` values:
 
-- `discrete_factor_graph` — GTSAM / Ceres batch MAP
-- `continuous_time_bspline` — SE(3) B-splines (Kalibr, Basalt)
-- `filter_ekf` — online EKF (OpenVINS-style)
-- `learning_based` — deep-network regression
-- `other` — hybrid or none of the above
+| Value | Meaning |
+|---|---|
+| `discrete_factor_graph` | GTSAM / Ceres batch MAP (all data solved at once for the most likely values) |
+| `continuous_time_bspline` | SE(3) B-splines (smooth curves of the pose over time; Kalibr, Basalt) |
+| `filter_ekf` | online EKF (an extended Kalman filter that updates as data arrives; OpenVINS-style) |
+| `learning_based` | deep-network regression |
+| `other` | hybrid or none of the above |
 
 ## Filing the PR
 
 1. Fork [`yangyulin/mvis_pages`](https://github.com/yangyulin/mvis_pages) on GitHub.
 2. Drop your YAML at `site/src/content/leaderboard/<method>__<config>.yaml`.
-3. (Optional) Add a full HTML report and raw YAML at `site/public/reports/` and
-   reference them in the `artifacts` block.
-4. Open a PR — schema is validated on build; the CI preview will show the new
-   row immediately.
+3. (Optional) Add a full HTML report and raw YAML at `site/public/reports/`. Reference them in the
+   `artifacts` block.
+4. Open a PR. The schema is validated on build, and the CI preview will show the new row immediately.
 5. A maintainer will merge once the schema passes and the numbers look reasonable.
 
 ## Reproducibility expectation
 
-For external submissions we expect either:
+For external submissions we expect one of these:
 
 - A public repo where anyone can reproduce your numbers, **or**
 - A paper citation whose experimental protocol matches the submission, **or**
@@ -92,7 +97,9 @@ For external submissions we expect either:
 
 ## Verification
 
-For now, submissions are self-reported. A future version of the leaderboard
-will offer server-side evaluation on hidden ground-truth sequences (the model
-used by the Hilti SLAM Challenge). Until then, the `submitted.by` and
-`submitted.hardware` fields carry the accountability trail.
+For now, submissions are self-reported. The `submitted.by` and `submitted.hardware` fields carry the
+accountability trail: who submitted and on what hardware.
+
+A future version of the leaderboard will offer server-side evaluation (results computed on the server, not reported by you). It
+will run on hidden ground-truth sequences (recordings whose true values are not published). This is the model
+used by the Hilti SLAM Challenge.

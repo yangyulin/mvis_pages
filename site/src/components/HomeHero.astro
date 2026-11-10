@@ -86,7 +86,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
       <div class="mh-x"><dt>Corners / frame</dt><dd data-k="corners" set:html={first.corners} /></div>
     </dl>
     <button class="mh-play" id="mhPlay" type="button" aria-controls="mhVideo">Pause</button>
-    <p class="mh-note"><span data-k="caption">{first.caption}</span> The outlined camera is the one shown in 3-D; the board corners it detects take its colour.</p>
+    <p class="mh-note"><span data-k="caption">{first.caption}</span> The outlined camera is the one shown in 3-D. The board corners it detects take its colour.</p>
 
     <details class="mh-more" id="mhMore">
       <summary>Details: all cameras and readout</summary>
@@ -95,7 +95,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
         <div><dt data-k="xlabel" set:html={first.xlabel} /><dd data-k="xval" set:html={first.xval} /></div>
         <div><dt>Corners / frame</dt><dd data-k="corners" set:html={first.corners} /></div>
       </dl>
-      <p class="mh-legend"><span data-k="caption">{first.caption}</span> Each camera has its own colour. The outlined camera is the one shown in 3-D, and the board corners it detects take that colour. In the camera views, coloured circles are detections and white crosses are reprojections.</p>
+      <p class="mh-legend"><span data-k="caption">{first.caption}</span> Each camera has its own colour. The outlined camera is the one shown in 3-D. The board corners it detects take that colour. In the camera views, coloured circles are detected corners. White crosses are reprojections: where the calibration places each corner.</p>
       <ul class="mh-strip" id="mhStrip"></ul>
     </details>
   </div>
