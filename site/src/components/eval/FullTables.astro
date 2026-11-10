@@ -1,0 +1,13 @@
+---
+// Every old number stays reachable: the leaderboard's own parameter tables, differences and run configs
+// (board.json, or uzh_fpv.json for the UZH-FPV study), unchanged, in one fold.
+import DatasetLeaderboard from '../DatasetLeaderboard.astro';
+import LeaderboardHowTo from '../LeaderboardHowTo.astro';
+import UzhFpvResults from '../UzhFpvResults.astro';
+interface Props { page: any }
+const { page } = Astro.props;
+---
+<details class="not-content rp-tables ev-full" data-rp-dataset={page.id}>
+  <summary>Every parameter table, tool difference and run config ({page.label})</summary>
+  {page.study ? <UzhFpvResults /> : <><LeaderboardHowTo /><DatasetLeaderboard id={page.id} /></>}
+</details>

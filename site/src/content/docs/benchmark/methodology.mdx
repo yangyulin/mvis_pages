@@ -5,13 +5,17 @@ pageType: concept
 wide: true
 ---
 
+import rep from '../../../data/leaderboard/repeatability.json';
+
 Use this page to read the [leaderboard](/benchmark/results/): what its numbers mean and how we make them.
 The metric definitions are shared with [Evaluation & metrics](/reference/evaluation/).
 So a local run and a published entry measure the same thing.
 
 ## What the board shows
 
-- **One table per dataset**, grouped by regression family (one test in the MVIS regression suite), then by sensor.
+- **The [Leaderboard](/benchmark/results/)** shows every dataset and family on one screen; each **dataset eval page**
+  (for example [VI-Rig 4 IMUs + 3 cams](/benchmark/results/virig-4imus-3cams/)) charts every parameter and holds the
+  full tables: one table per regression family (one test in the MVIS regression suite), then per sensor.
 - **Three tools:** MVIS, Kalibr and Basalt each calibrate the recordings of a rig.
 - **Each cell:** a parameter as median ± sd (n), across the recordings that tool solved.
   sd is the standard deviation; n is the number of recordings.
@@ -74,4 +78,4 @@ The files are kept with the records in
 
 Each batch is dated and kept in the history of
 [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
-So a comparison can be cited as "Open MVIS leaderboard, batch 2026-11-04a, accessed &lt;date&gt;".
+So a comparison can be cited as "Open MVIS leaderboard, batch {rep.batch}, accessed &lt;date&gt;".

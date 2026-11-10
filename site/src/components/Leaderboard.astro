@@ -1,0 +1,109 @@
+---
+// The Leaderboard: every family of every dataset on one screen, in page order (our VI-Rig first; never ordered by a
+// value). Per family: solved n of N per tool, one repeatability cell per group (repeatability.json) and the ◆ tally
+// per tool pair (eval/index.json, counted by the Space's own app.delta). No total, rank or score.
+// Filters are radio buttons and CSS; there is no client script.
+import RpCell from './RpCell.astro';
+import RpShape from './RpShape.astro';
+import lb from '../data/eval/index.json';
+import { data, dataset, detailId, groupOf } from './rp';
+import '../styles/results.css';
+
+const GROUPS = data.groups.map((g: any) => g.id);
+const SHORT: Record<string, string> = { focal_pp: 'f + pp', distortion: 'Dist', baseline: 'Base', readout: 'Readout',
+  time_offset: 'td', lever: 'Lever', gyro: 'Gyro', accel: 'Accel' };
+const PAIRS = [['mk', 'MVIS', 'Kalibr'], ['bk', 'Basalt', 'Kalibr'], ['bm', 'Basalt', 'MVIS']];
+const MODE: Record<string, string> = { cam: 'camera only', 'cam+imu': 'camera + IMU' };
+const SHUT: Record<string, string> = { global: 'global shutter', rolling: 'rolling shutter', mixed: 'global + rolling shutter' };
+const cellsOf = (ds: any, T: string) => dataset(ds.id).families.find((f: any) => f.id === T)?.cells ?? {};
+const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
+---
+<div class="not-content lb">
+  <form class="lb-filters" aria-label="Filter the families">
+    <fieldset>
+      <legend>Mode</legend>
+      <label><input type="radio" name="lb-mode" value="all" checked /> All</label>
+      <label><input type="radio" name="lb-mode" value="cam" /> Camera only</label>
+      <label><input type="radio" name="lb-mode" value="cam+imu" /> Camera + IMU</label>
+    </fieldset>
+    <fieldset>
+      <legend>Shutter</legend>
+      <label><input type="radio" name="lb-sh" value="all" checked /> All</label>
+      <label><input type="radio" name="lb-sh" value="global" /> Global</label>
+      <label><input type="radio" name="lb-sh" value="rolling" /> Rolling or mixed</label>
+    </fieldset>
+  </form>
+
+  <p class="lb-legend">
+    {data.tools.map((t: any) => <span><RpShape tool={t.id} /> {t.id}</span>)}
+    <span class="lb-sep">cell: whose estimates scatter least</span>
+    <span><span class="rc rc-tie">≈</span> tie</span>
+    <span><span class="rc rc-too_few"><span class="rc-few"></span></span> too few (under {data.method.min_n})</span>
+    <span><span class="rc rc-input">○</span> input</span>
+    <span><span class="rc rc-not_compared">–</span> not compared</span>
+    <span><sup class="rc-k">K</sup> MVIS with Kalibr's IMU model</span>
+  </p>
+
+  <div class="lb-grid" role="table" aria-label="Every family: solved recordings, repeatability per group and differences larger than the spread">
+    <div class="lb-row lb-head" role="row">
+      <span role="columnheader">Dataset · family</span>
+      <span role="columnheader">Solved of N</span>
+      {GROUPS.map((g: string) => <span role="columnheader" class="lb-gh" title={groupOf[g].label}>{SHORT[g]}</span>)}
+      {PAIRS.map(([p, a, b]) => <span role="columnheader" class="lb-dh">◆ {a}{p !== "bk" && <sup class="rc-k">K</sup>} −&nbsp;{b}</span>)}
+    </div>
+    {lb.datasets.map((ds: any) => (
+      <div class="lb-ds" role="rowgroup">
+        <div class="lb-dsh" role="row">
+          <span role="cell"><a href={ds.link}>{ds.label}</a>{ds.ours && <span class="lb-ours">our data</span>}</span>
+          <a class="lb-open" href={ds.link}>Dataset eval →</a>
+        </div>
+        {ds.families.map((f: any) => {
+          const cells = cellsOf(ds, f.id);
+          return (
+            <div class="lb-row" role="row" data-mode={f.mode} data-shutter={f.shutter}>
+              <span class="lb-fam" role="rowheader"><a href={`${ds.link}#${f.id}`}><b>{f.id}</b></a> {f.title}
+                <small>{MODE[f.mode]} · {SHUT[f.shutter]} · {f.n} recordings</small></span>
+              <span class="lb-solved" role="cell"><span class="lb-lab">Solved</span>
+                {f.solved.map((s: any) => (
+                  <span class="lb-s" title={s.reason ?? `${s.tool} solved ${s.n} of ${s.of}`}>
+                    <span class="lb-st"><RpShape tool={s.tool} /><span class="lb-n">{s.reason ? '–' : s.n}</span></span>
+                    <span class="lb-bar"><i style={`width:${pct(s.n, s.of)}%`} class={`rp-bg-${s.tool}`}></i></span>
+                  </span>))}
+              </span>
+              <span class="lb-cells" role="cell"><span class="lb-lab">Repeatability</span>
+                {GROUPS.map((g: string) => (
+                  <span class="lb-c"><span class="lb-cl">{SHORT[g]}</span>
+                    <RpCell cell={cells[g]} group={groupOf[g].label} href={`${ds.link}#${detailId(f.id, g)}`} /></span>))}
+              </span>
+              <span class="lb-diffs" role="cell"><span class="lb-lab">◆ differences larger than the spread</span>
+                {PAIRS.map(([p, a, b]) => {
+                  const d = f.diffs[p];
+                  const name = d ? d.label : `${a} − ${b}`;
+                  return d ? (
+                    <a class="lb-d" href={`${ds.link}#diff-${p}-${f.id}`} title={`${name}: ${d.marked} of ${d.compared} compared rows differ by more than the larger spread`}>
+                      <span class="lb-dl">{a}{p !== 'bk' && f.mode === 'cam+imu' && <sup class="rc-k">K</sup>} − {b}{p === 'bm' && f.mode === 'cam+imu' && <sup class="rc-k">K</sup>}</span>
+                      <span class="lb-frac"><i style={`width:${pct(d.marked, d.compared)}%`}></i></span>
+                      <span class="lb-n"><b>{d.marked}</b>/{d.compared}</span>
+                    </a>
+                  ) : <span class="lb-d lb-none" title={`${name}: not compared on this family`}><span class="lb-dl">{a} − {b}</span><span class="lb-n">–</span></span>;
+                })}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    ))}
+    {lb.studies.map((s: any) => (
+      <div class="lb-ds lb-study" role="rowgroup">
+        <div class="lb-dsh" role="row">
+          <span role="cell"><a href={s.link}>{s.label}</a> <span class="lb-tag">separate study · batch {s.batch}</span> <span class="lb-why">{lb.study_note}</span></span>
+          <a class="lb-open" href={s.link}>Dataset eval →</a>
+        </div>
+      </div>
+    ))}
+  </div>
+  <p class="lb-foot">◆ counts are the rows where two tools' medians differ by more than the larger of their spreads,
+    counted by the same code as the parameter tables. They mark disagreement, not who is right. On camera + IMU
+    families the MVIS of these pairs is its run with Kalibr's IMU model (<sup class="rc-k">K</sup>), so the IMU terms
+    mean the same thing in both tools.</p>
+</div>

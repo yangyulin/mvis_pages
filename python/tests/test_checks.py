@@ -23,8 +23,32 @@ def _sidebar(**kw):
 
 def test_sidebar_has_benchmark_then_sensor_wiki():
     assert C.SECTIONS.index("Sensor wiki") == C.SECTIONS.index("Benchmark") + 1
-    assert C.BENCHMARK == ["Examples", "Results", "Methodology"]
+    assert C.BENCHMARK == ["Examples", "Why calibrate t_ga", "Results", "Methodology"]
     assert C.sidebar_problems(_sidebar(), NAV) == []
+
+
+RNAV = [{"label": "VI-Rig 4 IMUs + 3 cams", "link": "/benchmark/results/virig-4imus-3cams/"}, {"label": "TUM-VI", "link": "/benchmark/results/tum-vi/"}]
+
+
+def test_results_holds_the_leaderboard_then_one_eval_page_per_results_nav_entry():
+    paths = {"Benchmark › Results": ["Leaderboard", "Datasets eval"], "Benchmark › Results › Datasets eval": ["VI-Rig 4 IMUs + 3 cams", "TUM-VI"]}
+    assert C.sidebar_problems(_sidebar(paths=paths), NAV, RNAV) == []
+    swapped = dict(paths, **{"Benchmark › Results › Datasets eval": ["TUM-VI", "VI-Rig 4 IMUs + 3 cams"]})
+    assert C.sidebar_problems(_sidebar(paths=swapped), NAV, RNAV) == [
+        "Benchmark › Results › Datasets eval holds ['TUM-VI', 'VI-Rig 4 IMUs + 3 cams'], want ['VI-Rig 4 IMUs + 3 cams', 'TUM-VI']"]
+    assert C.sidebar_problems(_sidebar(), NAV, RNAV) == [
+        "Benchmark › Results holds None, want ['Leaderboard', 'Datasets eval']",
+        "Benchmark › Results › Datasets eval holds None, want ['VI-Rig 4 IMUs + 3 cams', 'TUM-VI']"]
+
+
+def test_page_problems_name_a_sideways_scroll_and_a_theme_that_did_not_apply():
+    ok = {"vw": 390, "scrollW": 390, "theme": "dark", "wide": []}
+    assert C.page_problems("/p/", "phone-390", "dark", ok) == []
+    assert C.page_problems("/p/", "phone-390", "light", dict(ok, scrollW=420, wide=["DIV.x"])) == [
+        "/p/ phone-390 light: scrolls sideways (420 > 390 px; widest ['DIV.x'])", "/p/ phone-390 light: page theme is dark"]
+    assert C.shot_name("/benchmark/results/", "laptop-1360", "dark") == "benchmark_results-laptop-1360-dark.png"
+    assert C.shot_name("/", "phone-390", "light") == "home-phone-390-light.png"
+    assert {(v, t) for v, _, _, t in C.PAGE_VIEWS} == {(v, t) for v in ("phone-390", "laptop-1360") for t in ("light", "dark")}
 
 
 def test_sidebar_problems_name_what_is_wrong():
@@ -35,7 +59,7 @@ def test_sidebar_problems_name_what_is_wrong():
 
 def test_a_sensor_under_benchmark_fails():
     s = _sidebar(children={"Benchmark": [*C.BENCHMARK, "Sensors"], "Sensor wiki": ["Overview", "Tracking", "Head-worn"]})
-    assert C.sidebar_problems(s, NAV) == ["Benchmark holds ['Examples', 'Results', 'Methodology', 'Sensors']"]
+    assert C.sidebar_problems(s, NAV) == ["Benchmark holds ['Examples', 'Why calibrate t_ga', 'Results', 'Methodology', 'Sensors']"]
 
 
 def test_a_sensor_missing_or_twice_in_the_groups_fails():

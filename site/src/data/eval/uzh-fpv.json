@@ -1,0 +1,4654 @@
+{
+ "slug": "uzh-fpv",
+ "id": "uzh_fpv",
+ "label": "UZH-FPV",
+ "title": "UZH-FPV",
+ "ours": false,
+ "licence": "CC BY-NC-SA 3.0",
+ "intro": "The camera–IMU calibration bags of the UZH-FPV Drone Racing dataset: an mDAVIS346 and a Snapdragon Flight, each recorded indoors and outdoors, at 45° and facing forward. A one-off study, not part of the leaderboard batch or the regression suite.",
+ "chips": [
+  "2 devices, 4 bags each",
+  "AprilGrid 5×4, 75 mm"
+ ],
+ "image": {
+  "src": "/media/hero/hero_uzhd_960.jpg",
+  "alt": "MVIS solving a UZH-FPV Davis bag: board, camera path and one camera frame",
+  "credit": "MVIS solve view, from the homepage"
+ },
+ "links": {
+  "example": "/benchmark/examples/uzh-fpv/"
+ },
+ "reading": [
+  "<b>IMU weights.</b> All three tools use IMU sigmas taken from the residuals in UZH's own Kalibr results, not the MVIS defaults. The example page explains how they are derived.",
+  "<b>One Basalt solve is left out.</b> On davis_indoor_forward with these weights, Basalt gives a 120 mm lever and an accel scale (accelerometer scale factor) of 0.84. So its Davis column has 3 of 4 bags. At Basalt's default noise that bag is plausible, but snapdragon_indoor_45 then fails with a broken spline.",
+  "<b>Basalt's Davis distance stands out.</b> Its camera-to-IMU distance is 33.6 mm. Kalibr gives 23.2 mm and MVIS 22.8 mm on the same 3 bags. We haven't established why. At default noise Basalt's lever z is 14–25 mm.",
+  "<b>Each device's 4 bags form one family</b>, because the camera and IMU are on the same device. That assumes the camera–IMU geometry stayed the same across recordings, which we can't confirm.",
+  "<b>Snapdragon's time offset really does differ between bags</b>, with an sd (standard deviation) near 4.7 ms in every tool. So a small difference between tools on that row says little about each bag."
+ ],
+ "no_repeatability": "This study has no repeatability cells: it was made before the current schema, and 4 bags per device are too few for the test (it needs 6).",
+ "study": true,
+ "batch": "2026-11-04",
+ "results_commit": null,
+ "link": "/benchmark/results/uzh-fpv/",
+ "has_repeatability": false,
+ "legacy": [],
+ "families": [
+  {
+   "id": "DAVIS",
+   "title": "mDAVIS346 + IMU",
+   "mode": "cam+imu",
+   "shutter": "global",
+   "n": 4,
+   "columns": [
+    {
+     "col": "calyx",
+     "tool": "MVIS",
+     "label": "MVIS"
+    },
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)"
+    },
+    {
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr"
+    },
+    {
+     "col": "basalt",
+     "tool": "Basalt",
+     "label": "Basalt"
+    }
+   ],
+   "solved": [
+    {
+     "n": 4,
+     "of": 4,
+     "tool": "MVIS"
+    },
+    {
+     "n": 4,
+     "of": 4,
+     "tool": "Kalibr"
+    },
+    {
+     "n": 3,
+     "of": 4,
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "All three tools use each bag's IMU weights from the residuals in UZH's own Kalibr results. Kalibr's intrinsics and baseline are inputs from the calibration UZH ships.",
+   "notes": [
+    [
+     "Like for like",
+     "Every tool starts from the camera chain UZH ships and uses the same IMU sigmas on the same bags. Kalibr keeps the camera values fixed; MVIS and Basalt refine them."
+    ],
+    [
+     "Note",
+     "Basalt has 3 of 4 recordings: its davis_indoor_forward solve failed (lever 120 mm, accel scale 0.84) and is left out."
+    ]
+   ],
+   "records": {},
+   "fit": [
+    {
+     "sensor": "mDAVIS346",
+     "by_col": {
+      "calyx": "0.343",
+      "mvis": "0.344",
+      "kalibr": "0.137"
+     }
+    }
+   ],
+   "diffs": [
+    {
+     "pair": "mk",
+     "label": "MVIS (K-IMU) − Kalibr",
+     "a": "MVIS",
+     "b": "Kalibr",
+     "marked": 3,
+     "compared": 11,
+     "rows": [
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+0.024",
+       "spread": "0.369",
+       "z": 0.064,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "−2.29",
+       "spread": "2.13",
+       "z": -1.075,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "+0.00198",
+       "spread": "0.00158",
+       "z": 1.256,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "+0.00159",
+       "spread": "0.00812",
+       "z": 0.196,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "+0.00071",
+       "spread": "0.00184",
+       "z": 0.386,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00003",
+       "spread": "0.00195",
+       "z": -0.014,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "+0.00046",
+       "spread": "0.00925",
+       "z": 0.05,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "−0.00037",
+       "spread": "0.00457",
+       "z": -0.082,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "+0.00120",
+       "spread": "0.00330",
+       "z": 0.363,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "+0.00067",
+       "spread": "0.00257",
+       "z": 0.261,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "+0.00482",
+       "spread": "0.00318",
+       "z": 1.517,
+       "marked": true,
+       "unequal_n": false
+      }
+     ]
+    },
+    {
+     "pair": "bk",
+     "label": "Basalt − Kalibr",
+     "a": "Basalt",
+     "b": "Kalibr",
+     "marked": 4,
+     "compared": 11,
+     "rows": [
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+0.010",
+       "spread": "0.192",
+       "z": 0.053,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+10.17",
+       "spread": "2.13",
+       "z": 4.783,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.01284",
+       "spread": "0.00415",
+       "z": -3.091,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00655",
+       "spread": "0.01401",
+       "z": -0.467,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00030",
+       "spread": "0.00184",
+       "z": -0.163,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00100",
+       "spread": "0.00195",
+       "z": -0.51,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "+0.00172",
+       "spread": "0.00987",
+       "z": 0.174,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "−0.00179",
+       "spread": "0.00457",
+       "z": -0.392,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "−0.00454",
+       "spread": "0.00492",
+       "z": -0.923,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.00642",
+       "spread": "0.00362",
+       "z": -1.772,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.01989",
+       "spread": "0.00453",
+       "z": -4.387,
+       "marked": true,
+       "unequal_n": true
+      }
+     ]
+    },
+    {
+     "pair": "bm",
+     "label": "Basalt − MVIS (K-IMU)",
+     "a": "Basalt",
+     "b": "MVIS",
+     "marked": 8,
+     "compared": 19,
+     "rows": [
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−1.68",
+       "spread": "1.78",
+       "z": -0.945,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−1.56",
+       "spread": "1.68",
+       "z": -0.928,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "−0.24",
+       "spread": "0.17",
+       "z": -1.393,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "−0.52",
+       "spread": "3.52",
+       "z": -0.149,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "+0.00629",
+       "spread": "0.00892",
+       "z": 0.705,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.01806",
+       "spread": "0.02757",
+       "z": -0.655,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.04632",
+       "spread": "0.03113",
+       "z": 1.488,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.02500",
+       "spread": "0.01119",
+       "z": -2.235,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "−0.014",
+       "spread": "0.369",
+       "z": -0.037,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "mDAVIS346",
+       "sensor_id": "cam0",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+12.46",
+       "spread": "2.13",
+       "z": 5.845,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.01482",
+       "spread": "0.00415",
+       "z": -3.568,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00814",
+       "spread": "0.01401",
+       "z": -0.581,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00101",
+       "spread": "0.00117",
+       "z": -0.865,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00097",
+       "spread": "0.00138",
+       "z": -0.704,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "+0.00125",
+       "spread": "0.00987",
+       "z": 0.127,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "−0.00142",
+       "spread": "0.00448",
+       "z": -0.317,
+       "marked": false,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "−0.00573",
+       "spread": "0.00492",
+       "z": -1.166,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.00709",
+       "spread": "0.00362",
+       "z": -1.957,
+       "marked": true,
+       "unequal_n": true
+      },
+      {
+       "sensor": "DAVIS IMU",
+       "sensor_id": "imu0",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.02471",
+       "spread": "0.00453",
+       "z": -5.45,
+       "marked": true,
+       "unequal_n": true
+      }
+     ]
+    }
+   ],
+   "tally": {
+    "mk": [
+     3,
+     11
+    ],
+    "bk": [
+     4,
+     11
+    ],
+    "bm": [
+     8,
+     19
+    ]
+   },
+   "sensors": [
+    {
+     "id": "cam0",
+     "label": "mDAVIS346",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 173.099,
+        "h": 3.3484
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 173.163,
+         "sd": 1.76153,
+         "n": 4,
+         "text": "173.16",
+         "min": 171.187,
+         "max": 175.234
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 173.303,
+         "sd": 1.78039,
+         "n": 4,
+         "text": "173.30",
+         "min": 171.285,
+         "max": 175.342
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 173.035,
+         "sd": 1.20209,
+         "n": 4,
+         "text": "173.03",
+         "note": "input",
+         "min": 171.319,
+         "max": 174.24
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 171.62,
+         "sd": 1.10317,
+         "n": 3,
+         "text": "171.62",
+         "min": 170.055,
+         "max": 172.185
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 173.019,
+        "h": 3.41165
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 173.011,
+         "sd": 1.66746,
+         "n": 4,
+         "text": "173.01",
+         "min": 171.074,
+         "max": 174.951
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 173.15,
+         "sd": 1.68294,
+         "n": 4,
+         "text": "173.15",
+         "min": 171.173,
+         "max": 175.05
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 173.028,
+         "sd": 1.22332,
+         "n": 4,
+         "text": "173.03",
+         "note": "input",
+         "min": 171.167,
+         "max": 174.111
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 171.589,
+         "sd": 1.12748,
+         "n": 3,
+         "text": "171.59",
+         "min": 169.918,
+         "max": 172.065
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 163.527,
+        "h": 0.585839
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 163.665,
+         "sd": 0.193965,
+         "n": 4,
+         "text": "163.66",
+         "min": 163.329,
+         "max": 163.768
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 163.645,
+         "sd": 0.169413,
+         "n": 4,
+         "text": "163.65",
+         "min": 163.354,
+         "max": 163.746
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 163.323,
+         "sd": 0.328581,
+         "n": 4,
+         "text": "163.32",
+         "note": "input",
+         "min": 163.166,
+         "max": 163.911
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 163.409,
+         "sd": 0.165051,
+         "n": 3,
+         "text": "163.41",
+         "min": 163.137,
+         "max": 163.435
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 135.19,
+        "h": 6.36185
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 135.382,
+         "sd": 2.82977,
+         "n": 4,
+         "text": "135.38",
+         "min": 134.301,
+         "max": 140.509
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 135.392,
+         "sd": 2.83756,
+         "n": 4,
+         "text": "135.39",
+         "min": 134.297,
+         "max": 140.522
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 134.997,
+         "sd": 3.07084,
+         "n": 4,
+         "text": "135.00",
+         "note": "input",
+         "min": 134.543,
+         "max": 140.973
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 134.868,
+         "sd": 3.52385,
+         "n": 3,
+         "text": "134.87",
+         "min": 134.385,
+         "max": 140.715
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0271668,
+        "h": 0.0147997
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0269483,
+         "sd": 0.00896115,
+         "n": 4,
+         "text": "−0.02695",
+         "min": -0.0402998,
+         "max": -0.0186547
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0273853,
+         "sd": 0.00891641,
+         "n": 4,
+         "text": "−0.02739",
+         "min": -0.0406211,
+         "max": -0.0190882
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.0312478,
+         "sd": 0.00344403,
+         "n": 4,
+         "text": "−0.03125",
+         "note": "input",
+         "min": -0.0356036,
+         "max": -0.0275767
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0210953,
+         "sd": 0.00479621,
+         "n": 3,
+         "text": "−0.02110",
+         "min": -0.0250131,
+         "max": -0.0154714
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.000875702,
+        "h": 0.0482146
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.000933219,
+         "sd": 0.0277771,
+         "n": 4,
+         "text": "0.00093",
+         "min": -0.0216271,
+         "max": 0.0446528
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00106981,
+         "sd": 0.0275746,
+         "n": 4,
+         "text": "0.00107",
+         "min": -0.0208935,
+         "max": 0.0447072
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.000818185,
+         "sd": 0.00393951,
+         "n": 4,
+         "text": "0.00082",
+         "note": "input",
+         "min": -0.00659358,
+         "max": 0.00197472
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0169898,
+         "sd": 0.00945121,
+         "n": 3,
+         "text": "−0.01699",
+         "min": -0.0281264,
+         "max": -0.00933092
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0128031,
+        "h": 0.0551406
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0219897,
+         "sd": 0.0313234,
+         "n": 4,
+         "text": "−0.02199",
+         "min": -0.055119,
+         "max": 0.019828
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0217422,
+         "sd": 0.0311284,
+         "n": 4,
+         "text": "−0.02174",
+         "min": -0.0552075,
+         "max": 0.0188023
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.00386391,
+         "sd": 0.00263144,
+         "n": 4,
+         "text": "−0.00386",
+         "note": "input",
+         "min": -0.00485378,
+         "max": 0.000856694
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.0245774,
+         "sd": 0.0127474,
+         "n": 3,
+         "text": "0.02458",
+         "min": 0.0086248,
+         "max": 0.033824
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00650544,
+        "h": 0.0285343
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0126237,
+         "sd": 0.0112298,
+         "n": 4,
+         "text": "0.01262",
+         "min": -0.00457766,
+         "max": 0.0206714
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.0123033,
+         "sd": 0.0111872,
+         "n": 4,
+         "text": "0.01230",
+         "min": -0.00409177,
+         "max": 0.0210074
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.000707581,
+         "sd": 0.00081892,
+         "n": 4,
+         "text": "0.00071",
+         "note": "input",
+         "min": -0.000308996,
+         "max": 0.00146041
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0126948,
+         "sd": 0.00674002,
+         "n": 3,
+         "text": "−0.01269",
+         "min": -0.0170884,
+         "max": -0.00385502
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": 5.82957,
+        "h": 0.671759
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 5.87184,
+         "sd": 0.375631,
+         "n": 4,
+         "text": "5.872",
+         "min": 5.21888,
+         "max": 6.03611
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 5.83634,
+         "sd": 0.36945,
+         "n": 4,
+         "text": "5.836",
+         "min": 5.25054,
+         "max": 6.08307
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 5.81254,
+         "sd": 0.191789,
+         "n": 4,
+         "text": "5.813",
+         "min": 5.47957,
+         "max": 5.91501
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 5.8228,
+         "sd": 0.0758223,
+         "n": 3,
+         "text": "5.823",
+         "min": 5.76421,
+         "max": 5.91464
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 22.4631,
+        "h": 14.5585
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 21.5215,
+         "sd": 1.95257,
+         "n": 4,
+         "text": "21.52",
+         "min": 19.6364,
+         "max": 23.2149
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 21.1141,
+         "sd": 2.1313,
+         "n": 4,
+         "text": "21.11",
+         "min": 19.3447,
+         "max": 23.2895
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 23.4048,
+         "sd": 1.66116,
+         "n": 4,
+         "text": "23.40",
+         "min": 21.3001,
+         "max": 25.3524
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 33.5724,
+         "sd": 2.12574,
+         "n": 3,
+         "text": "33.57",
+         "min": 30.0508,
+         "max": 33.8744
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu0",
+     "label": "DAVIS IMU",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997229,
+        "h": 0.0186915
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.99921,
+         "sd": 0.00123825,
+         "n": 4,
+         "text": "0.99921",
+         "min": 0.997358,
+         "max": 1.00007
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.997229,
+         "sd": 0.00157688,
+         "n": 4,
+         "text": "0.99723",
+         "min": 0.994795,
+         "max": 0.99828
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.98439,
+         "sd": 0.00415325,
+         "n": 3,
+         "text": "0.98439",
+         "min": 0.982288,
+         "max": 0.990299
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00214,
+        "h": 0.032956
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00373,
+         "sd": 0.00702603,
+         "n": 4,
+         "text": "1.00373",
+         "min": 0.98978,
+         "max": 1.00403
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00214,
+         "sd": 0.00812455,
+         "n": 4,
+         "text": "1.00214",
+         "min": 0.986498,
+         "max": 1.00372
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.99559,
+         "sd": 0.0140144,
+         "n": 3,
+         "text": "0.99559",
+         "min": 0.97218,
+         "max": 0.997234
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00612,
+        "h": 0.00385
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00683,
+         "sd": 0.00116778,
+         "n": 4,
+         "text": "1.00683",
+         "min": 1.00624,
+         "max": 1.00877
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00612,
+         "sd": 0.00183798,
+         "n": 4,
+         "text": "1.00612",
+         "min": 1.00574,
+         "max": 1.00962
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 1.00582,
+         "sd": 0.000713364,
+         "n": 3,
+         "text": "1.00582",
+         "min": 1.00529,
+         "max": 1.0067
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.000614024,
+        "h": 0.00393618
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.000614024,
+         "sd": 0.00137637,
+         "n": 4,
+         "text": "−0.00061",
+         "min": -0.00285723,
+         "max": 0.000367158
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.0005868,
+         "sd": 0.00195316,
+         "n": 4,
+         "text": "−0.00059",
+         "min": -0.00419237,
+         "max": 0.000124058
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.00158333,
+         "sd": 0.000698674,
+         "n": 3,
+         "text": "−0.00158",
+         "min": -0.00262678,
+         "max": -0.00130016
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.00356043,
+        "h": 0.0193517
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00356043,
+         "sd": 0.009253,
+         "n": 4,
+         "text": "−0.00356",
+         "min": -0.00580203,
+         "max": 0.014032
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.00402541,
+         "sd": 0.00780966,
+         "n": 4,
+         "text": "−0.00403",
+         "min": -0.00495607,
+         "max": 0.0112585
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.00230715,
+         "sd": 0.00986684,
+         "n": 3,
+         "text": "−0.00231",
+         "min": -0.00741482,
+         "max": 0.0116465
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -0.017663,
+        "h": 0.0101174
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.017663,
+         "sd": 0.00448226,
+         "n": 4,
+         "text": "−0.01766",
+         "min": -0.0180792,
+         "max": -0.00884707
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.0172894,
+         "sd": 0.00456831,
+         "n": 4,
+         "text": "−0.01729",
+         "min": -0.0180181,
+         "max": -0.00846539
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.019082,
+         "sd": 0.00418513,
+         "n": 3,
+         "text": "−0.01908",
+         "min": -0.0213299,
+         "max": -0.0132234
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.998348,
+        "h": 0.0103993
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.999545,
+         "sd": 0.00268333,
+         "n": 4,
+         "text": "0.99955",
+         "min": 0.998979,
+         "max": 1.00464
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.998348,
+         "sd": 0.00330106,
+         "n": 4,
+         "text": "0.99835",
+         "min": 0.997462,
+         "max": 1.0046
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.993811,
+         "sd": 0.00491687,
+         "n": 3,
+         "text": "0.99381",
+         "min": 0.99177,
+         "max": 1.00112
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.0,
+        "h": 0.0121913
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00067,
+         "sd": 0.002569,
+         "n": 4,
+         "text": "1.00067",
+         "min": 0.996623,
+         "max": 1.00276
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.0,
+         "sd": 0.00175534,
+         "n": 4,
+         "text": "1.00000",
+         "min": 0.996813,
+         "max": 1.00061
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.993577,
+         "sd": 0.00362445,
+         "n": 3,
+         "text": "0.99358",
+         "min": 0.988917,
+         "max": 0.996056
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.980253,
+        "h": 0.0287815
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.985072,
+         "sd": 0.00317597,
+         "n": 4,
+         "text": "0.98507",
+         "min": 0.979962,
+         "max": 0.987419
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.980253,
+         "sd": 0.00111365,
+         "n": 4,
+         "text": "0.98025",
+         "min": 0.978187,
+         "max": 0.98064
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.960365,
+         "sd": 0.00453335,
+         "n": 3,
+         "text": "0.96037",
+         "min": 0.954088,
+         "max": 0.962893
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.51435,
+        "h": 0.303435
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.51435,
+         "sd": 0.216632,
+         "n": 4,
+         "text": "−0.514",
+         "min": -0.7689,
+         "max": -0.2385
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "missing",
+         "note": "not in this tool's model"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [
+    {
+     "sensor": "DAVIS IMU",
+     "sensor_id": "imu0",
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)",
+     "cells": {
+      "00": {
+       "med": -0.0610396,
+       "sd": 0.096771,
+       "text": "−0.061"
+      },
+      "01": {
+       "med": 0.0129383,
+       "sd": 0.262236,
+       "text": "0.013"
+      },
+      "02": {
+       "med": 0.0813152,
+       "sd": 0.120851,
+       "text": "0.081"
+      },
+      "10": {
+       "med": 0.0347671,
+       "sd": 0.0784583,
+       "text": "0.035"
+      },
+      "11": {
+       "med": -0.0516953,
+       "sd": 0.108155,
+       "text": "−0.052"
+      },
+      "12": {
+       "med": 0.172637,
+       "sd": 0.173217,
+       "text": "0.173"
+      },
+      "20": {
+       "med": 0.0665784,
+       "sd": 0.126456,
+       "text": "0.067"
+      },
+      "21": {
+       "med": -0.0735031,
+       "sd": 0.166937,
+       "text": "−0.074"
+      },
+      "22": {
+       "med": -0.131498,
+       "sd": 0.213947,
+       "text": "−0.131"
+      }
+     }
+    },
+    {
+     "sensor": "DAVIS IMU",
+     "sensor_id": "imu0",
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr",
+     "cells": {
+      "00": {
+       "med": -0.0540448,
+       "sd": 0.0536826,
+       "text": "−0.054"
+      },
+      "01": {
+       "med": -0.247603,
+       "sd": 0.19073,
+       "text": "−0.248"
+      },
+      "02": {
+       "med": 0.146496,
+       "sd": 0.175396,
+       "text": "0.146"
+      },
+      "10": {
+       "med": 0.205742,
+       "sd": 0.13414,
+       "text": "0.206"
+      },
+      "11": {
+       "med": 0.0721717,
+       "sd": 0.0502428,
+       "text": "0.072"
+      },
+      "12": {
+       "med": 0.15833,
+       "sd": 0.173807,
+       "text": "0.158"
+      },
+      "20": {
+       "med": -0.0979578,
+       "sd": 0.0754373,
+       "text": "−0.098"
+      },
+      "21": {
+       "med": 0.0132037,
+       "sd": 0.099272,
+       "text": "0.013"
+      },
+      "22": {
+       "med": 0.0447141,
+       "sd": 0.0122703,
+       "text": "0.045"
+      }
+     }
+    }
+   ],
+   "has_tga": true
+  },
+  {
+   "id": "SNAP",
+   "title": "Snapdragon stereo + IMU",
+   "mode": "cam+imu",
+   "shutter": "global",
+   "n": 4,
+   "columns": [
+    {
+     "col": "calyx",
+     "tool": "MVIS",
+     "label": "MVIS"
+    },
+    {
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)"
+    },
+    {
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr"
+    },
+    {
+     "col": "basalt",
+     "tool": "Basalt",
+     "label": "Basalt"
+    }
+   ],
+   "solved": [
+    {
+     "n": 4,
+     "of": 4,
+     "tool": "MVIS"
+    },
+    {
+     "n": 4,
+     "of": 4,
+     "tool": "Kalibr"
+    },
+    {
+     "n": 4,
+     "of": 4,
+     "tool": "Basalt"
+    }
+   ],
+   "read_first": "All three tools use each bag's IMU weights from the residuals in UZH's own Kalibr results. Kalibr's intrinsics and baseline are inputs from the calibration UZH ships.",
+   "notes": [
+    [
+     "Like for like",
+     "Every tool starts from the camera chain UZH ships and uses the same IMU sigmas on the same bags. Kalibr keeps the camera values fixed; MVIS and Basalt refine them."
+    ]
+   ],
+   "records": {},
+   "fit": [
+    {
+     "sensor": "Snapdragon left",
+     "by_col": {
+      "calyx": "0.203",
+      "mvis": "0.203",
+      "kalibr": "0.483"
+     }
+    },
+    {
+     "sensor": "Snapdragon right",
+     "by_col": {
+      "calyx": "0.202",
+      "mvis": "0.201",
+      "kalibr": "0.405"
+     }
+    }
+   ],
+   "diffs": [
+    {
+     "pair": "mk",
+     "label": "MVIS (K-IMU) − Kalibr",
+     "a": "MVIS",
+     "b": "Kalibr",
+     "marked": 1,
+     "compared": 13,
+     "rows": [
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+0.253",
+       "spread": "4.687",
+       "z": 0.054,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+1.19",
+       "spread": "4.71",
+       "z": 0.253,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+0.272",
+       "spread": "4.699",
+       "z": 0.058,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "−0.80",
+       "spread": "2.97",
+       "z": -0.27,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "+0.00010",
+       "spread": "0.00431",
+       "z": 0.023,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00161",
+       "spread": "0.00671",
+       "z": -0.239,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00019",
+       "spread": "0.00398",
+       "z": -0.048,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "+0.00104",
+       "spread": "0.00046",
+       "z": 2.255,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "−0.00098",
+       "spread": "0.00538",
+       "z": -0.183,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "+0.00042",
+       "spread": "0.00103",
+       "z": 0.41,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "−0.00193",
+       "spread": "0.00383",
+       "z": -0.505,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "+0.00021",
+       "spread": "0.00291",
+       "z": 0.071,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.00160",
+       "spread": "0.00575",
+       "z": -0.279,
+       "marked": false,
+       "unequal_n": false
+      }
+     ]
+    },
+    {
+     "pair": "bk",
+     "label": "Basalt − Kalibr",
+     "a": "Basalt",
+     "b": "Kalibr",
+     "marked": 4,
+     "compared": 13,
+     "rows": [
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+0.042",
+       "spread": "4.661",
+       "z": 0.009,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+3.10",
+       "spread": "4.71",
+       "z": 0.657,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "+0.077",
+       "spread": "4.661",
+       "z": 0.016,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+0.71",
+       "spread": "2.97",
+       "z": 0.238,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.00044",
+       "spread": "0.00431",
+       "z": -0.102,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00559",
+       "spread": "0.00671",
+       "z": -0.834,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00409",
+       "spread": "0.00409",
+       "z": -1.001,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "+0.00052",
+       "spread": "0.00151",
+       "z": 0.344,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "−0.00290",
+       "spread": "0.00538",
+       "z": -0.54,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "+0.00026",
+       "spread": "0.00127",
+       "z": 0.206,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "−0.01035",
+       "spread": "0.00517",
+       "z": -2.002,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.00613",
+       "spread": "0.00411",
+       "z": -1.492,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.01265",
+       "spread": "0.00575",
+       "z": -2.199,
+       "marked": true,
+       "unequal_n": false
+      }
+     ]
+    },
+    {
+     "pair": "bm",
+     "label": "Basalt − MVIS (K-IMU)",
+     "a": "Basalt",
+     "b": "MVIS",
+     "marked": 10,
+     "compared": 30,
+     "rows": [
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−2.14",
+       "spread": "1.13",
+       "z": -1.887,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−2.15",
+       "spread": "1.36",
+       "z": -1.59,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "+0.23",
+       "spread": "2.74",
+       "z": 0.084,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "−0.07",
+       "spread": "4.55",
+       "z": -0.015,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "+0.00353",
+       "spread": "0.00416",
+       "z": 0.85,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00204",
+       "spread": "0.00786",
+       "z": -0.259,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.00502",
+       "spread": "0.00973",
+       "z": 0.516,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.00267",
+       "spread": "0.00383",
+       "z": -0.696,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "−0.211",
+       "spread": "4.687",
+       "z": -0.045,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon left",
+       "sensor_id": "cam0",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+1.91",
+       "spread": "1.67",
+       "z": 1.139,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "text": "−1.66",
+       "spread": "1.65",
+       "z": -1.007,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "text": "−1.64",
+       "spread": "1.65",
+       "z": -0.997,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "text": "+0.36",
+       "spread": "0.23",
+       "z": 1.552,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "text": "+0.06",
+       "spread": "7.26",
+       "z": 0.009,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "text": "+0.00518",
+       "spread": "0.01584",
+       "z": 0.327,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "text": "−0.00561",
+       "spread": "0.02393",
+       "z": -0.234,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "text": "+0.00559",
+       "spread": "0.02973",
+       "z": 0.188,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "text": "−0.00189",
+       "spread": "0.01338",
+       "z": -0.141,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "baseline_mm",
+       "label": "baseline to Snapdragon left",
+       "unit": "mm",
+       "text": "+0.119",
+       "spread": "0.762",
+       "z": 0.156,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "text": "−0.195",
+       "spread": "4.699",
+       "z": -0.042,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon right",
+       "sensor_id": "cam1",
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "text": "+1.51",
+       "spread": "2.38",
+       "z": 0.632,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "text": "−0.00054",
+       "spread": "0.00194",
+       "z": -0.278,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "text": "−0.00399",
+       "spread": "0.00339",
+       "z": -1.176,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "text": "−0.00390",
+       "spread": "0.00409",
+       "z": -0.955,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "text": "−0.00052",
+       "spread": "0.00151",
+       "z": -0.343,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "text": "−0.00192",
+       "spread": "0.00131",
+       "z": -1.463,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "text": "−0.00016",
+       "spread": "0.00127",
+       "z": -0.127,
+       "marked": false,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "text": "−0.00842",
+       "spread": "0.00517",
+       "z": -1.628,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "text": "−0.00634",
+       "spread": "0.00411",
+       "z": -1.542,
+       "marked": true,
+       "unequal_n": false
+      },
+      {
+       "sensor": "Snapdragon IMU",
+       "sensor_id": "imu0",
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "text": "−0.01105",
+       "spread": "0.00363",
+       "z": -3.045,
+       "marked": true,
+       "unequal_n": false
+      }
+     ]
+    }
+   ],
+   "tally": {
+    "mk": [
+     1,
+     13
+    ],
+    "bk": [
+     4,
+     13
+    ],
+    "bm": [
+     10,
+     30
+    ]
+   },
+   "sensors": [
+    {
+     "id": "cam0",
+     "label": "Snapdragon left",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 277.12,
+        "h": 2.77736
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 277.771,
+         "sd": 1.11093,
+         "n": 4,
+         "text": "277.77",
+         "min": 276.304,
+         "max": 278.853
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 277.786,
+         "sd": 1.13272,
+         "n": 4,
+         "text": "277.79",
+         "min": 276.288,
+         "max": 278.879
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 276.469,
+         "sd": 1.61884,
+         "n": 4,
+         "text": "276.47",
+         "note": "input",
+         "min": 275.339,
+         "max": 278.667
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 275.649,
+         "sd": 1.05387,
+         "n": 4,
+         "text": "275.65",
+         "min": 274.748,
+         "max": 276.809
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 276.988,
+        "h": 2.89486
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 277.722,
+         "sd": 1.33269,
+         "n": 4,
+         "text": "277.72",
+         "min": 275.939,
+         "max": 278.98
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 277.737,
+         "sd": 1.35511,
+         "n": 4,
+         "text": "277.74",
+         "min": 275.92,
+         "max": 279.004
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 276.255,
+         "sd": 1.74007,
+         "n": 4,
+         "text": "276.25",
+         "note": "input",
+         "min": 274.995,
+         "max": 278.49
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 275.583,
+         "sd": 1.22619,
+         "n": 4,
+         "text": "275.58",
+         "min": 274.523,
+         "max": 276.908
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 317.899,
+        "h": 3.7796
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 317.893,
+         "sd": 2.64324,
+         "n": 4,
+         "text": "317.89",
+         "min": 314.683,
+         "max": 319.954
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 317.905,
+         "sd": 2.65413,
+         "n": 4,
+         "text": "317.90",
+         "min": 314.678,
+         "max": 319.983
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 317.855,
+         "sd": 2.3524,
+         "n": 4,
+         "text": "317.86",
+         "note": "input",
+         "min": 315.77,
+         "max": 320.105
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 318.136,
+         "sd": 2.73909,
+         "n": 4,
+         "text": "318.14",
+         "min": 314.463,
+         "max": 320.306
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 241.587,
+        "h": 9.80375
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 241.588,
+         "sd": 4.56384,
+         "n": 4,
+         "text": "241.59",
+         "min": 232.675,
+         "max": 242.174
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 241.587,
+         "sd": 4.55485,
+         "n": 4,
+         "text": "241.59",
+         "min": 232.683,
+         "max": 242.148
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 242.035,
+         "sd": 4.27945,
+         "n": 4,
+         "text": "242.03",
+         "note": "input",
+         "min": 233.726,
+         "max": 242.712
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 241.52,
+         "sd": 4.52005,
+         "n": 4,
+         "text": "241.52",
+         "min": 232.727,
+         "max": 242.195
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0104407,
+        "h": 0.0114776
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0111665,
+         "sd": 0.00368887,
+         "n": 4,
+         "text": "−0.01117",
+         "min": -0.0136323,
+         "max": -0.00502329
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0111606,
+         "sd": 0.00372177,
+         "n": 4,
+         "text": "−0.01116",
+         "min": -0.0136917,
+         "max": -0.00499206
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.00972086,
+         "sd": 0.00798298,
+         "n": 4,
+         "text": "−0.00972",
+         "note": "input",
+         "min": -0.0178116,
+         "max": -6.54515e-06
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.00762706,
+         "sd": 0.00415832,
+         "n": 4,
+         "text": "−0.00763",
+         "min": -0.0113884,
+         "max": -0.00209016
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0190147,
+        "h": 0.0348229
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0200192,
+         "sd": 0.00785039,
+         "n": 4,
+         "text": "0.02002",
+         "min": 0.0129342,
+         "max": 0.0270806
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.0200472,
+         "sd": 0.0078593,
+         "n": 4,
+         "text": "0.02005",
+         "min": 0.0128914,
+         "max": 0.0270543
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.0127349,
+         "sd": 0.0253774,
+         "n": 4,
+         "text": "0.01273",
+         "note": "input",
+         "min": -0.0103795,
+         "max": 0.0489708
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.0180102,
+         "sd": 0.00672947,
+         "n": 4,
+         "text": "0.01801",
+         "min": 0.00860506,
+         "max": 0.024239
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.0160075,
+        "h": 0.0377137
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.0184912,
+         "sd": 0.0096895,
+         "n": 4,
+         "text": "−0.01849",
+         "min": -0.0247354,
+         "max": -0.00464426
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.0185409,
+         "sd": 0.00972767,
+         "n": 4,
+         "text": "−0.01854",
+         "min": -0.0247515,
+         "max": -0.00460571
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.00579021,
+         "sd": 0.0240678,
+         "n": 4,
+         "text": "−0.00579",
+         "note": "input",
+         "min": -0.0413633,
+         "max": 0.0149353
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0135239,
+         "sd": 0.00591984,
+         "n": 4,
+         "text": "−0.01352",
+         "min": -0.0198767,
+         "max": -0.00554238
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00491555,
+        "h": 0.0129259
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00624738,
+         "sd": 0.00381161,
+         "n": 4,
+         "text": "0.00625",
+         "min": 0.000158467,
+         "max": 0.00828575
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.006254,
+         "sd": 0.00383399,
+         "n": 4,
+         "text": "0.00625",
+         "min": 0.000146371,
+         "max": 0.00834071
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.000471967,
+         "sd": 0.0073072,
+         "n": 4,
+         "text": "0.00047",
+         "note": "input",
+         "min": -0.00563906,
+         "max": 0.0114409
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.00358371,
+         "sd": 0.00204896,
+         "n": 4,
+         "text": "0.00358",
+         "min": 0.000853697,
+         "max": 0.00586161
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -10.8846,
+        "h": 6.12375
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -10.7939,
+         "sd": 4.70422,
+         "n": 4,
+         "text": "−10.794",
+         "min": -16.3949,
+         "max": -7.28144
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -10.7638,
+         "sd": 4.68738,
+         "n": 4,
+         "text": "−10.764",
+         "min": -16.3433,
+         "max": -7.29017
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -11.0168,
+         "sd": 4.624,
+         "n": 4,
+         "text": "−11.017",
+         "min": -16.448,
+         "max": -7.56492
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -10.9752,
+         "sd": 4.66107,
+         "n": 4,
+         "text": "−10.975",
+         "min": -16.4516,
+         "max": -7.48313
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 25.6116,
+        "h": 8.48155
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 25.6176,
+         "sd": 1.7005,
+         "n": 4,
+         "text": "25.62",
+         "min": 23.2794,
+         "max": 26.776
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 25.6056,
+         "sd": 1.67236,
+         "n": 4,
+         "text": "25.61",
+         "min": 23.2545,
+         "max": 26.7549
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 24.4141,
+         "sd": 4.71317,
+         "n": 4,
+         "text": "24.41",
+         "min": 23.1548,
+         "max": 33.3221
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 27.5123,
+         "sd": 1.67374,
+         "n": 4,
+         "text": "27.51",
+         "min": 26.7475,
+         "max": 30.3371
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "cam1",
+     "label": "Snapdragon right",
+     "params": [
+      {
+       "key": "fx",
+       "label": "fx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 276.176,
+        "h": 3.9776
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 276.727,
+         "sd": 1.52354,
+         "n": 4,
+         "text": "276.73",
+         "min": 275.128,
+         "max": 278.152
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 276.736,
+         "sd": 1.54599,
+         "n": 4,
+         "text": "276.74",
+         "min": 275.125,
+         "max": 278.178
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 275.625,
+         "sd": 2.00756,
+         "n": 4,
+         "text": "275.62",
+         "note": "input",
+         "min": 273.29,
+         "max": 277.616
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 275.075,
+         "sd": 1.64869,
+         "n": 4,
+         "text": "275.07",
+         "min": 272.56,
+         "max": 276.089
+        }
+       ]
+      },
+      {
+       "key": "fy",
+       "label": "fy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 275.951,
+        "h": 3.5915
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 276.542,
+         "sd": 1.59151,
+         "n": 4,
+         "text": "276.54",
+         "min": 275.202,
+         "max": 278.12
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 276.558,
+         "sd": 1.61449,
+         "n": 4,
+         "text": "276.56",
+         "min": 275.183,
+         "max": 278.143
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 275.36,
+         "sd": 2.10437,
+         "n": 4,
+         "text": "275.36",
+         "note": "input",
+         "min": 273.358,
+         "max": 277.637
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 274.914,
+         "sd": 1.64909,
+         "n": 4,
+         "text": "274.91",
+         "min": 272.686,
+         "max": 276.086
+        }
+       ]
+      },
+      {
+       "key": "cx",
+       "label": "cx",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 314.599,
+        "h": 1.4718
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 314.443,
+         "sd": 0.248221,
+         "n": 4,
+         "text": "314.44",
+         "min": 314.005,
+         "max": 314.545
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 314.448,
+         "sd": 0.233234,
+         "n": 4,
+         "text": "314.45",
+         "min": 314.036,
+         "max": 314.541
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 314.75,
+         "sd": 0.715095,
+         "n": 4,
+         "text": "314.75",
+         "note": "input",
+         "min": 314.286,
+         "max": 315.937
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 314.81,
+         "sd": 0.21468,
+         "n": 4,
+         "text": "314.81",
+         "min": 314.701,
+         "max": 315.18
+        }
+       ]
+      },
+      {
+       "key": "cy",
+       "label": "cy",
+       "unit": "px",
+       "cls": "intr",
+       "axis": {
+        "c": 235.68,
+        "h": 16.8916
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 235.648,
+         "sd": 7.25192,
+         "n": 4,
+         "text": "235.65",
+         "min": 234.978,
+         "max": 249.913
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 235.649,
+         "sd": 7.26017,
+         "n": 4,
+         "text": "235.65",
+         "min": 234.946,
+         "max": 249.918
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 236.278,
+         "sd": 7.46827,
+         "n": 4,
+         "text": "236.28",
+         "note": "input",
+         "min": 235.779,
+         "max": 251.036
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 235.711,
+         "sd": 7.0902,
+         "n": 4,
+         "text": "235.71",
+         "min": 235.339,
+         "max": 249.763
+        }
+       ]
+      },
+      {
+       "key": "dist[0]",
+       "label": "dist k1",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00902572,
+        "h": 0.0405748
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00931046,
+         "sd": 0.0158532,
+         "n": 4,
+         "text": "−0.00931",
+         "min": -0.0118863,
+         "max": 0.0214437
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00933041,
+         "sd": 0.0158445,
+         "n": 4,
+         "text": "−0.00933",
+         "min": -0.0118106,
+         "max": 0.0214448
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.00874097,
+         "sd": 0.0189362,
+         "n": 4,
+         "text": "−0.00874",
+         "note": "input",
+         "min": -0.0121381,
+         "max": 0.0278605
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.00415077,
+         "sd": 0.0146553,
+         "n": 4,
+         "text": "−0.00415",
+         "min": -0.00628791,
+         "max": 0.0243757
+        }
+       ]
+      },
+      {
+       "key": "dist[1]",
+       "label": "dist k2",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.0115876,
+        "h": 0.0432423
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.0125259,
+         "sd": 0.0239721,
+         "n": 4,
+         "text": "0.01253",
+         "min": -0.0237543,
+         "max": 0.0339616
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.0124876,
+         "sd": 0.0239258,
+         "n": 4,
+         "text": "0.01249",
+         "min": -0.0237489,
+         "max": 0.0338476
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.0106875,
+         "sd": 0.0218854,
+         "n": 4,
+         "text": "0.01069",
+         "note": "input",
+         "min": -0.0277236,
+         "max": 0.0224403
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.00687782,
+         "sd": 0.015251,
+         "n": 4,
+         "text": "0.00688",
+         "min": -0.0219179,
+         "max": 0.0111806
+        }
+       ]
+      },
+      {
+       "key": "dist[2]",
+       "label": "dist k3",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": -0.00627463,
+        "h": 0.0493125
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -0.00761255,
+         "sd": 0.0297775,
+         "n": 4,
+         "text": "−0.00761",
+         "min": -0.0328353,
+         "max": 0.0385549
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.00759642,
+         "sd": 0.0297262,
+         "n": 4,
+         "text": "−0.00760",
+         "min": -0.0327104,
+         "max": 0.0385397
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": -0.00495284,
+         "sd": 0.0231367,
+         "n": 4,
+         "text": "−0.00495",
+         "note": "input",
+         "min": -0.0137532,
+         "max": 0.03752
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.0020045,
+         "sd": 0.0196495,
+         "n": 4,
+         "text": "−0.00200",
+         "min": -0.00645506,
+         "max": 0.0355363
+        }
+       ]
+      },
+      {
+       "key": "dist[3]",
+       "label": "dist k4",
+       "unit": "",
+       "cls": "dist",
+       "axis": {
+        "c": 0.00113217,
+        "h": 0.0237944
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 0.00167111,
+         "sd": 0.0134022,
+         "n": 4,
+         "text": "0.00167",
+         "min": -0.0204991,
+         "max": 0.0110567
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00167406,
+         "sd": 0.0133826,
+         "n": 4,
+         "text": "0.00167",
+         "min": -0.0204884,
+         "max": 0.011009
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 0.000593229,
+         "sd": 0.0098103,
+         "n": 4,
+         "text": "0.00059",
+         "note": "input",
+         "min": -0.0181526,
+         "max": 0.00272509
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -0.000216218,
+         "sd": 0.00991854,
+         "n": 4,
+         "text": "−0.00022",
+         "min": -0.0195698,
+         "max": 0.00100423
+        }
+       ]
+      },
+      {
+       "key": "baseline_mm",
+       "label": "baseline to Snapdragon left",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 79.4686,
+        "h": 1.03543
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 79.4346,
+         "sd": 0.484284,
+         "n": 4,
+         "text": "79.435",
+         "min": 78.8589,
+         "max": 79.9921
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 79.4364,
+         "sd": 0.485502,
+         "n": 4,
+         "text": "79.436",
+         "min": 78.857,
+         "max": 79.9932
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "fixed",
+         "med": 79.5008,
+         "sd": 0.319444,
+         "n": 4,
+         "text": "79.501",
+         "note": "input",
+         "min": 79.1992,
+         "max": 79.9379
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 79.5555,
+         "sd": 0.762071,
+         "n": 4,
+         "text": "79.555",
+         "min": 78.5273,
+         "max": 80.3114
+        }
+       ]
+      },
+      {
+       "key": "td_ms",
+       "label": "time offset td to base IMU",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -10.8925,
+        "h": 6.11501
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": -10.8098,
+         "sd": 4.71613,
+         "n": 4,
+         "text": "−10.810",
+         "min": -16.3783,
+         "max": -7.25347
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -10.7797,
+         "sd": 4.69902,
+         "n": 4,
+         "text": "−10.780",
+         "min": -16.325,
+         "max": -7.26139
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -11.0517,
+         "sd": 4.63812,
+         "n": 4,
+         "text": "−11.052",
+         "min": -16.3945,
+         "max": -7.54376
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -10.9752,
+         "sd": 4.66107,
+         "n": 4,
+         "text": "−10.975",
+         "min": -16.4516,
+         "max": -7.48313
+        }
+       ]
+      },
+      {
+       "key": "lever_mm",
+       "label": "distance to base IMU ‖p‖",
+       "unit": "mm",
+       "cls": "length",
+       "axis": {
+        "c": 58.379,
+        "h": 6.63971
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "ok",
+         "med": 57.9956,
+         "sd": 1.54734,
+         "n": 4,
+         "text": "58.00",
+         "min": 57.5009,
+         "max": 60.806
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 57.9626,
+         "sd": 1.56606,
+         "n": 4,
+         "text": "57.96",
+         "min": 57.464,
+         "max": 60.7919
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 58.7624,
+         "sd": 2.96546,
+         "n": 4,
+         "text": "58.76",
+         "min": 58.1143,
+         "max": 64.4151
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 59.4688,
+         "sd": 2.38274,
+         "n": 4,
+         "text": "59.47",
+         "min": 58.6301,
+         "max": 63.8012
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imu0",
+     "label": "Snapdragon IMU",
+     "params": [
+      {
+       "key": "Dw[0,0]",
+       "label": "gyro Dw[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 1.00395,
+        "h": 0.008459
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 1.00405,
+         "sd": 0.00194348,
+         "n": 4,
+         "text": "1.00405",
+         "min": 1.00286,
+         "max": 1.00734
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00395,
+         "sd": 0.00430607,
+         "n": 4,
+         "text": "1.00395",
+         "min": 1.0019,
+         "max": 1.01164
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 1.00351,
+         "sd": 0.00101651,
+         "n": 4,
+         "text": "1.00351",
+         "min": 1.00207,
+         "max": 1.00455
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,1]",
+       "label": "gyro Dw[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997906,
+        "h": 0.00914862
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.997906,
+         "sd": 0.00213422,
+         "n": 4,
+         "text": "0.99791",
+         "min": 0.996893,
+         "max": 1.0015
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.999512,
+         "sd": 0.00671093,
+         "n": 4,
+         "text": "0.99951",
+         "min": 0.989989,
+         "max": 1.00619
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.993917,
+         "sd": 0.00339303,
+         "n": 4,
+         "text": "0.99392",
+         "min": 0.992437,
+         "max": 1.00006
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,2]",
+       "label": "gyro Dw[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.997922,
+        "h": 0.00878816
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.997922,
+         "sd": 0.0018481,
+         "n": 4,
+         "text": "0.99792",
+         "min": 0.996978,
+         "max": 1.00112
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.998112,
+         "sd": 0.00397634,
+         "n": 4,
+         "text": "0.99811",
+         "min": 0.993094,
+         "max": 1.00176
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.99402,
+         "sd": 0.00408724,
+         "n": 4,
+         "text": "0.99402",
+         "min": 0.991276,
+         "max": 0.999636
+        }
+       ]
+      },
+      {
+       "key": "Dw[1,0]",
+       "label": "gyro Dw[1,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.000182239,
+        "h": 0.00307668
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.000701196,
+         "sd": 0.000301035,
+         "n": 4,
+         "text": "0.00070",
+         "min": 0.000277129,
+         "max": 0.000996964
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.00033781,
+         "sd": 0.000460778,
+         "n": 4,
+         "text": "−0.00034",
+         "min": -0.000771519,
+         "max": 0.000297548
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.000182239,
+         "sd": 0.00151198,
+         "n": 4,
+         "text": "0.00018",
+         "min": -0.00261474,
+         "max": 0.000656755
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,0]",
+       "label": "gyro Dw[2,0] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": 0.00605514,
+        "h": 0.00937075
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.00605514,
+         "sd": 0.000851194,
+         "n": 4,
+         "text": "0.00606",
+         "min": 0.00461575,
+         "max": 0.00650014
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.00703747,
+         "sd": 0.00538025,
+         "n": 4,
+         "text": "0.00704",
+         "min": -0.00246372,
+         "max": 0.00971558
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.00413302,
+         "sd": 0.00131346,
+         "n": 4,
+         "text": "0.00413",
+         "min": 0.00207606,
+         "max": 0.00509928
+        }
+       ]
+      },
+      {
+       "key": "Dw[2,1]",
+       "label": "gyro Dw[2,1] cross",
+       "unit": "",
+       "cls": "cross",
+       "axis": {
+        "c": -1.72913e-05,
+        "h": 0.00169419
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.000144368,
+         "sd": 0.000753326,
+         "n": 4,
+         "text": "0.00014",
+         "min": -0.00106203,
+         "max": 0.000588721
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": -0.000279034,
+         "sd": 0.00103271,
+         "n": 4,
+         "text": "−0.00028",
+         "min": -0.000783662,
+         "max": 0.00152288
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": -1.72913e-05,
+         "sd": 0.00126822,
+         "n": 4,
+         "text": "−0.00002",
+         "min": -0.00116233,
+         "max": 0.0010891
+        }
+       ]
+      },
+      {
+       "key": "Da[0,0]",
+       "label": "accel Da[0,0] scale x",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.998407,
+        "h": 0.0149436
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.998407,
+         "sd": 0.00172001,
+         "n": 4,
+         "text": "0.99841",
+         "min": 0.997097,
+         "max": 1.00116
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 1.00034,
+         "sd": 0.00382665,
+         "n": 4,
+         "text": "1.00034",
+         "min": 0.996125,
+         "max": 1.00531
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.989991,
+         "sd": 0.00516913,
+         "n": 4,
+         "text": "0.98999",
+         "min": 0.985883,
+         "max": 0.99769
+        }
+       ]
+      },
+      {
+       "key": "Da[1,1]",
+       "label": "accel Da[1,1] scale y",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.999098,
+        "h": 0.0136059
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.999305,
+         "sd": 0.00133903,
+         "n": 4,
+         "text": "0.99930",
+         "min": 0.997849,
+         "max": 1.00069
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.999098,
+         "sd": 0.00291391,
+         "n": 4,
+         "text": "0.99910",
+         "min": 0.99824,
+         "max": 1.00458
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.992964,
+         "sd": 0.00411234,
+         "n": 4,
+         "text": "0.99296",
+         "min": 0.986729,
+         "max": 0.996624
+        }
+       ]
+      },
+      {
+       "key": "Da[2,2]",
+       "label": "accel Da[2,2] scale z",
+       "unit": "",
+       "cls": "scale",
+       "axis": {
+        "c": 0.989248,
+        "h": 0.019657
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "no value"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": 0.989248,
+         "sd": 0.00221126,
+         "n": 4,
+         "text": "0.98925",
+         "min": 0.985424,
+         "max": 0.990535
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "ok",
+         "med": 0.990853,
+         "sd": 0.00575317,
+         "n": 4,
+         "text": "0.99085",
+         "min": 0.98056,
+         "max": 0.993477
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "ok",
+         "med": 0.978201,
+         "sd": 0.00362824,
+         "n": 4,
+         "text": "0.97820",
+         "min": 0.971378,
+         "max": 0.979052
+        }
+       ]
+      },
+      {
+       "key": "t_ga_ms",
+       "label": "t_ga gyro−accel",
+       "unit": "ms",
+       "cls": "time",
+       "axis": {
+        "c": -0.8321,
+        "h": 0.2266
+       },
+       "lanes": [
+        {
+         "col": "calyx",
+         "tool": "MVIS",
+         "label": "MVIS",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "mvis",
+         "tool": "MVIS",
+         "label": "MVIS (K-IMU)",
+         "state": "ok",
+         "med": -0.8321,
+         "sd": 0.124395,
+         "n": 4,
+         "text": "−0.832",
+         "min": -1.0381,
+         "max": -0.7511
+        },
+        {
+         "col": "kalibr",
+         "tool": "Kalibr",
+         "label": "Kalibr",
+         "state": "missing",
+         "note": "not in this tool's model"
+        },
+        {
+         "col": "basalt",
+         "tool": "Basalt",
+         "label": "Basalt",
+         "state": "missing",
+         "note": "not in this tool's model"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "model_terms": [
+    {
+     "sensor": "Snapdragon IMU",
+     "sensor_id": "imu0",
+     "col": "mvis",
+     "tool": "MVIS",
+     "label": "MVIS (K-IMU)",
+     "cells": {
+      "00": {
+       "med": 0.00768517,
+       "sd": 0.0824455,
+       "text": "0.008"
+      },
+      "01": {
+       "med": -0.0885191,
+       "sd": 0.0655416,
+       "text": "−0.089"
+      },
+      "02": {
+       "med": 0.04628,
+       "sd": 0.145631,
+       "text": "0.046"
+      },
+      "10": {
+       "med": 0.162609,
+       "sd": 0.137624,
+       "text": "0.163"
+      },
+      "11": {
+       "med": 0.0435511,
+       "sd": 0.106921,
+       "text": "0.044"
+      },
+      "12": {
+       "med": -0.074394,
+       "sd": 0.400904,
+       "text": "−0.074"
+      },
+      "20": {
+       "med": 0.0294339,
+       "sd": 0.128274,
+       "text": "0.029"
+      },
+      "21": {
+       "med": 0.0221564,
+       "sd": 0.0936769,
+       "text": "0.022"
+      },
+      "22": {
+       "med": 0.0572046,
+       "sd": 0.206904,
+       "text": "0.057"
+      }
+     }
+    },
+    {
+     "sensor": "Snapdragon IMU",
+     "sensor_id": "imu0",
+     "col": "kalibr",
+     "tool": "Kalibr",
+     "label": "Kalibr",
+     "cells": {
+      "00": {
+       "med": 0.0450794,
+       "sd": 0.201452,
+       "text": "0.045"
+      },
+      "01": {
+       "med": 0.266929,
+       "sd": 0.0728207,
+       "text": "0.267"
+      },
+      "02": {
+       "med": 0.165348,
+       "sd": 0.104224,
+       "text": "0.165"
+      },
+      "10": {
+       "med": 0.0344968,
+       "sd": 0.234176,
+       "text": "0.034"
+      },
+      "11": {
+       "med": 0.0378838,
+       "sd": 0.182874,
+       "text": "0.038"
+      },
+      "12": {
+       "med": -0.340664,
+       "sd": 0.442937,
+       "text": "−0.341"
+      },
+      "20": {
+       "med": -0.0528098,
+       "sd": 0.125227,
+       "text": "−0.053"
+      },
+      "21": {
+       "med": 0.021706,
+       "sd": 0.218564,
+       "text": "0.022"
+      },
+      "22": {
+       "med": -0.158978,
+       "sd": 0.228517,
+       "text": "−0.159"
+      }
+     }
+    }
+   ],
+   "has_tga": true
+  }
+ ]
+}

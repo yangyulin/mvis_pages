@@ -9,7 +9,7 @@ Checks per device (see docs/plans/mvis/web-pages/homepage-responsive in mira):
   fold       laptops/desktops: the whole hero including the readout bar inside the first viewport
   taps       phones: visible buttons/chips/links in the hero, and the primary CTA, are tall enough to tap
   video      the hero video box takes a minimum share of the viewport width
-The limits are in mvis_site/checks.py (evaluate).
+The limits are in mvis_site/checks.py (evaluate). With --pages it checks content pages instead (checks.page_problems).
 Writes <out_dir>/<device>.png and <out_dir>/report.json; exit code 1 if any check fails.
 """
 import argparse
@@ -21,5 +21,7 @@ ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 ap.add_argument("base", help="site root URL")
 ap.add_argument("out", help="folder for the screenshots and report.json")
 ap.add_argument("--only", help="one device name or class (phone, laptop, ...)")
+ap.add_argument("--pages", help="comma-separated content pages (e.g. /benchmark/results/,/benchmark/results/tum-vi/): "
+                "screenshots at 390 and 1360 px in light and dark, and no horizontal page scroll, in place of the homepage matrix")
 a = ap.parse_args()
-raise SystemExit(responsive.run(a.base, a.out, a.only))
+raise SystemExit(responsive.run_pages(a.base, a.out, a.pages.split(",")) if a.pages else responsive.run(a.base, a.out, a.only))

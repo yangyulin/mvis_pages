@@ -3,7 +3,7 @@
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts = "-p no:cacheprovider"
-markers = ["real_data: needs private results named by env (MVIS_SENSORS_CONFIG, MVIS_MEDIA, MVIS_LEADERBOARD, MVIS_UZH_ROOT, MVIS_SRC); skipped without them"]
+markers = ["real_data: needs private results named by env (MVIS_SENSORS_CONFIG, MVIS_MEDIA, MVIS_LEADERBOARD, MVIS_UZH_ROOT, MVIS_SRC, MVIS_RESULTS_RECORDS, MVIS_RESULTS_STATS); skipped without them"]
 
 [tool.coverage.run]
 branch = true

@@ -1,0 +1,12 @@
+---
+// Old deep links of the one-page results (/benchmark/results/#ds-virig, #rp-cav-virig-a, #rp-T6-gyro, and the same
+// via the /benchmark/leaderboard/ redirect) go to the dataset eval page that now holds them; the ids keep their names
+// there. Any other hash (#ds-overall, #ov-h included) stays on this page. Fed by results-nav.json[].legacy.
+import nav from '../data/results-nav.json';
+const map: Record<string, string> = {};
+for (const p of nav) for (const h of p.legacy) map[h] = h.startsWith('ds-') ? p.link : `${p.link}#${h}`;
+---
+<script is:inline define:vars={{ map }}>
+  const to = map[decodeURIComponent(location.hash.slice(1))];
+  if (to) location.replace(to);
+</script>

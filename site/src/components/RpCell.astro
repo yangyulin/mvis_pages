@@ -1,0 +1,22 @@
+---
+// One repeatability cell as a compact glyph (Leaderboard rows, the strip over each family on its eval page).
+// State -> glyph: most -> that tool's shape; tie_top -> the tied shapes; tie / not_separated -> ≈; too_few -> hatched
+// box; input -> ○; single -> tool letter + "only"; not_compared -> –; no cell -> ·. The title is the cell's own
+// sentence from repeatability.json. ᴷ marks MVIS's run with Kalibr's IMU model. Nothing is counted per tool.
+import RpShape from './RpShape.astro';
+interface Props { cell?: any; href?: string; group: string }
+const { cell: c, href, group } = Astro.props;
+const kimu = c?.mvis_variant === 'kalibr_imu' && c?.compared?.includes('MVIS');
+const title = c ? `${group}: ${c.sentence}` : `${group}: not part of this family`;
+const Tag = c && href ? 'a' : 'span';
+---
+<Tag class={`rc rc-${c?.state ?? 'none'}`} href={c ? href : undefined} title={title} aria-label={c ? c.aria : title}>
+  {!c && <span aria-hidden="true">·</span>}
+  {(c?.state === 'most' || c?.state === 'tie_top') && c.tools.map((t: string) => <RpShape tool={t} />)}
+  {(c?.state === 'tie' || c?.state === 'not_separated') && <span aria-hidden="true">≈</span>}
+  {c?.state === 'too_few' && <span class="rc-few" aria-hidden="true"></span>}
+  {c?.state === 'input' && <span aria-hidden="true">○</span>}
+  {c?.state === 'single' && <span class="rc-one" aria-hidden="true"><RpShape tool={c.tools[0]} /><small>only</small></span>}
+  {c?.state === 'not_compared' && <span aria-hidden="true">–</span>}
+  {kimu && <sup class="rc-k" aria-hidden="true">K</sup>}
+</Tag>

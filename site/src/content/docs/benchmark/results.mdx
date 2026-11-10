@@ -1,30 +1,34 @@
 ---
-title: Results — repeatability across recordings
-description: How much MVIS, Kalibr and Basalt estimates scatter when the same rig is calibrated from different recordings, per dataset family and group of parameters. Repeatability, not accuracy.
+title: Leaderboard
+description: Every dataset and family on one screen. How much MVIS, Kalibr and Basalt estimates scatter across recordings of the same rig, per group of parameters, and where the tools differ by more than their spread. Repeatability, not accuracy; no totals.
 pageType: embed
 wide: true
 tableOfContents: false
 ---
 
-import DatasetLeaderboard from '../../../components/DatasetLeaderboard.astro';
-import LeaderboardHowTo from '../../../components/LeaderboardHowTo.astro';
-import RepeatabilityHeader from '../../../components/RepeatabilityHeader.astro';
-import RepeatabilityMatrix from '../../../components/RepeatabilityMatrix.astro';
-import RepeatabilityDetails from '../../../components/RepeatabilityDetails.astro';
-import Overall from '../../../components/Overall.astro';
+import Leaderboard from '../../../components/Leaderboard.astro';
+import LegacyHashJump from '../../../components/LegacyHashJump.astro';
 import { tested } from '../../../components/rp';
+import lb from '../../../data/eval/index.json';
 
-<RepeatabilityHeader />
+<LegacyHashJump />
+
+<p class="rp-prov">Batch <b>{lb.batch}</b> · results commit <a href={`https://huggingface.co/datasets/calibench-vi/results/tree/${lb.results_commit}`}><code>{lb.results_commit.slice(0, 7)}</code></a> · records in <a href="https://huggingface.co/datasets/calibench-vi/results">calibench-vi/results</a> · <a href="/benchmark/methodology/">Methodology</a></p>
 
 <div class="not-content rp-honest">
-  <p><b>This page shows repeatability, not accuracy.</b> Repeatability is how much each tool's estimates scatter when we calibrate the same rig from different recordings.</p>
-  <ul>
-    <li><b>No ground truth:</b> these datasets have none, so no tool is the reference. A tool can repeat well and still be biased.</li>
-    <li><b>Shared recordings only:</b> we compare tools only on recordings that every compared tool ran.</li>
-    <li><b>No reprojection error:</b> it measures how well a model fits its own data, so we do not use it here.</li>
-    <li><b>Who ran it:</b> the MVIS authors run this board and made every run, including the Kalibr and Basalt runs.</li>
-  </ul>
+  {lb.honest.map((h) => <p set:html={h} />)}
 </div>
+
+<Leaderboard />
+
+<details class="not-content rp-fold">
+  <summary>How to read a cell</summary>
+  <ul>
+    <li>Each repeatability cell is one family and one group of parameters, compared on the recordings every compared tool ran. Its shape names the tool whose estimates scatter least; two shapes are a tie between them, both ahead of the third.</li>
+    <li>≈ is a tie: the gap is within chance or under 20 %. The hatched box means too few shared recordings to decide (fewer than 6). ○ means a tool received the values as input, so there is nothing to compare; – means the tools' models differ there.</li>
+    <li>Point at a cell for its sentence; click it for its numbers on the dataset eval page. Nothing is counted per tool across cells.</li>
+  </ul>
+</details>
 
 <details class="not-content rp-dates">
   <summary>Run dates and data settings</summary>
@@ -41,72 +45,10 @@ import { tested } from '../../../components/rp';
   <p>Data settings still differ from MVIS on T6, T7 and T8.</p>
 </details>
 
-<Overall />
-
-<section id="ds-virig" data-rp-section="virig">
-
-## VI-Rig: 4 IMUs + 3 cameras
-
-Our flagship rig. [Dataset page](/reference/datasets/virig-4imus-3cams/).
-
-<RepeatabilityMatrix id="virig" />
-<RepeatabilityDetails id="virig" />
-<details class="rp-tables" data-rp-dataset="virig"><summary>Parameter tables, tool differences and run configs (VI-Rig 3 cams)</summary><DatasetLeaderboard id="virig" /></details>
-
-</section>
-
-<section id="ds-mvis_rig" data-rp-section="mvis_rig">
-
-## VI-Rig: 4 IMUs + 4 cameras
-
-Our rig with T265 and ELP cameras, global and rolling shutter. [Dataset page](/reference/datasets/virig-4imus-4cams/).
-
-<RepeatabilityMatrix id="mvis_rig" />
-<RepeatabilityDetails id="mvis_rig" />
-<details class="rp-tables" data-rp-dataset="mvis_rig"><summary>Parameter tables, tool differences and run configs (VI-Rig 4 cams)</summary><DatasetLeaderboard id="mvis_rig" /></details>
-
-</section>
-
-<section id="ds-tum_vi" data-rp-section="tum_vi">
-
-## TUM-VI
-
-Calibration bags from TUM. [Example](/benchmark/examples/tum-vi/).
-
-<RepeatabilityMatrix id="tum_vi" />
-<RepeatabilityDetails id="tum_vi" />
-<details class="rp-tables" data-rp-dataset="tum_vi"><summary>Parameter tables, tool differences and run configs (TUM-VI)</summary><DatasetLeaderboard id="tum_vi" /></details>
-
-</section>
-
-<section id="ds-looper_insight9" data-rp-section="looper_insight9">
-
-## Looper Insight-9
-
-Two global-shutter cameras, one rolling-shutter camera and a MEMS IMU, from Looper Robotics. [Example](/benchmark/examples/looper-sa16/).
-
-<RepeatabilityMatrix id="looper_insight9" />
-<RepeatabilityDetails id="looper_insight9" />
-<details class="rp-tables" data-rp-dataset="looper_insight9"><summary>Parameter tables, tool differences and run configs (Looper Insight-9)</summary><DatasetLeaderboard id="looper_insight9" /></details>
-
-</section>
-
-<section id="ds-monado_msd" data-rp-section="monado_msd">
-
-## Monado MGC
-
-Reverb G2 headset calibration from the Monado SLAM Datasets. [Example](/benchmark/examples/monado/).
-
-<RepeatabilityMatrix id="monado_msd" />
-<RepeatabilityDetails id="monado_msd" />
-<details class="rp-tables" data-rp-dataset="monado_msd"><summary>Parameter tables, tool differences and run configs (Monado MGC)</summary><DatasetLeaderboard id="monado_msd" /></details>
-
-</section>
-
 ## About these results
 
 <details class="rp-fold">
-<summary>How the verdicts are made</summary>
+<summary>How a cell is decided</summary>
 
 For each family and group of parameters, we decide a verdict in five steps:
 
@@ -123,25 +65,18 @@ Notes on the test:
 - **Too few recordings:** with fewer than 6 shared recordings, no gap can pass this test (the smallest possible p is 2/2ⁿ). Those cells say "too few recordings".
 - **Not compared:** values a tool received as input, and rows where the tools' models differ.
 - **Distortion coefficients** trade off against each other, so their scatter can overstate differences in the lens mapping.
-- **Many tests:** each cell is a separate 5 % test. Across the {tested.cells} tested cells on this page, of which {tested.naming} name a tool, one or two calls may be chance. The intervals are not adjusted for multiple tests.
+- **Many tests:** each cell is a separate 5 % test. Across the {tested.cells} tested cells of this batch, of which {tested.naming} name a tool, one or two calls may be chance. The intervals are not adjusted for multiple tests.
 
 </details>
 
 <details class="rp-fold">
-<summary>Agreement between tools</summary>
+<summary>◆ differences between tools</summary>
 
-The parameter tables also show the differences between the tools' medians. No tool is the reference.
+The ◆ columns count, per tool pair, the parameter rows where the tools' medians differ. No tool is the reference. Each dataset eval page lists every row.
 
 - **Disagreement:** two tools disagree where their medians differ by more than either tool's scatter.
 - **◆** marks disagreement, not an error in either tool.
 - **‡** on a time offset: MVIS splits the gyro (td) and accel (td + t_ga) timelines, so Basalt − Kalibr is the like-for-like check there. Here td is the camera–IMU time offset, and t_ga is the time offset between the gyroscope and accelerometer channels.
-
-</details>
-
-<details class="rp-fold">
-<summary>How to read the parameter tables</summary>
-
-<LeaderboardHowTo />
 
 </details>
 

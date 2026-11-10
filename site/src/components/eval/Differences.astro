@@ -1,0 +1,38 @@
+---
+// Where the tools differ: per tool pair, every compared row in record order (sensor, then parameter; never by size).
+// Each row is a gauge in units of the larger sd: shaded band = ±1 sd, dot = the median difference Δ, filled and ◆
+// when outside the band (the Space's app.delta). Inline SVG at build time; "only ◆ rows" is a CSS checkbox.
+interface Props { page: any; i: number }
+const { page, i } = Astro.props;
+const f = page.families[i];
+const W = 220, H = 16, M = W / 2, LIM = 5, S = (M - 6) / LIM;
+const x = (z: number) => M + Math.max(-LIM, Math.min(LIM, z)) * S;
+---
+<div class="not-content ev-diffs">
+  {f.diffs.length === 0 && <p class="ev-note">No tool pair has a compared row on this family.</p>}
+  {f.diffs.map((d: any, k: number) => (
+    <details class="ev-pair" id={`diff-${d.pair}-${f.id}`} open={k === 0}>
+      <summary><b>{d.label}</b> <span class="ev-tally">◆ {d.marked} of {d.compared} compared rows</span></summary>
+      <label class="ev-only"><input type="checkbox" /> only ◆ rows</label>
+      <ul class="ev-drows">
+        {d.rows.map((r: any) => (
+          <li class={r.marked ? 'ev-mk' : ''}>
+            <span class="ev-dp"><small>{r.sensor} ·</small> {r.label}</span>
+            <svg class="ev-gauge" viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img"
+              aria-label={`${r.label}: Δ ${r.text} ${r.unit}, larger sd ${r.spread}${r.marked ? ', outside the spread' : ''}`}>
+              <rect class="ev-band" x={x(-1)} y="2" width={x(1) - x(-1)} height={H - 4} />
+              <line class="ev-axis" x1="4" x2={W - 4} y1={H / 2} y2={H / 2} />
+              <line class="ev-zero" x1={M} x2={M} y1="1" y2={H - 1} />
+              {r.z !== null && <circle class={r.marked ? 'ev-dot ev-dot-mk' : 'ev-dot'} cx={x(r.z)} cy={H / 2} r="3.6" />}
+              {r.z !== null && Math.abs(r.z) > LIM && <path class="ev-clip" d={r.z > 0 ? `M${W - 1} ${H / 2} l-5 -4 v8 z` : `M1 ${H / 2} l5 -4 v8 z`} />}
+            </svg>
+            <span class="ev-dv"><b>{r.text}</b> {r.unit}{r.marked && <span class="ev-dia" title="larger than the larger spread"> ◆</span>}{r.unequal_n && <small title="the two tools solved different recordings"> ≠n</small>}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  ))}
+  <p class="ev-small">Dot = median difference Δ on an axis in units of the larger of the two tools' sd; shaded = ±1 sd;
+    filled dot and ◆ = outside it; an arrow = beyond ±{LIM} sd. No tool is the reference. "≠n" = the tools solved
+    different recordings.</p>
+</div>
