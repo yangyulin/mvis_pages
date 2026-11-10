@@ -1,0 +1,7 @@
+{
+  "about": "Intel T265 (BMI055) accel-minus-gyro delay per motion band, against the Xsens, on VI-Rig april_01 from the raw bag. Gain is the fitted accel gain per band. Coherence falls above about 22 Hz, so the top two bands are less certain.",
+  "bands_hz": [[2, 4], [4, 7], [7, 11], [11, 16], [16, 22], [22, 30], [30, 40]],
+  "delay_ms": [-6.76, -6.35, -5.79, -5.17, -3.60, -2.19, -1.17],
+  "gain": [1.00, 1.01, 1.05, 1.09, 1.01, 0.70, 0.28],
+  "uncertain_from_hz": 22
+}

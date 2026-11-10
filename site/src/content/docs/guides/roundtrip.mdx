@@ -74,7 +74,10 @@ A FAIL is a real finding, not a flaky test. The usual causes:
 - **Wrong IMU convention.** See [IMU model](/concepts/imu-model/).
 - **An interpolated accelerometer** corrupting `td`. This is the T265 case.
   The fix is `gyro_only` on that IMU, or estimating `t_ga` (the time offset
-  between the gyroscope and accelerometer channels).
+  between the gyroscope and accelerometer channels). A self round trip does
+  not catch this case by itself: a tool with no `t_ga` also returns to about
+  zero on its own corrected bag. Turn `t_ga` on and read it, or run a
+  correlation check. See [Why calibrate t_ga](/benchmark/tga/).
 - **Insufficient excitation.** The parameter was never observed, so
   correcting by it does nothing consistent.
 

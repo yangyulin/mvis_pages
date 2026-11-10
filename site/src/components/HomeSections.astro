@@ -44,7 +44,7 @@
           <tr><td class="q">Rolling-shutter readout</td><td class="sym">t_r</td><td class="per">camera</td><td class="unit">ms</td><td>Each corner projected at its own row time</td></tr>
           <tr><td class="q">IMU–IMU extrinsics</td><td class="sym">T_IstoI</td><td class="per">aux IMU</td><td class="unit">m · log(R) rad</td><td>Plus a per-IMU time offset</td></tr>
           <tr><td class="q">IMU intrinsics</td><td class="sym">D_w, D_a</td><td class="per">IMU</td><td class="unit">—</td><td><code>kalibr</code>, <code>rpng</code> or <code>calyx</code> convention</td></tr>
-          <tr><td class="q">Gyro–accel offset</td><td class="sym">t_ga</td><td class="per">IMU</td><td class="unit">ms</td><td>The T265 reads −6.2 ms, stable to ~0.2 ms across bags</td></tr>
+          <tr><td class="q">Gyro–accel offset</td><td class="sym">t_ga</td><td class="per">IMU</td><td class="unit">ms</td><td>The T265 reads about −6 ms; <a href="/benchmark/tga/">why it matters</a></td></tr>
           <tr><td class="q">Biases</td><td class="sym">b_g, b_a</td><td class="per">IMU</td><td class="unit">rad/s · m/s²</td><td>Along the whole trajectory</td></tr>
           <tr><td class="q">Board pose + trajectory</td><td class="sym">T_BinW, T_ItoW(t)</td><td class="per">recording</td><td class="unit">m · log(R) rad</td><td>Chessboard, AprilGrid or ArUco targets</td></tr>
         </tbody>

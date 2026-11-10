@@ -1,0 +1,91 @@
+---
+// The t_ga sweep: td (and MVIS t_ga) against the accel delay tau injected into the MVIS-corrected bag, one panel per
+// device, shared axes. Data from src/data/tga/tga.json (export_tga.py). Rendered at build time; colours from the
+// tool tokens. Lines and end labels carry the meaning, so colour is never the only cue.
+import data from '../data/tga/tga.json';
+
+const W = 380, H = 312, L = 40, R = 104, T = 24, B = 34;
+const lim = 50;
+const x = (v: number) => L + ((v + lim) / (2 * lim)) * (W - L - R);
+const y = (v: number) => T + ((lim - v) / (2 * lim)) * (H - T - B);
+const xt = [-50, -20, -10, 0, 10, 20, 50];
+const yt = [-50, -25, 0, 25, 50];
+const f = (v: number, d = 2) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+const path = (xs: number[], ys: number[]) => xs.map((a, i) => `${i ? 'L' : 'M'}${x(a).toFixed(1)},${y(ys[i]).toFixed(1)}`).join(' ');
+
+const panels = (['looper', 't265'] as const).map((key) => {
+  const d: any = (data as any).devices[key];
+  const tdCam0 = d.mvis_td.map((p: number[]) => p[0]);
+  const series = [
+    { cls: 'tga-mvis', dash: false, label: `MVIS t_ga ${d.slope.mvis_tga.toFixed(2)}×`, name: 'MVIS t_ga', ys: d.mvis_tga },
+    { cls: 'tga-kalibr', dash: false, label: `Kalibr td ${d.slope.kalibr.toFixed(2)}×`, name: 'Kalibr td (mean of cameras)', ys: d.kalibr_td_mean },
+    { cls: 'tga-basalt', dash: false, label: `Basalt td ${d.slope.basalt.toFixed(2)}×`, name: 'Basalt td', ys: d.basalt_td },
+    { cls: 'tga-mvis', dash: true, label: 'MVIS td ≈ 0', name: 'MVIS td (cam0)', ys: tdCam0 },
+  ];
+  // End labels at the right edge, pushed apart so none overlap (12 px).
+  const ends = series.map((s, i) => ({ i, y: y(s.ys[s.ys.length - 1]) })).sort((a, b) => a.y - b.y);
+  for (let k = 1; k < ends.length; k++) ends[k].y = Math.max(ends[k].y, ends[k - 1].y + 12);
+  const labelY: number[] = [];
+  ends.forEach((e) => (labelY[e.i] = e.y));
+  const lag = d.raw.mvis_tga, sig = d.raw.mvis_tga_sigma;
+  return { key, d, series, labelY, lag, sig };
+});
+const aria = panels.map((p) => `${p.d.label}: Kalibr td slope ${p.d.slope.kalibr}, Basalt td slope ${p.d.slope.basalt}, MVIS t_ga slope ${p.d.slope.mvis_tga}, MVIS td flat`).join('. ');
+---
+<figure class="tga-sweep">
+  <div class="tga-panels" role="img" aria-label={`td against the injected accel delay. ${aria}.`}>
+    {panels.map((p) => (
+      <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <text class="tga-title" x={L} y="13">{p.d.label}</text>
+        {yt.map((t) => (
+          <g>
+            <line class="rp-grid" x1={L} x2={W - R} y1={y(t)} y2={y(t)} />
+            <text class="rp-tick" x={L - 5} y={y(t) + 3} text-anchor="end">{t}</text>
+          </g>
+        ))}
+        {xt.map((t) => (
+          <text class="rp-tick" x={x(t)} y={H - B + 13} text-anchor="middle">{t}</text>
+        ))}
+        <text class="rp-tick" x={(L + W - R) / 2} y={H - 4} text-anchor="middle">injected accel delay τ (ms)</text>
+        <text class="rp-tick" x="10" y={(T + H - B) / 2} text-anchor="middle" transform={`rotate(-90 10 ${(T + H - B) / 2})`}>reported value (ms)</text>
+        <rect class="tga-lag" x={x(p.lag - Math.max(p.sig, 0.6))} width={x(p.lag + Math.max(p.sig, 0.6)) - x(p.lag - Math.max(p.sig, 0.6))} y={T} height={H - T - B}>
+          <title>{`Measured on the raw bag: t_ga ${f(p.lag)} ± ${p.sig.toFixed(2)} ms`}</title>
+        </rect>
+        <line class="rp-one" x1={L} x2={W - R} y1={y(0)} y2={y(0)} />
+        {p.series.map((s, i) => (
+          <g class={s.cls}>
+            <path class={s.dash ? 'tga-line tga-dash' : 'tga-line'} d={path(p.d.tau, s.ys)} />
+            {p.d.tau.map((t: number, j: number) => (
+              <circle class="tga-pt" cx={x(t)} cy={y(s.ys[j])} r={s.dash ? 2 : 2.6}>
+                <title>{`${s.name}, τ ${f(t, 0)} ms: ${f(s.ys[j], 3)} ms`}</title>
+              </circle>
+            ))}
+            <text class="tga-end" x={W - R + 6} y={p.labelY[i] + 3}>{s.label}</text>
+          </g>
+        ))}
+      </svg>
+    ))}
+  </div>
+  <figcaption>Each bag has the accelerometer delayed by τ. MVIS reports the delay as t_ga (solid blue, on the full-delay
+    diagonal) and keeps td (dashed blue, flat). Kalibr and Basalt have no t_ga, so their td takes a steady share of
+    τ: {panels[0].d.slope.kalibr.toFixed(2)} and {panels[0].d.slope.basalt.toFixed(2)} on Looper, {panels[1].d.slope.kalibr.toFixed(2)}
+    and {panels[1].d.slope.basalt.toFixed(2)} on the T265. Kalibr is the mean of its two camera offsets. The shaded band marks the
+    t_ga each device has on its raw bag. Hover a point for its value.</figcaption>
+</figure>
+
+<style>
+  .tga-sweep { margin: 1rem 0; }
+  .tga-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  @media (max-width: 40rem) { .tga-panels { grid-template-columns: 1fr; } }
+  .tga-panels svg { width: 100%; height: auto; color: var(--rp-ink); }
+  .tga-sweep figcaption { font-size: 0.75rem; color: var(--rp-mut); max-width: 60rem; }
+  .tga-title { font-size: 12px; font-weight: 700; fill: currentColor; }
+  .tga-line { fill: none; stroke: var(--tga-c); stroke-width: 2; }
+  .tga-dash { stroke-dasharray: 5 3; stroke-width: 1.6; }
+  .tga-pt { fill: var(--tga-c); stroke: var(--sl-color-bg); stroke-width: 1; }
+  .tga-end { font-size: 10.5px; fill: var(--tga-c); font-weight: 600; }
+  .tga-mvis { --tga-c: var(--rp-mvis); }
+  .tga-kalibr { --tga-c: var(--rp-kalibr); }
+  .tga-basalt { --tga-c: var(--rp-basalt); }
+  .tga-lag { fill: var(--sl-color-gray-6); }
+</style>
