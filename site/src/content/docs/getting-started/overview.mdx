@@ -1,57 +1,81 @@
 ---
 title: Overview
-description: What MVIS is, what it calibrates, and how a calibration run is structured.
+description: What MVIS is, what it calibrates, and how a calibration run works.
 pageType: concept
 ---
 
-MVIS is a Python camera-calibration toolbox for single- and multi-camera
-systems, built on GTSAM factor-graph optimisation with native SO(3)/SE(3) Lie
-group support. It is the calibration library behind Open MVIS, and it replaces
-the earlier C++/ROS implementation.
+Use this page to see what MVIS is, what it solves, and how a run works.
 
-Everything is solved in **one graph** — intrinsics, distortion, extrinsics, time
-offsets, rolling-shutter readout, board poses, and, with an IMU, the camera–IMU
-transform, IMU intrinsics, and biases.
+MVIS is a Python toolbox that calibrates single- and multi-camera systems.
+It is the calibration library behind Open MVIS. It replaces the earlier C++/ROS
+implementation.
+
+- **Built on:** GTSAM factor-graph optimisation (one big least-squares problem
+  over linked unknowns)
+- **Rotations and poses:** native SO(3)/SE(3) Lie group support (3D
+  rotations and full rigid poses are handled as their own types)
+
+## What it solves
+
+Everything is solved in **one graph**:
+
+- **Intrinsics** (focal length, centre and other values inside each camera)
+- **Distortion**
+- **Extrinsics** (where each camera sits relative to the others)
+- **Time offsets**
+- **Rolling-shutter readout** (the time a camera takes to read its rows top to
+  bottom)
+- **Board poses**
+- **With an IMU:** the camera–IMU transform, IMU intrinsics, and biases
 
 ## What makes it different
 
-**No ROS required.** Pure Python, `pip install`, Windows/macOS/Linux. Bags are
-read through `rosbags`, so a ROS1 or ROS2 recording calibrates on a machine that
-has never had ROS installed.
-
-**Six distortion models, mixable.** `radtan`, `equidistant`, `fov`,
-`double_sphere`, `eucm`, and experimental `omni_radtan` — available in both
-camera-only and camera–IMU calibration, and mixable across cameras in one rig.
-
-**Multi-IMU.** Several IMUs in one graph, each with its own extrinsics, time
-offset, and intrinsics; per-IMU gyro-only mode for sensors whose accelerometer
-you cannot trust.
-
-**It checks its own work.** `mvis roundtrip` applies a calibration to the
-data it came from and recalibrates — a PASS requires the IMU intrinsics to
-collapse to identity *and* the geometry to stay put. That is a much stronger
-statement than a low residual.
+- **No ROS required.** Pure Python, `pip install`, Windows/macOS/Linux.
+  - Bags are read through `rosbags`.
+  - So a ROS1 or ROS2 recording calibrates on a machine that has never had ROS
+    installed.
+- **Six distortion models, mixable.**
+  - `radtan`, `equidistant`, `fov`, `double_sphere`, `eucm`, and experimental
+    `omni_radtan`.
+  - All work in both camera-only and camera–IMU calibration.
+  - You can mix them across cameras in one rig.
+- **Multi-IMU.**
+  - Several IMUs in one graph.
+  - Each has its own extrinsics, time offset, and intrinsics.
+  - Per-IMU gyro-only mode, for sensors whose accelerometer you cannot trust.
+- **It checks its own work.** `mvis roundtrip` applies a calibration to the
+  data it came from, then recalibrates.
+  - A PASS requires the IMU intrinsics to collapse to identity *and* the
+    geometry to stay put.
+  - That is a much stronger statement than a low residual.
 
 ## Three ways it is used
 
-**Full calibration.** Solve everything from a board sequence.
+| Mode | What you do |
+|---|---|
+| **Full calibration** | Solve everything from a board sequence. |
+| **Refinement** | Start from an existing calibration and refine it. Kalibr output reads directly via `mvis.io.kalibr`. |
+| **Partial calibration** | Pin what you trust and solve the rest. |
 
-**Refinement.** Start from an existing calibration — Kalibr output reads
-directly via `mvis.io.kalibr` — and refine it.
-
-**Partial calibration.** Pin what you trust and solve the rest. The common case
-is camera–IMU calibration with intrinsics pinned from a prior camera-only run,
-which is the recommended two-step workflow.
+The common partial case is camera–IMU calibration with intrinsics pinned from a
+prior camera-only run. This is the recommended two-step workflow.
 
 ## Why one graph
 
-Calibrating a rig pairwise accumulates error: each pairwise result carries its
+Solving jointly keeps the links between errors that pairwise calibration loses.
+Calibrating a rig pairwise accumulates error. Each pairwise result carries its
 own uncertainty, and composing them discards the correlations between them.
-Solving jointly keeps those correlations, which matters most for the weakly
-observable parameters — time offsets, rolling-shutter readout, and IMU
-intrinsics. See [Calibration graph](/concepts/calibration-graph/).
 
-The same principle shows up in the implementation: pose interpolation, extrinsic
+Keeping those correlations matters most for the weakly observable parameters
+(the ones the data pins down least):
+
+- time offsets
+- rolling-shutter readout
+- IMU intrinsics
+
+See [Calibration graph](/concepts/calibration-graph/).
+
+The implementation follows the same principle. Pose interpolation, extrinsic
 composition, time offset, rolling shutter, and projection are **one unified
 factor**, not a chain of corrections.
 
