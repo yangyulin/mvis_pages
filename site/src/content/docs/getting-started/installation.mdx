@@ -4,8 +4,11 @@ description: Install MVIS — one-step conda setup or pip into an existing envir
 pageType: guide
 ---
 
-MVIS is pure Python and installs with `pip` on Windows, macOS, and Linux.
-There is no ROS dependency and nothing to compile.
+Use this page to install MVIS and check that it works.
+
+- **Pure Python:** installs with `pip` on Windows, macOS and Linux
+- **No ROS:** there is no ROS dependency
+- **Nothing to compile**
 
 ## One-step setup (recommended)
 
@@ -14,8 +17,11 @@ bash scripts/setup_env.sh
 conda activate mvis
 ```
 
-Creates the `mvis` conda environment, installs every dependency, and runs
-the test suite so you know the install works before you point it at data.
+The script does three things:
+
+1. Creates the `mvis` conda environment.
+2. Installs every dependency.
+3. Runs the test suite, so you know the install works before you point it at data.
 
 ## Manual install
 
@@ -23,7 +29,8 @@ the test suite so you know the install works before you point it at data.
 pip install -e .
 ```
 
-Detector backends are optional extras — install the ones your boards need:
+Detector backends (the code that finds the board in each image) are optional extras.
+Install the ones your boards need:
 
 ```bash
 pip install -e ".[apriltag]"    # AprilGrid (aprilgrid package)
@@ -33,24 +40,25 @@ pip install -e ".[dev]"         # pytest
 
 ## Reading bags
 
-ROS bags are read through [`rosbags`](https://pypi.org/project/rosbags/) — pure
-Python, no ROS installation:
+We read ROS bags through [`rosbags`](https://pypi.org/project/rosbags/).
+It is pure Python and needs no ROS installation:
 
 ```bash
 pip install rosbags
 ```
 
-This is what lets a ROS1 or ROS2 bag be calibrated on a machine that has never
-had ROS on it.
+So you can calibrate a ROS1 or ROS2 bag on a machine that has never had ROS on it.
 
 :::caution[GTSAM needs NumPy 1.x]
-GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2 installed
-you will get a **segfault** when constructing `gtsam.Pose3(Rot3, np.array)` —
-not an exception, a crash. Pin it:
+Pin NumPy below 2:
 
 ```bash
 pip install "numpy<2"
 ```
+
+GTSAM 4.2 from pip is built against the NumPy 1.x ABI (the binary interface between compiled libraries).
+With NumPy 2 installed, constructing `gtsam.Pose3(Rot3, np.array)` gives a **segfault**.
+That is not an exception you can catch: the program crashes.
 :::
 
 ## Check the install
@@ -59,9 +67,17 @@ pip install "numpy<2"
 mvis --help
 ```
 
-Seven subcommands should be listed — `calibrate`, `cam`, `cam-imu`,
-`apply-calib`, `roundtrip`, `run`, `analyze`. They are documented in the
-[CLI reference](/reference/cli/).
+You should see seven subcommands:
+
+- `calibrate`
+- `cam`
+- `cam-imu`
+- `apply-calib`
+- `roundtrip`
+- `run`
+- `analyze`
+
+The [CLI reference](/reference/cli/) documents each one.
 
 ## Next
 
