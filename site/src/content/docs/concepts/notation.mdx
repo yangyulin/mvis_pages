@@ -5,11 +5,16 @@ pageType: reference
 wide: true
 ---
 
-Every equation on this site uses the symbols below. Conventions follow
-[OpenVINS](https://docs.openvins.com/), which shares this lab's lineage — if you
-arrive from there, nothing needs re-learning.
+Use this page to look up a symbol, a frame or a sign convention.
+Every equation on this site uses the symbols below.
+
+Conventions follow [OpenVINS](https://docs.openvins.com/), which shares this lab's lineage.
+If you arrive from there, nothing needs re-learning.
 
 ## Frames
+
+A frame is a coordinate system attached to the world, a sensor or the board.
+We write it in braces, e.g. $\{I\}$.
 
 | Symbol | Frame | Notes |
 |---|---|---|
@@ -21,22 +26,27 @@ arrive from there, nothing needs re-learning.
 
 ## Transforms
 
-A rotation is written ${}^{A}_{B}\mathbf{R}$ and takes a vector expressed in
-$\{B\}$ into $\{A\}$. A translation ${}^{A}\mathbf{p}_{B}$ is the origin of
-$\{B\}$ expressed in $\{A\}$. Together:
+A rotation is written ${}^{A}_{B}\mathbf{R}$.
+It takes a vector expressed in $\{B\}$ into $\{A\}$.
+A translation ${}^{A}\mathbf{p}_{B}$ is the origin of $\{B\}$ expressed in $\{A\}$.
+Together:
 
 $$
 {}^{A}\mathbf{p} = {}^{A}_{B}\mathbf{R}\, {}^{B}\mathbf{p} + {}^{A}\mathbf{p}_{B}
 $$
 
 :::note[The result file uses a different spelling]
-Calibration output writes `T_C0toI` for the transform taking points from
-$\{C_0\}$ into $\{I\}$ — the same object as ${}^{I}_{C_0}\mathbf{T}$. The
-`XtoY` naming reads left-to-right in the direction of the mapping. See
-[Result formats](/reference/result-formats/).
+Calibration output writes `T_C0toI` for the transform taking points from $\{C_0\}$ into $\{I\}$.
+It is the same object as ${}^{I}_{C_0}\mathbf{T}$.
+The `XtoY` naming reads left-to-right, in the direction of the mapping.
+See [Result formats](/reference/result-formats/).
 :::
 
 ## Calibration state
+
+The calibration state is the set of quantities we estimate.
+Intrinsics describe the camera itself; extrinsics give its pose in the base-IMU frame $\{I\}$.
+The **Per** column says whether a quantity exists once per camera, per rolling-shutter (RS) camera, per IMU or per auxiliary IMU.
 
 | Symbol | Quantity | Dimension | Per |
 |---|---|---|---|
@@ -51,11 +61,12 @@ $\{C_0\}$ into $\{I\}$ — the same object as ${}^{I}_{C_0}\mathbf{T}$. The
 | $t_{d,j}$ | IMU–IMU time offset | 1 | aux IMU |
 | $\mathbf{b}_g,\ \mathbf{b}_a$ | gyro / accel biases | 3 each | IMU |
 
-The full state $\mathbf{x}$ stacks the trajectory with all of the above; the
-cost that acts on it is in
-[Calibration graph](/concepts/calibration-graph/).
+The full state $\mathbf{x}$ stacks the trajectory with all of the above.
+The cost that acts on it is in [Calibration graph](/concepts/calibration-graph/).
 
 ## Measurements
+
+What the sensors report, and the terms we build from those readings:
 
 | Symbol | Measurement |
 |---|---|
@@ -67,6 +78,8 @@ cost that acts on it is in
 
 ## Time
 
+Every stamp is mapped onto one reference clock, the base-IMU clock.
+
 | Symbol | Meaning |
 |---|---|
 | $t_I$ | timestamp on the base-IMU clock — the reference |
@@ -74,16 +87,17 @@ cost that acts on it is in
 | $t_d$ | offset such that $t_I = t_C + t_d$ |
 | $t_r$ | whole-frame readout time of a rolling-shutter camera |
 
-The sign convention matters: `td` is **added to** the sensor's own stamp to
-reach base-IMU time. The result file states it explicitly as `(t_Ib = t_C + td)`
-next to each value.
+The sign convention matters.
+`td` is **added to** the sensor's own stamp to reach base-IMU time.
+The result file states it explicitly as `(t_Ib = t_C + td)` next to each value.
 
 ## Conventions worth stating once
 
 - **Quaternions** are JPL-convention, as in OpenVINS.
-- **Error states** are defined multiplicatively for rotations,
-  $\mathbf{R} \approx \hat{\mathbf{R}}\,\exp(\delta\boldsymbol{\theta}^\wedge)$,
-  and additively for everything else.
-- **Board points** are exact — the target is treated as rigid and known, so
-  board geometry errors appear as a scale bias on translations rather than as
+- **Error states** (the small corrections around the current estimate) are defined:
+  - multiplicatively for rotations,
+    $\mathbf{R} \approx \hat{\mathbf{R}}\,\exp(\delta\boldsymbol{\theta}^\wedge)$;
+  - additively for everything else.
+- **Board points** are exact. The target is treated as rigid and known.
+  So board geometry errors appear as a scale bias on translations rather than as
   noise.
