@@ -5,7 +5,8 @@
       --t265-sweep <run>/t265_sweep --t265-forward <run>/cells --t265-suffix __april_01 [--out FILE]
 
 --*-sweep    folder with sweep.json: {tau_ms: {M: {td_ms, t_ga_ms, t_ga_sigma_ms, reproj_rms_px},
-             K: {td_ms, reproj_mean_px, gyro_err_mean, accel_err_mean}, B: {status, td_ms, reproj_mean_px}}}.
+             K: {td_ms, reproj_mean_px, gyro_err_mean, accel_err_mean}, B: {status, td_ms, reproj_mean_px}}},
+             and sweep_scales.json: {scales: {tau_ms: {M|K|B: [gyro x, y, z, accel x, y, z]}}} (IMU scale factors).
              tau is the accel delay injected into the MVIS-corrected bag (accel stored at t = physical accel at t - tau).
 --*-forward  folder with the raw-bag solves F_M<suffix> (cam_imu_calib.yaml), F_K<suffix> (input-camchain-imucam.yaml)
              and F_B<suffix> (calibration.json).
@@ -13,8 +14,8 @@
 
 Computed here, so the page never types a number twice: least-squares slopes of each tool's td (Kalibr: mean of
 the cameras) and MVIS t_ga against tau, over all tau and over |tau| <= 10 ms; the raw-bag gaps tool - MVIS per
-camera; the predicted gap slope x t_ga. Sign: t_imu = t_cam + td. Times in ms. The output is refused if it holds a
-local path or a word the public-text lint bans.
+camera; the predicted gap slope x t_ga; each tool's IMU scales as (scale - 1) in %. Sign: t_imu = t_cam + td.
+Times in ms. The output is refused if it holds a local path or a word the public-text lint bans.
 """
 import argparse
 import json
@@ -56,6 +57,7 @@ def forward(folder: Path, suffix: str):
 
 def device(sweep_dir: Path, fwd_dir: Path, suffix: str):
     s = json.loads((sweep_dir / "sweep.json").read_text(encoding="utf-8"))
+    sc = json.loads((sweep_dir / "sweep_scales.json").read_text(encoding="utf-8"))["scales"]
     taus = sorted(s, key=float)
     tau = [float(t) for t in taus]
     col = lambda f: [f(s[t]) for t in taus]
@@ -85,6 +87,7 @@ def device(sweep_dir: Path, fwd_dir: Path, suffix: str):
         "reproj": {"mvis_rms_px": col(lambda r: r["M"]["reproj_rms_px"]),
                    "kalibr_mean_px": r3(col(lambda r: r["K"]["reproj_mean_px"])),
                    "basalt_mean_px": r3(col(lambda r: r["B"]["reproj_mean_px"]))},
+        "scale_pct": {k: [[round((v - 1) * 100, 4) for v in sc[t][k]] for t in taus] for k in ("M", "K", "B")},
         "slope": {"mvis_tga": r3(fit(tau, tga)[0]), "mvis_tga_max_residual": r3(fit(tau, tga)[2]),
                   "kalibr": r3(kk[0]), "kalibr_near": r3(fit(*sub(kal))[0]),
                   "basalt": r3(kb[0]), "basalt_near": r3(fit(*sub(bas))[0])},

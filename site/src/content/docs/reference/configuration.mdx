@@ -141,8 +141,8 @@ Settings for the camera–IMU solve. Three terms first:
 | `max_iterations` | int | — | LM iterations |
 | `imu_intrinsics` | `dw_da \| …` | — | Which IMU intrinsics to solve |
 | `imu_intrinsics_model` | `kalibr \| rpng \| calyx` | — | Parameterisation. A convention, not a quality lever — all three recover identical extrinsics. See [IMU model](/concepts/imu-model/) |
-| `estimate_t_ga` | bool | `false` | Estimate the base IMU's internal gyro↔accel offset |
-| `sigma_t_ga` | float | — | Staged prior on `t_ga` |
+| `estimate_t_ga` | bool | `true` | Estimate the base IMU's internal gyro↔accel offset ([why](/benchmark/tga/)) |
+| `sigma_t_ga` | float | `0.010` | Prior on `t_ga` (s), a weak 10 ms prior |
 | `corner_subsample` | `top_left \| two_diag \| all` | `top_left` | As above |
 | `sigma_td_prior` | float | — | Prior on the camera–IMU time offset; `0.0` disables |
 | `init_kwargs` | object | — | Initialiser options, e.g. `{keyframe_hz: 2.0, scale_rel_tol: 0.3}` |

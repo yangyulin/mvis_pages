@@ -45,8 +45,8 @@ accelerometer.
   composed. That accumulates error and throws away the correlations.
 - **It fits the gyro–accel offset.** `t_ga` is the time offset between the
   gyroscope and accelerometer channels. Kalibr and Basalt have one IMU clock.
-  On the same bags their `td` differs from MVIS by about 3.2 ms on Looper
-  Insight 9 and 1.9–2.0 ms on the T265; an injection sweep predicts 3.0–3.2 and
+  On the same bags their `td` differs from MVIS by about 2.9–3.2 ms on Looper
+  Insight 9 and 1.9–2.0 ms on the T265 (first camera); an injection sweep predicts 3.0–3.2 and
   1.6–1.7 ms of that from the offset alone. Whose `td` is closer to the truth is
   not yet tested. [Details](/benchmark/tga/).
 - **Validation is a command, not a habit.** `mvis roundtrip` gives a
