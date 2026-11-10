@@ -1,0 +1,537 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-ueh2pqc5"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Why calibrate t_ga | Open MVIS</title><link rel="canonical" href="https://openmvis.com/benchmark/tga/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.1.8"/><meta name="generator" content="Starlight v0.38.3"/><meta property="og:title" content="Why calibrate t_ga"/><meta property="og:type" content="article"/><meta property="og:url" content="https://openmvis.com/benchmark/tga/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Two real IMUs have a gyro–accel offset of about −5 to −6 ms. Tools without a t_ga parameter fold 0.3–0.6 of an offset into the camera time offset. What this shows and what it does not."/><meta property="og:site_name" content="Open MVIS"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Two real IMUs have a gyro–accel offset of about −5 to −6 ms. Tools without a t_ga parameter fold 0.3–0.6 of an offset into the camera time offset. What this shows and what it does not."/> <style>{':root{--sl-content-width:72rem}'}</style> <script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme = storedTheme || 'light';
+		document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/astro/common.B56sWegJ.css">
+<link rel="stylesheet" href="/astro/Code.BXJwTMTI.css"><script type="module" src="/astro/page.BIhdncjw.js"></script><style>.tga-sweep:where(.astro-5fcz6xqa){margin:1rem 0}.tga-panels:where(.astro-5fcz6xqa){display:grid;grid-template-columns:1fr 1fr;gap:.75rem}@media(max-width:40rem){.tga-panels:where(.astro-5fcz6xqa){grid-template-columns:1fr}}.tga-panels:where(.astro-5fcz6xqa) svg:where(.astro-5fcz6xqa){width:100%;height:auto;color:var(--rp-ink)}.tga-sweep:where(.astro-5fcz6xqa) figcaption:where(.astro-5fcz6xqa){font-size:.75rem;color:var(--rp-mut);max-width:60rem}.tga-title:where(.astro-5fcz6xqa){font-size:12px;font-weight:700;fill:currentColor}.tga-line:where(.astro-5fcz6xqa){fill:none;stroke:var(--tga-c);stroke-width:2}.tga-dash:where(.astro-5fcz6xqa){stroke-dasharray:5 3;stroke-width:1.6}.tga-pt:where(.astro-5fcz6xqa){fill:var(--tga-c);stroke:var(--sl-color-bg);stroke-width:1}.tga-end:where(.astro-5fcz6xqa){font-size:10.5px;fill:var(--tga-c);font-weight:600}.tga-mvis:where(.astro-5fcz6xqa){--tga-c: var(--rp-mvis)}.tga-kalibr:where(.astro-5fcz6xqa){--tga-c: var(--rp-kalibr)}.tga-basalt:where(.astro-5fcz6xqa){--tga-c: var(--rp-basalt)}.tga-lag:where(.astro-5fcz6xqa){fill:var(--sl-color-gray-6)}.tga-band:where(.astro-3fo2lylm){max-width:34rem}.tga-bline:where(.astro-3fo2lylm){fill:none;stroke:var(--rp-mvis);stroke-width:2}.tga-weak:where(.astro-3fo2lylm){stroke-dasharray:4 3;opacity:.7}.tga-bdot:where(.astro-3fo2lylm){fill:var(--rp-mvis);stroke:var(--sl-color-bg);stroke-width:1.5}.tga-open:where(.astro-3fo2lylm){fill:var(--sl-color-bg);stroke:var(--rp-mvis);stroke-width:1.8}.tga-solver:where(.astro-3fo2lylm){stroke:var(--sl-color-gray-3);stroke-width:1;stroke-dasharray:5 3}.tga-foot:where(.astro-w75f6den){font-size:.8rem;color:var(--rp-mut)}
+</style></head> <body class="astro-ueh2pqc5"> <a href="#_top" class="astro-4fvidsab">Skip to content</a> <div class="page sl-flex astro-4czgbdsd"> <header class="header astro-4czgbdsd"><div class="header astro-5j47u65l"> <div class="title-wrapper sl-flex astro-5j47u65l"> <a href="/" class="site-title sl-flex astro-vi3irs6b">  <img class="astro-vi3irs6b" alt src="/astro/logo-placeholder.BKsbu6i1.svg" width="64" height="64">  <span class="astro-vi3irs6b" translate="no"> Open MVIS </span> </a> </div> <div class="sl-flex print:hidden astro-5j47u65l"> <site-search class="astro-5j47u65l astro-fvd4fyez" data-translations="{&#34;placeholder&#34;:&#34;Search&#34;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-fvd4fyez"> <svg aria-hidden="true" class="astro-fvd4fyez astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-fvd4fyez" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-fvd4fyez" style="display: none;"> <kbd class="astro-fvd4fyez">Ctrl</kbd><kbd class="astro-fvd4fyez">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-fvd4fyez"> <div class="dialog-frame sl-flex astro-fvd4fyez">  <button data-close-modal class="sl-flex md:sl-hidden astro-fvd4fyez"> Cancel </button> <div class="search-container astro-fvd4fyez"> <div id="starlight__search" class="astro-fvd4fyez"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/astro/Search.astro_astro_type_script_index_0_lang.Rw77DzG6.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-5j47u65l"> <div class="sl-flex social-icons astro-5j47u65l"> <a href="https://github.com/yangyulin/mvis_pages" rel="me" class="sl-flex astro-tuqsvgd4"><span class="sr-only astro-tuqsvgd4">GitHub</span><svg aria-hidden="true" class="astro-tuqsvgd4 astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-55tghktp"> <span class="sr-only astro-55tghktp">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-55tghktp astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-55tghktp"> <option value="dark" class="astro-55tghktp">Dark</option><option value="light" class="astro-55tghktp">Light</option><option value="auto" selected class="astro-55tghktp">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-55tghktp astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-4czgbdsd" aria-label="Main"> <starlight-menu-button class="print:hidden astro-yzciwj66"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-yzciwj66"> <svg aria-hidden="true" class="open-menu astro-yzciwj66 astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-yzciwj66 astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-4czgbdsd"> <div class="sidebar-content sl-flex astro-4czgbdsd"> <sl-sidebar-state-persist data-hash="0pub545" class="astro-45jcow4r"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-oidraweo"> <li class="astro-oidraweo"> <details open class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Getting started</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/getting-started/overview/" class="astro-oidraweo"> <span class="astro-oidraweo">Overview</span>  </a> </li><li class="astro-oidraweo"> <a href="/getting-started/requirements/" class="astro-oidraweo"> <span class="astro-oidraweo">Requirements</span>  </a> </li><li class="astro-oidraweo"> <a href="/getting-started/installation/" class="astro-oidraweo"> <span class="astro-oidraweo">Installation</span>  </a> </li><li class="astro-oidraweo"> <a href="/getting-started/quickstart/" class="astro-oidraweo"> <span class="astro-oidraweo">Quickstart</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details open class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Guides</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/guides/calibration-motion/" class="astro-oidraweo"> <span class="astro-oidraweo">Calibration motion</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/camera-calibration/" class="astro-oidraweo"> <span class="astro-oidraweo">Camera calibration</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/camera-imu-calibration/" class="astro-oidraweo"> <span class="astro-oidraweo">Camera–IMU calibration</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/multi-sensor-rigs/" class="astro-oidraweo"> <span class="astro-oidraweo">Multi-camera / multi-IMU rigs</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/rolling-shutter/" class="astro-oidraweo"> <span class="astro-oidraweo">Rolling shutter</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/corrected-datasets/" class="astro-oidraweo"> <span class="astro-oidraweo">Corrected-dataset export</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/roundtrip/" class="astro-oidraweo"> <span class="astro-oidraweo">Round-trip validation</span>  </a> </li><li class="astro-oidraweo"> <a href="/guides/simulation/" class="astro-oidraweo"> <span class="astro-oidraweo">Simulation &amp; synthetic data</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details open class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Benchmark</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Examples</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/benchmark/examples/" class="astro-oidraweo"> <span class="astro-oidraweo">Overview</span>  </a> </li><li class="astro-oidraweo"> <a href="/benchmark/examples/tum-vi/" class="astro-oidraweo"> <span class="astro-oidraweo">TUM VI</span>  </a> </li><li class="astro-oidraweo"> <a href="/benchmark/examples/monado/" class="astro-oidraweo"> <span class="astro-oidraweo">Monado</span>  </a> </li><li class="astro-oidraweo"> <a href="/benchmark/examples/looper-sa16/" class="astro-oidraweo"> <span class="astro-oidraweo">Looper SA16</span>  </a> </li><li class="astro-oidraweo"> <a href="/benchmark/examples/uzh-fpv/" class="astro-oidraweo"> <span class="astro-oidraweo">UZH-FPV</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <a href="/benchmark/tga/" aria-current="page" class="astro-oidraweo"> <span class="astro-oidraweo">Why calibrate t_ga</span>  </a> </li><li class="astro-oidraweo"> <a href="/benchmark/results/" class="astro-oidraweo"> <span class="astro-oidraweo">Results</span>  </a> </li><li class="astro-oidraweo"> <a href="/benchmark/methodology/" class="astro-oidraweo"> <span class="astro-oidraweo">Methodology</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details open class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Sensor wiki</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/sensors/" class="astro-oidraweo"> <span class="astro-oidraweo">Overview</span>  </a> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Tracking cameras and modules</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/sensors/intel-t265/" class="astro-oidraweo"> <span class="astro-oidraweo">Intel RealSense T265</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/looper-insight9/" class="astro-oidraweo"> <span class="astro-oidraweo">LooperRobotics Insight 9</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/dibuli-prism-a4l/" class="astro-oidraweo"> <span class="astro-oidraweo">Dibuli Prism-A4L</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/alg-avs111c/" class="astro-oidraweo"> <span class="astro-oidraweo">ALG AVS111C-Y stereo module</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/hampo/" class="astro-oidraweo"> <span class="astro-oidraweo">Hampo stereo module</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Head-worn cameras</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/sensors/gi-ego1/" class="astro-oidraweo"> <span class="astro-oidraweo">GI Ego1</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/gi-ego1gs/" class="astro-oidraweo"> <span class="astro-oidraweo">GI EGO1GS</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/xq20/" class="astro-oidraweo"> <span class="astro-oidraweo">XQ20 stereo headset</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">VR headsets</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/sensors/valve-index/" class="astro-oidraweo"> <span class="astro-oidraweo">Valve Index</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/hp-reverb-g2/" class="astro-oidraweo"> <span class="astro-oidraweo">HP Reverb G2</span>  </a> </li><li class="astro-oidraweo"> <a href="/sensors/samsung-odyssey-plus/" class="astro-oidraweo"> <span class="astro-oidraweo">Samsung Odyssey+</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Concepts</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/concepts/notation/" class="astro-oidraweo"> <span class="astro-oidraweo">Notation &amp; glossary</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/camera-model/" class="astro-oidraweo"> <span class="astro-oidraweo">Camera model</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/imu-model/" class="astro-oidraweo"> <span class="astro-oidraweo">IMU model</span>  </a> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Camera–IMU calibration math</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/concepts/camera-imu-math/" class="astro-oidraweo"> <span class="astro-oidraweo">Overview</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/camera-imu-math/base-imu/" class="astro-oidraweo"> <span class="astro-oidraweo">Base IMU factor</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/camera-imu-math/aux-imu/" class="astro-oidraweo"> <span class="astro-oidraweo">Auxiliary IMU factor</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <a href="/concepts/calibration-graph/" class="astro-oidraweo"> <span class="astro-oidraweo">Calibration graph</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/observability/" class="astro-oidraweo"> <span class="astro-oidraweo">Observability</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/degeneracy/" class="astro-oidraweo"> <span class="astro-oidraweo">Degeneracy</span>  </a> </li><li class="astro-oidraweo"> <a href="/concepts/continuous-time/" class="astro-oidraweo"> <span class="astro-oidraweo">Continuous-time refinement</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Reference</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/reference/configuration/" class="astro-oidraweo"> <span class="astro-oidraweo">Configuration</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/cli/" class="astro-oidraweo"> <span class="astro-oidraweo">CLI</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/result-formats/" class="astro-oidraweo"> <span class="astro-oidraweo">Result formats</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/database/" class="astro-oidraweo"> <span class="astro-oidraweo">Capture database</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/evaluation/" class="astro-oidraweo"> <span class="astro-oidraweo">Evaluation &amp; metrics</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/python-api/" class="astro-oidraweo"> <span class="astro-oidraweo">Python API</span>  </a> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Datasets</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/reference/datasets/" class="astro-oidraweo"> <span class="astro-oidraweo">Overview</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/datasets/virig-4imus-3cams/" class="astro-oidraweo"> <span class="astro-oidraweo">VI-Rig — 4 IMUs + 3 cams</span>  </a> </li><li class="astro-oidraweo"> <a href="/reference/datasets/virig-4imus-4cams/" class="astro-oidraweo"> <span class="astro-oidraweo">VI-Rig — 4 IMUs + 4 cams</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-oidraweo"> <details open class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">Contribute</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/contribute/submit-results/" class="astro-oidraweo"> <span class="astro-oidraweo">Submit results</span>  </a> </li><li class="astro-oidraweo"> <a href="/contribute/regression-testing/" class="astro-oidraweo"> <span class="astro-oidraweo">Regression testing</span>  </a> </li><li class="astro-oidraweo"> <a href="/contribute/submit-dataset/" class="astro-oidraweo"> <span class="astro-oidraweo">Submit a dataset</span>  </a> </li><li class="astro-oidraweo"> <a href="/contribute/governance/" class="astro-oidraweo"> <span class="astro-oidraweo">Governance</span>  </a> </li> </ul> </details> </li><li class="astro-oidraweo"> <details class="astro-oidraweo"> <summary class="astro-oidraweo"> <span class="group-label astro-oidraweo"> <span class="large astro-oidraweo">About</span>  </span> <svg aria-hidden="true" class="caret astro-oidraweo astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-oidraweo"> <li class="astro-oidraweo"> <a href="/about/contributors/" class="astro-oidraweo"> <span class="astro-oidraweo">Contributors &amp; citation</span>  </a> </li><li class="astro-oidraweo"> <a href="/about/comparison/" class="astro-oidraweo"> <span class="astro-oidraweo">Comparison vs Kalibr / Basalt</span>  </a> </li><li class="astro-oidraweo"> <a href="/about/faq/" class="astro-oidraweo"> <span class="astro-oidraweo">FAQ &amp; troubleshooting</span>  </a> </li><li class="astro-oidraweo"> <a href="/about/changelog/" class="astro-oidraweo"> <span class="astro-oidraweo">Changelog</span>  </a> </li><li class="astro-oidraweo"> <a href="/about/roadmap/" class="astro-oidraweo"> <span class="astro-oidraweo">Roadmap</span>  </a> </li><li class="astro-oidraweo"> <a href="/about/license/" class="astro-oidraweo"> <span class="astro-oidraweo">License</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-l5rij3ne"> <div class="social-icons astro-l5rij3ne"> <a href="https://github.com/yangyulin/mvis_pages" rel="me" class="sl-flex astro-tuqsvgd4"><span class="sr-only astro-tuqsvgd4">GitHub</span><svg aria-hidden="true" class="astro-tuqsvgd4 astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-55tghktp"> <span class="sr-only astro-55tghktp">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-55tghktp astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-55tghktp"> <option value="dark" class="astro-55tghktp">Dark</option><option value="light" class="astro-55tghktp">Light</option><option value="auto" selected class="astro-55tghktp">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-55tghktp astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>   </div> </div> </div> </div> </nav> <div class="main-frame astro-4czgbdsd">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-ttkdb3qf"> <aside class="right-sidebar-container print:hidden astro-ttkdb3qf"> <div class="right-sidebar astro-ttkdb3qf"> <div class="lg:sl-hidden astro-mposkw76"><mobile-starlight-toc data-min-h="2" data-max-h="4" class="astro-gvumsyej"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-gvumsyej"><details id="starlight__mobile-toc" class="astro-gvumsyej"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-gvumsyej"><span class="toggle sl-flex astro-gvumsyej">On this page<svg aria-hidden="true" class="caret astro-gvumsyej astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-gvumsyej"></span></summary><div class="dropdown astro-gvumsyej"><ul class="isMobile astro-vcekdvhi" style="--depth: 0;"> <li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#_top" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#short-answer" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Short answer</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#in-one-table" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">In one table</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#the-offset-is-real" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">The offset is real</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#the-sweep-delay-the-accelerometer-watch-td" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">The sweep: delay the accelerometer, watch td</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#would-you-notice-it" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Would you notice it?</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#limits" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Limits</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#reproducibility" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Reproducibility</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#related" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Related</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc><script type="module" src="/astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-mposkw76"><div class="sl-container astro-mposkw76"><starlight-toc data-min-h="2" data-max-h="4"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-vcekdvhi" style="--depth: 0;"> <li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#_top" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#short-answer" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Short answer</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#in-one-table" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">In one table</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#the-offset-is-real" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">The offset is real</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#the-sweep-delay-the-accelerometer-watch-td" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">The sweep: delay the accelerometer, watch td</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#would-you-notice-it" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Would you notice it?</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#limits" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Limits</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#reproducibility" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Reproducibility</span> </a>  </li><li class="astro-vcekdvhi" style="--depth: 0;"> <a href="#related" class="astro-vcekdvhi" style="--depth: 0;"> <span class="astro-vcekdvhi" style="--depth: 0;">Related</span> </a>  </li> </ul></nav></starlight-toc><script type="module" src="/astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script></div></div> </div> </aside> <div class="main-pane astro-ttkdb3qf">  <main data-pagefind-body class="astro-ueh2pqc5" lang="en" dir="ltr">    <div class="content-panel astro-vgd3lilp"> <div class="sl-container astro-vgd3lilp"> <h1 id="_top" class="astro-mef3hdpe">Why calibrate t_ga</h1> </div> </div> <div class="content-panel astro-vgd3lilp"> <div class="sl-container astro-vgd3lilp"> <div class="sl-markdown-content"> <p>Use this page to decide whether to calibrate <code dir="auto">t_ga</code> (the time offset between the gyroscope and the accelerometer
+inside one IMU), and to see what happens to <code dir="auto">td</code> (the camera–IMU time offset) when a tool cannot model it.</p>
+<p>MVIS fits <code dir="auto">t_ga</code>. Kalibr (one time shift per camera) and Basalt (one camera time offset for the whole rig) treat the
+IMU as one clock. If the accelerometer is off that clock, the offset has to go somewhere else.</p>
+<p><strong>On two real IMUs, MVIS measures <code dir="auto">t_ga</code> of about −5 to −6 ms. On the same bags, Kalibr’s and Basalt’s <code dir="auto">td</code> differ
+from MVIS by about 3 ms (Looper Insight 9) and about 2 ms (Intel T265). The sweep below predicts 3.0–3.2 ms and
+1.6–1.7 ms of that from the offset alone.</strong></p>
+<div class="not-content rp-honest"><p><b>This page shows where an offset goes, not which tool is right.</b></p><ul><li><b>Shown:</b> a real gyro–accel offset of −5 to −6 ms on two IMUs. Tools with one IMU clock move <code>td</code> by a steady share of an injected offset, and that share explains most of the <code>td</code> gap on the raw bags.</li><li><b>Not shown:</b> whose <code>td</code> is closer to the truth on raw data. That test is still open.</li><li><b>Built in our favour:</b> the sweep injects exactly the model MVIS fits (a pure accel shift, linear interpolation). MVIS recovering it is a consistency check, not proof of accuracy.</li><li><b>Round trips cannot order tools:</b> every tool returns to about zero on a bag it corrected itself.</li><li><b>Small sample, our runs:</b> one recording per device. The MVIS authors ran all three tools.</li></ul><p>All limits: <a href="#limits">Limits</a>.</p></div>
+<div class="sl-heading-wrapper level-h2"><h2 id="short-answer">Short answer</h2><a class="sl-anchor-link" href="#short-answer"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Short answer”</span></a></div>
+<ul>
+<li>
+<p><strong>Turn it on:</strong> the default is off.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/astro/ec.v4551.css"><script type="module" src="/astro/ec.0vx5m.js"></script><figure class="frame has-title not-content"><figcaption class="header"><span class="title">cam_imu.yaml</span></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">solve</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">estimate_t_ga</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">sigma_t_ga</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">0.010</span><span style="--0:#D6DEEB;--1:#403F53">   </span><span style="--0:#919F9F;--1:#5F636F"># seconds: a weak 10 ms prior, as in the runs here</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="solve:  estimate_t_ga: true  sigma_t_ga: 0.010   # seconds: a weak 10 ms prior, as in the runs here"><div></div></button></div></figure></div>
+<p>See <a href="/reference/configuration/">Configuration</a> and <a href="/guides/camera-imu-calibration/">Estimate <code dir="auto">t_ga</code></a>.</p>
+</li>
+<li>
+<p><strong>Sign:</strong> the accel stored at stamp <code dir="auto">t</code> is taken as sampled at <code dir="auto">t − t_ga</code>. A negative <code dir="auto">t_ga</code> means the accel is
+stamped early: it leads the gyro on the stamp timeline. Both devices here read negative.</p>
+</li>
+<li>
+<p><strong>If <code dir="auto">t_ga</code> is near zero</strong> (well under 1 ms, within 2σ): MVIS sees no offset under its pure-shift model. That does
+not rule out a frequency-dependent response like the T265’s. A real-data control on such an IMU has not been run yet.</p>
+</li>
+<li>
+<p><strong>If <code dir="auto">t_ga</code> is 1 ms or more in size:</strong> for an offset that is a pure shift, as injected here, a one-clock tool moves <code dir="auto">td</code> by
+0.28–0.64 × <code dir="auto">t_ga</code>. Whether that is its error on raw data is not tested.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Size of <code dir="auto">t_ga</code></th><th><code dir="auto">td</code> moved, T265-like (× 0.28–0.30)</th><th><code dir="auto">td</code> moved, Looper-like (× 0.59–0.64)</th></tr></thead><tbody><tr><td>1 ms</td><td>0.3 ms</td><td>0.6 ms</td></tr><tr><td><strong>5 ms</strong></td><td><strong>1.4–1.5 ms</strong></td><td><strong>3.0–3.2 ms</strong></td></tr><tr><td>10 ms</td><td>2.8–3.0 ms</td><td>5.9–6.4 ms</td></tr><tr><td>20 ms</td><td>5.6–6.0 ms</td><td>11.8–12.8 ms</td></tr></tbody></table>
+<p>The share depends on the IMU and the motion. It is not a constant of the tool.</p>
+</li>
+<li>
+<p><strong>IMU scale moves very little:</strong> under 0.06 % between τ = 0 and −5 ms. In this test the offset shows up in <code dir="auto">td</code>,
+not in scale.</p>
+</li>
+<li>
+<p><strong>If you must use a one-clock tool:</strong> expect <code dir="auto">td</code> to carry part of the offset, or remove it first with
+<a href="/guides/corrected-datasets/">corrected-dataset export</a>. On the MVIS-corrected bags, Kalibr and Basalt read <code dir="auto">td</code>
+within 0.3 ms of zero (T265 −0.16 / −0.20 and −0.28; Looper −0.03 / −0.04 and −0.01). That is a self-consistency
+read. Whether a pre-shift gives Kalibr or Basalt the true <code dir="auto">td</code> is not tested.</p>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="in-one-table">In one table</h2><a class="sl-anchor-link" href="#in-one-table"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “In one table”</span></a></div>
+<table class="astro-w75f6den"> <thead class="astro-w75f6den"><tr class="astro-w75f6den"><th class="astro-w75f6den">Result</th><th class="astro-w75f6den">Looper Insight 9</th><th class="astro-w75f6den">Intel T265</th></tr></thead> <tbody class="astro-w75f6den"> <tr class="astro-w75f6den"><td class="astro-w75f6den">Recording</td><td class="astro-w75f6den">looper_1, 66 s, cam0 + cam1, intrinsics free</td><td class="astro-w75f6den">VI-Rig april_01, 80 s window, intrinsics pinned</td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">t_ga on the raw bag (MVIS)</td><td class="astro-w75f6den"><b class="astro-w75f6den">−5.03 ± 0.02</b></td><td class="astro-w75f6den"><b class="astro-w75f6den">−5.69 ± 0.43</b></td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">Share of an injected delay in Kalibr td</td><td class="astro-w75f6den"><b class="astro-w75f6den">0.64</b></td><td class="astro-w75f6den"><b class="astro-w75f6den">0.30</b></td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">Share in Basalt td</td><td class="astro-w75f6den"><b class="astro-w75f6den">0.59</b></td><td class="astro-w75f6den"><b class="astro-w75f6den">0.28</b></td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">Kalibr − MVIS td, predicted (share × t_ga)</td><td class="astro-w75f6den">−3.21</td><td class="astro-w75f6den">−1.72</td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">Kalibr − MVIS td, measured, cam0 / cam1</td><td class="astro-w75f6den"><b class="astro-w75f6den">−3.16 / −3.17</b></td><td class="astro-w75f6den"><b class="astro-w75f6den">−1.91 / −1.97</b></td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">Basalt − MVIS td, predicted</td><td class="astro-w75f6den">−2.97</td><td class="astro-w75f6den">−1.60</td></tr> <tr class="astro-w75f6den"><td class="astro-w75f6den">Basalt − MVIS td, measured, cam0 / cam1</td><td class="astro-w75f6den"><b class="astro-w75f6den">−2.88 / −2.90</b></td><td class="astro-w75f6den"><b class="astro-w75f6den">−2.02</b> / +0.68 ‡</td></tr> </tbody> </table> <p class="tga-foot astro-w75f6den">Times in ms. The gaps are differences from MVIS, not errors. ‡ Basalt fits one offset for the whole
+  rig. The two T265 cameras differ by 2.7 ms in MVIS
+  (−7.94 / −10.64), so the Basalt gap is only like-for-like against cam0.</p>
+<p>On raw data, the <code dir="auto">td</code> gap between tools is close to what the offset predicts: within 0.1 ms on Looper, 0.2–0.4 ms
+short on the T265. That explains the gap. It does not say which <code dir="auto">td</code> is true.</p>
+<aside aria-label="Older run, t_ga off" class="starlight-aside starlight-aside--note"><p class="starlight-aside__title" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="starlight-aside__icon"><path d="M12 11C11.7348 11 11.4804 11.1054 11.2929 11.2929C11.1054 11.4804 11 11.7348 11 12V16C11 16.2652 11.1054 16.5196 11.2929 16.7071C11.4804 16.8946 11.7348 17 12 17C12.2652 17 12.5196 16.8946 12.7071 16.7071C12.8946 16.5196 13 16.2652 13 16V12C13 11.7348 12.8946 11.4804 12.7071 11.2929C12.5196 11.1054 12.2652 11 12 11ZM12.38 7.08C12.1365 6.97998 11.8635 6.97998 11.62 7.08C11.4973 7.12759 11.3851 7.19896 11.29 7.29C11.2017 7.3872 11.1306 7.49882 11.08 7.62C11.024 7.73868 10.9966 7.86882 11 8C10.9992 8.13161 11.0245 8.26207 11.0742 8.38391C11.124 8.50574 11.1973 8.61656 11.29 8.71C11.3872 8.79833 11.4988 8.86936 11.62 8.92C11.7715 8.98224 11.936 9.00632 12.099 8.99011C12.2619 8.97391 12.4184 8.91792 12.5547 8.82707C12.691 8.73622 12.8029 8.61328 12.8805 8.46907C12.9582 8.32486 12.9992 8.16378 13 8C12.9963 7.73523 12.8927 7.48163 12.71 7.29C12.6149 7.19896 12.5028 7.12759 12.38 7.08ZM12 2C10.0222 2 8.08879 2.58649 6.4443 3.6853C4.79981 4.78412 3.51809 6.3459 2.76121 8.17317C2.00433 10.0004 1.8063 12.0111 2.19215 13.9509C2.578 15.8907 3.53041 17.6725 4.92894 19.0711C6.32746 20.4696 8.10929 21.422 10.0491 21.8079C11.9889 22.1937 13.9996 21.9957 15.8268 21.2388C17.6541 20.4819 19.2159 19.2002 20.3147 17.5557C21.4135 15.9112 22 13.9778 22 12C22 10.6868 21.7413 9.38642 21.2388 8.17317C20.7363 6.95991 19.9997 5.85752 19.0711 4.92893C18.1425 4.00035 17.0401 3.26375 15.8268 2.7612C14.6136 2.25866 13.3132 2 12 2ZM12 20C10.4178 20 8.87104 19.5308 7.55544 18.6518C6.23985 17.7727 5.21447 16.5233 4.60897 15.0615C4.00347 13.5997 3.84504 11.9911 4.15372 10.4393C4.4624 8.88743 5.22433 7.46197 6.34315 6.34315C7.46197 5.22433 8.88743 4.4624 10.4393 4.15372C11.9911 3.84504 13.5997 4.00346 15.0615 4.60896C16.5233 5.21447 17.7727 6.23984 18.6518 7.55544C19.5308 8.87103 20 10.4177 20 12C20 14.1217 19.1572 16.1566 17.6569 17.6569C16.1566 19.1571 14.1217 20 12 20Z"></path></svg>Older run, t_ga off</p><div class="starlight-aside__content"><p>On older MVIS code, april_01 with <code dir="auto">t_ga</code> off gave <code dir="auto">td</code> −9.60 / −12.28 ms, against −7.60 / −10.29 ms with it on.
+That is close to Kalibr’s −9.85 / −12.61 ms. It is the only run where MVIS itself turned <code dir="auto">t_ga</code> off, and it has not
+been re-run on current code.</p></div></aside>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-offset-is-real">The offset is real</h2><a class="sl-anchor-link" href="#the-offset-is-real"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The offset is real”</span></a></div>
+<ul>
+<li><strong>What <code dir="auto">t_ga</code> is:</strong> see <a href="/concepts/imu-model/">IMU model</a>. A common cause is a driver that resamples or filters
+the accel. The T265 driver places a 62.5 Hz accel onto 200 Hz gyro stamps.</li>
+<li><strong>Looper Insight 9:</strong> <code dir="auto">t_ga</code> <strong>−5.03 ± 0.02 ms</strong> on looper_1.</li>
+<li><strong>Intel T265:</strong> <strong>−5.69 ± 0.43 ms</strong> on VI-Rig april_01. Older runs on other april recordings read −5.88 to
+−8.07 ms. The <a href="/sensors/intel-t265/">T265 sensor page</a> reads −6.59 ± 0.43 ms from one recording, in a different
+run set.</li>
+<li><strong>Without the solver:</strong> an estimator-free correlation check on twelve older Looper recordings (10 hand-held,
+2 arm) read −5.8 to −7.1 ms, against −5.0 to −5.5 ms from an older solver run; the check reads about 1.2 ms more
+negative than the solver (bias −1.24 ± 0.42 ms). On ten T265 recordings it read −6.05 ± 0.14 ms at 2–25 Hz.</li>
+<li><strong>On the T265 the offset shrinks with frequency</strong> (Figure 2). One <code dir="auto">t_ga</code> is a compromise for the motion.</li>
+</ul>
+<figure class="rp-plot tga-band astro-3fo2lylm"> <svg viewBox="0 0 420 210" role="img" aria-label="T265 accel delay by motion band, from −6.76 ms at the lowest band to −1.17 ms at the highest; the solver's single value is −5.69 ms" class="astro-3fo2lylm"> <g class="astro-3fo2lylm"> <line class="rp-grid astro-3fo2lylm" x1="44" x2="406" y1="174" y2="174"></line> <text class="rp-tick astro-3fo2lylm" x="39" y="177" text-anchor="end">-8</text> </g><g class="astro-3fo2lylm"> <line class="rp-grid astro-3fo2lylm" x1="44" x2="406" y1="133.5" y2="133.5"></line> <text class="rp-tick astro-3fo2lylm" x="39" y="136.5" text-anchor="end">-6</text> </g><g class="astro-3fo2lylm"> <line class="rp-grid astro-3fo2lylm" x1="44" x2="406" y1="93" y2="93"></line> <text class="rp-tick astro-3fo2lylm" x="39" y="96" text-anchor="end">-4</text> </g><g class="astro-3fo2lylm"> <line class="rp-grid astro-3fo2lylm" x1="44" x2="406" y1="52.5" y2="52.5"></line> <text class="rp-tick astro-3fo2lylm" x="39" y="55.5" text-anchor="end">-2</text> </g><g class="astro-3fo2lylm"> <line class="rp-grid astro-3fo2lylm" x1="44" x2="406" y1="12" y2="12"></line> <text class="rp-tick astro-3fo2lylm" x="39" y="15" text-anchor="end">0</text> </g> <line class="tga-solver astro-3fo2lylm" x1="44" x2="406" y1="127.3197" y2="127.3197"></line> <text class="rp-tick astro-3fo2lylm" x="406" y="123.3197" text-anchor="end">solver t_ga −5.69 ms</text> <path class="tga-bline astro-3fo2lylm" d="M69.9,148.9 L121.6,140.6 L173.3,129.2 L225.0,116.7 L276.7,84.9"></path> <path class="tga-bline tga-weak astro-3fo2lylm" d="M276.7,84.9 L328.4,56.3 L380.1,35.7"></path> <g class="astro-3fo2lylm"> <title>2–4 Hz: delay −6.76 ms, gain 1.00</title> <circle class="tga-bdot astro-3fo2lylm" cx="69.85714285714286" cy="148.89" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="69.85714285714286" y="188" text-anchor="middle">2–4</text> </g><g class="astro-3fo2lylm"> <title>4–7 Hz: delay −6.35 ms, gain 1.01</title> <circle class="tga-bdot astro-3fo2lylm" cx="121.57142857142857" cy="140.5875" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="121.57142857142857" y="188" text-anchor="middle">4–7</text> </g><g class="astro-3fo2lylm"> <title>7–11 Hz: delay −5.79 ms, gain 1.05</title> <circle class="tga-bdot astro-3fo2lylm" cx="173.28571428571428" cy="129.2475" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="173.28571428571428" y="188" text-anchor="middle">7–11</text> </g><g class="astro-3fo2lylm"> <title>11–16 Hz: delay −5.17 ms, gain 1.09</title> <circle class="tga-bdot astro-3fo2lylm" cx="225" cy="116.6925" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="225" y="188" text-anchor="middle">11–16</text> </g><g class="astro-3fo2lylm"> <title>16–22 Hz: delay −3.60 ms, gain 1.01</title> <circle class="tga-bdot astro-3fo2lylm" cx="276.7142857142857" cy="84.9" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="276.7142857142857" y="188" text-anchor="middle">16–22</text> </g><g class="astro-3fo2lylm"> <title>22–30 Hz: delay −2.19 ms, gain 0.70 (low coherence, less certain)</title> <circle class="tga-bdot tga-open astro-3fo2lylm" cx="328.42857142857144" cy="56.3475" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="328.42857142857144" y="188" text-anchor="middle">22–30</text> </g><g class="astro-3fo2lylm"> <title>30–40 Hz: delay −1.17 ms, gain 0.28 (low coherence, less certain)</title> <circle class="tga-bdot tga-open astro-3fo2lylm" cx="380.14285714285717" cy="35.692499999999995" r="4.5"></circle> <text class="rp-tick astro-3fo2lylm" x="380.14285714285717" y="188" text-anchor="middle">30–40</text> </g> <text class="rp-tick astro-3fo2lylm" x="225" y="206" text-anchor="middle">motion band (Hz)</text> <text class="rp-tick astro-3fo2lylm" x="10" y="93" text-anchor="middle" transform="rotate(-90 10 93)">accel − gyro delay (ms)</text> </svg> <figcaption class="astro-3fo2lylm">On the T265 the accel delay shrinks as the motion gets faster, so one t_ga is a compromise for the
+    motion in the recording. Coherence falls above about 22 Hz, so the two open points are less certain.
+    Hover a point for its gain.</figcaption> </figure>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-sweep-delay-the-accelerometer-watch-td">The sweep: delay the accelerometer, watch <code dir="auto">td</code></h2><a class="sl-anchor-link" href="#the-sweep-delay-the-accelerometer-watch-td"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “The sweep: delay the accelerometer, watch td”</span></a></div>
+<ul>
+<li><strong>Start from a fair zero:</strong> the MVIS-corrected bag, with a common crop. On it all three tools read <code dir="auto">td</code> near zero.</li>
+<li><strong>Delay only the accel</strong> by τ = −50, −20, −10, −5, −2, 0, 2, 5, 10, 20 and 50 ms: a′(t) = a(t − τ). That is 11 bags
+per device. The 0 ms bag is the corrected bag with the same crop. In MVIS’s sign, the true <code dir="auto">t_ga</code> is τ.</li>
+<li><strong>Run all three tools</strong> on every bag with their usual settings.</li>
+<li><strong>Read</strong> <code dir="auto">td</code> and <code dir="auto">t_ga</code>.</li>
+</ul>
+<figure class="tga-sweep astro-5fcz6xqa"> <div class="tga-panels astro-5fcz6xqa" role="img" aria-label="td against the injected accel delay. Looper Insight 9: Kalibr td slope 0.639, Basalt td slope 0.59, MVIS t_ga slope 1, MVIS td flat. Intel T265: Kalibr td slope 0.302, Basalt td slope 0.282, MVIS t_ga slope 0.998, MVIS td flat."> <svg viewBox="0 0 380 312" aria-hidden="true" class="astro-5fcz6xqa"> <text class="tga-title astro-5fcz6xqa" x="40" y="13">Looper Insight 9</text> <g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="278" y2="278"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="281" text-anchor="end">-50</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="214.5" y2="214.5"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="217.5" text-anchor="end">-25</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="151" y2="151"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="154" text-anchor="end">0</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="87.5" y2="87.5"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="90.5" text-anchor="end">25</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="24" y2="24"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="27" text-anchor="end">50</text> </g> <text class="rp-tick astro-5fcz6xqa" x="40" y="291" text-anchor="middle">-50</text><text class="rp-tick astro-5fcz6xqa" x="110.8" y="291" text-anchor="middle">-20</text><text class="rp-tick astro-5fcz6xqa" x="134.4" y="291" text-anchor="middle">-10</text><text class="rp-tick astro-5fcz6xqa" x="158" y="291" text-anchor="middle">0</text><text class="rp-tick astro-5fcz6xqa" x="181.6" y="291" text-anchor="middle">10</text><text class="rp-tick astro-5fcz6xqa" x="205.2" y="291" text-anchor="middle">20</text><text class="rp-tick astro-5fcz6xqa" x="276" y="291" text-anchor="middle">50</text> <text class="rp-tick astro-5fcz6xqa" x="158" y="308" text-anchor="middle">injected accel delay τ (ms)</text> <text class="rp-tick astro-5fcz6xqa" x="10" y="151" text-anchor="middle" transform="rotate(-90 10 151)">reported value (ms)</text> <rect class="tga-lag astro-5fcz6xqa" x="144.71603199999998" width="2.8319999999999936" y="24" height="254"> <title>Measured on the raw bag: t_ga −5.03 ± 0.02 ms</title> </rect> <line class="rp-one astro-5fcz6xqa" x1="40" x2="276" y1="151" y2="151"></line> <g class="tga-mvis astro-5fcz6xqa"> <path class="tga-line astro-5fcz6xqa" d="M40.0,278.0 L110.8,201.8 L134.4,176.4 L146.2,163.7 L153.3,156.1 L158.0,151.0 L162.7,145.9 L169.8,138.3 L181.6,125.6 L205.2,100.2 L276.0,24.0"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="277.98222" r="2.6"> <title>MVIS t_ga, τ −50 ms: −49.993 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="201.78222" r="2.6"> <title>MVIS t_ga, τ −20 ms: −19.993 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="176.38222000000002" r="2.6"> <title>MVIS t_ga, τ −10 ms: −9.993 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="163.68222" r="2.6"> <title>MVIS t_ga, τ −5 ms: −4.993 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="156.05968" r="2.6"> <title>MVIS t_ga, τ −2 ms: −1.992 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="150.98222" r="2.6"> <title>MVIS t_ga, τ 0 ms: +0.007 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="145.90222" r="2.6"> <title>MVIS t_ga, τ +2 ms: +2.007 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="138.28222" r="2.6"> <title>MVIS t_ga, τ +5 ms: +5.007 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="125.58222" r="2.6"> <title>MVIS t_ga, τ +10 ms: +10.007 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="100.18221999999999" r="2.6"> <title>MVIS t_ga, τ +20 ms: +20.007 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="23.982220000000005" r="2.6"> <title>MVIS t_ga, τ +50 ms: +50.007 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="26.982220000000005">MVIS t_ga 1.00×</text> </g><g class="tga-kalibr astro-5fcz6xqa"> <path class="tga-line astro-5fcz6xqa" d="M40.0,232.4 L110.8,182.9 L134.4,167.0 L146.2,159.0 L153.3,154.3 L158.0,151.1 L162.7,147.9 L169.8,143.2 L181.6,135.3 L205.2,119.4 L276.0,69.5"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="232.41970000000003" r="2.6"> <title>Kalibr td (mean of cameras), τ −50 ms: −32.055 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="182.87446" r="2.6"> <title>Kalibr td (mean of cameras), τ −20 ms: −12.549 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="166.95628" r="2.6"> <title>Kalibr td (mean of cameras), τ −10 ms: −6.282 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="158.99084000000002" r="2.6"> <title>Kalibr td (mean of cameras), τ −5 ms: −3.146 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="154.25627999999998" r="2.6"> <title>Kalibr td (mean of cameras), τ −2 ms: −1.282 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="151.09906" r="2.6"> <title>Kalibr td (mean of cameras), τ 0 ms: −0.039 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="147.94438" r="2.6"> <title>Kalibr td (mean of cameras), τ +2 ms: +1.203 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="143.21744" r="2.6"> <title>Kalibr td (mean of cameras), τ +5 ms: +3.064 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="135.27994" r="2.6"> <title>Kalibr td (mean of cameras), τ +10 ms: +6.189 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="119.37954" r="2.6"> <title>Kalibr td (mean of cameras), τ +20 ms: +12.449 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="69.46346" r="2.6"> <title>Kalibr td (mean of cameras), τ +50 ms: +32.101 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="72.46346">Kalibr td 0.64×</text> </g><g class="tga-basalt astro-5fcz6xqa"> <path class="tga-line astro-5fcz6xqa" d="M40.0,228.2 L110.8,181.0 L134.4,165.8 L146.2,158.4 L153.3,154.0 L158.0,151.1 L162.7,148.2 L169.8,143.8 L181.6,136.5 L205.2,122.0 L276.0,77.7"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="228.18806" r="2.6"> <title>Basalt td, τ −50 ms: −30.389 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="180.95168" r="2.6"> <title>Basalt td, τ −20 ms: −11.792 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="165.79296" r="2.6"> <title>Basalt td, τ −10 ms: −5.824 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="158.44219999999999" r="2.6"> <title>Basalt td, τ −5 ms: −2.930 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="154.03276000000002" r="2.6"> <title>Basalt td, τ −2 ms: −1.194 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="151.10922" r="2.6"> <title>Basalt td, τ 0 ms: −0.043 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="148.19584" r="2.6"> <title>Basalt td, τ +2 ms: +1.104 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="143.8245" r="2.6"> <title>Basalt td, τ +5 ms: +2.825 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="136.54994" r="2.6"> <title>Basalt td, τ +10 ms: +5.689 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="122.01352" r="2.6"> <title>Basalt td, τ +20 ms: +11.412 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="77.721" r="2.6"> <title>Basalt td, τ +50 ms: +28.850 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="84.46346">Basalt td 0.59×</text> </g><g class="tga-mvis astro-5fcz6xqa"> <path class="tga-line tga-dash astro-5fcz6xqa" d="M40.0,151.0 L110.8,151.0 L134.4,151.0 L146.2,151.0 L153.3,151.0 L158.0,151.0 L162.7,151.0 L169.8,151.0 L181.6,151.0 L205.2,151.0 L276.0,151.0"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="151.02032000000003" r="2"> <title>MVIS td (cam0), τ −50 ms: −0.008 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="151.02286" r="2"> <title>MVIS td (cam0), τ −20 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="151.02286" r="2"> <title>MVIS td (cam0), τ −10 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="151.02286" r="2"> <title>MVIS td (cam0), τ −5 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="151.02286" r="2"> <title>MVIS td (cam0), τ −2 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="151.02286" r="2"> <title>MVIS td (cam0), τ 0 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="151.02286" r="2"> <title>MVIS td (cam0), τ +2 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="151.02286" r="2"> <title>MVIS td (cam0), τ +5 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="151.02286" r="2"> <title>MVIS td (cam0), τ +10 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="151.02286" r="2"> <title>MVIS td (cam0), τ +20 ms: −0.009 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="151.02286" r="2"> <title>MVIS td (cam0), τ +50 ms: −0.009 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="154.02286">MVIS td ≈ 0</text> </g> </svg><svg viewBox="0 0 380 312" aria-hidden="true" class="astro-5fcz6xqa"> <text class="tga-title astro-5fcz6xqa" x="40" y="13">Intel T265</text> <g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="278" y2="278"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="281" text-anchor="end">-50</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="214.5" y2="214.5"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="217.5" text-anchor="end">-25</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="151" y2="151"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="154" text-anchor="end">0</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="87.5" y2="87.5"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="90.5" text-anchor="end">25</text> </g><g class="astro-5fcz6xqa"> <line class="rp-grid astro-5fcz6xqa" x1="40" x2="276" y1="24" y2="24"></line> <text class="rp-tick astro-5fcz6xqa" x="35" y="27" text-anchor="end">50</text> </g> <text class="rp-tick astro-5fcz6xqa" x="40" y="291" text-anchor="middle">-50</text><text class="rp-tick astro-5fcz6xqa" x="110.8" y="291" text-anchor="middle">-20</text><text class="rp-tick astro-5fcz6xqa" x="134.4" y="291" text-anchor="middle">-10</text><text class="rp-tick astro-5fcz6xqa" x="158" y="291" text-anchor="middle">0</text><text class="rp-tick astro-5fcz6xqa" x="181.6" y="291" text-anchor="middle">10</text><text class="rp-tick astro-5fcz6xqa" x="205.2" y="291" text-anchor="middle">20</text><text class="rp-tick astro-5fcz6xqa" x="276" y="291" text-anchor="middle">50</text> <text class="rp-tick astro-5fcz6xqa" x="158" y="308" text-anchor="middle">injected accel delay τ (ms)</text> <text class="rp-tick astro-5fcz6xqa" x="10" y="151" text-anchor="middle" transform="rotate(-90 10 151)">reported value (ms)</text> <rect class="tga-lag astro-5fcz6xqa" x="143.144272" width="2.8319999999999936" y="24" height="254"> <title>Measured on the raw bag: t_ga −5.69 ± 0.43 ms</title> </rect> <line class="rp-one astro-5fcz6xqa" x1="40" x2="276" y1="151" y2="151"></line> <g class="tga-mvis astro-5fcz6xqa"> <path class="tga-line astro-5fcz6xqa" d="M40.0,277.8 L110.8,201.7 L134.4,176.3 L146.2,163.7 L153.3,156.0 L158.0,151.0 L162.7,146.0 L169.8,138.3 L181.6,125.6 L205.2,100.3 L276.0,24.2"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="277.75108" r="2.6"> <title>MVIS t_ga, τ −50 ms: −49.902 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="201.67553999999998" r="2.6"> <title>MVIS t_ga, τ −20 ms: −19.951 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="176.33396000000002" r="2.6"> <title>MVIS t_ga, τ −10 ms: −9.974 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="163.65936" r="2.6"> <title>MVIS t_ga, τ −5 ms: −4.984 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="156.00379999999998" r="2.6"> <title>MVIS t_ga, τ −2 ms: −1.970 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="150.99238000000003" r="2.6"> <title>MVIS t_ga, τ 0 ms: +0.003 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="145.9708" r="2.6"> <title>MVIS t_ga, τ +2 ms: +1.980 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="138.30762" r="2.6"> <title>MVIS t_ga, τ +5 ms: +4.997 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="125.63302" r="2.6"> <title>MVIS t_ga, τ +10 ms: +9.987 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="100.28636" r="2.6"> <title>MVIS t_ga, τ +20 ms: +19.966 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="24.210819999999995" r="2.6"> <title>MVIS t_ga, τ +50 ms: +49.917 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="27.210819999999995">MVIS t_ga 1.00×</text> </g><g class="tga-kalibr astro-5fcz6xqa"> <path class="tga-line astro-5fcz6xqa" d="M40.0,187.6 L110.8,167.0 L134.4,159.4 L146.2,155.5 L153.3,153.1 L158.0,151.5 L162.7,149.9 L169.8,147.4 L181.6,143.3 L205.2,135.2 L276.0,111.5"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="187.64966" r="2.6"> <title>Kalibr td (mean of cameras), τ −50 ms: −14.429 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="166.9512" r="2.6"> <title>Kalibr td (mean of cameras), τ −20 ms: −6.280 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="159.38708000000003" r="2.6"> <title>Kalibr td (mean of cameras), τ −10 ms: −3.302 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="155.46532000000002" r="2.6"> <title>Kalibr td (mean of cameras), τ −5 ms: −1.758 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="153.07518" r="2.6"> <title>Kalibr td (mean of cameras), τ −2 ms: −0.817 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="151.47498" r="2.6"> <title>Kalibr td (mean of cameras), τ 0 ms: −0.187 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="149.85953999999998" r="2.6"> <title>Kalibr td (mean of cameras), τ +2 ms: +0.449 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="147.42368" r="2.6"> <title>Kalibr td (mean of cameras), τ +5 ms: +1.408 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="143.34698" r="2.6"> <title>Kalibr td (mean of cameras), τ +10 ms: +3.013 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="135.24692" r="2.6"> <title>Kalibr td (mean of cameras), τ +20 ms: +6.202 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="111.5411" r="2.6"> <title>Kalibr td (mean of cameras), τ +50 ms: +15.535 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="114.5411">Kalibr td 0.30×</text> </g><g class="tga-basalt astro-5fcz6xqa"> <path class="tga-line astro-5fcz6xqa" d="M40.0,186.1 L110.8,166.2 L134.4,159.1 L146.2,155.4 L153.3,153.2 L158.0,151.7 L162.7,150.2 L169.8,148.0 L181.6,144.2 L205.2,136.7 L276.0,115.0"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="186.1155" r="2.6"> <title>Basalt td, τ −50 ms: −13.825 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="166.19681999999997" r="2.6"> <title>Basalt td, τ −20 ms: −5.983 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="159.05687999999998" r="2.6"> <title>Basalt td, τ −10 ms: −3.172 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="155.4069" r="2.6"> <title>Basalt td, τ −5 ms: −1.735 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="153.18439999999998" r="2.6"> <title>Basalt td, τ −2 ms: −0.860 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="151.71374" r="2.6"> <title>Basalt td, τ 0 ms: −0.281 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="150.2126" r="2.6"> <title>Basalt td, τ +2 ms: +0.310 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="147.98502000000002" r="2.6"> <title>Basalt td, τ +5 ms: +1.187 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="144.23852" r="2.6"> <title>Basalt td, τ +10 ms: +2.662 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="136.74298" r="2.6"> <title>Basalt td, τ +20 ms: +5.613 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="115.00058" r="2.6"> <title>Basalt td, τ +50 ms: +14.173 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="126.5411">Basalt td 0.28×</text> </g><g class="tga-mvis astro-5fcz6xqa"> <path class="tga-line tga-dash astro-5fcz6xqa" d="M40.0,150.9 L110.8,150.9 L134.4,150.8 L146.2,150.8 L153.3,150.8 L158.0,150.8 L162.7,150.8 L169.8,150.8 L181.6,150.8 L205.2,150.8 L276.0,150.7"></path> <circle class="tga-pt astro-5fcz6xqa" cx="40" cy="150.89078" r="2"> <title>MVIS td (cam0), τ −50 ms: +0.043 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="110.8" cy="150.85268" r="2"> <title>MVIS td (cam0), τ −20 ms: +0.058 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="134.4" cy="150.8349" r="2"> <title>MVIS td (cam0), τ −10 ms: +0.065 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="146.2" cy="150.82474" r="2"> <title>MVIS td (cam0), τ −5 ms: +0.069 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="153.28" cy="150.8349" r="2"> <title>MVIS td (cam0), τ −2 ms: +0.065 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="158" cy="150.81204000000002" r="2"> <title>MVIS td (cam0), τ 0 ms: +0.074 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="162.72" cy="150.79172" r="2"> <title>MVIS td (cam0), τ +2 ms: +0.082 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="169.8" cy="150.80949999999999" r="2"> <title>MVIS td (cam0), τ +5 ms: +0.075 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="181.6" cy="150.80187999999998" r="2"> <title>MVIS td (cam0), τ +10 ms: +0.078 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="205.2" cy="150.78663999999998" r="2"> <title>MVIS td (cam0), τ +20 ms: +0.084 ms</title> </circle><circle class="tga-pt astro-5fcz6xqa" cx="276" cy="150.74599999999998" r="2"> <title>MVIS td (cam0), τ +50 ms: +0.100 ms</title> </circle> <text class="tga-end astro-5fcz6xqa" x="282" y="153.74599999999998">MVIS td ≈ 0</text> </g> </svg> </div> <figcaption class="astro-5fcz6xqa">Each bag has the accelerometer delayed by τ. MVIS reports the delay as t_ga (solid blue, on the full-delay
+    diagonal) and keeps td (dashed blue, flat). Kalibr and Basalt have no t_ga, so their td takes a steady share of
+    τ: 0.64 and 0.59 on Looper, 0.30
+and 0.28 on the T265. Kalibr is the mean of its two camera offsets. The shaded band marks the
+    t_ga each device has on its raw bag. Hover a point for its value.</figcaption> </figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Result</th><th>Looper Insight 9</th><th>Intel T265</th></tr></thead><tbody><tr><td>MVIS <code dir="auto">t_ga</code> slope</td><td><strong>1.000</strong> (largest residual 0.001 ms)</td><td><strong>0.998</strong> (σ 0.42 ms per bag)</td></tr><tr><td>MVIS <code dir="auto">td</code> change over the sweep</td><td>under 0.01 ms</td><td>under 0.06 ms</td></tr><tr><td>Kalibr <code dir="auto">td</code> slope (τ within ±10 ms only)</td><td><strong>0.639</strong> (0.623)</td><td><strong>0.302</strong> (0.316)</td></tr><tr><td>Basalt <code dir="auto">td</code> slope (τ within ±10 ms only)</td><td><strong>0.590</strong> (0.576)</td><td><strong>0.282</strong> (0.292)</td></tr><tr><td>Kalibr <code dir="auto">td</code> at −50 / +50 ms</td><td>−32.1 / +32.1</td><td>−14.4 / +15.5</td></tr><tr><td>Basalt <code dir="auto">td</code> at −50 / +50 ms</td><td>−30.4 / +28.9</td><td>−13.8 / +14.2</td></tr></tbody></table>
+<p>All runs of all three tools converged (run note; Basalt reports <code dir="auto">ok</code> on all 22 of its runs).</p>
+<p><strong>Fair to Kalibr and Basalt:</strong> with one IMU clock, the closest fit puts <code dir="auto">td</code> between the gyro and the accel
+timelines. Neither tool is broken; neither has a parameter for this. Why the T265 share is about half of Looper’s
+is open.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="would-you-notice-it">Would you notice it?</h2><a class="sl-anchor-link" href="#would-you-notice-it"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Would you notice it?”</span></a></div>
+<ul>
+<li><strong>No warning:</strong> Kalibr and Basalt converge at every τ.</li>
+<li><strong>Reprojection barely moves:</strong> near the real offset (τ 0 to −5 ms) it does not change. Even at ±50 ms it rises only
+10–16 %, which is easy to miss.</li>
+<li><strong>Kalibr gyro error grows, but slowly:</strong> at τ = −5 ms it is × 2.4 on Looper and × 1.2 on the T265, against τ = 0.
+At −50 ms it is × 21 and × 5.3.</li>
+<li><strong>A self round trip will not catch it:</strong> Kalibr’s own round trip on Looper returns +0.0006 ms.</li>
+<li><strong>What does catch it:</strong> a run with <code dir="auto">t_ga</code> on, or an estimator-free correlation check.</li>
+</ul>
+<details class="rp-fold"><summary>IMU scale under the sweep</summary><ul>
+<li><strong>At real offsets (τ 0 → −5 ms):</strong> Kalibr moves at most 0.03 % (Looper) and 0.062 % (T265); Basalt at most
+0.032 % and 0.055 %. MVIS spans at most 0.002 % and 0.005 % over the whole sweep.</li>
+<li><strong>Looper shape:</strong> gyro y follows the size of τ, not its sign. Kalibr +0.96 / +1.51 % and Basalt −1.65 / −1.84 % at
+−50 / +50 ms.</li>
+<li><strong>T265 shape:</strong> Kalibr’s accel scale follows the sign of τ: −0.09 / −0.12 / +0.09 % per 10 ms on x / y / z.</li>
+<li><strong>Basalt’s T265 offset:</strong> gyro x +1.22 % and accel z +1.50 % are already there at τ = 0. From −10 to +10 ms gyro x
+stays within 0.1 % of that and accel z within 0.13 %. The offset does not cause them.</li>
+</ul></details>
+<details class="rp-fold"><summary>All cross round trips</summary><p>Each bag is corrected by one tool (rows) and recalibrated by each tool (columns). <code dir="auto">td</code> in ms, cam0 / cam1 for MVIS
+and Kalibr, one rig value for Basalt.</p><p><strong>Intel T265, april_01</strong> (80 s window, intrinsics pinned)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Corrected by</th><th>Read by MVIS</th><th>Read by Kalibr</th><th>Read by Basalt</th></tr></thead><tbody><tr><td>not corrected</td><td>−7.94 / −10.64, <code dir="auto">t_ga</code> −5.69 ± 0.43</td><td>−9.85 / −12.61</td><td>−9.955</td></tr><tr><td>MVIS</td><td>+0.19 / −0.06, <code dir="auto">t_ga</code> −0.11</td><td>−0.16 / −0.20</td><td>−0.28</td></tr><tr><td>Kalibr</td><td>+1.77 / +1.83, <code dir="auto">t_ga</code> −5.44 ± 0.43</td><td>−0.019 / −0.019</td><td>−0.16</td></tr><tr><td>Basalt</td><td>+2.01 / −0.69, <code dir="auto">t_ga</code> −5.70 ± 0.42</td><td>+0.09 / −2.67</td><td>−0.00002</td></tr></tbody></table><p><strong>Looper Insight 9, looper_1</strong> (66 s, cam0 + cam1, intrinsics free)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Corrected by</th><th>Read by MVIS</th><th>Read by Kalibr</th><th>Read by Basalt</th></tr></thead><tbody><tr><td>not corrected</td><td>+1.22 / +1.25, <code dir="auto">t_ga</code> −5.03 ± 0.02</td><td>−1.94 / −1.92</td><td>−1.66</td></tr><tr><td>MVIS</td><td>0.00 / 0.00, <code dir="auto">t_ga</code> 0.00</td><td>−0.03 / −0.04</td><td>−0.01</td></tr><tr><td>Kalibr</td><td>+1.73 / +1.74, <code dir="auto">t_ga</code> −2.65 (unexplained, see Limits)</td><td>+0.0006 / +0.0005</td><td>+0.10</td></tr><tr><td>Basalt</td><td>+2.88 / +2.90, <code dir="auto">t_ga</code> −5.03</td><td>−0.29 / −0.27</td><td>+0.0000</td></tr></tbody></table><ul>
+<li><strong>Diagonal:</strong> every tool returns to about zero on its own bag. On the T265, MVIS has the largest self residual
+(+0.19 / −0.06 ms).</li>
+<li><strong>Off the diagonal:</strong> bags corrected by Kalibr or Basalt still carry the offset. MVIS reads <code dir="auto">t_ga</code> −5.44 and −5.70 on
+them (T265) and −5.03 on the Basalt-corrected Looper bag.</li>
+<li><strong>One rig offset:</strong> Kalibr’s cam1 reads −2.67 ms on the Basalt-corrected T265 bag. One offset cannot remove the
+2.7 ms between the two T265 cameras.</li>
+</ul></details>
+<details class="rp-fold"><summary>Kalibr fit statistics and reprojection</summary><p>Kalibr gyro and accel error (mean), τ = −50 … +50 ms:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>τ (ms)</th><th>−50</th><th>−20</th><th>−10</th><th>−5</th><th>−2</th><th>0</th><th>+2</th><th>+5</th><th>+10</th><th>+20</th><th>+50</th></tr></thead><tbody><tr><td>Looper gyro</td><td>0.1177</td><td>0.0478</td><td>0.0247</td><td>0.0134</td><td>0.0074</td><td>0.0055</td><td>0.0069</td><td>0.0125</td><td>0.0237</td><td>0.0468</td><td>0.1166</td></tr><tr><td>Looper accel</td><td>0.1665</td><td>0.0825</td><td>0.0569</td><td>0.0469</td><td>0.0380</td><td>0.0424</td><td>0.0378</td><td>0.0463</td><td>0.0560</td><td>0.0814</td><td>0.1628</td></tr><tr><td>T265 gyro</td><td>0.0652</td><td>0.0294</td><td>0.0185</td><td>0.0143</td><td>0.0127</td><td>0.0122</td><td>0.0124</td><td>0.0137</td><td>0.0179</td><td>0.0290</td><td>0.0680</td></tr><tr><td>T265 accel</td><td>0.2274</td><td>0.1367</td><td>0.1175</td><td>0.1118</td><td>0.0720</td><td>0.1099</td><td>0.0727</td><td>0.1116</td><td>0.1166</td><td>0.1346</td><td>0.2200</td></tr></tbody></table><p>The T265 accel error dips at τ = ±2 ms. We have not explained it.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Reprojection over the sweep</th><th>Looper Insight 9</th><th>Intel T265</th></tr></thead><tbody><tr><td>MVIS, RMS</td><td>0.317 px in every bag</td><td>0.476 px in every bag</td></tr><tr><td>Kalibr, mean</td><td>0.179–0.196 px</td><td>0.240–0.273 px</td></tr><tr><td>Basalt, mean</td><td>0.165–0.182 px</td><td>0.179–0.207 px</td></tr></tbody></table><p>MVIS reports an RMS and Kalibr and Basalt a mean, and the settings differ, so the levels cannot be compared across
+tools. Only the change across the sweep is meaningful.</p></details>
+<div class="sl-heading-wrapper level-h2"><h2 id="limits">Limits</h2><a class="sl-anchor-link" href="#limits"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Limits”</span></a></div>
+<ul>
+<li><strong>Which <code dir="auto">td</code> is true is not tested:</strong> the page explains the gap, not which value is right. A clock check through a
+third IMU, camera-<code dir="auto">td</code> injection and a control on an IMU with <code dir="auto">t_ga</code> near 0 are still open.</li>
+<li><strong>The sweep uses our model:</strong> a pure accel shift with linear interpolation, which is exactly what MVIS fits. A slope
+of 1.000 / 0.998 is consistency, not accuracy. A real offset that is not a pure shift fits less well.</li>
+<li><strong>Round trips cannot order tools:</strong> self residuals on the T265 are MVIS +0.19 / −0.06, Kalibr −0.019 / −0.019 and
+Basalt −0.00002 ms.</li>
+<li><strong>The T265 offset depends on frequency:</strong> −6.76 ms at 2–4 Hz to −1.17 ms at 30–40 Hz. Coherence falls above about
+22 Hz, so the top two bands are less certain. So −5.69 ms is a compromise for this motion; other recordings read
+−5.88 to −8.07 ms.</li>
+<li><strong>First-order model:</strong> MVIS corrects <code dir="auto">t_ga</code> to first order; the ½·t_ga²·ä term is ignored, which matters at large
+offsets. A re-linearised version is being tested and is not in MVIS yet.</li>
+<li><strong>Open questions:</strong>
+<ul>
+<li>Why the T265 share (0.30) is about half Looper’s (0.64). Unchecked candidates: the 62.5 Hz accel interpolated onto
+the gyro stamps, different motion, part of the offset going into scale.</li>
+<li>MVIS on the Kalibr-corrected Looper bag reads <code dir="auto">t_ga</code> −2.65 ms (expected −5.03), RMS 0.47 px and gyro x scale
+1.0069. It is unexplained, and it does not repeat on the T265 (−5.44 ms).</li>
+<li>On the T265 the sweep predicts the raw Kalibr gap 0.2–0.25 ms short.</li>
+</ul>
+</li>
+<li><strong>One recording per device:</strong> april_01 and looper_1. The other recordings have not been run.</li>
+<li><strong>Basalt has one offset for the rig:</strong> on the T265 its gap is −2.02 ms against cam0 and +0.68 ms against cam1.</li>
+<li><strong>Settings differ:</strong> Kalibr uses 10 Hz frames, Basalt every second frame with its own camera calibration, MVIS
+30 Hz. Intrinsics are pinned on the T265 and free on Looper.</li>
+<li><strong>The <code dir="auto">t_ga</code>-off row is from older code</strong> and has not been re-run.</li>
+<li><strong>The MVIS authors ran every tool.</strong></li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="reproducibility">Reproducibility</h2><a class="sl-anchor-link" href="#reproducibility"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Reproducibility”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Set</th><th>Hub folder</th><th>Bags</th></tr></thead><tbody><tr><td>VI-Rig, Intel T265</td><td><a href="https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams/tga-sweep"><code dir="auto">calibench-vi/datasets</code> → <code dir="auto">virig-4imus-3cams/tga-sweep</code></a></td><td>11, 3.3 GB each</td></tr><tr><td>Looper Insight 9</td><td><a href="https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9/tga-sweep"><code dir="auto">calibench-vi/datasets</code> → <code dir="auto">looper-insight9/tga-sweep</code></a></td><td>11, 0.94 GB each</td></tr></tbody></table>
+<p>Each folder has a README, the MVIS calibration used for the correction (<code dir="auto">mvis_correction_calib.yaml</code>) and
+<code dir="auto">provenance.json</code> (sign convention, τ, crop, sha256 per bag).</p>
+<p><strong>Licence:</strong></p>
+<ul>
+<li><strong>CC BY-NC 4.0:</strong> both folders, gated, commercial use by request.</li>
+<li><strong>Looper folder:</strong> also carries the Looper benchmark exception: anyone may run tools on the bags and publish the
+results for the Calibench benchmark.</li>
+<li><strong>Cite</strong> the VI-Rig dataset and MVIS.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody><tr><td>MVIS</td><td>main as of 2026-11-08; 30 Hz frames, <code dir="auto">calyx</code> IMU model, <code dir="auto">estimate_t_ga: true</code>, <code dir="auto">sigma_t_ga: 0.010</code></td></tr><tr><td>Kalibr</td><td>scale-misalignment IMU model, 10 Hz frames</td></tr><tr><td>Basalt</td><td><code dir="auto">basalt_calibrate_imu</code>, every second frame, its own camera calibration</td></tr><tr><td>Intrinsics</td><td>pinned on the T265, free on Looper</td></tr><tr><td>T265 window</td><td>80 s of april_01</td></tr><tr><td>Run dates</td><td>2026-11-08 (Looper), 2026-11-09 (T265)</td></tr></tbody></table>
+<details class="rp-fold"><summary>Replay it yourself</summary><ol>
+<li>Download one sweep folder from the Hub (you need to accept the gate first).</li>
+<li>Run each tool on each bag with your usual settings: <code dir="auto">mvis cam-imu -c cam_imu.yaml</code> with <code dir="auto">estimate_t_ga: true</code>,
+Kalibr’s <code dir="auto">kalibr_calibrate_imu_camera</code>, and <code dir="auto">basalt_calibrate_imu</code>.</li>
+<li>Read <code dir="auto">td</code> (and <code dir="auto">t_ga</code> for MVIS) and fit each tool’s <code dir="auto">td</code> against τ. The true values in every bag are
+<code dir="auto">t_ga</code> = τ, <code dir="auto">td</code> = 0, identity IMU scale and zero bias.</li>
+</ol><p>To build a sweep from your own recording: correct it with <code dir="auto">mvis apply-calib</code>, crop it, then delay only the accel
+channel by τ with linear interpolation, as each folder’s README describes.</p></details>
+<p>This page uses april_01 only. The T265 sensor page’s −6.59 ± 0.43 ms is from another run set.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="related">Related</h2><a class="sl-anchor-link" href="#related"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Related”</span></a></div>
+<ul>
+<li><a href="/concepts/imu-model/">IMU model: <code dir="auto">t_ga</code></a></li>
+<li><a href="/guides/camera-imu-calibration/">Camera–IMU calibration</a></li>
+<li><a href="/guides/corrected-datasets/">Corrected-dataset export</a></li>
+<li><a href="/guides/roundtrip/">Round-trip validation</a></li>
+<li><a href="/about/comparison/">Comparison vs Kalibr / Basalt</a></li>
+<li><a href="/benchmark/methodology/">Methodology</a></li>
+</ul> </div> <footer class="sl-flex astro-hdodbrm5"> <div class="meta sl-flex astro-hdodbrm5"> <a href="https://github.com/yangyulin/mvis_pages/edit/main/site/src/content/docs/benchmark/tga.mdx" class="sl-flex print:hidden astro-xql4m4p5"><svg aria-hidden="true" class="astro-xql4m4p5 astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.2em;"><path d="M22 7.24a1 1 0 0 0-.29-.71l-4.24-4.24a1 1 0 0 0-1.1-.22 1 1 0 0 0-.32.22l-2.83 2.83L2.29 16.05a1 1 0 0 0-.29.71V21a1 1 0 0 0 1 1h4.24a1 1 0 0 0 .76-.29l10.87-10.93L21.71 8c.1-.1.17-.2.22-.33a1 1 0 0 0 0-.24v-.14l.07-.05ZM6.83 20H4v-2.83l9.93-9.93 2.83 2.83L6.83 20ZM18.17 8.66l-2.83-2.83 1.42-1.41 2.82 2.82-1.41 1.42Z"/></svg>Edit page</a> <p>Last updated: <time datetime="2026-11-10T15:22:48.000Z">Nov 10, 2026</time></p> </div> <div class="pagination-links print:hidden astro-ep4jfubr" dir="ltr"> <a href="/benchmark/examples/uzh-fpv/" rel="prev" class="astro-ep4jfubr"> <svg aria-hidden="true" class="astro-ep4jfubr astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-ep4jfubr"> Previous <br class="astro-ep4jfubr"> <span class="link-title astro-ep4jfubr">UZH-FPV</span> </span> </a> <a href="/benchmark/results/" rel="next" class="astro-ep4jfubr"> <svg aria-hidden="true" class="astro-ep4jfubr astro-eg3tbr4b" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-ep4jfubr"> Next <br class="astro-ep4jfubr"> <span class="link-title astro-ep4jfubr">Results</span> </span> </a> </div>  </footer> <footer class="mvis-footer astro-sz7xmlte"> <div class="mvis-footer-row astro-sz7xmlte"> <div class="astro-sz7xmlte"> <strong class="astro-sz7xmlte">Open MVIS</strong> &middot; the benchmark for multi-visual-inertial sensor calibration.
+</div> <div class="mvis-footer-links astro-sz7xmlte">  <a href="https://github.com/yangyulin/mvis_pages" target="_blank" rel="noopener" class="astro-sz7xmlte">GitHub</a> <span class="astro-sz7xmlte">&middot;</span> <a href="/benchmark/results/" class="astro-sz7xmlte">Results</a> <span class="astro-sz7xmlte">&middot;</span> <a href="/about/contributors/#citing-open-mvis" class="astro-sz7xmlte">Cite</a> <span class="astro-sz7xmlte">&middot;</span> <span class="astro-sz7xmlte">MIT License</span> <span class="astro-sz7xmlte">&middot;</span> <span class="astro-sz7xmlte">&copy; 2026</span> </div> </div> </footer> </div> </div>  </main> </div> </div> </div> </div> </body></html>
