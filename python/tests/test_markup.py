@@ -129,3 +129,11 @@ def test_board_svg_chessboard_to_scale():
     assert 'aria-label="Chessboard 9 by 12 squares, to scale"' in svg
     assert "12 × 9 squares (11 × 8 inner corners), 25 mm squares, 300 × 225 mm" in svg
     assert svg.count("h25.00v25.00") == 54          # half of 108 squares are black
+
+
+def test_board_svg_charuco_to_scale():
+    svg = m.board_svg({"type": "charuco", "rows": 9, "cols": 14, "square_mm": 40, "marker_mm": 30, "dictionary": "DICT_5X5"}, {})
+    assert 'aria-label="ChArUco board 9 by 14 squares, to scale"' in svg
+    assert "14 × 9 squares (13 × 8 inner corners), 40 mm squares, 30 mm DICT_5X5 markers, 560 × 360 mm" in svg
+    assert svg.count("h40.00v40.00") == 63 and svg.count("h30.00v30.00") == 63   # 63 black squares, 63 markers
+    assert "M5.00 45.00h30.00" in svg                                          # first marker centred in square (1, 0)
