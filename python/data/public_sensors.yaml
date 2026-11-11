@@ -172,7 +172,7 @@ sensors:
       - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
       - "We solved three recordings of the same unit separately. The lever arm agrees within 3 mm, the camera-to-IMU time offset within 0.2 ms, the focal lengths within 1.3 px and the IMU scales within 0.4 %. The IMU position also agrees with the maker's drawing within 2 mm."
       - "The board reaches about 54° off-axis. Past that, toward the image edges (61°) and corners (72°), the lens model is extrapolated: the three solves differ by up to 7 px at the edges and 35 px at the corners."
-      - The motion is gentle (about 6 to 11°/s RMS), so the lever arm is the least certain value, with a solver σ of 2 to 4 mm.
+      - "The motion is gentle (about 6 to 11°/s RMS). In a simulated copy of each recording, with noise matched to this unit, MVIS recovered the lever arm within 1.1 mm, the rotation within 0.6 mrad, the time offset within 0.1 ms and the IMU scales within 0.4 %. The solver's own σ for the lever arm (2 to 4 mm) is wider, because the solve used MVIS's default IMU noise, which is looser than this IMU needs."
       - The model is matched from resolution, baseline, field of view and shutter, not confirmed by the maker.
     header:
       type: "GMSL2 stereo camera module with a 6-axis IMU"
