@@ -6,6 +6,7 @@ import math
 
 import numpy as np
 
+from . import assets
 from .geometry import baseline_mm, lens_radius
 
 e = html.escape
@@ -77,17 +78,33 @@ def chessboard_svg(b) -> str:
 
 
 def charuco_svg(b) -> str:
-    """A ChArUco board to scale: the chessboard squares, black at the top left, and each white square's marker as a plain
-    black square (marker_mm); the ArUco bit patterns aren't drawn."""
+    """A ChArUco board to scale, as OpenCV's CharucoBoard draws it: the chessboard squares, black at the top left, and in
+    each white square, row by row from the top left, the next ArUco marker (marker_mm, a 1-bit black border around 5x5 data
+    bits from assets.aruco5x5()). Other dictionaries are drawn as plain black marker squares."""
     sq, mk, cols, rows = b["square_mm"], b["marker_mm"], b["cols"], b["rows"]
     w, h, o = cols * sq, rows * sq, (sq - mk) / 2
-    d = "".join(f"M{c * sq:.2f} {r * sq:.2f}h{sq:.2f}v{sq:.2f}h{-sq:.2f}z" if (r + c) % 2 == 0
-                else f"M{c * sq + o:.2f} {r * sq + o:.2f}h{mk:.2f}v{mk:.2f}h{-mk:.2f}z" for r in range(rows) for c in range(cols))
+    bits = assets.aruco5x5() if str(b.get("dictionary", "")).startswith("DICT_5X5") else None
+    rect = lambda x, y, a: f"M{x:.2f} {y:.2f}h{a:.2f}v{a:.2f}h{-a:.2f}z"
+    black, white, n = [], [], 0
+    for r in range(rows):
+        for c in range(cols):
+            if (r + c) % 2 == 0:
+                black.append(rect(c * sq, r * sq, sq))
+                continue
+            x, y = c * sq + o, r * sq + o
+            black.append(rect(x, y, mk))
+            if bits:
+                cell = mk / 7
+                white += [rect(x + (k + 1) * cell, y + (i + 1) * cell, cell)
+                          for i, row in enumerate(bits[str(n)]) for k, v in enumerate(row) if v == "1"]
+            n += 1
     m = sq
+    drawn = f"markers 0–{n - 1}. To scale" if bits else "To scale; marker patterns not drawn"
     return (f'<figure class=board><svg viewBox="{-m:.1f} {-m:.1f} {w + 2 * m:.1f} {h + 2 * m:.1f}" role="img" aria-label="ChArUco board {rows} by {cols} squares, to scale">'
-            f'<rect x="{-m:.1f}" y="{-m:.1f}" width="{w + 2 * m:.1f}" height="{h + 2 * m:.1f}" fill="#fff"/><path fill="#111" d="{d}"/></svg>'
+            f'<rect x="{-m:.1f}" y="{-m:.1f}" width="{w + 2 * m:.1f}" height="{h + 2 * m:.1f}" fill="#fff"/><path fill="#111" d="{"".join(black)}"/>'
+            + (f'<path fill="#fff" d="{"".join(white)}"/>' if white else "") + '</svg>'
             f'<figcaption>ChArUco {cols} × {rows} squares ({cols - 1} × {rows - 1} inner corners), {sq:g} mm squares, '
-            f'{mk:g} mm {b.get("dictionary", "ArUco")} markers, {w:.0f} × {h:.0f} mm. To scale; marker patterns not drawn</figcaption></figure>')
+            f'{mk:g} mm {b.get("dictionary", "ArUco")} markers, {w:.0f} × {h:.0f} mm, {drawn}</figcaption></figure>')
 
 
 def board_svg(b, tags: dict) -> str:
