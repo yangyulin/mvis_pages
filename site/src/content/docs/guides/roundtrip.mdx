@@ -85,39 +85,61 @@ The full rig: VI-Rig bag 01, all 4 cameras and all 4 IMUs, the step 4 config, MV
 2026-11-10. **Result: PASS.** All 16 IMU checks (4 per IMU) and all 5 geometry checks pass; the timing rows
 are warnings by design. Each solve took 9 to 13 min.
 
-**IMUs: what the first solve measured collapses.** Before = calibration A on the raw bag, after =
-calibration B on the corrected bag.
+**IMUs: what the first solve measured collapses.** A = calibration A on the raw bag; B = calibration B
+on the corrected bag. A right calibration leaves nothing for B to find.
 
-| IMU | Gyro scale `Dw` diagonal | Accel scale `Da` diagonal | Largest bias | `t_ga` (ms) | `td` to base (ms) |
-|---|---|---|---|---|---|
-| Xsens (base) | 0.9981, 0.9977, 1.0009 → **1.0000, 1.0000, 1.0000** | 0.9999, 0.9964, 1.0013 → **0.9999, 1.0001, 1.0000** | 0.036 → **0.002** m/s² | −0.82 → **+0.30** | — |
-| GX3-25 | 0.9999, 0.9998, 1.0027 → **1.0000, 1.0000, 1.0000** | 0.9954, 1.0011, 1.0008 → **1.0000, 1.0000, 1.0000** | 0.093 → **0.0002** m/s² | +0.10 → **0.00** | −0.69 → **0.00** |
-| GX3-35 | 0.9990, 0.9986, 1.0009 → **1.0000, 1.0000, 1.0000** | 0.9949, 1.0004, 1.0006 → **1.0000, 1.0000, 1.0000** | 0.064 → **0.0003** m/s² | +0.01 → **0.01** | −2.07 → **0.00** |
-| T265 IMU | 0.9967, 1.0037, 1.0028 → **1.0000, 1.0000, 1.0000** | 1.0205, 1.0204, 1.0123 → **1.0000, 1.0000, 1.0000** | 0.161 → **0.002** m/s² | −6.74 → **0.00** | −7.17 → **0.00** |
+| Check | Solve | Xsens (base) | GX3-25 | GX3-35 | T265 IMU | Pass if |
+|---|---|--:|--:|--:|--:|---|
+| Gyro scale `Dw`: worst axis off 1 | A | 0.23 % | 0.27 % | 0.14 % | 0.37 % | |
+| | B | **0.00 %** | **0.00 %** | **0.00 %** | **0.00 %** | < 1 % |
+| Accel scale `Da`: worst axis off 1 | A | 0.36 % | 0.46 % | 0.51 % | 2.05 % | |
+| | B | **0.01 %** | **0.00 %** | **0.00 %** | **0.00 %** | < 1 % |
+| Largest bias (m/s²) | A | 0.036 | 0.093 | 0.064 | 0.161 | |
+| | B | **0.002** | **0.0002** | **0.0003** | **0.002** | < 0.02 |
+| `t_ga` (ms) | A | −0.82 | +0.10 | +0.01 | −6.74 | |
+| | B | **+0.30** | **0.00** | **0.01** | **0.00** | warn > 2 ms |
+| `td` to base (ms) | A | — | −0.69 | −2.07 | −7.17 | |
+| | B | — | **0.00** | **0.00** | **0.00** | warn > 2 ms |
 
-- **Scale:** every diagonal lands within 0.0001 of 1. The limit is 0.01.
-- **Bias:** every gyro and accel bias drops below 0.002. The limit is 0.02.
-- **`t_ga`:** the T265 IMU's −6.74 ms drops to 0.00 ms. The base Xsens keeps +0.30 ms, under the
-  2 ms warning line.
-- **`td`:** each extra IMU's time offset to the base drops to 0.00 ms.
+The largest change A had to make, the T265 IMU's 2 % accel scale and −6.74 ms `t_ga`, is fully gone
+in B. The base Xsens keeps +0.30 ms of `t_ga`, under the 2 ms warning line.
 
-**Cameras: the geometry stays.**
+<details>
+<summary>Full scale diagonals (x, y, z)</summary>
 
-| Camera | Lever arm to base (mm) | Lever change | Rotation change | `td` (ms) | fx / fy (px) |
-|---|---|---|---|---|---|
-| T265-1 | 130.82 → 130.90 | 0.09 mm | 0.08 mrad | −5.41 → **0.00** | 286.54 / 286.34 → 286.53 / 286.33 |
-| T265-2 | 112.24 → 112.33 | 0.09 mm | 0.11 mrad | −7.47 → **0.00** | 286.51 / 286.08 → 286.50 / 286.08 |
-| ELP-L | 145.12 → 145.16 | 0.08 mm | 0.12 mrad | −123.25 → **0.00** | 426.90 / 426.45 → 426.89 / 426.45 |
-| ELP-R | 185.95 → 185.98 | 0.06 mm | 0.11 mrad | −123.30 → **0.00** | 423.58 / 423.10 → 423.58 / 423.11 |
+| IMU | `Dw`, A | `Dw`, B | `Da`, A | `Da`, B |
+|---|---|---|---|---|
+| Xsens (base) | 0.9981, 0.9977, 1.0009 | 1.0000, 1.0000, 1.0000 | 0.9999, 0.9964, 1.0013 | 0.9999, 1.0001, 1.0000 |
+| GX3-25 | 0.9999, 0.9998, 1.0027 | 1.0000, 1.0000, 1.0000 | 0.9954, 1.0011, 1.0008 | 1.0000, 1.0000, 1.0000 |
+| GX3-35 | 0.9990, 0.9986, 1.0009 | 1.0000, 1.0000, 1.0000 | 0.9949, 1.0004, 1.0006 | 1.0000, 1.0000, 1.0000 |
+| T265 IMU | 0.9967, 1.0037, 1.0028 | 1.0000, 1.0000, 1.0000 | 1.0205, 1.0204, 1.0123 | 1.0000, 1.0000, 1.0000 |
 
-| Baseline | Before | After |
-|---|---|---|
-| T265 pair | 63.69 mm | 63.69 mm |
-| ELP pair | 59.39 mm | 59.40 mm |
+</details>
 
-- **Levers:** every camera moves by under 0.1 mm. The limit is 2 mm.
-- **Rotations:** every camera turns by under 0.13 mrad.
-- **Intrinsics:** fx and fy move by under 0.01 px. Reprojection stays at 0.52 px RMS.
+**Cameras: the geometry stays.** The lever arms, rotations and intrinsics that A found are not
+touched by `apply-calib`, so B should find them again.
+
+| Check | Solve | T265-1 | T265-2 | ELP-L | ELP-R | Pass if |
+|---|---|--:|--:|--:|--:|---|
+| Lever arm to base (mm) | A | 130.82 | 112.24 | 145.12 | 185.95 | |
+| | B | 130.90 | 112.33 | 145.16 | 185.98 | |
+| Lever change (mm) | A → B | **0.09** | **0.09** | **0.08** | **0.06** | ≤ 2 mm |
+| Rotation change (mrad) | A → B | **0.08** | **0.11** | **0.12** | **0.11** | |
+| `td` (ms) | A | −5.41 | −7.47 | −123.25 | −123.30 | |
+| | B | **0.00** | **0.00** | **0.00** | **0.00** | warn > 2 ms |
+| fx (px) | A | 286.54 | 286.51 | 426.90 | 423.58 | |
+| | B | 286.53 | 286.50 | 426.89 | 423.58 | |
+| fy (px) | A | 286.34 | 286.08 | 426.45 | 423.10 | |
+| | B | 286.33 | 286.08 | 426.45 | 423.11 | |
+
+| Stereo baseline | A | B | Pass if |
+|---|--:|--:|---|
+| T265 pair | 63.69 mm | 63.69 mm | moves ≤ 2 mm |
+| ELP pair | 59.39 mm | 59.40 mm | moves ≤ 2 mm |
+
+Every camera moves by under 0.1 mm and turns by under 0.13 mrad; fx and fy move by under 0.01 px.
+Reprojection stays at 0.52 px RMS. The camera `td` collapses with the IMU's: it is a timing term A
+measured and `apply-calib` removed.
 
 **Not tested by this round trip:**
 
