@@ -1,0 +1,106 @@
+---
+title: Why calibrate cameras together
+description: On the VI-Rig 4 IMUs + 4 cams rig, one joint solve gives camera-to-camera extrinsics that repeat to a fraction of a millimetre, and a time offset for each camera.
+pageType: example
+---
+
+Use this page to see what you gain from putting several cameras into one solve.
+You need nothing to follow along. Every number here comes from the
+[VI-Rig 4 IMUs + 4 cams](/reference/datasets/virig-4imus-4cams/) dataset.
+
+**The short answer:**
+
+- **Sub-mm extrinsics:** solving all cameras in one graph gives camera-to-camera
+  extrinsics that repeat to a fraction of a millimetre over 15 recordings.
+- **One td per camera:** each camera gets its own time offset td (camera–IMU
+  time offset). The cameras on this rig are about 116–118 ms apart.
+- **Wide helps narrow:** a narrow camera alone pins its own lever arm poorly.
+  Adding the other cameras tightens it.
+
+The rig has two camera pairs:
+
+- **T265 L / R:** global-shutter fisheye, 848×800, 30 Hz
+- **ELP L / R:** rolling-shutter, 640×480, 25 Hz
+
+## 1. Cameras do not share a clock
+
+From the [example run](/benchmark/examples/virig-4imus-4cams/) on bag 01, with
+all 4 cameras and 4 IMUs in one cam-IMU solve:
+
+| Camera | td (ms) |
+|---|---|
+| T265 L (cam0) | −5.41 |
+| T265 R (cam1) | −7.47 |
+| ELP L (cam2) | −123.25 |
+| ELP R (cam3) | −123.30 |
+
+- **Pairs agree:** inside each pair the offsets are close.
+- **Pairs disagree:** the ELP pair sits about 116–118 ms behind the T265 pair.
+- **So:** one shared td for the rig would be wrong by over 100 ms for one pair.
+  Give each camera its own td.
+
+## 2. Extrinsics repeat
+
+Public results over 15 recordings, batch 2026-11-08a
+([full tables](/benchmark/results/virig-4imus-4cams/)). Median and standard
+deviation (sd) of the camera-to-camera distance:
+
+| Camera pair | Family | MVIS | Kalibr | Basalt |
+|---|---|---|---|---|
+| T265 L – T265 R | T1, camera only | 63.663 mm (sd 0.034) | 63.468 mm (sd 0.099) | 63.555 mm (sd 0.135) |
+| ELP L – ELP R | T8, cam-IMU | 59.207 mm (sd 0.084) | not run | — |
+| T265 L – ELP L | T7, cam-IMU | 153.50 mm (sd 0.17), 14 of 15 bags | — | — |
+
+- **T265 pair:** the MVIS spread is about 3× tighter than Kalibr and 4× tighter
+  than Basalt.
+- **Mixed pair:** even a fisheye and a rolling-shutter camera on different
+  clocks repeat to 0.17 mm.
+- **Note:** in T7, Kalibr's camera baselines are inputs from an MVIS export, so
+  we do not compare them here.
+
+## 3. A wide camera fixes a narrow one
+
+- **Narrow view:** the ELP sees about 92° across. A board seen by it alone
+  constrains the lever arm weakly along some axes (section 3).
+- **Wide view:** the T265 fisheyes see the board over a much wider range of
+  angles. In one graph their poses pin the rig, and the ELP gains from it.
+- **Time offsets across lenses:** on fisheye + narrow rigs, plain time-offset
+  estimation often fails. MVIS then uses two independent estimators, PnP-based
+  and homography cross-correlation. See
+  [What the pipeline does](/guides/camera-calibration/#what-the-pipeline-does).
+
+## 4. When not to bundle
+
+Joint is not always better. Two cases:
+
+- **Hybrid rigs:** a global-shutter camera plus an unsynchronised
+  rolling-shutter camera (T265 L + ELP L here). On bags 03–05 a joint
+  camera-only bundle gave:
+  - 2.4–2.5 px rms reprojection
+  - readout scatter of 15–19 ms
+  - lever z shifts of 5 mm
+
+  One mono solve per camera gave 0.43 px and 0.1 ms readout scatter.
+- **What we do:** solve each such camera on its own in the camera-only step.
+  Then join them in the cam-IMU solve, which brings the extrinsics and the td of
+  each camera. Hardware-synced, same-shutter pairs (ELP L + R) are fine as a
+  joint camera-only solve.
+- **A bad camera can pull a solve:** in an older test, adding ELP L (as a
+  global-shutter camera) to a Kalibr T265 run pulled the T265 gyro scale up
+  about 3 % on two axes. The cause was later traced to the ELP frame stamps.
+  Check each camera's residuals before you trust the joint result.
+
+## Set it up
+
+- **Camera-only:** one config per synced pair. List its cameras under
+  `input:` → `cameras:` and set `reference_camera`. See
+  [Camera-only calibration](/guides/camera-calibration/).
+- **Cam-IMU:** the joint solve with every camera and IMU. It gives the
+  extrinsics and td between the pairs. See
+  [Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+## Related
+
+- [Why calibrate rolling shutter](/why/rolling-shutter/)
+- [Why calibrate IMUs together](/why/multi-imu/)
+- [VI-Rig 4 IMUs + 4 cams results](/benchmark/results/virig-4imus-4cams/)

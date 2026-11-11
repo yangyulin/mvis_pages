@@ -1,116 +1,316 @@
 ---
-title: Camera calibration
-description: Calibrate one or more cameras — board, inputs, model choice, and the pipeline's stages.
+title: Camera-only calibration
+description: Solve each camera's lens and the camera-to-camera extrinsics on the VI-Rig 4 IMUs + 4 cameras dataset, and pick a fisheye model for the T265.
 pageType: guide
 ---
 
-import { Image } from 'astro:assets';
-import kalibrBoard from '../../../assets/kalibr_board.png';
-import aurcoBoard from '../../../assets/aurco.JPG';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Use this page to calibrate one or more cameras without an IMU. MVIS solves all
-of these jointly:
+Use this page to solve each camera's lens and the camera-to-camera extrinsics.
+You need a bag from [step 2](/guides/calibration-motion/). You get a camera YAML
+that [step 4](/guides/camera-imu-calibration/) reads as its prior.
 
-- **Intrinsics:** focal length and image centre of each camera
-- **Distortion:** how the lens bends straight lines
-- **Extrinsics:** where each camera sits relative to the others
-- **Time offsets:** the clock delay between cameras
-- **Rolling-shutter readout:** the time a rolling-shutter sensor takes to read
-  out one frame, row by row
+- **Intrinsics:** focal length and image centre of each camera.
+- **Distortion:** how the lens bends straight lines.
+- **Extrinsics:** where each camera sits relative to the others.
+- **Our example:** the [VI-Rig 4 IMUs + 4 cameras](/reference/datasets/virig-4imus-4cams/)
+  dataset. It has a T265 fisheye pair (global shutter, 848 × 800) and an ELP
+  pair (rolling shutter, 640 × 480).
 
-This is also **step one of camera–IMU calibration**. That step uses the result
-of this one.
+## 1. Solve the cameras in pairs
 
-## 1. Make a target
+The rig has two kinds of camera on two clocks. We solve each pair on its own.
 
-<Image src={kalibrBoard} alt="AprilGrid target" width="200" />
-<Image src={aurcoBoard} alt="ArUco target" width="200" />
+- **T265 pair:** both fisheyes are global shutter and share one clock. Solve
+  them together.
+- **ELP pair:** both cameras are rolling shutter and share one clock. Solve
+  them together.
+- **Do not bundle the T265 with the ELP** in one camera-only solve. Their
+  shutters differ and their clocks are far apart.
+- **Between the pairs:** the extrinsics and time offsets (td) come from the
+  joint camera–IMU solve in [step 4](/guides/camera-imu-calibration/).
 
-Pick one of three boards. Each needs these fields in the config:
+The evidence is on [Why calibrate cameras together](/why/multi-camera/#5-when-not-to-bundle).
 
-| Board | `board_type` | Required fields |
-|---|---|---|
-| AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` |
-| Chessboard | `chessboard` | `rows`, `cols` (**inner corners**), `square_size` (m) |
-| ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` |
+## 2. Write the T265 config
 
-AprilGrid follows the Kalibr 2-bit border convention. Kalibr target YAMLs load
-directly via `apriltag_board.from_kalibr_yaml`.
+Save this as `t265_cam.yaml`, next to the bag:
 
-:::caution[Measure the printed board]
-Print at 100% and measure a tag with calipers. If the true size differs from
-`tag_size`, every translation in the rig scales by that same factor. This error
-is silent and systematic: no residual will reveal it.
-:::
-
-## 2. Record
-
-- **Fill the frame** and cover the image out to its corners. Distortion is only
-  constrained where tags were actually seen.
-- **Vary distance and angle.**
-- **Avoid motion blur.**
-
-## 3. Point the config at your data
-
-MVIS reads six input formats. All of them stream one image at a time, so memory
-stays bounded whatever the dataset size.
-
-A folder of images:
-
-```yaml title="config.yaml"
-cameras:
-  - camera_id: 0
-    source_type: images              # a folder, sorted by filename
-    source_path: /path/to/cam0_images
-```
-
-A ROS1 bag, with several cameras from one bag:
-
-```yaml title="config.yaml"
-cameras:
-  - camera_id: 0
-    source_type: rosbag_topic        # ROS1 — several cameras from one bag
-    source_path: /path/to/data.bag
-    topic: /cam0/image_raw
-  - camera_id: 1
+```yaml title="t265_cam.yaml"
+input:
+  cameras:
+  - camera_id: 2
+    name: T265-1
     source_type: rosbag_topic
-    source_path: /path/to/data.bag
-    topic: /cam1/image_raw
+    source_path: 4imus_4cams_01.bag
+    topic: /t265/fisheye1/image_raw
+    distortion_model: kb4
+    shutter_type: global
+  - camera_id: 3
+    name: T265-2
+    source_type: rosbag_topic
+    source_path: 4imus_4cams_01.bag
+    topic: /t265/fisheye2/image_raw
+    distortion_model: kb4
+    shutter_type: global
+board:
+  board_type: apriltag
+  rows: 6
+  cols: 6
+  tag_size: 0.088
+  tag_spacing: 0.3
+  tag_family: t36h11
+solve:
+  max_iterations: 15
+  max_init_frames: 100
+  pixel_sigma: 1.0
+  huber_threshold: 1.345
+output:
+  path: t265_calib.yaml
+  format: yaml
+reference_camera: 2
+estimate:
+  board_points: true
+corner_subsample: two_anti
 ```
 
-A EuRoC / ASL folder, as used by TUM-VI and Monado SLAM:
+- **`board:`:** the block from [step 1](/guides/board-setup/#2-the-board-in-the-running-example).
+- **`corner_subsample: two_anti`:** two corners per tag, the default. See [Speed](#6-speed).
+- **`estimate.board_points: true`:** solves the board shape too. See
+  [A board is never flat](/guides/board-setup/#4-a-board-is-never-flat).
+- **`reference_camera: 2`:** the other camera's extrinsics are given relative to
+  T265-1.
+- **`shutter_type: global`:** no readout to solve.
 
-```yaml title="config.yaml"
-cameras:
+Run it:
+
+```bash title="shell"
+mvis cam -c t265_cam.yaml
+```
+
+- **`-o` / `--output`:** the run folder for the report, logs and detection
+  cache. By default it is an `ablation` folder next to `output.path`.
+
+### Other input formats
+
+`source_type` takes five formats. MVIS reads each one image at a time.
+
+<Tabs>
+  <TabItem label="ROS1 bag">
+```yaml
+    source_type: rosbag_topic     # ROS1; several cameras from one bag
+    source_path: data.bag
+    topic: /cam0/image_raw
+```
+  </TabItem>
+  <TabItem label="ROS2 bag">
+```yaml
+    source_type: ros2bag
+    source_path: data_ros2
+    topic: /cam0/image_raw
+```
+  </TabItem>
+  <TabItem label="EuRoC">
+```yaml
+    source_type: euroc            # EuRoC / ASL folder: TUM-VI, Monado SLAM
+    source_path: cam0
+```
+  </TabItem>
+  <TabItem label="Images">
+```yaml
+    source_type: images           # a folder, sorted by filename
+    source_path: cam0_images
+```
+  </TabItem>
+  <TabItem label="Timestamped images">
+```yaml
+    source_type: timestamped_images   # a folder plus a CSV of timestamps
+    source_path: cam0_images,timestamps.csv   # folder, then CSV, comma-separated
+```
+  </TabItem>
+</Tabs>
+
+## 3. Choose a fisheye model for the T265
+
+Set `distortion_model` per camera. MVIS has eight models:
+
+- `radtan`, `equidistant`, `fov`, `double_sphere`, `eucm`, `ucm`,
+  `omni_radtan`, `kb4`
+- **Fisheye default:** `kb4`. The names `fisheye` and `kannala_brandt` also
+  mean `kb4`.
+- **Removed:** `kb8`. MVIS refuses it.
+- **Normal lenses:** `radtan`.
+- **Mixed rigs:** each camera can use its own model.
+
+**kb4 and equidistant are the same on the T265.**
+
+- **Why:** they share one polynomial. They differ only for rays more than 90°
+  off axis.
+- **T265 coverage:** on recording 01 the board corners stay under 80° off
+  axis in the T265 images.
+- **Checked:** in our T265 model study every reprojection number of the two models agreed
+  to about 1e-6 px.
+- **So:** the regression rows that use `equidistant` stand for `kb4` too.
+
+How the models compare on the T265 (our study on the 5-IMU rig,
+[virig-5imus-4cams](/benchmark/results/virig-5imus-4cams/), 7 recordings, same
+T265 model):
+
+| Model | Verdict | What we saw |
+|---|---|---|
+| `kb4` / `equidistant` | **Use this** | Lowest error at the image edge, most repeatable between recordings |
+| `eucm` | Usable | 9–12 % higher edge error (outer-bin p95); 1.57× the smallest spread |
+| `double_sphere` | Avoid | 3.10× the smallest spread; needs bounds in cam-IMU |
+| `omni_radtan` | Avoid | 2.93× the smallest spread; needs bounds in cam-IMU |
+| `fov` | Avoid | 3.39× the smallest spread |
+| `radtan` | Fails | Cannot follow the lens |
+
+- **Spread:** how far each recording's fit moves the projected pixels,
+  compared with the most central fit. The ratio is for the worst camera,
+  against the model with the smallest spread on that camera.
+- **Bounds:** with free intrinsics in cam-IMU, the double sphere focal length
+  went negative on 4 of 7 recordings, omni-radtan on 3 of 7. Set
+  `solve.bound_intrinsics: true` in the step 4 config if you use them.
+
+To try another model, change only the `distortion_model` line on both cameras:
+
+<Tabs>
+  <TabItem label="kb4 (default)">
+```yaml title="t265_cam.yaml"
+    distortion_model: kb4
+```
+  </TabItem>
+  <TabItem label="double_sphere">
+```yaml title="t265_cam.yaml"
+    distortion_model: double_sphere
+```
+  </TabItem>
+  <TabItem label="eucm">
+```yaml title="t265_cam.yaml"
+    distortion_model: eucm
+```
+  </TabItem>
+</Tabs>
+
+The trade-offs in math are on [Camera model](/concepts/camera-model/).
+
+## 4. Result on the running example
+
+**Bag 01, the two configs on this page** (`mvis cam`, MVIS main, 2026-11-10, `two_anti`):
+
+| | T265-1 | T265-2 | ELP-L | ELP-R |
+|---|---|---|---|---|
+| Model | `kb4` | `kb4` | `equidistant` | `equidistant` |
+| fx / fy (px) | 284.74 / 284.30 | 284.76 / 284.12 | 427.60 / 426.69 | 424.44 / 423.49 |
+| cx / cy (px) | 415.07 / 403.48 | 414.70 / 397.86 | 350.06 / 267.37 | 336.27 / 258.50 |
+| Rolling-shutter readout | — | — | 14.60 ms | 14.58 ms |
+| Median / P95 reprojection (px) | 0.18 / 0.63 | 0.17 / 0.62 | 0.28 / 0.96 | 0.30 / 0.97 |
+
+| Pair | Baseline | Translation (mm) | Rotation, log(R) (rad) |
+|---|---|---|---|
+| T265-2 in T265-1 | 63.71 mm | 63.71, −0.59, −0.51 | 0.0024, 0.0063, 0.0010 |
+| ELP-R in ELP-L | 59.43 mm | 59.43, 0.68, −0.10 | −0.0215, −0.0135, −0.0027 |
+
+- **Run time:** about 10 min (T265) and 15 min (ELP), detection included, on a busy desktop.
+- **The reports** of both runs are in [Read the report](#7-read-the-report).
+
+**All 15 recordings** ([results page](/benchmark/results/virig-4imus-4cams/), T265
+fisheye stereo, camera only, median and sd). These runs use `equidistant`,
+which gives the same numbers as `kb4` here:
+
+| | MVIS | Kalibr | Basalt |
+|---|---|---|---|
+| Stereo baseline (mm) | 63.663 (sd 0.034) | 63.468 (sd 0.099) | 63.555 (sd 0.135) |
+| Fisheye 1 fx (px) | 286.54 (sd 0.65) | 285.09 (sd 2.40) | 284.14 (sd 0.65) |
+
+- **Baseline:** the distance between the two T265 cameras.
+- **Board shape:** MVIS estimates it. Kalibr assumes a flat board.
+- **Repeatable:** the MVIS baseline moves by about 0.03 mm between recordings.
+
+## 5. Write the ELP config
+
+The ELP pair uses the same shape. Only the camera block and the reference
+camera change:
+
+```yaml title="elp_cam.yaml"
+input:
+  cameras:
   - camera_id: 0
-    source_type: euroc               # EuRoC / ASL — TUM-VI, Monado SLAM
-    source_path: /path/to/cam0
+    name: ELP-L
+    source_type: rosbag_topic
+    source_path: 4imus_4cams_01.bag
+    topic: /elp/split_sync_image_node/left/image_raw
+    distortion_model: equidistant
+    shutter_type: rolling
+  - camera_id: 1
+    name: ELP-R
+    source_type: rosbag_topic
+    source_path: 4imus_4cams_01.bag
+    topic: /elp/split_sync_image_node/right/image_raw
+    distortion_model: equidistant
+    shutter_type: rolling
+# board:, solve: and estimate: as in t265_cam.yaml
+output:
+  path: elp_calib.yaml
+  format: yaml
+reference_camera: 0
 ```
 
-Also available:
-
-- `timestamped_images`: a folder plus a CSV of timestamps
-- `ros2bag`
-
-## 4. Pick a distortion model
-
-```yaml title="config.yaml"
-    distortion_model: kb4            # radtan | kb4 | equidistant | fov
-                                     # double_sphere | eucm | ucm | omni_radtan
+```bash title="shell"
+mvis cam -c elp_cam.yaml
 ```
 
-- **Normal lenses:** `radtan`
-- **Fisheye lenses:** `equidistant`
-- **Mixed rigs:** models can be **mixed across cameras** in one rig
+- **`distortion_model: equidistant`:** what our ELP runs use.
+- **`shutter_type: rolling`:** `mvis cam` then solves each ELP camera's readout.
+  Readout details are in [step 5](/guides/rolling-shutter/).
 
-The trade-offs are in [Camera model](/concepts/camera-model/). That page also
-covers the divergence to watch for with a wide field of view (FoV).
+## 6. Speed
 
-## 5. Run
+`corner_subsample` picks how many corners per tag enter the solve. The camera-only
+default is `two_anti`.
 
-```bash
-mvis calibrate --config config.yaml
+```yaml title="t265_cam.yaml"
+corner_subsample: two_anti     # two_anti | two_diag | all | top_left
 ```
+
+- **`two_anti` (default):** 2 corners per tag, top-left and bottom-right. About 20 % faster than `all`, and cx, cy stay put.
+- **`two_diag`:** 2 corners per tag, the other diagonal.
+- **`all`:** 4 corners per tag. Most data, no speed-up.
+- **`top_left`:** 1 corner per tag, fastest. The fit is unchanged, but cx and
+  cy can shift by up to about 0.8 px.
+- **`factor_hz`:** the frame rate used per camera, 10 Hz by default. Set it
+  lower to use fewer frames from a long recording.
+
+## 7. Read the report
+
+MVIS writes:
+
+- **`output.path`:** the result to deploy. Step 4 reads this file.
+- **`*_calib.yaml`:** the same result, in the run folder.
+- **`*_full.yaml`:** the result plus board poses, to replay the run.
+- **`.log`:** the run log, in the run folder.
+- **HTML report:** self-contained.
+
+Check the **motion-excitation grade** before the reprojection error. It is in the
+report's Data Quality section, folded by default. The grade says how well your
+motion constrained the calibration. The reprojection error is the pixel gap
+between seen and predicted corners. See [Evaluation & metrics](/reference/evaluation/).
+
+The reports of the two bag 01 runs above. They are as MVIS wrote them, except that local folder
+names are cut and the appendix of low-detection frames is left out to save space:
+
+<Tabs>
+  <TabItem label="T265 pair">
+<iframe src="/media/guides/virig-4imus-4cams/cam_t265_report.html" title="MVIS camera-only report, T265 pair, VI-Rig bag 01" loading="lazy" style="width:100%;height:80vh;border:1px solid var(--sl-color-gray-5);border-radius:0.4rem"></iframe>
+
+[Open full screen](/media/guides/virig-4imus-4cams/cam_t265_report.html) (HTML, 9.7 MB)
+  </TabItem>
+  <TabItem label="ELP pair">
+<iframe src="/media/guides/virig-4imus-4cams/cam_elp_report.html" title="MVIS camera-only report, ELP pair, VI-Rig bag 01" loading="lazy" style="width:100%;height:80vh;border:1px solid var(--sl-color-gray-5);border-radius:0.4rem"></iframe>
+
+[Open full screen](/media/guides/virig-4imus-4cams/cam_elp_report.html) (HTML, 11.3 MB)
+  </TabItem>
+</Tabs>
 
 ## What the pipeline does
 
@@ -118,51 +318,27 @@ The failure messages name these stages, so they are worth knowing:
 
 | Stage | What happens |
 |---|---|
-| Detection | Adaptive multi-scale AprilTag — probes scale 1.0, then up to 2 adaptive scales by observed module size; subpixel refinement at original resolution |
+| Detection | Adaptive multi-scale AprilTag — probes scale 1.0, then up to 3 extra scales picked from the observed tag size; far boards get an upscaled crop |
 | Quality gating | Corner subsample, pooled-pose filter (≥20% tags across cameras), per-corner ≥5 views, per-camera ≥3 views, ≥6 tags/frame |
 | 1 | Per-camera init — vanishing-point focal + RANSAC PnP board poses + sanity check |
 | 2 | Per-camera GTSAM refinement, with rolling-shutter readout if enabled |
-| 3 | Trajectory alignment — extrinsics via RANSAC, time offsets via dual PnP + homography cross-correlation |
+| 3 | Trajectory alignment — extrinsics via RANSAC; time offsets (only with `optimize_time_offset: true`) via PnP and homography cross-correlation |
 | 4 | Joint multi-camera factor graph — the unified factor, all parameters |
 | 5 | Outlier-driven rerun with pathology guardrail |
 
-## Speed
-
-`corner_subsample` defaults to `top_left`. It uses one corner per tag instead of
-four.
-
-- **Speed-up:** **3–5× faster for under 0.1% quality drift**
-- **Tested:** validated across eight dataset families
-- **Fallback:** it switches to `all` on its own when the data is sparse
-
-```yaml title="config.yaml"
-corner_subsample: top_left     # top_left | two_diag | all
-```
-
-If a long recording is slowing you down, `factor_hz` subsamples the frames.
-
-## 6. Read the report
-
-MVIS writes three files:
-
-- **`*_calib.yaml`:** the result to deploy
-- **`*_full.yaml`:** the result plus board poses, to replay the run
-- **HTML report:** self-contained
-
-Check the **motion-excitation grade** before the reprojection error. The grade
-says how well your motion constrained the calibration. The reprojection error
-is the pixel gap between seen and predicted corners. See
-[Evaluation & metrics](/reference/evaluation/).
-
-## Multi-camera
-
-1. Add one entry per camera to `cameras:`.
-2. Set `reference_camera`.
-3. For unsynchronised cameras, enable `optimize_time_offset: true`.
-
-There is no separate stereo step. All cameras enter one graph. A five-camera rig
-stays consistent this way, instead of piling up pairwise error.
-
 ## Next
 
-Add an IMU: [Camera–IMU calibration](/guides/camera-imu-calibration/).
+- **Step 4:** point `camera_input.path` at the camera YAML from this page. It
+  takes one file, so join the T265 and ELP results into one YAML first. See
+  [Camera–IMU calibration](/guides/camera-imu-calibration/#1-point-at-the-camera-prior).
+  The cam-IMU solve refines the intrinsics further.
+- **Renumber when you join:** MVIS sorts the joined file's cameras by `id` and
+  matches them to `cam_topics` by order. Step 4 lists the T265 first, so give the
+  T265 cameras `id` 0 and 1 and the ELP cameras 2 and 3. The configs on this page
+  use other ids (ELP 0 and 1, T265 2 and 3).
+- **Our example's prior:** the `camera_prior.yaml` of the
+  [example run](/benchmark/examples/virig-4imus-4cams/) joins two earlier
+  camera-only results. The ELP pair is the median of the 15 ELP camera-only
+  solves. The T265 pair comes from an older camera-only solve of the T265, not
+  from the config on this page.
+- **Step 5:** [Rolling-shutter calibration](/guides/rolling-shutter/) for the ELP.

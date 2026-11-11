@@ -1,83 +1,162 @@
 ---
-title: Rolling shutter
-description: Solve per-row readout time jointly with intrinsics, extrinsics, and time offset.
+title: Rolling-shutter calibration
+description: Solve the ELP readout time on the VI-Rig 4 IMUs + 4 cameras dataset, camera-only and in the camera–IMU solve.
 pageType: guide
 ---
 
-Use this page to calibrate a rolling-shutter camera. Such a camera exposes its
-rows one after another, so one image spans a range of times.
+Use this page to solve the ELP readout time. You need steps 3 and 4. You get a
+readout per ELP camera.
 
-MVIS solves the **readout time** as a parameter. This is the time the camera
-takes to read out its rows. We solve it rather than correcting for it afterwards.
+- **Rolling shutter:** the camera exposes its rows one after another, so one
+  image spans a range of times.
+- **Readout:** the time from the first row to the last row of one image.
+- **Our example:** the [VI-Rig 4 IMUs + 4 cameras](/reference/datasets/virig-4imus-4cams/)
+  dataset. The two T265 fisheyes are global shutter. The two ELP cameras are
+  rolling shutter.
 
-## Enable it
+## 1. Camera-only: mark the ELP as rolling shutter
 
-```yaml title="config.yaml"
-cameras:
+In the [camera-only ELP config](/guides/camera-calibration/#5-write-the-elp-config),
+set `shutter_type` on each ELP camera:
+
+```yaml title="elp_cam.yaml"
+input:
+  cameras:
   - camera_id: 0
-    shutter_type: rolling      # global | rolling
+    name: ELP-L
+    topic: /elp/split_sync_image_node/left/image_raw
+    shutter_type: rolling      # global | rolling | auto (auto = global)
+  - camera_id: 1
+    name: ELP-R
+    topic: /elp/split_sync_image_node/right/image_raw
+    shutter_type: rolling
 ```
 
-- **Per camera:** you set it on each camera.
-- **Mixed rigs:** a rig can mix global- and rolling-shutter cameras freely.
-- **Example:** the released 4-IMU/4-camera rig does exactly that.
+```bash title="shell"
+mvis cam -c elp_cam.yaml
+```
 
-In a camera–IMU config, you can estimate readout in the cam-IMU stage instead:
+- **Readout is on:** `mvis cam` solves the readout of every camera marked
+  `rolling`.
+- **Global cameras:** leave the T265 fisheyes at `shutter_type: global`. A rig
+  can mix both kinds.
+- **`auto`:** the default. It counts as global, so readout stays off.
 
-```yaml title="cam_imu.yaml"
+Result over the 15 recordings
+([results page](/benchmark/results/virig-4imus-4cams/), ELP stereo, camera only):
+
+| Readout (ms) | ELP-L | ELP-R |
+|---|---|---|
+| MVIS | 14.600 (sd 0.409) | 14.598 (sd 0.408) |
+| Kalibr RS | 16.354 (sd 2.00) | 17.369 (sd 1.42, n = 13) |
+
+- **Kalibr:** it solves one camera per run. Two ELP-R recordings failed, so it
+  has 13 of 15.
+- **Lens models differ:** MVIS uses equidistant, Kalibr radtan. So only the
+  readout is compared here.
+
+## 2. Camera–IMU: turn readout on per camera
+
+In the [step 4 config](/guides/camera-imu-calibration/), add a per-camera
+override for the two ELP cameras:
+
+```yaml title="virig_4imus_4cams_cam_imu.yaml"
 camera_input:
-  estimate_readout: true
+  cameras:
+  - {}
+  - factor_hz: 4.0
+  - estimate_readout: true
+    factor_hz: 4.0
+  - estimate_readout: true
+    factor_hz: 4.0
 ```
+
+- **Order:** the list follows the camera order in `cam_topics`. cam0 and cam1
+  are the T265 fisheyes. cam2 and cam3 are the ELP left and right. (In the
+  camera-only `elp_cam.yaml` above, the ELP cameras have `camera_id` 0 and 1.)
+- **`estimate_readout: true`:** solves the readout of that camera.
+- **`factor_hz: 4.0`:** adds that camera's frames to the solve at 4 Hz. This
+  keeps the solve small.
+- **Rig-wide switch:** the example config also sets `estimate.camera.tr: false`.
+  This keeps readout off for the global-shutter T265. The per-camera
+  `estimate_readout: true` wins for the ELP.
+- **All cameras at once:** `estimate.camera.tr: true` turns readout on for every
+  camera that has no `estimate_readout` of its own. It overrides
+  `camera_input.estimate_readout`, and MVIS logs a warning when both are set.
+
+```bash title="shell"
+mvis cam-imu -c virig_4imus_4cams_cam_imu.yaml
+```
+
+The full config is on the [example page](/benchmark/examples/virig-4imus-4cams/).
+
+## 3. Read the result
+
+Recording 01 ([example run](/benchmark/examples/virig-4imus-4cams/)):
+
+| | ELP-L (cam2) | ELP-R (cam3) |
+|---|---|---|
+| Readout (ms) | 16.684 | 16.732 |
+| td (ms) | −123.25 | −123.30 |
+
+- **td:** the camera's time offset to the base IMU. The ELP td is large. The
+  T265 cameras sit at −5.41 and −7.47 ms.
+
+All 15 recordings ([results page](/benchmark/results/virig-4imus-4cams/), MVIS
+median and sd):
+
+| Run | ELP-L readout (ms) | ELP-R readout (ms) |
+|---|---|---|
+| ELP stereo + two IMUs (T8) | 16.618 (sd 0.122) | 16.594 (sd 0.111) |
+| t265 fisheye 1 + ELP-L + two IMUs (T7) | 16.670 (sd 0.091, n = 14) | — |
+
+- **Repeatable:** the cam-IMU readout moves by about 0.1 ms between recordings.
+
+## 4. Camera-only and cam-IMU readouts differ
+
+- **The gap:** camera-only gives 14.6 ms. Cam-IMU gives 16.6 ms.
+- **Cause:** not yet explained.
+- **Spread:** the cam-IMU value repeats more tightly (sd about 0.1 ms against 0.4 ms).
 
 ## Why it is solved jointly
 
-Readout is constrained by the same residuals as everything else. So it is not a
-post-hoc correction with no derivative. A residual is the error between an
-observed and a predicted image point.
+Readout is fitted by the same residuals as everything else. It is not a fix
+applied afterwards.
 
-This works because **one unified factor** (one error term in the solver) holds
-all of these:
+- **Per-row time:** we project each corner against the trajectory at *its row's*
+  time, not the frame's.
+- **One factor:** projection, td, readout and pose interpolation sit in one
+  error term.
 
-- projection
-- time offset
-- rolling shutter
-- extrinsic composition
-- SLERP pose interpolation (smooth blending between two poses)
-
-We project a row's observation against the trajectory at *that row's* time,
-not the frame's.
+The math: [Camera model](/concepts/camera-model/#rolling-shutter).
 
 ## What to expect
 
-Readout is among the weakest parameters in the graph.
+Readout is one of the weakest parameters in the solve.
 
-- **Needs fast motion:** only motion fast enough that rows see meaningfully
-  different geometry excites it.
-- **Slow recordings fail:** a slow, smooth recording will not constrain it.
-- **Drift:** then the estimate drifts toward whatever the initialisation
-  suggested.
+- **Needs fast motion:** rows must see clearly different geometry.
+- **Slow recordings fail:** a slow, smooth recording will not pin it.
+- **Drift:** the estimate then stays near where it started.
 
-Two checks are worth more than a single run's residual:
-
-- **Repeatability.** Calibrate several sequences of the same rig with
-  [batch mode](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
-  and compare. A readout that moves between sequences was not observed in them.
-- **Round-trip.** [`mvis roundtrip`](/guides/roundtrip/) catches a readout
-  that absorbed error belonging to the time offset.
-
-:::caution[Readout and time offset trade against each other]
-Both shift *when* an observation is considered to have happened. With
-insufficient motion the solver cannot separate them. The pair can then land
-anywhere along a ridge (a line of equally good solutions) while the residual
-stays flat. Is a rolling-shutter camera's `td` (its time offset) displaced
-relative to its global-shutter neighbours? Suspect this before the hardware.
+:::caution[Readout and td trade against each other]
+Both shift *when* a corner is taken to have been seen. With too little motion,
+the solver cannot separate them. The pair can land anywhere along a ridge (a
+line of equally good solutions) while the residual stays flat. Is a rolling-shutter
+camera's td off from its global-shutter neighbours by about a readout? Suspect
+this before the hardware. The ELP gap in recording 01 (about 118 ms) is far
+larger than its readout (about 17 ms), so it is not this.
 :::
 
-## Reporting
+## Checks
 
-- **HTML report:** readout appears in the temporal-calibration section, merged
-  with the time offset. We read them together for the reason above.
-- **Regression comparison reports:** they break out per-collection readout and
-  time offset. This makes drift across a dataset family visible.
+- **Repeatability:** calibrate several recordings of the rig with
+  [batch mode](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
+  and compare. A readout that moves between recordings was not observed.
+- **Round trip cannot test it:** [`mvis roundtrip`](/guides/roundtrip/) uses
+  `mvis apply-calib`. That re-stamps the frames but does not unwarp the rows. So
+  readout errors stay hidden.
 
-The residual and its Jacobians (its derivatives): [Camera model](/concepts/camera-model/).
+## Next
+
+- **Step 6:** [Multi-IMU spatial-temporal calibration](/guides/multi-sensor-rigs/).
+- **Why it matters:** [Why calibrate rolling shutter](/why/rolling-shutter/).

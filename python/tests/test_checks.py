@@ -25,7 +25,7 @@ def _sidebar(**kw):
 
 def test_sidebar_has_benchmark_then_sensor_wiki():
     assert C.SECTIONS.index("Device wiki") == C.SECTIONS.index("Benchmark") + 1
-    assert C.BENCHMARK == ["Examples", "Why calibrate t_ga", "Results", "Methodology"]
+    assert C.BENCHMARK == ["Examples", "Results", "Methodology"]
     assert C.sidebar_problems(_sidebar(), NAV) == []
 
 
@@ -61,7 +61,7 @@ def test_sidebar_problems_name_what_is_wrong():
 
 def test_a_sensor_under_benchmark_fails():
     s = _sidebar(children={"Benchmark": [*C.BENCHMARK, "Sensors"], "Device wiki": ["Overview", "Tracking", "Head-worn"]})
-    assert C.sidebar_problems(s, NAV) == ["Benchmark holds ['Examples', 'Why calibrate t_ga', 'Results', 'Methodology', 'Sensors']"]
+    assert C.sidebar_problems(s, NAV) == ["Benchmark holds ['Examples', 'Results', 'Methodology', 'Sensors']"]
 
 
 def test_a_sensor_missing_or_twice_in_the_groups_fails():

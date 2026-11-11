@@ -7,10 +7,10 @@ from pathlib import Path
 from urllib.parse import unquote
 
 # --- sidebar (nav_check) ---------------------------------------------------------------------------------------
-SECTIONS = ["Getting started", "Guides", "Benchmark", "Device wiki", "Concepts", "Reference", "Contribute", "About"]
-BENCHMARK = ["Examples", "Why calibrate t_ga", "Results", "Methodology"]
+SECTIONS = ["Getting started", "Guides", "Why calibrate", "Benchmark", "Device wiki", "Concepts", "Reference", "Contribute", "About"]
+BENCHMARK = ["Examples", "Results", "Methodology"]
 RESULTS = ["Leaderboard", "Datasets eval"]
-DEEP_PAGES = ["/devices/intel-t265/", "/benchmark/examples/monado/", "/benchmark/results/tum-vi/", "/concepts/notation/", "/reference/cli/", "/about/license/"]
+DEEP_PAGES = ["/devices/intel-t265/", "/benchmark/examples/monado/", "/benchmark/results/tum-vi/", "/concepts/notation/", "/reference/cli/", "/about/license/", "/why/tga/"]
 NOT_IN_SIDEBAR = {"/"}
 
 

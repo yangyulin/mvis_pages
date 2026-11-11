@@ -29,5 +29,7 @@
  "/sensors/xq20/": "/devices/xq20/",
  "/sensors/valve-index/": "/devices/valve-index/",
  "/sensors/hp-reverb-g2/": "/devices/hp-reverb-g2/",
- "/sensors/samsung-odyssey-plus/": "/devices/samsung-odyssey-plus/"
+ "/sensors/samsung-odyssey-plus/": "/devices/samsung-odyssey-plus/",
+ "/benchmark/tga/": "/why/tga/",
+ "/guides/corrected-datasets/": "/guides/roundtrip/"
 }

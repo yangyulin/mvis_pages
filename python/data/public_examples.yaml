@@ -250,7 +250,7 @@ examples:
         text: >-
           This run estimates t_ga, the time offset between the gyroscope and the accelerometer, as every MVIS camera +
           IMU run does by default. What happens to tools that cannot model it is shown on its own page.
-        link: {url: /benchmark/tga/, label: Why calibrate t_ga}
+        link: {url: /why/tga/, label: Why calibrate t_ga}
   looper-insight9:
     title: Looper Insight 9
     nav: Looper Insight 9

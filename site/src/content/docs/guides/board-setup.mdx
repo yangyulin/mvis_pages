@@ -1,0 +1,131 @@
+---
+title: Set up the calibration board
+description: Pick a board, measure it, and write the board block that every later calibration step reads.
+pageType: guide
+---
+
+
+Use this page to pick, measure and describe the board. You need a printed board or a monitor.
+You get the `board:` block every later step uses.
+
+:::note[Running example]
+The guides use one rig as the running example: the VI-Rig recording set
+[virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/). It has 4 IMUs, a T265 fisheye pair
+and an ELP stereo pair. It is on the Calibench Hub (`calibench-vi/datasets`) under CC BY-NC 4.0.
+:::
+
+**Hands on:** you leave this page with a `board:` block (and, if you have one, a heights file).
+[Step 2](/guides/calibration-motion/) records with that board.
+[Step 3](/guides/camera-calibration/) puts the block in its config.
+
+## 1. Pick a board type
+
+<figure style="display:flex;gap:1rem;flex-wrap:wrap;margin:0">
+  <figure style="margin:0;flex:1 1 220px"><img src="/downloads/boards/aprilgrid_6x6_2560x1440.png" alt="AprilGrid 6 × 6, tag36h11" style="width:100%;border:1px solid var(--sl-color-gray-5)" /><figcaption>AprilGrid 6 × 6</figcaption></figure>
+  <figure style="margin:0;flex:1 1 220px"><img src="/downloads/boards/chessboard_10x7_2560x1440.png" alt="Chessboard 10 × 7 squares" style="width:100%;border:1px solid var(--sl-color-gray-5)" /><figcaption>Chessboard 10 × 7 squares</figcaption></figure>
+</figure>
+
+These are the two boards we used to record the [calibration motion](/guides/calibration-motion/).
+Both are in [section 5](#5-no-printer-use-a-screen-board) as images and configs. Pick one. Each needs these fields in the config:
+
+| Board | `board_type` | Required fields |
+|---|---|---|
+| AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` |
+| Chessboard | `chessboard` | `rows`, `cols` (**inner corners**), `square_size` (m) |
+
+- **AprilGrid** follows the Kalibr 2-bit border convention.
+- **Kalibr target YAML:** MVIS can read one in Python (`AprilTagBoard.from_kalibr_yaml`). No config
+  key points at a Kalibr file, so write the `board:` block yourself.
+
+## 2. The board in the running example
+
+The VI-Rig recordings use a printed AprilGrid:
+
+- **Grid:** 6 × 6 tags, family t36h11
+- **Tag:** 0.088 m, edge to edge
+- **Spacing:** 0.3, the ratio of the gap to the tag
+
+Its Kalibr file, `april.yaml`, is on the Hub next to the bags. It says `target_type: 'aprilgrid'`,
+`tagCols: 6`, `tagRows: 6`, `tagSize: 0.088`, `tagSpacing: 0.3`.
+
+The same board in MVIS:
+
+```yaml title="config.yaml"
+board:
+  board_type: apriltag
+  rows: 6
+  cols: 6
+  tag_size: 0.088
+  tag_spacing: 0.3
+  tag_family: t36h11
+```
+
+## 3. Measure what you printed
+
+:::caution[Measure the printed board]
+Print at 100% and measure a tag with calipers. If the true size differs from
+`tag_size`, every translation in the rig scales by that same factor. This error
+is silent and systematic: no residual will reveal it.
+:::
+
+## 4. A board is never flat
+
+A printed board bends and twists a little. A solve that assumes it is flat pushes that error into the
+calibration.
+
+The VI-Rig board, estimated from the camera residuals:
+
+- **Out of plane:** 10–11 mm peak to peak, 2.3–2.4 mm rms.
+- **Example run:** the [4 IMUs + 4 cameras example](/benchmark/examples/virig-4imus-4cams/)
+  re-estimates it at 2.21 mm rms and 8.94 mm peak to peak.
+- **Effect:** estimating the shape cut the camera-only residual by 30–45 %. On the ELP left camera alone,
+  0.771 px became 0.430 px.
+
+Turn it on with one key. MVIS then solves one height per corner, in camera-only and camera–IMU runs:
+
+```yaml title="config.yaml"
+board:
+  # ... the fields above ...
+  heights_file: board_shape_4imus_4cams.yaml   # optional start values, from an earlier run
+estimate:
+  board_points: true
+```
+
+- **`estimate.board_points: true`:** solve the board shape with everything else.
+- **`board.heights_file`:** optional. The heights start from this file, or flat without it. A camera–IMU
+  run writes its estimate next to its output as `<output>_board_shape.yaml`, which you can use here.
+  The example's `board_shape_4imus_4cams.yaml` is such an earlier estimate of the VI-Rig board.
+- **Prior:** each height has a weak prior of 3 mm (solver default `board_height_sigma: 0.003`, in m).
+
+We turn it on for every VI-Rig solve.
+
+## 5. No printer? Use a screen board
+
+You can show the board on a monitor instead. We made two full-screen images for a 2560 × 1440 monitor,
+with configs for MVIS and Kalibr:
+
+| Board | Size | Downloads |
+|---|---|---|
+| AprilGrid 6 × 6 | tag36h11, tag 43.47 mm, spacing 0.3 | [image](/downloads/boards/aprilgrid_6x6_2560x1440.png) (PNG, 75 KB) · [MVIS config](/downloads/boards/aprilgrid_6x6_mvis.yaml) · [Kalibr config](/downloads/boards/aprilgrid_6x6_kalibr.yaml) |
+| Chessboard 10 × 7 squares | 9 × 6 inner corners, square 43.47 mm | [image](/downloads/boards/chessboard_10x7_2560x1440.png) (PNG, 30 KB) · [MVIS config](/downloads/boards/chessboard_10x7_2560x1440_mvis.yaml) · [Kalibr config](/downloads/boards/chessboard_10x7_2560x1440_kalibr.yaml) |
+
+**How to show them:**
+
+1. Open the image full screen at 100 % on a 2560 × 1440 monitor.
+2. Use no display scaling and no zoom, so one image pixel is one screen pixel.
+
+On our monitor 160 px (one tag, one square) measure 43.47 mm, the size in the configs. On another screen,
+measure one tag or square with a ruler. Put that size in the config:
+
+- **MVIS:** `tag_size` / `square_size`
+- **Kalibr:** `tagSize` / `rowSpacingMeters` and `colSpacingMeters`
+
+**Setup:**
+
+- Board upright and flat.
+- Enough light for a short exposure (about 2 ms).
+
+## Next
+
+[Step 2: record the dataset](/guides/calibration-motion/). It shows how to move the rig in front of the
+board.

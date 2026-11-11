@@ -1,75 +1,36 @@
 ---
-title: Calibration motion
-description: How to move the rig in front of the board so a camera–IMU calibration converges on every parameter, built from a real hand-held take and checked with a noisy digital twin.
+title: Record the dataset
+description: How to move the rig in front of the board so the solver converges on every parameter, with the VI-Rig 4 IMUs + 4 cameras recordings as the running example.
 pageType: guide
 wide: true
 ---
 
 import CalibMotionPlayer from '../../../components/CalibMotionPlayer.astro';
 
-Use this page to plan how you move the rig for a camera–IMU calibration. You need a board on a screen
-and a rig with cameras and an IMU (inertial measurement unit: gyroscope and accelerometer).
+Use this page to record a take the solver can use. You need the board from
+[step 1](/guides/board-setup/). You get one bag per take.
+
+- **Takes from step 1:** the board, set up and measured.
+- **Hands on to step 3:** the bags, for [camera-only calibration](/guides/camera-calibration/).
 
 A calibration can only find what the motion shows it. Our 60 s motion below excites every axis. It also
 sweeps the board across the whole image.
 
 We built it from a real hand-held recording with our Looper Insight 9. We checked it with a **noisy
-digital twin**. The twin:
+digital twin**: a simulated copy of the rig that we record, solve and compare with the truth. A motion is
+good if the twin still converges on every calibration parameter. Converges means the solve settles on a
+value.
 
-- simulates the recording;
-- solves it;
-- compares the result with the truth.
+<span id="boards-we-used" class="cm-anchor"></span>The board setup moved to [step 1: set up the calibration board](/guides/board-setup/).
 
-A motion is good if the twin still converges on every calibration parameter. Converges means the solve
-settles on a value.
+## 1. What a good take has
 
-## <span id="boards-we-used" class="cm-anchor"></span>1. Set up the board
-
-Pick your board first. Each board has its own motion:
-
-- **AprilGrid:** the main motion is built for it. It may run partly off the edge of the picture.
-- **Chessboard:** it is only detected with every corner in the picture. So it has its own, smaller motion
-  (see [step 2](#2-watch-and-practise-the-motion)).
-
-Both boards are full-screen images for a 2560 × 1440 monitor, with configs for MVIS and Kalibr.
-
-<div class="cm-boards not-content">
-  <figure>
-    <a href="/downloads/boards/aprilgrid_6x6_2560x1440.png"><img src="/downloads/boards/aprilgrid_6x6_2560x1440.png" width="320" height="180" loading="lazy" alt="AprilGrid of 6 × 6 tags, black on white, in a 2560 × 1440 image" /></a>
-    <figcaption>
-      <b>AprilGrid 6 × 6</b> (tag36h11, tag 43.47 mm, spacing 0.3)<br />
-      <a href="/downloads/boards/aprilgrid_6x6_2560x1440.png" download>image</a> (PNG, 75 KB) ·
-      <a href="/downloads/boards/aprilgrid_6x6_mvis.yaml" download>MVIS config</a> ·
-      <a href="/downloads/boards/aprilgrid_6x6_kalibr.yaml" download>Kalibr config</a> (YAML, under 1 KB)
-    </figcaption>
-  </figure>
-  <figure>
-    <a href="/downloads/boards/chessboard_10x7_2560x1440.png"><img src="/downloads/boards/chessboard_10x7_2560x1440.png" width="320" height="180" loading="lazy" alt="Chessboard of 10 × 7 squares, black on white, in a 2560 × 1440 image" /></a>
-    <figcaption>
-      <b>Chessboard 10 × 7 squares</b> (9 × 6 inner corners, square 43.47 mm)<br />
-      <a href="/downloads/boards/chessboard_10x7_2560x1440.png" download>image</a> (PNG, 30 KB) ·
-      <a href="/downloads/boards/chessboard_10x7_2560x1440_mvis.yaml" download>MVIS config</a> ·
-      <a href="/downloads/boards/chessboard_10x7_2560x1440_kalibr.yaml" download>Kalibr config</a> (YAML, under 1 KB)
-    </figcaption>
-  </figure>
-</div>
-
-**How to show them:**
-
-1. Open the image full screen at 100 % on a 2560 × 1440 monitor.
-2. Use no display scaling and no zoom, so one image pixel is one screen pixel.
-
-On our monitor 160 px (one tag, one square) measure 43.47 mm, the size in the configs. On another screen,
-measure one tag or square with a ruler. Put that size in the config:
-
-- **MVIS:** `tag_size` / `square_size`
-- **Kalibr:** `tagSize` / `rowSpacingMeters` and `colSpacingMeters`
-
-**Setup:**
-
-- Board upright and flat.
-- Enough light for a short exposure (about 2 ms).
-- Start face-on, about 0.42 m away for the AprilGrid motion (0.47 m for the chessboard).
+- **About 60 s long.** 50 s also works.
+- **Fill the frame.** Cover the image out to its corners. Distortion is only pinned down where the board
+  was seen.
+- **Vary distance and angle.** Move in and out, and turn the rig about every axis.
+- **Avoid motion blur.** Use enough light for a short exposure (about 2 ms).
+- **Rest at both ends.** Hold still for about 3 s at the start and the end.
 
 ## <span id="the-motion" class="cm-anchor"></span><span id="chessboard-version" class="cm-anchor"></span>2. Watch and practise the motion
 
@@ -97,21 +58,53 @@ hand pace: about 0.4 m/s and 1.9 rad/s at most.
 | # | Move | Time | What to do |
 |---|---|---|---|
 | 0 | Rest | 0–3 s | Hold still in front of the board, count 3. |
-| 1 | Left–right + yaw | 3–20 s | Swing left and right around the board, 2 times (about 43° each side), turning about 22° past facing it at each end so the board slides to the picture edge. Turn round sharply. |
-| 2 | Up–down + pitch | 20–32 s | Move up and down, 2 times (about 33° above and below), tipping about 34° past the board so it reaches the top or bottom edge. |
-| 3 | Back–forth + roll | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times, rolling like a steering wheel up to about 65°. Hold the board off-centre so the roll carries it into the corners. |
-| 4 | Loop + roll | 47–57 s | Move round a loop parallel to the board, about 40 cm across, 2 times, turning a little against the loop and rolling about 25°, so the board runs into every corner. |
+| 1 | Left–right + turn left-right | 3–20 s | Swing left and right around the board, 2 times. At each end, turn the camera a little past facing the board, so the board slides to the left or right edge of the picture. Turn round sharply. |
+| 2 | Up–down + tilt up-down | 20–32 s | Move up and down, 2 times. Tilt the camera a little past the board, so the board reaches the top or bottom edge of the picture. |
+| 3 | Back–forth + twist | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times. Twist the camera about its view axis like a steering wheel, one way coming in and the other going out. Hold the board off-centre so the twist carries it into the corners. |
+| 4 | Loop + twist | 47–57 s | Move round a loop parallel to the board, about 43 cm across, 2 times. Turn the camera a little against the loop and twist it a little, once per loop, so the board runs into every corner. |
 | 5 | Rest | 57–60 s | Hold still, count 3. |
 
 - **Vary the speed** on every sweep: push through the middle, brake into the ends.
 - **Keep most of the board in view.** An AprilGrid may run partly off the edge; a chessboard may not.
 - **Don't add shake.** The natural wobble of a hand is all the motion needs.
 
-## 4. Record and check
+## 4. The running example's recordings
+
+The Guides use the VI-Rig 4 IMUs + 4 cameras dataset as the running example. It has 15 takes, one bag each:
+`4imus_4cams_01.bag` to `4imus_4cams_15.bag`.
+
+Each bag holds these topics:
+
+| Sensor | Topic | Rate | Notes |
+|---|---|---|---|
+| RealSense T265 left | `/t265/fisheye1/image_raw` | 30 Hz | 848×800, global shutter |
+| RealSense T265 right | `/t265/fisheye2/image_raw` | 30 Hz | 848×800, global shutter |
+| ELP left | `/elp/split_sync_image_node/left/image_raw` | 25 Hz | 640×480, rolling shutter |
+| ELP right | `/elp/split_sync_image_node/right/image_raw` | 25 Hz | 640×480, rolling shutter |
+| Xsens MTI-100 | `/imu/data` | 400 Hz | IMU |
+| MicroStrain GX3-25 | `/gx3_25/data` | 500 Hz | IMU |
+| MicroStrain GX3-35 | `/gx3_35/imu/data` | 100 Hz | IMU |
+| RealSense T265 IMU | `/t265/imu` | 200 Hz | IMU |
+
+- **Download** the bags from the Hub:
+  [`calibench-vi/datasets` → `virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams).
+  Access is gated; the licence is CC BY-NC 4.0.
+- **Board config:** the AprilGrid target file `april.yaml` sits next to the bags.
+- **Full details:** see the [dataset page](/reference/datasets/virig-4imus-4cams/).
+
+:::caution[Bag 09 starts one frame early]
+In `4imus_4cams_09.bag` the second T265 fisheye starts one frame before the first. MVIS and Basalt pair
+frames by the nearest stamp, so they handle it. Kalibr reads each camera on its own, so its pairs come out
+one frame off. It needs a trimmed copy of the bag.
+:::
+
+## 5. Record and check
 
 1. Record the 60 s motion with your rig. 50 s also works: drop one in-out and one loop.
-2. Calibrate with the board config from [step 1](#1-set-up-the-board).
-3. Check the result, as in the [camera–IMU calibration guide](/guides/camera-imu-calibration/).
+2. Solve the cameras with the board block from [step 1](/guides/board-setup/):
+   [step 3: camera-only calibration](/guides/camera-calibration/).
+3. Solve cameras and IMUs together and read the result:
+   [step 4: camera–IMU calibration](/guides/camera-imu-calibration/#5-read-the-result).
 
 ## Real examples
 
@@ -127,9 +120,9 @@ Both move faster than the guide motion. At a comfortable pace, follow the 60 s g
 Avoid these motions. Each leaves some parameters loose: the solve cannot pin them down.
 
 - **Fast shaking from one spot, face-on:** the lens distortion stays loose.
-- **One slow axis at a time, never pitched:** lever arm (the camera–IMU position offset), time offsets and IMU scales
+- **One slow axis at a time, never tilted:** lever arm (the camera–IMU position offset), time offsets and IMU scales
   stay loose.
-- **A missing rotation** (no pitch, no roll, or yaw only): the matching gyro and accelerometer scales,
+- **A missing rotation** (no tilt, no twist, or only turning left-right): the matching gyro and accelerometer scales,
   or the whole camera–IMU rotation, cannot be found.
 - **The board always centred:** the image edges are never seen, so the distortion stays loose.
 
@@ -150,6 +143,8 @@ A motion is **good** if, on all 22 parameters:
 The 22 parameters are the camera–IMU rotation, lever arm, td (the camera–IMU time offset), t_ga, gyro and
 accelerometer scales, and the camera intrinsics.
 
+To run the same check on your own calibration, see [step 7: digital-twin check](/guides/simulation/).
+
 ## Replay it yourself
 
 Run our motions through your own simulator and calibration tool with the
@@ -166,3 +161,7 @@ Its README gives the frames, units and replay steps. The twin itself ran on MVIS
 - **CC BY 4.0:** the guide motions, rigs and their results.
 - **CC BY-NC 4.0:** the two real-example trajectories and their results. The trajectories come from our
   Looper Insight 9 recordings.
+
+## Next
+
+Calibrate the cameras from your bags: [step 3: camera-only calibration](/guides/camera-calibration/).

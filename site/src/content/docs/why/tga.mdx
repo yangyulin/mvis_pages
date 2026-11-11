@@ -1,0 +1,139 @@
+---
+title: Why calibrate t_ga
+description: Two real IMUs have a gyro–accel offset t_ga of about −5 to −6 ms. Tools without a t_ga parameter move the camera time offset td by a steady share of it, about 1.6–3.2 ms on these devices.
+pageType: example
+wide: true
+---
+
+import TgaSweepPlot from '../../../components/TgaSweepPlot.astro';
+import TgaTables from '../../../components/TgaTables.astro';
+import data from '../../../data/tga/tga.json';
+import ex4 from '../../../data/examples/virig-4imus-4cams.json';
+import ev4 from '../../../data/eval/virig-4imus-4cams.json';
+
+export const L = data.devices.looper;
+export const T = data.devices.t265;
+export const ms = (v) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+export const moved = [L, T].flatMap((d) => [d.gap.kalibr_predicted, d.gap.basalt_predicted]).map(Math.abs);
+export const bands = data.t265_bands;
+export const lastSure = bands.bands_hz.filter((b) => b[1] <= bands.uncertain_from_hz).length - 1;
+export const rig4 = ex4.rigs[0];
+export const auxName = { gx3_25: 'MicroStrain GX3-25', gx3_35: 'MicroStrain GX3-35', t265: 'T265 IMU' };
+export const sgn = (v, d = 2) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d);
+export const tga15 = (fam) => ev4.families.find((f) => f.id === fam).sensors.find((s) => s.id === 'imu_t265')
+  .params.find((p) => p.key === 't_ga_ms').lanes.find((l) => l.col === 'mvis');
+export const band = (i) => `${(bands.delay_ms[i] < 0 ? '−' : '') + Math.abs(bands.delay_ms[i]).toFixed(1)} ms at ${bands.bands_hz[i][0]}–${bands.bands_hz[i][1]} Hz`;
+
+`t_ga` is the time offset between the gyroscope and the accelerometer inside one IMU. `td` is the time offset
+between the camera and the IMU. MVIS fits both. Kalibr and Basalt fit only `td`: they treat the IMU as one clock.
+
+This page asks one question: what happens to a camera–IMU calibration when the IMU has a `t_ga`?
+
+## 1. With t_ga = 0, the three tools agree
+
+- **Two datasets:** Looper Insight 9 (looper_1) and Intel T265 (VI-Rig april_01).
+- **Prepared so `t_ga` is 0:** MVIS calibrated each raw recording. We then resampled the camera and IMU streams
+  with that result. So on the new bag, by MVIS's estimate, `td` = 0, `t_ga` = 0 and the IMU scales are 1.
+- **Settings:** each tool's usual settings. T265: camera intrinsics pinned; Looper: intrinsics free.
+- **Result:** all three tools read `td` within 0.3 ms of 0. The IMU scales are within 0.4 % of 1, except Basalt on the T265 (below).
+
+<TgaTables which="zero" />
+
+Two scales are further off: Basalt on the T265 reads gyro x and accel z about 1.2 % and 1.5 % from 1. That is
+already there with no offset, so it is not caused by `t_ga`.
+
+## 2. Add a t_ga: delay the accelerometer
+
+- **Sweep:** delay only the accel by τ = −50, −20, −10, −5, −2, 0, 2, 5, 10, 20 and 50 ms. Everything else is
+  unchanged. That is 11 bags per device, and the true `t_ga` in each is τ.
+- **Run** all three tools on every bag, with the same settings as above.
+
+<TgaSweepPlot />
+
+- **MVIS** reports the delay as `t_ga` (slope {L.slope.mvis_tga.toFixed(2)} on both devices). Its `td` stays
+  flat, and its IMU scales change by under 0.01 %.
+- **Kalibr and Basalt** have no `t_ga`, so their `td` takes a steady share of τ. A share of
+  {L.slope.kalibr.toFixed(2)} means `td` moves {L.slope.kalibr.toFixed(2)} ms for every 1 ms of `t_ga`. The shares
+  are {L.slope.kalibr.toFixed(2)} (Kalibr) and {L.slope.basalt.toFixed(2)} (Basalt) on Looper, and
+  {T.slope.kalibr.toFixed(2)} and {T.slope.basalt.toFixed(2)} on the T265.
+- **Their IMU scales drift too:** mostly under 0.2 % within ±10 ms (Basalt on the T265: accel 0.3 % at ±2 ms),
+  and up to about 1.8 % at ±50 ms.
+- **No warning:** every run of every tool converged.
+
+This is not a bug in Kalibr or Basalt. With one IMU clock, the closest fit puts `td` somewhere between the gyro and
+the accel. Where depends on the recording, likely on how much the gyro and the accel each drive the fit; that is not
+tested here.
+
+## 3. Real devices have a t_ga
+
+MVIS measures `t_ga` on the raw bags: **{ms(L.raw.mvis_tga)} ms** on Looper and **{ms(T.raw.mvis_tga)} ms** on the
+T265. A tool without `t_ga` moves `td` by its share of that.
+
+<TgaTables which="shift" />
+
+**Conclusion:** `t_ga` matters for camera–IMU calibration. On these two devices, a tool without it moves `td` by
+about {Math.min(...moved).toFixed(1)}–{Math.max(...moved).toFixed(1)} ms.
+
+MVIS fits `t_ga` by default (`solve.estimate_t_ga: true`, with a weak 10 ms prior, `sigma_t_ga: 0.010`), as in
+these runs. See [Estimate `t_ga`](/guides/camera-imu-calibration/#awkward-imus). To use a tool without `t_ga`,
+remove the offset first with [corrected-dataset export](/guides/roundtrip/#export-a-corrected-dataset).
+
+## 4. On the running example
+
+The guides use the VI-Rig recording [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/). It has four IMUs on
+one rig, so it shows `t_ga` on four devices at once.
+
+- **One run, bag 01:** MVIS solved all four cameras and all four IMUs together, with `t_ga` on (as in
+  [step 4](/guides/camera-imu-calibration/)). The Xsens is the base IMU.
+- **`t_ga` per IMU** (± 0.02 ms on each, from the run's result table):
+
+<table>
+  <thead><tr><th>IMU</th><th><code>t_ga</code> (ms)</th></tr></thead>
+  <tbody>
+    <tr><td>Xsens MTi-100 (base)</td><td>{sgn(rig4.imu.tga)}</td></tr>
+    {rig4.imus.map((m) => <tr><td>{auxName[m.name] ?? m.name}</td><td>{sgn(m.tga)}</td></tr>)}
+  </tbody>
+</table>
+
+- **Only the T265 IMU has a large offset.** The other three read within 1 ms of 0.
+- **It repeats over 15 bags:** in the [results](/benchmark/results/virig-4imus-4cams/), the T265 IMU reads
+  {sgn(tga15('T7').med, 3)} ms (sd {tga15('T7').sd.toFixed(3)}) in T7 and {sgn(tga15('T8').med, 3)} ms
+  (sd {tga15('T8').sd.toFixed(3)}) in T8. In those two runs the T265 IMU is the base.
+
+### Older run (July 2026): round trip with and without t_ga
+
+- **Setup:** bag 01, T265 cameras and the T265 IMU, older MVIS code with camera intrinsics pinned. We ran a
+  [round trip](/guides/roundtrip/) twice: calibrate, correct the bag, calibrate again. The only change was `t_ga` on or off.
+- **Both runs pass.** The IMU scales and biases go back to 1 and 0 in both.
+- **With `t_ga`:** the second calibration finds camera `td` of −0.03 and −0.04 ms. `t_ga` goes from −6.97 to +0.17 ms.
+- **Without `t_ga`:** the second calibration finds −1.47 ms `td` on both cameras. It does not go to 0. This is the
+  gyro–accel offset that was not modelled, showing up as a camera time error.
+
+So `t_ga` is what makes a corrected dataset consistent in time.
+
+## Limits
+
+<div class="not-content rp-honest">
+  <p><b>The test favours MVIS.</b> The zero point is MVIS's own calibration, and the sweep injects exactly the shift
+    MVIS models (a pure accel delay). Which tool's <code>td</code> is right on raw data is not tested. A real offset
+    need not be a pure shift: on the T265 it shrinks with frequency, from {band(0)} to {band(lastSure)} (less
+    certain above {bands.uncertain_from_hz} Hz), so one <code>t_ga</code> is a compromise. One recording per device,
+    and the MVIS authors ran all three tools.</p>
+</div>
+
+## Data
+
+The sweep bags are on the Hub, with a README, the MVIS calibration used for the correction and a `provenance.json`
+(sign, τ, crop, sha256 per bag):
+
+- [`calibench-vi/datasets` → `looper-insight9/tga-sweep`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9/tga-sweep)
+- [`calibench-vi/datasets` → `virig-4imus-3cams/tga-sweep`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams/tga-sweep)
+
+Licence CC BY-NC 4.0, gated; commercial use by request. Please cite the VI-Rig dataset and MVIS.
+
+## Related
+
+- [IMU model: `t_ga`](/concepts/imu-model/)
+- [Step 4: Camera–IMU calibration](/guides/camera-imu-calibration/)
+- [Round-trip validation](/guides/roundtrip/)
+- [Comparison vs Kalibr / Basalt](/about/comparison/)
