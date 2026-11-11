@@ -196,6 +196,7 @@ sensors:
     description: Four-camera global-shutter RGB module from Tujian with a Bosch BMI088, calibrated with MVIS as four cameras + IMU.
     lead: Four-camera inertial module from Shenzhen Tujian Intelligent Technology (图间智能). Four global-shutter RGB cameras sit on separate 25 × 25 mm boards, cabled to one controller with a Bosch BMI088 IMU; two cameras have 160° lenses and two have 200° lenses, and the baseline is set by how the boards are mounted. One recording, solved as four cameras + IMU.
     chips: [4 cameras, Global shutter, 200° fisheye, 200 Hz IMU]
+    demo: {from: "cyperstereo_small", note: "The 3D scene MVIS recovered from this recording, first 20 s, each camera in turn."}
     card: {name: "CyperStereo", maker: Tujian, tags: [Global shutter, 4 cameras, 200 Hz IMU], sensors: "4 global-shutter RGB fisheye + BMI088 @ 200 Hz", format: "ROS bag", shows: "Four wide-angle cameras (160° and 200°) and an IMU solved together"}
     source: https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html
     source_label: CyperStereo product documentation

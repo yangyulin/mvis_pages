@@ -61,7 +61,7 @@ def test_unknown_shutter_is_left_out_of_the_tags(pub):
         assert any("shutter" in t for t in c["tags"]) == known, slug
 
 
-# Live without a demo or hosted data, at the user's request (alg-avs111c 2026-11-06; cyperstereo draft 2026-11-11): no demo rendered yet, no permission to host the bag.
+# Live without a demo or hosted data, at the user's request (alg-avs111c 2026-11-06; cyperstereo 2026-11-11, which has a demo since): no permission to host the bag.
 NO_DEMO_NOT_HOSTED = ("alg-avs111c", "cyperstereo")
 
 
