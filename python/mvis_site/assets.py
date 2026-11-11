@@ -42,6 +42,12 @@ def apriltag() -> dict:
     return json.loads(_read("apriltag36h11.json"))
 
 
+def aruco5x5() -> dict:
+    """ArUco DICT_5X5 data bits (5 rows of 5, 1 = white) by marker id 0-249, for charuco_svg. From OpenCV 4.13
+    cv2.aruco.generateImageMarker(DICT_5X5_250, id, 7); the smaller DICT_5X5 dictionaries are its first ids."""
+    return json.loads(_read("aruco5x5.json"))
+
+
 def custom_css() -> str:
     return (SITE / "src/styles/custom.css").read_text(encoding="utf-8")
 

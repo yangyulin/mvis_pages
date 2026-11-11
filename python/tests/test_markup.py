@@ -1,4 +1,5 @@
 import re
+import pytest
 
 import numpy as np
 
@@ -134,6 +135,25 @@ def test_board_svg_chessboard_to_scale():
 def test_board_svg_charuco_to_scale():
     svg = m.board_svg({"type": "charuco", "rows": 9, "cols": 14, "square_mm": 40, "marker_mm": 30, "dictionary": "DICT_5X5"}, {})
     assert 'aria-label="ChArUco board 9 by 14 squares, to scale"' in svg
-    assert "14 × 9 squares (13 × 8 inner corners), 40 mm squares, 30 mm DICT_5X5 markers, 560 × 360 mm" in svg
+    assert "14 × 9 squares (13 × 8 inner corners), 40 mm squares, 30 mm DICT_5X5 markers, 560 × 360 mm, markers 0–62" in svg
     assert svg.count("h40.00v40.00") == 63 and svg.count("h30.00v30.00") == 63   # 63 black squares, 63 markers
     assert "M5.00 45.00h30.00" in svg                                          # first marker centred in square (1, 0)
+
+
+def test_charuco_svg_detects_as_the_opencv_board():
+    """Rasterise the SVG's rectangles; OpenCV's ChArUco detector for the same layout finds every marker and corner.
+    (A pixel compare with CharucoBoard.generateImage is off by its 17.5 px marker-offset rounding, not the patterns.)"""
+    cv2 = pytest.importorskip("cv2")
+    svg = m.board_svg({"type": "charuco", "rows": 9, "cols": 14, "square_mm": 40, "marker_mm": 30, "dictionary": "DICT_5X5"}, {})
+    k, pad = 3.5, 100                                          # px per mm: a 40 mm square is 140 px, a marker cell 15 px
+    img = np.full((360 * 7 // 2 + 2 * pad, 560 * 7 // 2 + 2 * pad), 255, np.uint8)
+    for fill, d in re.findall(r'<path fill="(#[0-9a-f]+)" d="([^"]+)"', svg):
+        for x, y, a in re.findall(r"M([-\d.]+) ([-\d.]+)h([\d.]+)v", d):
+            x0, y0, n = pad + round(float(x) * k), pad + round(float(y) * k), round(float(a) * k)
+            img[y0:y0 + n, x0:x0 + n] = 0 if fill == "#111" else 255
+    board = cv2.aruco.CharucoBoard((14, 9), 0.040, 0.030, cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_250))
+    corners, corner_ids, _, marker_ids = cv2.aruco.CharucoDetector(board).detectBoard(img)
+    assert sorted(marker_ids.ravel()) == list(range(63))
+    assert sorted(corner_ids.ravel()) == list(range(104))
+    first = corners[list(corner_ids.ravel()).index(0)].ravel()  # corner 0: between the top-left two rows and columns
+    assert np.allclose(first, (pad + 140 - 0.5, pad + 140 - 0.5), atol=1.0)
