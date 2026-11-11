@@ -20,6 +20,11 @@
   "group": "Tracking cameras and modules"
  },
  {
+  "label": "CyperStereo four-camera module",
+  "link": "/devices/cyperstereo/",
+  "group": "Tracking cameras and modules"
+ },
+ {
   "label": "Hampo stereo module",
   "link": "/devices/hampo/",
   "group": "Tracking cameras and modules"
