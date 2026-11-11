@@ -148,6 +148,7 @@ sensors:
     lead: GMSL2 stereo camera module from Shenzhen Aili-Light Technology (ALG Tech, 艾利光), with two global-shutter cameras 50 mm apart and a 6-axis IMU. Three recordings, each solved as stereo + IMU; this page shows the longest. The recordings match ALG's AVS111C-Y; the exact model isn't confirmed by the maker.
     chips: [Stereo, Global shutter, 200 Hz IMU, GMSL2]
     card: {name: "AVS111C-Y stereo", maker: ALG Tech, tags: [Global shutter, 2 cameras, 200 Hz IMU], sensors: "Stereo global-shutter + IMU @ 200 Hz", format: "ROS2 bag → EuRoC mav0", shows: "A stereo + IMU solve on a ChArUco board, repeated on three recordings"}
+    demo: {from: "alg-avs111c_small", note: "The 3D scene MVIS recovered from the 08:41:48 recording, the one solved on this page."}
     source: https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html
     source_label: ALG AVS111C-Y product page
     checked: 2026-11-11
