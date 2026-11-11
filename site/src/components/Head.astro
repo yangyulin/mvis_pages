@@ -13,5 +13,6 @@ const sensor = Boolean(data.sensor || data.example);
 ---
 
 <Default><slot /></Default>
+<script is:inline data-goatcounter="https://openmvis.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 {wide && <style is:inline>{':root{--sl-content-width:72rem}'}</style>}
 {sensor && <style is:inline>{'@media (max-width:44rem){.sl-markdown-content h2{font-size:1.5rem}}'}</style>}
