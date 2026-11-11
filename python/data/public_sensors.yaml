@@ -189,6 +189,54 @@ sensors:
         baseline: {auto: baseline}
         imu: {v: "6-axis, 200 Hz here"}
         output: {v: "GMSL2, ROS2 bag"}
+  cyperstereo:
+    group: cameras
+    key: cyperstereo
+    title: CyperStereo four-camera module
+    description: Four-camera global-shutter RGB module from Tujian with a Bosch BMI088, calibrated with MVIS as four cameras + IMU.
+    lead: Four-camera inertial module from Shenzhen Tujian Intelligent Technology (图间智能). Four global-shutter RGB cameras sit on separate 25 × 25 mm boards, cabled to one controller with a Bosch BMI088 IMU; two cameras have 160° lenses and two have 200° lenses, and the baseline is set by how the boards are mounted. One recording, solved as four cameras + IMU.
+    chips: [4 cameras, Global shutter, 200° fisheye, 200 Hz IMU]
+    card: {name: "CyperStereo", maker: Tujian, tags: [Global shutter, 4 cameras, 200 Hz IMU], sensors: "4 global-shutter RGB fisheye + BMI088 @ 200 Hz", format: "ROS bag", shows: "Four wide-angle cameras (160° and 200°) and an IMU solved together"}
+    source: https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html
+    source_label: CyperStereo product documentation
+    checked: 2026-11-11
+    company: {name: Shenzhen Tujian Intelligent Technology, url: "https://tujian.tech"}
+    hardware:
+      - [Maker, Shenzhen Tujian Intelligent Technology (深圳市图间智能科技有限公司), Maker]
+      - [Image sensor, "SmartSens SC136HGS, RGB, global shutter, back-illuminated, 4 × 4 µm pixels", Maker]
+      - [Cameras, "4 × 1280×1024; 30 fps on the sheet, 15 Hz in this recording", Measured]
+      - ["Wide lenses (cam2, cam3)", "1.67 mm, F2.0, M12; 200° diagonal, 174° × 139°", Maker]
+      - ["Narrow lenses (cam0, cam1)", "1.79 mm, F2.0, M12; 160° diagonal, 133° × 112°", Maker]
+      - [Synchronization, "Camera to camera 10 µs, camera to IMU 100 µs on the sheet; identical camera stamps in this recording", Maker]
+      - [IMU, "Bosch BMI088, 200 Hz", Measured]
+      - [Link and power, "USB 3.0, UVC; 1.5–2 W at 5 V", Maker]
+    dataset:
+      - [Recordings, "1 recording, 74.6 s, hand-held. About 1,120 frames per camera, 14,920 IMU samples"]
+      - [Format, ROS1 bag]
+      - [Board, "AprilGrid 6×6, tag 55 mm, spacing 0.3"]
+      - [Licence, None]
+      - [Hosted, Not hosted]
+    method: "All four cameras and the IMU together. Camera intrinsics (Kannala–Brandt kb4) from four single-camera solves of the same recording, then held fixed; IMU scale and misalignment, gyro-to-accel offset t_ga and camera time offsets estimated. IMU noise from the BMI088 datasheet, about 2.5× wider. Solved 2026-11-11."
+    limits:
+      - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
+      - "The board never reached the outer side of the two 200° images (about two-thirds of each image is covered), so the lens model there is extrapolated."
+      - "The IMU noise set for the solve is wider than the residuals need (IMU χ²/dof 0.03); a solve with tighter noise is still to do."
+      - "The tag size is taken from the target file sent with the data and isn't confirmed on the printed board. It scales every baseline and lever arm."
+    header:
+      type: "Four-camera global-shutter RGB module with a 6-axis IMU"
+      maker: {name: Shenzhen Tujian Intelligent Technology, url: "https://tujian.tech"}
+      contact:
+        - {item: Email, v: support@tujian.com, url: "mailto:support@tujian.com"}
+      links: {product: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html", product_label: "Product documentation", more: [{label: SDK, url: "https://github.com/Cyperstereo/CyperstereoSDK"}, {label: Calibration guide, url: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/tools/calibration_tool.html"}]}
+      image: {kind: photo, file: cyperstereo.jpg, alt: "CyperStereo controller board with four camera boards on cables", credit: "Photo: Tujian, CyperStereo product manual", url: "https://tujian.tech"}
+      foot: "Values measured in this recording · Maker values from the CyperStereo product manual, read 2026-11-11"
+      key_specs:
+        cameras: {v: "4 × 1280×1024 RGB"}
+        shutter: {v: Global, tag: maker, src: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html"}
+        fov: {auto: fov, also: {v: "160° and 200° diagonal", tag: maker, src: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html"}}
+        baseline: {auto: baseline}
+        imu: {v: "Bosch BMI088, 200 Hz"}
+        output: {v: "USB 3.0 / UVC, ROS bag"}
   hampo:
     group: cameras
     key: hampo
