@@ -24,7 +24,7 @@ accelerometer.
 | **Per-IMU gyro-only mode** | ✅ | ✖ | ✖ |
 | IMU intrinsics (scale, misalignment) | ✅ — 3 conventions | ✅ | ✖ |
 | G-sensitivity `Tg` | ✅ | ✅ | ✖ |
-| **[Gyro↔accel offset `t_ga`](/benchmark/tga/)** | ✅ | ✖ | ✖ |
+| **[Gyro↔accel offset `t_ga`](/why/tga/)** | ✅ | ✖ | ✖ |
 | Rolling-shutter readout | ✅ | via fork | ✖ |
 | **Corrected-dataset export** | ✅ `apply-calib` | ✖ | ✖ |
 | **Round-trip PASS/FAIL validation** | ✅ `roundtrip` | ✖ | ✖ |
@@ -48,7 +48,7 @@ accelerometer.
   On the same bags their `td` differs from MVIS by about 2.9–3.2 ms on Looper
   Insight 9 and 1.9–2.0 ms on the T265 (first camera); an injection sweep predicts 3.0–3.2 and
   1.6–1.7 ms of that from the offset alone. Whose `td` is closer to the truth is
-  not yet tested. [Details](/benchmark/tga/).
+  not yet tested. [Details](/why/tga/).
 - **Validation is a command, not a habit.** `mvis roundtrip` gives a
   PASS/FAIL. A PASS requires IMU intrinsics to collapse *and* geometry to
   hold. Nothing comparable ships with the others.

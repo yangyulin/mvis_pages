@@ -116,7 +116,7 @@ export default defineConfig({
         PageTitle: './src/components/PageTitle.astro',
       },
 
-      // Sidebar — design plan §3. Eight sections (Benchmark then Device wiki: Sensor wiki until 2026-11-10), ordered concepts → how-to →
+      // Sidebar — design plan §3. Nine sections: Why calibrate after Guides, Device wiki (Sensor wiki until then) after Benchmark (both 2026-11-10), ordered concepts → how-to →
       // reference (COLMAP's spine, §1.1). Every leaf declares its pageType in
       // its own frontmatter, enforced by the §3.1 rule.
       sidebar: [
@@ -131,15 +131,26 @@ export default defineConfig({
         },
         {
           label: 'Guides',
+          // One walkthrough on VI-Rig virig-4imus-4cams; pagination follows this order.
           items: [
-            { label: 'Calibration motion', link: '/guides/calibration-motion/' },
-            { label: 'Camera calibration', link: '/guides/camera-calibration/' },
-            { label: 'Camera–IMU calibration', link: '/guides/camera-imu-calibration/' },
-            { label: 'Multi-camera / multi-IMU rigs', link: '/guides/multi-sensor-rigs/' },
-            { label: 'Rolling shutter', link: '/guides/rolling-shutter/' },
-            { label: 'Corrected-dataset export', link: '/guides/corrected-datasets/' },
-            { label: 'Round-trip validation', link: '/guides/roundtrip/' },
-            { label: 'Simulation & synthetic data', link: '/guides/simulation/' },
+            { label: '1. Set up the board', link: '/guides/board-setup/' },
+            { label: '2. Record the dataset', link: '/guides/calibration-motion/' },
+            { label: '3. Camera-only calibration', link: '/guides/camera-calibration/' },
+            { label: '4. Camera–IMU calibration', link: '/guides/camera-imu-calibration/' },
+            { label: '5. Rolling shutter (ELP)', link: '/guides/rolling-shutter/' },
+            { label: '6. Multi-IMU calibration', link: '/guides/multi-sensor-rigs/' },
+            { label: '7. Digital-twin check', link: '/guides/simulation/' },
+            { label: '8. Round-trip validation', link: '/guides/roundtrip/' },
+          ],
+        },
+        {
+          label: 'Why calibrate',
+          items: [
+            { label: 'IMU', link: '/why/imu/' },
+            { label: 't_ga', link: '/why/tga/' },
+            { label: 'Rolling shutter', link: '/why/rolling-shutter/' },
+            { label: 'Multi-camera', link: '/why/multi-camera/' },
+            { label: 'Multi-IMU', link: '/why/multi-imu/' },
           ],
         },
         {
@@ -151,7 +162,6 @@ export default defineConfig({
               // Written by site/scripts/export_examples.py with the Examples overview, so both list examples in one order.
               items: JSON.parse(readFileSync(new URL('./src/data/examples-nav.json', import.meta.url), 'utf8')),
             },
-            { label: 'Why calibrate t_ga', link: '/benchmark/tga/' },
             {
               label: 'Results',
               collapsed: true,

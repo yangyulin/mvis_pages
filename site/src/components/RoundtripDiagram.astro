@@ -1,0 +1,119 @@
+---
+// The round trip of /guides/roundtrip/ as a flow chart: calibrate → apply-calib → recalibrate → compare.
+// Inline SVG in two layouts (wide snake, phone column), coloured by the Starlight theme. Limits match
+// mvis roundtrip's defaults (mvis.recalib.roundtrip.roundtrip_report).
+type Node = { id: string; kind: 'data' | 'step' | 'result' | 'judge' | 'check' | 'pass'; title: string; lines: string[] };
+const N: Record<string, Node> = Object.fromEntries(([
+  ['raw', 'data', 'Raw bag', ['images + IMU as recorded']],
+  ['cal', 'step', '1 · Calibrate', ['mvis cam-imu']],
+  ['A', 'result', 'Calibration A', ['Dw, Da, biases, td,', 't_ga, extrinsics']],
+  ['fix', 'step', '2 · Correct', ['mvis apply-calib:', 'A applied to the raw bag']],
+  ['cbag', 'data', 'Corrected bag', ['a perfect sensor,', 'if A was right']],
+  ['recal', 'step', '3 · Recalibrate', ['same config, new bag']],
+  ['B', 'result', 'Calibration B', ['what is left to find']],
+  ['cmp', 'judge', '4 · Compare', ['B with a perfect sensor', 'and with A']],
+  ['col', 'check', 'Collapse: what A measured is gone', ['Dw, Da within 1 % of identity', 'biases below 0.02', 'td, base t_ga near 0 (warn > 2 ms)']],
+  ['pre', 'check', 'Preserve: what A did not touch stays', ['lever arms move ≤ 2 mm', 'stereo baseline moves ≤ 2 mm']],
+  ['pass', 'pass', 'PASS = both hold', []],
+] as const).map(([id, kind, title, lines]) => [id, { id, kind, title, lines: [...lines] } as Node]));
+
+type Box = { x: number; y: number; w: number; h: number };
+// Wide: 4 columns of 170 in an 800-wide box. Row 1 runs right, row 2 comes back left, row 3 runs right.
+const wide: Record<string, Box> = {
+  raw: { x: 10, y: 20, w: 170, h: 64 }, cal: { x: 215, y: 20, w: 170, h: 64 }, A: { x: 420, y: 20, w: 170, h: 64 },
+  fix: { x: 420, y: 130, w: 170, h: 64 }, cbag: { x: 215, y: 130, w: 170, h: 64 },
+  recal: { x: 215, y: 240, w: 170, h: 64 }, B: { x: 420, y: 240, w: 170, h: 64 }, cmp: { x: 625, y: 240, w: 165, h: 64 },
+  col: { x: 10, y: 360, w: 380, h: 88 }, pre: { x: 410, y: 360, w: 380, h: 88 }, pass: { x: 300, y: 488, w: 200, h: 42 },
+};
+const wideEdges = [
+  { d: 'M180,52 H213' }, { d: 'M385,52 H418' }, { d: 'M505,84 V128' }, { d: 'M420,162 H387' },
+  { d: 'M300,194 V238' }, { d: 'M385,272 H418' }, { d: 'M590,272 H623' },
+  { d: 'M590,40 H707 V238', dashed: true, label: { x: 714, y: 150, t: 'A' } },
+  { d: 'M707,304 V330 H200 V358' }, { d: 'M707,330 H600 V358' },
+  { d: 'M200,448 V468 H400 V486' }, { d: 'M600,448 V468 H400' },
+];
+// Phone: one column, 300 wide, in a 360-wide box; A's dashed line runs down the right edge.
+const order = ['raw', 'cal', 'A', 'fix', 'cbag', 'recal', 'B', 'cmp', 'col', 'pre', 'pass'];
+const narrow: Record<string, Box> = {};
+let y = 10;
+for (const id of order) {
+  const h = N[id].kind === 'check' ? 88 : N[id].kind === 'pass' ? 42 : 64;
+  narrow[id] = { x: 20, y, w: 300, h };
+  y += h + 30;
+}
+const narrowH = y - 20;
+const narrowEdges = order.slice(0, -1).map((id, i) => {
+  const a = narrow[id], b = narrow[order[i + 1]];
+  return { d: `M170,${a.y + a.h} V${b.y - 2}` };
+});
+narrowEdges.push({ d: `M320,${narrow.A.y + 32} H345 V${narrow.cmp.y + 32} H322`, dashed: true, label: { x: 349, y: (narrow.A.y + narrow.cmp.y) / 2 + 36, t: 'A' } } as any);
+const layouts = [
+  { cls: 'rt-wide', vb: '0 0 800 540', boxes: wide, edges: wideEdges, mk: 'rt-arrow-w' },
+  { cls: 'rt-narrow', vb: `0 0 360 ${narrowH}`, boxes: narrow, edges: narrowEdges, mk: 'rt-arrow-n' },
+];
+---
+<figure class="rt">
+  {layouts.map((L) => (
+    <svg class={L.cls} viewBox={L.vb} role="img"
+         aria-label="Round trip: calibrate the raw bag to get A, apply A to make a corrected bag, recalibrate it to get B, then PASS only if B shows the IMU terms collapsed and the geometry preserved.">
+      <defs>
+        <marker id={L.mk} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="rt-head" />
+        </marker>
+      </defs>
+      {L.edges.map((e: any) => (
+        <g>
+          <path d={e.d} class={e.dashed ? 'rt-edge rt-dash' : 'rt-edge'} marker-end={`url(#${L.mk})`} />
+          {e.label && <text x={e.label.x} y={e.label.y} class="rt-elabel">{e.label.t}</text>}
+        </g>
+      ))}
+      {order.map((id) => {
+        const b = L.boxes[id], n = N[id];
+        const left = n.kind === 'check';
+        const tx = left ? b.x + 14 : b.x + b.w / 2;
+        const total = 1 + n.lines.length;
+        const top = b.y + b.h / 2 - ((total - 1) * 17) / 2 + 5;
+        return (
+          <g class={`rt-node rt-${n.kind}`}>
+            <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={n.kind === 'pass' ? b.h / 2 : 7} />
+            <text x={tx} y={top} text-anchor={left ? 'start' : 'middle'}>
+              <tspan class="rt-title">{n.title}</tspan>
+              {n.lines.map((l, i) => <tspan x={tx} dy="17" class="rt-line">{left ? `• ${l}` : l}</tspan>)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  ))}
+  <figcaption>
+    Why both checks: a solver that hides an IMU error inside the geometry can still collapse the IMU
+    terms, but then a lever arm or the baseline moves. A solver that measured nothing keeps the geometry,
+    but nothing collapses. Only a right calibration passes both, with no ground truth needed.
+  </figcaption>
+</figure>
+
+<style>
+  .rt { margin: 1.5rem 0; }
+  .rt svg { width: 100%; height: auto; display: block; }
+  .rt-narrow { display: none !important; max-width: 24rem; margin: 0 auto; }
+  @media (max-width: 40rem) {
+    .rt-wide { display: none !important; }
+    .rt-narrow { display: block !important; }
+  }
+  .rt-edge { fill: none; stroke: var(--sl-color-gray-3); stroke-width: 1.6; }
+  .rt-dash { stroke: var(--sl-color-accent); stroke-dasharray: 5 4; }
+  .rt-head { fill: var(--sl-color-gray-3); }
+  .rt-elabel { fill: var(--sl-color-accent); font-size: 13px; font-weight: 700; }
+  .rt-node rect { stroke-width: 1.5; }
+  .rt-node text { fill: var(--sl-color-white); font-size: 13.5px; }
+  .rt-title { font-weight: 700; font-size: 15px; }
+  .rt-line { fill: var(--sl-color-gray-2); }
+  .rt-data rect { fill: var(--sl-color-gray-6); stroke: var(--sl-color-gray-4); }
+  .rt-step rect { fill: var(--sl-color-bg); stroke: var(--sl-color-accent); }
+  .rt-result rect { fill: var(--sl-color-accent-low); stroke: var(--sl-color-accent); }
+  .rt-judge rect { fill: var(--sl-color-bg); stroke: var(--sl-color-accent); stroke-width: 2.5; }
+  .rt-check rect { fill: var(--sl-color-bg); stroke: var(--sl-color-accent); stroke-width: 2; }
+  .rt-pass rect { fill: var(--sl-color-accent); stroke: none; }
+  .rt-pass text, .rt-pass .rt-title { fill: var(--sl-color-black); }
+  .rt figcaption { margin-top: 0.6rem; font-size: 0.85rem; color: var(--sl-color-gray-2); }
+</style>

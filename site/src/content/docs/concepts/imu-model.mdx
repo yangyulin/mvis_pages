@@ -88,7 +88,7 @@ at σ = 0.024 ms. There is no `td` / `Dw` / `Da` cross-contamination.
 across recordings and code versions (april_01 now −5.69 ± 0.43 ms). The offset
 changes with frequency, from about −6.8 ms at 2–4 Hz to −1.2 ms at 30–40 Hz.
 So one `t_ga` is a compromise for the motion, not a constant of the driver; see
-the [limits](/benchmark/tga/#limits).
+the [limits](/why/tga/#limits).
 
 MVIS corrects `t_ga` to first order. The ½·t_ga²·ä term is ignored, which
 matters at large offsets.
@@ -96,13 +96,13 @@ matters at large offsets.
 Where `t_ga` shows up:
 
 - **Reported** in the result JSON, the calibration YAML, and the text report
-- **Corrected** by [`apply-calib`](/guides/corrected-datasets/), which
+- **Corrected** by [`apply-calib`](/guides/roundtrip/#export-a-corrected-dataset), which
   re-interpolates the accel channel at `t + t_ga`
 - **Checked** by [`roundtrip`](/guides/roundtrip/), which tests that it
   collapses toward zero
 
 **Why it matters:** tools without `t_ga` put about 0.3–0.6 of a pure-shift
-offset into the camera `td`. See [Why calibrate t_ga](/benchmark/tga/).
+offset into the camera `td`. See [Why calibrate t_ga](/why/tga/).
 
 ## Gyro-only auxiliaries
 

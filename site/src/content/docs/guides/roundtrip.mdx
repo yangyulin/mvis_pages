@@ -1,84 +1,258 @@
 ---
 title: Round-trip validation
-description: Validate a calibration end to end — calibrate, correct, recalibrate, PASS/FAIL.
+description: Check a calibration without ground truth — calibrate, correct, recalibrate, PASS/FAIL — and export a corrected dataset.
 pageType: guide
 ---
 
-Use this page to check that a calibration is *right*, not only that it fits.
+import RoundtripDiagram from '../../../components/RoundtripDiagram.astro';
+
+Use this page to check the calibration without ground truth. You need the
+cam-IMU config from [step 4](/guides/camera-imu-calibration/). You get PASS
+or FAIL.
 
 - **Reprojection error** (how far detected corners land from where the
-  calibration predicts them) tells you a calibration fits its own observations.
-  It does not tell you the calibration is right.
-- **Round-trip** does. We apply the calibration to the data it came from, then
-  calibrate again. If it was correct, there is nothing left to find.
+  calibration predicts them) tells you a calibration fits its own data. It
+  does not tell you the calibration is right.
+- **A round trip** does. We apply the calibration to the data it came from,
+  then calibrate again. If the first answer was right, there is nothing left
+  to find.
+
+<RoundtripDiagram />
+
+## 1. Run it
 
 ```bash
-mvis roundtrip -c cam_imu.yaml
+mvis roundtrip -c virig_4imus_4cams_cam_imu.yaml
 ```
 
 One command runs four steps:
 
 1. Calibrate.
-2. Correct the data with [`apply-calib`](/guides/corrected-datasets/).
-3. Recalibrate.
-4. Report.
+2. Correct the bag with [`apply-calib`](#export-a-corrected-dataset).
+3. Recalibrate the corrected bag.
+4. Report PASS or FAIL.
 
-It exits non-zero on FAIL, so it belongs in CI.
-
-## What PASS means
-
-PASS needs two conditions. They pull in opposite directions, which is what
-makes the test informative.
-
-- **Collapse.** On the corrected bag, every IMU's `Dw` and `Da` (the gyroscope
-  and accelerometer scale and axis-misalignment matrices) must go to identity.
-  The biases `b_g` / `b_a` must go to zero. The first pass claimed to have
-  measured those. If it was right, correction consumed them and there is
-  nothing left.
-- **Preserve.** The camera and IMU extrinsics (the poses between sensors) must
-  not move. Nor must the **stereo baseline**. Correction changes timing and
-  inertial scaling, not geometry. A baseline that shifts means the first solve
-  traded geometry against something else.
-
-Residual `td` (the camera-to-IMU time offset) is a **warning, not a failure**.
-How much of a time offset survives correction depends on how observable it is.
-
-## Flags
+It exits non-zero on FAIL, so it can run in CI.
 
 | Flag | Effect |
 |---|---|
-| `-c`, `--config` | The cam-IMU config to validate |
-| `--out` | Report path |
-| `--bag` | Override the config's bag |
-| `--keep-corrected` | Keep the intermediate corrected bag |
-| `--keep-bias` | Passed through to `apply-calib` |
+| `-c`, `--config` | The cam-IMU config to check (ROS1 bag) |
+| `--out` | Output folder for the report |
+| `--bag` | Use this ROS1 bag instead of the config's source |
+| `--keep-corrected` | Keep the corrected bag (deleted by default) |
+| `--keep-bias` | Passed on to `apply-calib` |
 
-The corrected bag gets a distinct name. So it gets a **fresh detection cache**
-rather than silently reusing the original's. It is deleted afterwards unless
-you keep it.
+The corrected bag gets its own name. So it gets a **fresh detection cache**
+and does not reuse the original's.
 
-## Confirmed results
+## 2. What PASS means
+
+PASS needs two things. They pull in opposite directions, which is what makes
+the test useful.
+
+- **Collapse.** On the corrected bag, every IMU's `Dw` and `Da` (the gyroscope
+  and accelerometer scale and misalignment matrices) must go to identity.
+  The biases `b_g` / `b_a` must go to zero. The first pass claimed to measure
+  them. If it was right, the correction used them up.
+- **Preserve.** Each camera's lever arm (its position in the base-IMU frame)
+  must not move. Nor must the **stereo baseline**. Correction changes timing
+  and IMU scaling, not geometry. A baseline that moves means the first solve
+  traded geometry against something else.
+
+The default limits:
+
+- `Dw` and `Da`: within 1 % of identity.
+- Biases: below 0.02 (rad/s for the gyroscope, m/s² for the accelerometer).
+- Lever arms and stereo baseline: at most 2 mm of drift.
+
+A residual `td` (the camera-to-IMU time offset) is a **warning, not a
+failure**. How much of it survives depends on how well the data observes it.
+A residual `t_ga` of the base IMU is also only a warning. Both warn above
+2 ms.
+
+## 3. Limits on this rig
+
+- **Rolling shutter is not tested.** `apply-calib` re-stamps each frame but
+  does not unwarp rolling-shutter rows. So a round trip on the ELP pair does
+  not check its readout time.
+- **Use other checks for the readout.** See
+  [Rolling-shutter calibration](/guides/rolling-shutter/) and the
+  [digital-twin check](/guides/simulation/).
+
+## 4. Results on the running example
+
+The full rig: VI-Rig bag 01, all 4 cameras and all 4 IMUs, the step 4 config, MVIS of
+2026-11-10. **Result: PASS.** All 16 IMU checks (4 per IMU) and all 5 geometry checks pass; the timing rows
+are warnings by design. Each solve took 9 to 13 min.
+
+**IMUs: what the first solve measured collapses.** Before = calibration A on the raw bag, after =
+calibration B on the corrected bag.
+
+| IMU | Gyro scale `Dw` diagonal | Accel scale `Da` diagonal | Largest bias | `t_ga` (ms) | `td` to base (ms) |
+|---|---|---|---|---|---|
+| Xsens (base) | 0.9981, 0.9977, 1.0009 → **1.0000, 1.0000, 1.0000** | 0.9999, 0.9964, 1.0013 → **0.9999, 1.0001, 1.0000** | 0.036 → **0.002** m/s² | −0.82 → **+0.30** | — |
+| GX3-25 | 0.9999, 0.9998, 1.0027 → **1.0000, 1.0000, 1.0000** | 0.9954, 1.0011, 1.0008 → **1.0000, 1.0000, 1.0000** | 0.093 → **0.0002** m/s² | +0.10 → **0.00** | −0.69 → **0.00** |
+| GX3-35 | 0.9990, 0.9986, 1.0009 → **1.0000, 1.0000, 1.0000** | 0.9949, 1.0004, 1.0006 → **1.0000, 1.0000, 1.0000** | 0.064 → **0.0003** m/s² | +0.01 → **0.01** | −2.07 → **0.00** |
+| T265 IMU | 0.9967, 1.0037, 1.0028 → **1.0000, 1.0000, 1.0000** | 1.0205, 1.0204, 1.0123 → **1.0000, 1.0000, 1.0000** | 0.161 → **0.002** m/s² | −6.74 → **0.00** | −7.17 → **0.00** |
+
+- **Scale:** every diagonal lands within 0.0001 of 1. The limit is 0.01.
+- **Bias:** every gyro and accel bias drops below 0.002. The limit is 0.02.
+- **`t_ga`:** the T265 IMU's −6.74 ms drops to 0.00 ms. The base Xsens keeps +0.30 ms, under the
+  2 ms warning line.
+- **`td`:** each extra IMU's time offset to the base drops to 0.00 ms.
+
+**Cameras: the geometry stays.**
+
+| Camera | Lever arm to base (mm) | Lever change | Rotation change | `td` (ms) | fx / fy (px) |
+|---|---|---|---|---|---|
+| T265-1 | 130.82 → 130.90 | 0.09 mm | 0.08 mrad | −5.41 → **0.00** | 286.54 / 286.34 → 286.53 / 286.33 |
+| T265-2 | 112.24 → 112.33 | 0.09 mm | 0.11 mrad | −7.47 → **0.00** | 286.51 / 286.08 → 286.50 / 286.08 |
+| ELP-L | 145.12 → 145.16 | 0.08 mm | 0.12 mrad | −123.25 → **0.00** | 426.90 / 426.45 → 426.89 / 426.45 |
+| ELP-R | 185.95 → 185.98 | 0.06 mm | 0.11 mrad | −123.30 → **0.00** | 423.58 / 423.10 → 423.58 / 423.11 |
+
+| Baseline | Before | After |
+|---|---|---|
+| T265 pair | 63.69 mm | 63.69 mm |
+| ELP pair | 59.39 mm | 59.40 mm |
+
+- **Levers:** every camera moves by under 0.1 mm. The limit is 2 mm.
+- **Rotations:** every camera turns by under 0.13 mrad.
+- **Intrinsics:** fx and fy move by under 0.01 px. Reprojection stays at 0.52 px RMS.
+
+**Not tested by this round trip:**
+
+- **ELP readout:** `apply-calib` does not unwarp rolling-shutter rows (section 3).
+
+The check list as `mvis roundtrip` prints it: [`report.txt`](/media/guides/virig-4imus-4cams/roundtrip_report.txt).
+The report of the recalibration (calibration B), as MVIS wrote it except for local folder names:
+
+<iframe src="/media/guides/virig-4imus-4cams/roundtrip_recal_report.html" title="MVIS cam-IMU report of the round-trip recalibration, VI-Rig bag 01" loading="lazy" style="width:100%;height:80vh;border:1px solid var(--sl-color-gray-5);border-radius:0.4rem"></iframe>
+
+[Open full screen](/media/guides/virig-4imus-4cams/roundtrip_recal_report.html) (HTML, 11.6 MB). The
+report of calibration A is the one in [step 4](/guides/camera-imu-calibration/#5-read-the-result).
+
+<details>
+<summary>Older runs (June and July 2026)</summary>
+
+Older runs, June 2026:
 
 | Rig | Collapse | Preserve |
 |---|---|---|
-| virig 3cams | all four IMUs' `Da` → identity | baseline 69.86 mm stable |
+| VI-Rig 4 IMUs + 3 cams | all four IMUs' `Dw` and `Da` → identity | baseline 69.88 → 69.86 mm |
 | Monado / MIC05 | `Da` 1.06 → 1.00, `b_a` −0.25 → −0.01 | baseline 133.8 mm stable |
+
+**VI-Rig 4 IMUs + 4 cams** (older run, July 2026, intrinsics pinned). Bag 01,
+T265 fisheye pair with the T265 IMU, `t_ga` on. Result: **PASS**.
+
+| Check | Before | After |
+|---|---|---|
+| T265 IMU `Da` (x axis) | 1.0233 | 1.000 |
+| T265 IMU `t_ga` | −6.965 ms | 0.167 ms |
+| Stereo baseline | 63.96 mm | 63.96 mm |
+
+</details>
+
+## Export a corrected dataset
+
+`mvis apply-calib` is the correction step inside the round trip. You can also
+run it on its own. It takes a cam-IMU calibration and a raw ROS1 bag, and
+writes a new bag with the calibration already applied:
+
+- **IMU intrinsics** removed (scale, misalignment and g-sensitivity)
+- **Bias** removed
+- **One timeline** for every stream
+
+Downstream tools then get corrected data. They need to know nothing about the
+calibration.
+
+### Run apply-calib
+
+From a config, like the calibrator:
+
+```bash
+mvis apply-calib -c recalib.yaml
+```
+
+Or by flags:
+
+```bash
+mvis apply-calib --calib cam_imu_calib.yaml --in raw.bag --out corrected.bag
+```
+
+- **Calibration:** `cam-imu` writes `cam_imu_calib.yaml` next to
+  `cam_imu.json`. Pass that YAML to `--calib`.
+- **Output:** defaults to `<bag>.corrected.bag`.
+- **Topics:** the calibration records each sensor's **source topic**. So the
+  topic-to-sensor map is derived for you; there is none to write by hand.
+- **Override:** use `--map` when you must override it.
+
+Example config: `examples/configs/recalib_example.yaml` in the MVIS repo.
+
+### What gets corrected
+
+| Correction | Detail |
+|---|---|
+| IMU intrinsics | `Dw` / `Da` / `Tg` removed via the inverse model |
+| Static bias | Removed, unless `--keep-bias` |
+| Time alignment | Every camera and auxiliary IMU re-stamped onto the base-IMU timeline by its `td` |
+| Gyro↔accel offset | Base-IMU accel channel re-interpolated at `t + t_ga`, when `t_ga` was calibrated |
+| Undistortion | Images undistorted, with `--undistort` |
+
+The terms in the table:
+
+- **`Dw` / `Da`:** the scale and misalignment of the gyroscope and the
+  accelerometer.
+- **`Tg`:** the g-sensitivity, how linear acceleration leaks into the
+  gyroscope.
+- **`td`:** the time offset of a sensor against the base IMU.
+- **`t_ga`:** the time offset between the gyroscope and the accelerometer.
+
+A provenance sidecar is written next to the bag. It records what was applied.
+
+:::caution[Re-stamping uses the header clock, not record time]
+Correction is applied on each message's **header** clock. This is the most
+important detail of the tool. Re-stamping on record time would bake each
+topic's receive latency into the corrected bag. That turns a driver artefact
+into permanent data.
+:::
+
+### Batch
+
+A batch runner applies one calibration across a whole dataset family. This is
+the usual case: one calibration per rig, many recordings.
+
+### Validated on
+
+- **TUM MIC05 and TUM-VI raw:** the correction is bit-exact. The corrected bag
+  recalibrates to near-identity IMU intrinsics.
+- **T265** (July run, older code): the time offsets change as below.
+
+| Offset | Before correction | After correction |
+|---|---|---|
+| `t_ga` | −6.32 ms | +0.53 ms |
+| camera `td` | −7.6 ms | −0.37 ms |
+
+The `t_ga` sweep starts from such a corrected bag:
+[Why calibrate t_ga](/why/tga/).
 
 ## When it fails
 
 A FAIL is a real finding, not a flaky test. The usual causes:
 
-- **Wrong camera model.** The intrinsics absorbed error that reappears once
-  timing is corrected. Try another [distortion
-  model](/concepts/camera-model/).
+- **Wrong camera model.** The intrinsics absorbed error that comes back once
+  timing is corrected. Try another
+  [distortion model](/concepts/camera-model/).
 - **Wrong IMU convention.** See [IMU model](/concepts/imu-model/).
 - **An interpolated accelerometer** corrupting `td`. This is the T265 case.
-  The fix is `gyro_only` on that IMU, or estimating `t_ga` (the time offset
-  between the gyroscope and accelerometer channels). A self round trip does
-  not catch this case by itself: a tool with no `t_ga` also returns to about
-  zero on its own corrected bag. Turn `t_ga` on and read it, or run a
-  correlation check. See [Why calibrate t_ga](/benchmark/tga/).
-- **Insufficient excitation.** The parameter was never observed, so
-  correcting by it does nothing consistent.
+  The fix is `gyro_only` on that IMU, or estimating `t_ga`. A self round trip
+  does not catch this case by itself: a tool with no `t_ga` also returns to
+  about zero on its own corrected bag. Turn `t_ga` on and read it, or run a
+  correlation check. See [Why calibrate t_ga](/why/tga/).
+- **Not enough motion.** The parameter was never observed, so correcting by
+  it does nothing consistent.
 
-Same entry point as `studies/roundtrip.py`.
+## Next
+
+The corrected bag from `apply-calib` is also what the
+[Why calibrate](/why/imu/) pages test: start with
+[Why calibrate the IMU](/why/imu/).

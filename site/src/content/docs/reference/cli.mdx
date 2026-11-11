@@ -90,7 +90,7 @@ The bag is re-recorded calibration-corrected.
 
 ```bash
 mvis apply-calib -c recalib.yaml
-mvis apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
+mvis apply-calib --calib cam_imu_calib.yaml --in raw.bag --out corrected.bag
 ```
 
 | Flag | Description |
@@ -104,7 +104,7 @@ mvis apply-calib --calib cam_imu.json --in raw.bag --out corrected.bag
 | `--undistort` | Also undistort images |
 
 What it corrects and why: [Corrected-dataset
-export](/guides/corrected-datasets/).
+export](/guides/roundtrip/#export-a-corrected-dataset).
 
 ## `roundtrip`
 
