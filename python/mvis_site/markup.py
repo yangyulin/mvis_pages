@@ -76,14 +76,31 @@ def chessboard_svg(b) -> str:
             f'{w:.0f} × {h:.0f} mm. To scale</figcaption></figure>')
 
 
+def charuco_svg(b) -> str:
+    """A ChArUco board to scale: the chessboard squares, black at the top left, and each white square's marker as a plain
+    black square (marker_mm); the ArUco bit patterns aren't drawn."""
+    sq, mk, cols, rows = b["square_mm"], b["marker_mm"], b["cols"], b["rows"]
+    w, h, o = cols * sq, rows * sq, (sq - mk) / 2
+    d = "".join(f"M{c * sq:.2f} {r * sq:.2f}h{sq:.2f}v{sq:.2f}h{-sq:.2f}z" if (r + c) % 2 == 0
+                else f"M{c * sq + o:.2f} {r * sq + o:.2f}h{mk:.2f}v{mk:.2f}h{-mk:.2f}z" for r in range(rows) for c in range(cols))
+    m = sq
+    return (f'<figure class=board><svg viewBox="{-m:.1f} {-m:.1f} {w + 2 * m:.1f} {h + 2 * m:.1f}" role="img" aria-label="ChArUco board {rows} by {cols} squares, to scale">'
+            f'<rect x="{-m:.1f}" y="{-m:.1f}" width="{w + 2 * m:.1f}" height="{h + 2 * m:.1f}" fill="#fff"/><path fill="#111" d="{d}"/></svg>'
+            f'<figcaption>ChArUco {cols} × {rows} squares ({cols - 1} × {rows - 1} inner corners), {sq:g} mm squares, '
+            f'{mk:g} mm {b.get("dictionary", "ArUco")} markers, {w:.0f} × {h:.0f} mm. To scale; marker patterns not drawn</figcaption></figure>')
+
+
 def board_svg(b, tags: dict) -> str:
     """The AprilGrid to scale: Kalibr layout, tag 0 at bottom left, each tag 6x6 data bits inside a 2-bit black border, black squares at the gaps' crossings.
 
     tags: tag id (as a string) to its 6x6 bit rows, from assets.apriltag().
-    A board with type "chessboard" (rows, cols = squares, square_mm) is drawn by chessboard_svg instead.
+    A board with type "chessboard" (rows, cols = squares, square_mm) is drawn by chessboard_svg instead, and one with
+    type "charuco" (also marker_mm, dictionary) by charuco_svg.
     """
     if b.get("type") == "chessboard":
         return chessboard_svg(b)
+    if b.get("type") == "charuco":
+        return charuco_svg(b)
     tag = b["tag_mm"]
     gap = tag * b["spacing"]
     cols, rows = b["cols"], b["rows"]
