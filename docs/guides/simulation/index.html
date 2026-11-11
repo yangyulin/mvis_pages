@@ -284,17 +284,16 @@ error; a scale is the largest of its three axis errors.</p>
 
 
 
-<table><thead><tr><th>Parameter</th><th>Noise-free</th><th>With noise, RMS over seeds 0–2 (upper bound)</th></tr></thead><tbody><tr><td>Camera lever</td><td>0.094 mm</td><td>1.67 mm</td></tr><tr><td>Camera rotation</td><td>0.177 mrad</td><td>2.35 mrad</td></tr><tr><td>Camera td</td><td>0.007 ms</td><td>0.15 ms</td></tr><tr><td>Camera readout</td><td>0.003 ms</td><td>0.23 ms</td></tr><tr><td>Camera focal length</td><td>0.009 px</td><td>0.22 px</td></tr><tr><td>Base t_ga</td><td>0.015 ms</td><td>0.47 ms</td></tr><tr><td>Base gyro scale</td><td>0.011 %</td><td>1.22 %</td></tr><tr><td>Base accel scale</td><td>0.013 %</td><td>0.28 %</td></tr><tr><td>Board height rms</td><td>0.23 mm</td><td>0.22 mm</td></tr><tr><td>Aux lever</td><td>0.164 mm</td><td>2.46 mm</td></tr><tr><td>Aux rotation</td><td>0.245 mrad</td><td>3.56 mrad</td></tr><tr><td>Aux td</td><td>0.007 ms</td><td>0.56 ms</td></tr></tbody></table>
+<table><thead><tr><th>Parameter</th><th>Noise-free</th><th>With noise, RMS over seeds 0–2</th></tr></thead><tbody><tr><td>Camera lever</td><td>0.094 mm</td><td>0.44 mm</td></tr><tr><td>Camera rotation</td><td>0.177 mrad</td><td>0.32 mrad</td></tr><tr><td>Camera td</td><td>0.007 ms</td><td>0.024 ms</td></tr><tr><td>Camera readout</td><td>0.003 ms</td><td>0.017 ms</td></tr><tr><td>Camera focal length</td><td>0.009 px</td><td>0.096 px</td></tr><tr><td>Base t_ga</td><td>0.015 ms</td><td>0.053 ms</td></tr><tr><td>Base gyro scale</td><td>0.011 %</td><td>0.108 %</td></tr><tr><td>Base accel scale</td><td>0.013 %</td><td>0.033 %</td></tr><tr><td>Board height rms</td><td>0.23 mm</td><td>0.23 mm</td></tr><tr><td>Aux lever</td><td>0.164 mm</td><td>0.20 mm</td></tr><tr><td>Aux rotation</td><td>0.245 mrad</td><td>0.58 mrad</td></tr><tr><td>Aux td</td><td>0.007 ms</td><td>0.036 ms</td></tr></tbody></table>
 <p>Camera rows are ELP left; ELP right is close. What it shows:</p>
 <ul>
 <li><strong>The solver converges to the truth.</strong> Without noise every error is a fraction of a mm, mrad or
 ms, and scales land within 0.02 %. This is the check that matters.</li>
-<li><strong>The noisy column is an upper bound.</strong> The twin’s IMU noise is set from the real IMU fit, but
-that fit is scored with t_ga forced to 0. On this row the base IMU is the T265, with t_ga
-about −6.7 ms, so the twin gets more IMU noise than the real sensor has. The real spread over
-the 15 recordings is much smaller: T265 gyro scale 0.03–0.13 % per axis, t_ga 0.13 ms, ELP
-readout 0.12 ms (<a href="/benchmark/results/virig-4imus-4cams/">results</a>, family T8). A fix is in
-progress.</li>
+<li><strong>Noise sets the limit, and it matches real data.</strong> The twin’s IMU noise is tuned so its IMU fit
+matches the real one. With that noise, the gyro scale lands within 0.11 %, t_ga within 0.05 ms
+and the ELP readout within 0.02 ms. That is no larger than the real spread over the 15
+recordings, which also varies the motion: T265 gyro scale 0.03–0.13 % per axis, t_ga 0.13 ms,
+ELP readout 0.12 ms (<a href="/benchmark/results/virig-4imus-4cams/">results</a>, family T8).</li>
 <li><strong>The board height</strong> keeps about 0.2 mm error even without noise.</li>
 </ul>
 <p>We keep these numbers as a reference. A new MVIS version fails the check if an

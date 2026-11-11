@@ -141,31 +141,30 @@ We built a twin of the ELP-pair cam-IMU row on
 Errors against the truth (estimate minus truth). Lever and rotation are the length of the 3D
 error; a scale is the largest of its three axis errors.
 
-| Parameter | Noise-free | With noise, RMS over seeds 0–2 (upper bound) |
+| Parameter | Noise-free | With noise, RMS over seeds 0–2 |
 |---|---|---|
-| Camera lever | 0.094 mm | 1.67 mm |
-| Camera rotation | 0.177 mrad | 2.35 mrad |
-| Camera td | 0.007 ms | 0.15 ms |
-| Camera readout | 0.003 ms | 0.23 ms |
-| Camera focal length | 0.009 px | 0.22 px |
-| Base t_ga | 0.015 ms | 0.47 ms |
-| Base gyro scale | 0.011 % | 1.22 % |
-| Base accel scale | 0.013 % | 0.28 % |
-| Board height rms | 0.23 mm | 0.22 mm |
-| Aux lever | 0.164 mm | 2.46 mm |
-| Aux rotation | 0.245 mrad | 3.56 mrad |
-| Aux td | 0.007 ms | 0.56 ms |
+| Camera lever | 0.094 mm | 0.44 mm |
+| Camera rotation | 0.177 mrad | 0.32 mrad |
+| Camera td | 0.007 ms | 0.024 ms |
+| Camera readout | 0.003 ms | 0.017 ms |
+| Camera focal length | 0.009 px | 0.096 px |
+| Base t_ga | 0.015 ms | 0.053 ms |
+| Base gyro scale | 0.011 % | 0.108 % |
+| Base accel scale | 0.013 % | 0.033 % |
+| Board height rms | 0.23 mm | 0.23 mm |
+| Aux lever | 0.164 mm | 0.20 mm |
+| Aux rotation | 0.245 mrad | 0.58 mrad |
+| Aux td | 0.007 ms | 0.036 ms |
 
 Camera rows are ELP left; ELP right is close. What it shows:
 
 - **The solver converges to the truth.** Without noise every error is a fraction of a mm, mrad or
   ms, and scales land within 0.02 %. This is the check that matters.
-- **The noisy column is an upper bound.** The twin's IMU noise is set from the real IMU fit, but
-  that fit is scored with t_ga forced to 0. On this row the base IMU is the T265, with t_ga
-  about −6.7 ms, so the twin gets more IMU noise than the real sensor has. The real spread over
-  the 15 recordings is much smaller: T265 gyro scale 0.03–0.13 % per axis, t_ga 0.13 ms, ELP
-  readout 0.12 ms ([results](/benchmark/results/virig-4imus-4cams/), family T8). A fix is in
-  progress.
+- **Noise sets the limit, and it matches real data.** The twin's IMU noise is tuned so its IMU fit
+  matches the real one. With that noise, the gyro scale lands within 0.11 %, t_ga within 0.05 ms
+  and the ELP readout within 0.02 ms. That is no larger than the real spread over the 15
+  recordings, which also varies the motion: T265 gyro scale 0.03–0.13 % per axis, t_ga 0.13 ms,
+  ELP readout 0.12 ms ([results](/benchmark/results/virig-4imus-4cams/), family T8).
 - **The board height** keeps about 0.2 mm error even without noise.
 
 We keep these numbers as a reference. A new MVIS version fails the check if an
