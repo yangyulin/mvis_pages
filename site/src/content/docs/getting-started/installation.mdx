@@ -1,14 +1,29 @@
 ---
 title: Installation
-description: Install MVIS — one-step conda setup or pip into an existing environment.
+description: Install MVIS from the OpenMVIS repository — one-step conda setup or pip into an existing environment.
 pageType: guide
 ---
 
 Use this page to install MVIS and check that it works.
 
-- **Pure Python:** installs with `pip` on Windows, macOS and Linux
+- **Pure Python:** the package is `pymvis`, the command is `mvis`
+- **Platforms:** Linux and macOS (x86-64 / arm64), Python 3.11 or 3.12
 - **No ROS:** there is no ROS dependency
 - **Nothing to compile**
+
+The code lives at
+[github.com/openmvis/openmvis](https://github.com/openmvis/openmvis).
+Version 0.1.0 is the first release; it is not on PyPI yet, so install from
+the clone:
+
+```bash
+git clone https://github.com/openmvis/openmvis && cd openmvis
+```
+
+:::note[Why no Windows, and why Python 3.11–3.12]
+GTSAM publishes no Windows wheels, and the `numpy<2` pin (see below) has no
+wheel for Python 3.13. Windows users can run MVIS under WSL.
+:::
 
 ## One-step setup (recommended)
 
@@ -20,37 +35,43 @@ conda activate mvis
 The script does three things:
 
 1. Creates the `mvis` conda environment.
-2. Installs every dependency.
+2. Installs every dependency and the package in editable mode.
 3. Runs the test suite, so you know the install works before you point it at data.
 
 ## Manual install
 
+Into any Python 3.11 or 3.12 environment:
+
 ```bash
+python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
 
-Detector backends (the code that finds the board in each image) are optional extras.
-Install the ones your boards need:
+Optional extras add the detector backends (the code that finds the board in
+each image), input formats and tools. Install the ones you need:
 
 ```bash
-pip install -e ".[apriltag]"    # AprilGrid (aprilgrid package)
-pip install -e ".[aruco]"       # ArUco (opencv-contrib)
+pip install -e ".[apriltag]"    # AprilGrid boards (aprilgrid package)
+pip install -e ".[aruco]"       # ArUco boards (opencv-contrib)
+pip install -e ".[ros1]"        # ROS1 bags, read with rosbags (no ROS needed)
+pip install -e ".[mcap]"        # MCAP episodes
+pip install -e ".[viz]"         # Rerun 3D viewer
 pip install -e ".[dev]"         # pytest
 ```
 
+Several at once: `pip install -e ".[apriltag,aruco,ros1,dev]"`.
+
+Once `pymvis` is on PyPI the same extras work as `pip install "pymvis[apriltag,ros1]"`.
+
 ## Reading bags
 
-We read ROS bags through [`rosbags`](https://pypi.org/project/rosbags/).
-It is pure Python and needs no ROS installation:
-
-```bash
-pip install rosbags
-```
-
-So you can calibrate a ROS1 or ROS2 bag on a machine that has never had ROS on it.
+We read ROS bags through [`rosbags`](https://pypi.org/project/rosbags/), the
+`[ros1]` extra. It is pure Python and needs no ROS installation, so you can
+calibrate a ROS1 or ROS2 bag on a machine that has never had ROS on it.
 
 :::caution[GTSAM needs NumPy 1.x]
-Pin NumPy below 2:
+The package pins NumPy below 2, so a plain install is safe. Only override the pin
+if you know GTSAM has a NumPy 2 build:
 
 ```bash
 pip install "numpy<2"
@@ -64,10 +85,11 @@ That is not an exception you can catch: the program crashes.
 ## Check the install
 
 ```bash
+mvis check --env --smoke   # verifies the install, then runs a short synthetic solve
 mvis --help
 ```
 
-You should see seven subcommands:
+You should see eleven subcommands:
 
 - `calibrate`
 - `cam`
@@ -75,6 +97,10 @@ You should see seven subcommands:
 - `apply-calib`
 - `roundtrip`
 - `run`
+- `inspect`
+- `check`
+- `verdict`
+- `datasets`
 - `analyze`
 
 The [CLI reference](/reference/cli/) documents each one.

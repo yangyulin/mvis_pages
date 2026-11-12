@@ -22,10 +22,14 @@ on the [roadmap](/about/roadmap/). Until then the source is authoritative.
 |---|---|
 | `mvis.core` | Types — `Observation`, `CameraParams`, `CalibrationResult` — plus config dataclasses |
 | `mvis.camera` | One `CameraModel` per distortion model; projection, Jacobians, unprojection in one place |
-| `mvis.board` | Detection — chessboard, AprilGrid, ArUco — and `corner_subsample` |
+| `mvis.detection` | Detection — chessboard, AprilGrid, ArUco — `board_factory`, `detectors`, `corner_subsample` |
 | `mvis.io` | `DataLoader`, streaming `DetectionPipeline`, data sources, detection cache, frame selector, output writers |
 | `mvis.calibration` | Initialiser (OpenCV PnP), Optimizer (the unified factor), Pipeline, `outlier_rejection`, `camera_projection`, `custom_projections` |
 | `mvis.analysis` | HTML report, plotting, Rerun 3D visualisation, motion analysis |
+| `mvis.imu` | IMU intrinsic models (`kalibr`, `rpng`, `calyx` conventions) and the measurement model |
+| `mvis.simulation` | Synthetic camera–IMU data with known ground truth ([Simulation](/guides/simulation/)) |
+| `mvis.datasets` | Dataset catalog, download and conversion behind `mvis datasets` |
+| `mvis.doctor` | `mvis inspect`, `check` and `verdict` |
 | `mvis.recalib` | `apply-calib` — corrected-dataset export |
 | `mvis.cli` | Command-line interface |
 
