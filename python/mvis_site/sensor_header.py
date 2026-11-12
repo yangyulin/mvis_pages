@@ -14,11 +14,15 @@ from .sensor_parts import map_panel
 from .sensor_rig import rig_drawing, rig_table
 
 
+_TAG_LABELS = {"measured": "Measured", "not_published": "Not published", "supplier": "Supplier's sheet", "dataset": "Dataset", "catalog": "Catalog"}
+
+
 def _tag(row: dict) -> str:
     tag = row.get("tag", "measured")
     if tag in ("maker", "listing"):
         return f'<a class=sd-tag href="{e(row["src"])}">{tag.capitalize()} ↗</a>'
-    return f'<span class=sd-tag>{e({"measured": "Measured", "not_published": "Not published", "supplier": "Supplier's sheet", "dataset": "Dataset", "catalog": "Catalog"}.get(tag, tag))}</span>'
+    label = _TAG_LABELS.get(tag, tag)
+    return f'<span class=sd-tag>{e(label)}</span>'
 
 
 def _auto(row: dict, v: dict) -> dict:
@@ -149,7 +153,12 @@ def process_block(slug: str, v: dict, i: int, media: str | None = None) -> str:
         return (f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(v)}<span>Explore in 3D ({views_mb(v)})</span></button>'
                 f'<div class="mvv" data-mvv="scene" data-mode="site" data-src="{media}/views{i}.json"></div></div>')
     return (f'<div class=proc-wrap><button type=button class=proc-open hidden>{proc_preview(v)}<span>Explore in 3D (about 5 MB)</span></button>'
-            f'{proc_html(v, i).replace("▶ Play", "▶\ufe0e Play")}</div>')
+            f'{_plotly_play(v, i)}</div>')
+
+
+def _plotly_play(v: dict, i: int) -> str:
+    """The Plotly process figure with a text-presentation play glyph (U+FE0E keeps emoji rendering off)."""
+    return proc_html(v, i).replace("▶ Play", "▶\ufe0e Play")
 
 
 PCHIPS = ('<div class=pchips><span><i style="background:#9333ea"></i>Board corners</span><span><i class=ln style="background:#2563eb"></i>Rig path, darker is later</span>'
