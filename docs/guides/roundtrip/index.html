@@ -163,8 +163,8 @@ not check its readout time.</li>
 <p>The full rig: VI-Rig bag 01, all 4 cameras and all 4 IMUs, the step 4 config, MVIS of
 2026-11-10. <strong>Result: PASS.</strong> All 16 IMU checks (4 per IMU) and all 5 geometry checks pass; the timing rows
 are warnings by design. Each solve took 9 to 13 min.</p>
-<p><strong>IMUs: what the first solve measured collapses.</strong> Before = calibration A on the raw bag, after =
-calibration B on the corrected bag.</p>
+<p><strong>IMUs: what the first solve measured collapses.</strong> A = calibration A on the raw bag; B = calibration B
+on the corrected bag. A right calibration leaves nothing for B to find.</p>
 
 
 
@@ -210,15 +210,6 @@ calibration B on the corrected bag.</p>
 
 
 
-<table><thead><tr><th>IMU</th><th>Gyro scale <code dir="auto">Dw</code> diagonal</th><th>Accel scale <code dir="auto">Da</code> diagonal</th><th>Largest bias</th><th><code dir="auto">t_ga</code> (ms)</th><th><code dir="auto">td</code> to base (ms)</th></tr></thead><tbody><tr><td>Xsens (base)</td><td>0.9981, 0.9977, 1.0009 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>0.9999, 0.9964, 1.0013 → <strong>0.9999, 1.0001, 1.0000</strong></td><td>0.036 → <strong>0.002</strong> m/s²</td><td>−0.82 → <strong>+0.30</strong></td><td>—</td></tr><tr><td>GX3-25</td><td>0.9999, 0.9998, 1.0027 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>0.9954, 1.0011, 1.0008 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>0.093 → <strong>0.0002</strong> m/s²</td><td>+0.10 → <strong>0.00</strong></td><td>−0.69 → <strong>0.00</strong></td></tr><tr><td>GX3-35</td><td>0.9990, 0.9986, 1.0009 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>0.9949, 1.0004, 1.0006 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>0.064 → <strong>0.0003</strong> m/s²</td><td>+0.01 → <strong>0.01</strong></td><td>−2.07 → <strong>0.00</strong></td></tr><tr><td>T265 IMU</td><td>0.9967, 1.0037, 1.0028 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>1.0205, 1.0204, 1.0123 → <strong>1.0000, 1.0000, 1.0000</strong></td><td>0.161 → <strong>0.002</strong> m/s²</td><td>−6.74 → <strong>0.00</strong></td><td>−7.17 → <strong>0.00</strong></td></tr></tbody></table>
-<ul>
-<li><strong>Scale:</strong> every diagonal lands within 0.0001 of 1. The limit is 0.01.</li>
-<li><strong>Bias:</strong> every gyro and accel bias drops below 0.002. The limit is 0.02.</li>
-<li><strong><code dir="auto">t_ga</code>:</strong> the T265 IMU’s −6.74 ms drops to 0.00 ms. The base Xsens keeps +0.30 ms, under the
-2 ms warning line.</li>
-<li><strong><code dir="auto">td</code>:</strong> each extra IMU’s time offset to the base drops to 0.00 ms.</li>
-</ul>
-<p><strong>Cameras: the geometry stays.</strong></p>
 
 
 
@@ -264,7 +255,6 @@ calibration B on the corrected bag.</p>
 
 
 
-<table><thead><tr><th>Camera</th><th>Lever arm to base (mm)</th><th>Lever change</th><th>Rotation change</th><th><code dir="auto">td</code> (ms)</th><th>fx / fy (px)</th></tr></thead><tbody><tr><td>T265-1</td><td>130.82 → 130.90</td><td>0.09 mm</td><td>0.08 mrad</td><td>−5.41 → <strong>0.00</strong></td><td>286.54 / 286.34 → 286.53 / 286.33</td></tr><tr><td>T265-2</td><td>112.24 → 112.33</td><td>0.09 mm</td><td>0.11 mrad</td><td>−7.47 → <strong>0.00</strong></td><td>286.51 / 286.08 → 286.50 / 286.08</td></tr><tr><td>ELP-L</td><td>145.12 → 145.16</td><td>0.08 mm</td><td>0.12 mrad</td><td>−123.25 → <strong>0.00</strong></td><td>426.90 / 426.45 → 426.89 / 426.45</td></tr><tr><td>ELP-R</td><td>185.95 → 185.98</td><td>0.06 mm</td><td>0.11 mrad</td><td>−123.30 → <strong>0.00</strong></td><td>423.58 / 423.10 → 423.58 / 423.11</td></tr></tbody></table>
 
 
 
@@ -279,18 +269,184 @@ calibration B on the corrected bag.</p>
 
 
 
+<table><thead><tr><th>Check</th><th>Solve</th><th align="right">Xsens (base)</th><th align="right">GX3-25</th><th align="right">GX3-35</th><th align="right">T265 IMU</th><th>Pass if</th></tr></thead><tbody><tr><td>Gyro scale <code dir="auto">Dw</code>: worst axis off 1</td><td>A</td><td align="right">0.23 %</td><td align="right">0.27 %</td><td align="right">0.14 %</td><td align="right">0.37 %</td><td></td></tr><tr><td></td><td>B</td><td align="right"><strong>0.00 %</strong></td><td align="right"><strong>0.00 %</strong></td><td align="right"><strong>0.00 %</strong></td><td align="right"><strong>0.00 %</strong></td><td>&#x3C; 1 %</td></tr><tr><td>Accel scale <code dir="auto">Da</code>: worst axis off 1</td><td>A</td><td align="right">0.36 %</td><td align="right">0.46 %</td><td align="right">0.51 %</td><td align="right">2.05 %</td><td></td></tr><tr><td></td><td>B</td><td align="right"><strong>0.01 %</strong></td><td align="right"><strong>0.00 %</strong></td><td align="right"><strong>0.00 %</strong></td><td align="right"><strong>0.00 %</strong></td><td>&#x3C; 1 %</td></tr><tr><td>Largest bias (m/s²)</td><td>A</td><td align="right">0.036</td><td align="right">0.093</td><td align="right">0.064</td><td align="right">0.161</td><td></td></tr><tr><td></td><td>B</td><td align="right"><strong>0.002</strong></td><td align="right"><strong>0.0002</strong></td><td align="right"><strong>0.0003</strong></td><td align="right"><strong>0.002</strong></td><td>&#x3C; 0.02</td></tr><tr><td><code dir="auto">t_ga</code> (ms)</td><td>A</td><td align="right">−0.82</td><td align="right">+0.10</td><td align="right">+0.01</td><td align="right">−6.74</td><td></td></tr><tr><td></td><td>B</td><td align="right"><strong>+0.30</strong></td><td align="right"><strong>0.00</strong></td><td align="right"><strong>0.01</strong></td><td align="right"><strong>0.00</strong></td><td>warn > 2 ms</td></tr><tr><td><code dir="auto">td</code> to base (ms)</td><td>A</td><td align="right">—</td><td align="right">−0.69</td><td align="right">−2.07</td><td align="right">−7.17</td><td></td></tr><tr><td></td><td>B</td><td align="right">—</td><td align="right"><strong>0.00</strong></td><td align="right"><strong>0.00</strong></td><td align="right"><strong>0.00</strong></td><td>warn > 2 ms</td></tr></tbody></table>
+<p>The largest change A had to make, the T265 IMU’s 2 % accel scale and −6.74 ms <code dir="auto">t_ga</code>, is fully gone
+in B. The base Xsens keeps +0.30 ms of <code dir="auto">t_ga</code>, under the 2 ms warning line.</p>
+<details><summary>Full scale diagonals (x, y, z)</summary>
 
 
 
 
 
 
-<table><thead><tr><th>Baseline</th><th>Before</th><th>After</th></tr></thead><tbody><tr><td>T265 pair</td><td>63.69 mm</td><td>63.69 mm</td></tr><tr><td>ELP pair</td><td>59.39 mm</td><td>59.40 mm</td></tr></tbody></table>
-<ul>
-<li><strong>Levers:</strong> every camera moves by under 0.1 mm. The limit is 2 mm.</li>
-<li><strong>Rotations:</strong> every camera turns by under 0.13 mrad.</li>
-<li><strong>Intrinsics:</strong> fx and fy move by under 0.01 px. Reprojection stays at 0.52 px RMS.</li>
-</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>IMU</th><th><code dir="auto">Dw</code>, A</th><th><code dir="auto">Dw</code>, B</th><th><code dir="auto">Da</code>, A</th><th><code dir="auto">Da</code>, B</th></tr></thead><tbody><tr><td>Xsens (base)</td><td>0.9981, 0.9977, 1.0009</td><td>1.0000, 1.0000, 1.0000</td><td>0.9999, 0.9964, 1.0013</td><td>0.9999, 1.0001, 1.0000</td></tr><tr><td>GX3-25</td><td>0.9999, 0.9998, 1.0027</td><td>1.0000, 1.0000, 1.0000</td><td>0.9954, 1.0011, 1.0008</td><td>1.0000, 1.0000, 1.0000</td></tr><tr><td>GX3-35</td><td>0.9990, 0.9986, 1.0009</td><td>1.0000, 1.0000, 1.0000</td><td>0.9949, 1.0004, 1.0006</td><td>1.0000, 1.0000, 1.0000</td></tr><tr><td>T265 IMU</td><td>0.9967, 1.0037, 1.0028</td><td>1.0000, 1.0000, 1.0000</td><td>1.0205, 1.0204, 1.0123</td><td>1.0000, 1.0000, 1.0000</td></tr></tbody></table></details>
+<p><strong>Cameras: the geometry stays.</strong> The lever arms, rotations and intrinsics that A found are not
+touched by <code dir="auto">apply-calib</code>, so B should find them again.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Check</th><th>Solve</th><th align="right">T265-1</th><th align="right">T265-2</th><th align="right">ELP-L</th><th align="right">ELP-R</th><th>Pass if</th></tr></thead><tbody><tr><td>Lever arm to base (mm)</td><td>A</td><td align="right">130.82</td><td align="right">112.24</td><td align="right">145.12</td><td align="right">185.95</td><td></td></tr><tr><td></td><td>B</td><td align="right">130.90</td><td align="right">112.33</td><td align="right">145.16</td><td align="right">185.98</td><td></td></tr><tr><td>Lever change (mm)</td><td>A → B</td><td align="right"><strong>0.09</strong></td><td align="right"><strong>0.09</strong></td><td align="right"><strong>0.08</strong></td><td align="right"><strong>0.06</strong></td><td>≤ 2 mm</td></tr><tr><td>Rotation change (mrad)</td><td>A → B</td><td align="right"><strong>0.08</strong></td><td align="right"><strong>0.11</strong></td><td align="right"><strong>0.12</strong></td><td align="right"><strong>0.11</strong></td><td></td></tr><tr><td><code dir="auto">td</code> (ms)</td><td>A</td><td align="right">−5.41</td><td align="right">−7.47</td><td align="right">−123.25</td><td align="right">−123.30</td><td></td></tr><tr><td></td><td>B</td><td align="right"><strong>0.00</strong></td><td align="right"><strong>0.00</strong></td><td align="right"><strong>0.00</strong></td><td align="right"><strong>0.00</strong></td><td>warn > 2 ms</td></tr><tr><td>fx (px)</td><td>A</td><td align="right">286.54</td><td align="right">286.51</td><td align="right">426.90</td><td align="right">423.58</td><td></td></tr><tr><td></td><td>B</td><td align="right">286.53</td><td align="right">286.50</td><td align="right">426.89</td><td align="right">423.58</td><td></td></tr><tr><td>fy (px)</td><td>A</td><td align="right">286.34</td><td align="right">286.08</td><td align="right">426.45</td><td align="right">423.10</td><td></td></tr><tr><td></td><td>B</td><td align="right">286.33</td><td align="right">286.08</td><td align="right">426.45</td><td align="right">423.11</td><td></td></tr></tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Stereo baseline</th><th align="right">A</th><th align="right">B</th><th>Pass if</th></tr></thead><tbody><tr><td>T265 pair</td><td align="right">63.69 mm</td><td align="right">63.69 mm</td><td>moves ≤ 2 mm</td></tr><tr><td>ELP pair</td><td align="right">59.39 mm</td><td align="right">59.40 mm</td><td>moves ≤ 2 mm</td></tr></tbody></table>
+<p>Every camera moves by under 0.1 mm and turns by under 0.13 mrad; fx and fy move by under 0.01 px.
+Reprojection stays at 0.52 px RMS. The camera <code dir="auto">td</code> collapses with the IMU’s: it is a timing term A
+measured and <code dir="auto">apply-calib</code> removed.</p>
 <p><strong>Not tested by this round trip:</strong></p>
 <ul>
 <li><strong>ELP readout:</strong> <code dir="auto">apply-calib</code> does not unwarp rolling-shutter rows (section 3).</li>
