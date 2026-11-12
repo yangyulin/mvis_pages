@@ -5,16 +5,28 @@ pageType: example
 wide: true
 ---
 
-Correcting the IMU and timing with MVIS cut OpenVINS mono position error (SE3 ATE) by two thirds on 24 headset recordings.
+Use this page to see what an IMU calibration buys a tracker downstream.
+Data: 24 headset recordings from the [Monado SLAM Datasets](https://huggingface.co/datasets/collabora/monado-slam-datasets); the VI-Rig numbers are in [the last section](#4-on-vi-rig-the-t265-accel-scale-is-off-on-every-axis).
 
-- **What:** we ran the OpenVINS visual-inertial tracker on each recording twice, once on the bag as published and once on the bag corrected by MVIS.
-- **Data:** Monado headset recordings, not VI-Rig. The VI-Rig numbers are in [the last section](#6-on-the-running-example).
+**The answer first:**
 
-Use this page to see what an IMU calibration buys a tracker downstream. The terms are explained where they first appear.
+- **Mono gains most:** correcting the IMU and timing with MVIS cuts the median OpenVINS mono SE3 ATE from 28.80 to
+  9.56 mm, by two thirds.
+- **Stereo gains less:** the median stereo SE3 ATE drops from 8.94 to 7.04 mm, and the 1 s drift improves on 24/24
+  recordings.
+- **Online calibration does not replace it:** on the as-published recordings, only stereo with online $t_d$ ties
+  the corrected recording; every other setting stays behind.
+- **Online calibration on top adds nothing:** on the corrected recordings, keep it off.
+- **Same kind of error on VI-Rig:** the T265 accel scale is off by 1.7–2.0 % on every axis.
 
-## 1. The test
+How to turn it on: estimate the IMU intrinsics in [Camera–IMU calibration](/guides/camera-imu-calibration/#3-turn-on-imu-intrinsics), then write a corrected recording with [`mvis apply-calib`](/guides/roundtrip/#export-a-corrected-dataset).
 
-**Recordings.** 24 `imucalib` recordings from the [Monado SLAM Datasets](https://huggingface.co/datasets/collabora/monado-slam-datasets) (CC BY 4.0):
+## The setup
+
+We ran the OpenVINS visual-inertial tracker on each recording twice: once on the recording as published and once on
+the recording corrected by MVIS.
+
+**Recordings:** 24 `imucalib` recordings from the Monado SLAM Datasets:
 
 | Headset | Recordings |
 |---|---|
@@ -22,19 +34,19 @@ Use this page to see what an IMU calibration buys a tracker downstream. The term
 | [HP Reverb G2](/devices/hp-reverb-g2/) | 12 |
 | [Samsung Odyssey+](/devices/samsung-odyssey-plus/) | 4 |
 
-**Two arms.** The two runs of a recording differ only in the input bag:
+**Two arms:** the two runs of a recording differ only in the input recording.
 
-- **As published:** the bag as the dataset ships it.
-- **Corrected:** the same bag after `mvis apply-calib` with the MVIS calibration. It applies:
-  - the **IMU intrinsics** (gyro and accel scale and misalignment),
-  - removal of the **static bias**,
-  - the **td** of each camera (camera–IMU time offset), by shifting the image stamps,
-  - the **t_ga** (gyro–accel time offset), by re-interpolating the accelerometer.
-- **Images** are unchanged.
+- **As published:** the recording as the dataset ships it.
+- **Corrected:** the same recording after `mvis apply-calib` with the MVIS calibration. It applies:
+  - the **IMU intrinsics**, the gyro and accel scale and misalignment $\mathbf{D}_w$ and $\mathbf{D}_a$;
+  - removal of the **static bias**;
+  - the camera–IMU time offset $t_d$ of each camera, by shifting the image stamps;
+  - the gyro–accel time offset $t_{ga}$, by re-interpolating the accelerometer.
+- **Images:** unchanged.
 
 **Shared by both arms:**
 
-- the same MVIS camera intrinsics (kb4) and camera–IMU extrinsics;
+- the same MVIS camera intrinsics (`kb4`) and camera–IMU extrinsics;
 - identical OpenVINS configs, byte for byte.
 
 So the test measures one thing: applying the MVIS IMU and time correction, given the MVIS geometry.
@@ -45,26 +57,29 @@ So the test measures one thing: applying the MVIS IMU and time correction, given
 
 - **SE3 ATE** (mm): position error after a rigid alignment to the ground truth. This is the primary metric.
 - **RPE 1 s** (mm): position drift over 1 s windows.
-- **Scale error** (%): \|Sim3 scale − 1\|, how far the trajectory size is off after a similarity alignment.
-- **Medians and wins:** each number below is a median over recordings. "Better" counts the recordings where the corrected bag wins.
+- **Scale error** (%): $\lvert s - 1 \rvert$, where $s$ is the Sim3 scale. It shows how far the trajectory size is
+  off after a similarity alignment.
+- **Medians and wins:** each number below is a median over recordings. "Better" counts the recordings where the
+  corrected recording wins.
 - **p:** Wilcoxon signed-rank p, paired by recording, not corrected for multiple tests.
 
-## 2. Result, nothing estimated online
+## 1. Correcting the IMU cuts mono position error by two thirds
 
 Here OpenVINS estimates no calibration while it runs. Lower is better.
 
 | Metric | As published | Corrected | Corrected better | p |
 |---|---|---|---|---|
-| Stereo SE3 ATE (mm) | 8.94 | 7.04 | 20/24 | 9.1×10⁻⁵ |
-| Stereo RPE 1 s (mm) | 5.51 | 4.23 | 24/24 | 1.2×10⁻⁷ |
-| Mono SE3 ATE (mm) | 28.80 | 9.56 | 21/23 | 2.1×10⁻⁴ |
-| Mono RPE 1 s (mm) | 9.95 | 6.79 | 21/23 | 2.1×10⁻⁴ |
-| Mono scale error (%) | 5.81 | 1.90 | 19/23 | 3.3×10⁻⁵ |
+| Stereo SE3 ATE (mm) | 8.94 | 7.04 | 20/24 | $9.1\times10^{-5}$ |
+| Stereo RPE 1 s (mm) | 5.51 | 4.23 | 24/24 | $1.2\times10^{-7}$ |
+| Mono SE3 ATE (mm) | 28.80 | 9.56 | 21/23 | $2.1\times10^{-4}$ |
+| Mono RPE 1 s (mm) | 9.95 | 6.79 | 21/23 | $2.1\times10^{-4}$ |
+| Mono scale error (%) | 5.81 | 1.90 | 19/23 | $3.3\times10^{-5}$ |
 | Stereo scale error (%) | 1.40 | 1.15 | 11/24 | 0.88 (not significant) |
 
-- **Mono** has 23 pairs: one Valve recording never starts in mono on either bag.
-- **Mono gains most.** One camera cannot see metric scale, so the tracker leans on the IMU. A wrong IMU likely shows up directly.
-- **Stereo gains less.** The stereo baseline gives scale, which likely hides part of the IMU error.
+- **Mono has 23 pairs:** one Valve recording never starts in mono on either recording.
+- **Mono gains most:** one camera cannot see metric scale, so the tracker leans on the IMU. A wrong IMU likely shows
+  up directly.
+- **Stereo gains less:** the stereo baseline gives scale, which likely hides part of the IMU error.
 
 Per headset, SE3 ATE in mm:
 
@@ -74,75 +89,118 @@ Per headset, SE3 ATE in mm:
 | HP Reverb G2 (12) | 9.91 → 7.39 | 29.08 → 9.49 |
 | Samsung Odyssey+ (4) | 21.29 → 9.96 | 47.51 → 13.67 |
 
-**Mono failures.** Five as-published mono runs lost scale or diverged. With the correction, only one failed: MIC10, a Valve recording that fails on both bags.
+- **Mono failures as published:** five as-published mono runs lost scale or diverged.
+- **Mono failures corrected:** with the correction, only one failed: MIC10, a Valve recording that fails on both
+  recordings.
 
-## 3. Can OpenVINS calibrate online instead?
+## 2. Online calibration on the published recordings does not catch up
 
-OpenVINS can estimate some calibration while it runs: one td for all cameras, the IMU intrinsics and the camera–IMU extrinsics. Here the corrected bag with nothing online meets the as-published bag with online estimation on. SE3 ATE in mm, medians:
+OpenVINS can estimate some calibration while it runs: one $t_d$ for all cameras, the IMU intrinsics and the
+camera–IMU extrinsics. Here the corrected recording with nothing online meets the as-published recording with
+online estimation on. SE3 ATE in mm, medians:
 
-| Cameras | Online on the as-published bag | Corrected, nothing online | As published + online |
+| Cameras | Online on the as-published recording | Corrected, nothing online | As published + online |
 |---|---|---|---|
-| Stereo | td | 7.04 | 6.80 |
+| Stereo | $t_d$ | 7.04 | 6.80 |
 | Stereo | IMU intrinsics | 7.04 | 10.74 |
-| Stereo | IMU intrinsics + td | 7.04 | 8.19 |
-| Stereo | IMU intrinsics + td + extrinsics | 7.04 | 11.62 |
-| Mono | td | 9.56 | 18.06 |
+| Stereo | IMU intrinsics + $t_d$ | 7.04 | 8.19 |
+| Stereo | IMU intrinsics + $t_d$ + extrinsics | 7.04 | 11.62 |
+| Mono | $t_d$ | 9.56 | 18.06 |
 | Mono | IMU intrinsics | 9.56 | 25.50 |
-| Mono | IMU intrinsics + td | 9.56 | 14.57 |
+| Mono | IMU intrinsics + $t_d$ | 9.56 | 14.57 |
 
-- **Stereo + online td is a tie:** corrected better in 14/24, p = 0.2.
-- **Every other setting** stays behind the corrected bag.
+- **Stereo + online $t_d$ is a tie:** corrected better in 14/24, p = 0.2.
+- **Every other setting** stays behind the corrected recording.
 - **Mono** stays behind at every setting, each in 21/23 recordings.
-- **t_ga:** OpenVINS has no t_ga parameter, so it cannot model this offset at all. See [Why calibrate t_ga](/why/tga/).
+- **$t_{ga}$:** OpenVINS has no $t_{ga}$ parameter, so it cannot model this offset at all. See
+  [Why calibrate t_ga](/why/tga/).
 
-## 4. Online calibration on corrected data adds nothing
+## 3. Online calibration on corrected recordings adds nothing
 
-Turning online calibration on for the corrected bag does not help:
+Turning online calibration on for the corrected recording does not help:
 
-- **Stereo + td:** 7.04 → 7.33 mm. Online is better in only 7/24.
-- **No setting** lowers SE3 ATE significantly. So use the corrected bag with online calibration off.
+- **Stereo + $t_d$:** 7.04 → 7.33 mm. Online is better in only 7/24.
+- **No setting** lowers SE3 ATE significantly. So use the corrected recording with online calibration off.
 
-The online values still check MVIS. They start at td = 0, so the agreement does not lean on MVIS. Camera td in ms, as-published bag, stereo + online td:
+The online values still check MVIS:
 
-| Headset | MVIS td (cam0) | OpenVINS online td |
+- **Independent start:** the online values start at $t_d = 0$, so the agreement does not lean on MVIS.
+- **Agreement:** camera $t_d$ in ms, as-published recording, stereo + online $t_d$:
+
+| Headset | MVIS $t_d$ (cam0) | OpenVINS online $t_d$ |
 |---|---|---|
 | Valve Index | −0.19 | −0.22 |
 | HP Reverb G2 | −1.33 | −1.12 |
 | Samsung Odyssey+ | −1.44 | −1.21 |
 
-On the corrected bag the online td stays near 0, as it should once the offset is removed.
+- **Corrected recording:** the online $t_d$ stays near 0, as it should once the offset is removed.
 
-## 5. Limits
+## 4. On VI-Rig, the T265 accel scale is off on every axis
 
-- **In-sample.** MVIS was solved on the same recordings. A check on held-out recordings is still open.
-- **Shared geometry.** Both arms use the MVIS camera intrinsics and extrinsics. This is not MVIS against the best calibration for the as-published data.
-- **"As published" is not raw.** The dataset already carries its own Basalt IMU correction. On Valve it was applied twice, which leaves an accel scale error of about 6 %. Part of the Valve mono gain likely undoes that.
-- **One combined gain.** The correction fixes IMU intrinsics, bias, td and t_ga together. Their effects were not separated.
-- **Too-large trajectories.** Reverb G2 and Odyssey+ trajectories come out about 1–2 % too large in both arms. The cause is not known.
-- **One recording gets worse.** Odyssey+ MOC11 stereo goes from 11.4 to 16.6 mm with the correction, though its RPE and mono improve.
-- **Small group.** Odyssey+ has only 4 pairs.
-- **Priors not tuned.** The OpenVINS online priors are fixed and were not tuned.
+The VI-Rig dataset [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/) shows why this matters on a real
+rig. We take the 15-recording [results](/benchmark/results/virig-4imus-4cams/) of family T8:
 
-## 6. On the running example
+- **Rig:** ELP stereo, T265 IMU as base, Xsens as second IMU.
+- **Model:** MVIS with Kalibr's IMU model (`kalibr`).
 
-The VI-Rig dataset [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/) shows why this matters on a real rig. The 15-recording [results](/benchmark/results/virig-4imus-4cams/) (family T8: ELP stereo, T265 IMU as base, Xsens as second IMU, MVIS with Kalibr's IMU model) give these accel scales, the diagonal of Da:
+Accel scales, the diagonal of $\mathbf{D}_a$:
 
-| IMU | Da x | Da y | Da z |
+| IMU | $\mathbf{D}_a$ x | $\mathbf{D}_a$ y | $\mathbf{D}_a$ z |
 |---|---|---|---|
 | T265 IMU | 1.01989 | 1.01905 | 1.01668 |
 | Xsens MTi | 0.99997 | 0.99932 | 1.00093 |
 
 - **T265 IMU:** its accel scale is off by 1.7–2.0 % on every axis.
 - **Xsens:** its scale stays within 0.1 % of 1. It is a check on the T265 result.
-- **Same kind of fix:** the corrected Monado bags apply the MVIS IMU intrinsics (Da and Dw) in the same way.
+- **Same kind of fix:** the corrected Monado recordings apply the MVIS IMU intrinsics $\mathbf{D}_a$ and
+  $\mathbf{D}_w$ in the same way.
 
 To do it on your rig:
 
 - **Estimate** the IMU intrinsics in [step 4, Camera–IMU calibration](/guides/camera-imu-calibration/).
-- **Write** a corrected bag with `mvis apply-calib` in [step 8, Round-trip validation](/guides/roundtrip/#export-a-corrected-dataset).
+- **Write** a corrected recording with `mvis apply-calib` in [step 8, Round-trip validation](/guides/roundtrip/#export-a-corrected-dataset).
+
+**Conclusion:**
+
+- **Correct the IMU before the tracker:** the MVIS IMU and time correction cuts mono SE3 ATE by two thirds and helps
+  stereo too.
+- **Online calibration is no substitute:** it does not catch up on the as-published recordings, and adds nothing on
+  the corrected ones.
+- **Keep it off:** run the corrected recording with online calibration off.
+
+## Limits
+
+<div class="not-content rp-honest">
+  <ul>
+    <li><b>In-sample:</b> MVIS was solved on the same recordings. A check on held-out recordings is still open.</li>
+    <li><b>Shared geometry:</b> Both arms use the MVIS camera intrinsics and extrinsics. This is not MVIS against
+      the best calibration for the as-published data.</li>
+    <li><b>"As published" is not raw:</b> The dataset already carries its own Basalt IMU correction.</li>
+    <li><b>Valve corrected twice:</b> On Valve that correction was applied twice, which leaves an accel scale error
+      of about 6 %. Part of the Valve mono gain likely undoes that.</li>
+    <li><b>One combined gain:</b> The correction fixes IMU intrinsics, bias, td and t_ga together. Their effects
+      were not separated.</li>
+    <li><b>Too-large trajectories:</b> Reverb G2 and Odyssey+ trajectories come out about 1–2 % too large in both
+      arms. The cause is not known.</li>
+    <li><b>One recording gets worse:</b> Odyssey+ MOC11 stereo goes from 11.4 to 16.6 mm with the correction,
+      though its RPE and mono improve.</li>
+    <li><b>Small group:</b> Odyssey+ has only 4 pairs.</li>
+    <li><b>Priors not tuned:</b> The OpenVINS online priors are fixed and were not tuned.</li>
+  </ul>
+</div>
+
+## Data
+
+- **Monado:** the `imucalib` recordings of the
+  [Monado SLAM Datasets](https://huggingface.co/datasets/collabora/monado-slam-datasets), CC BY 4.0, with the
+  lighthouse ground truth that comes with them. The MVIS configs are in the [Monado example](/benchmark/examples/monado/).
+- **VI-Rig:** [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/), family T8 of the
+  [results](/benchmark/results/virig-4imus-4cams/). Licence and citation are on the dataset page.
+- **Runs:** the source page dated no run by commit, so none is listed here.
 
 ## Related
 
+- [Camera–IMU calibration](/guides/camera-imu-calibration/)
 - [Why calibrate t_ga](/why/tga/)
 - [Monado example](/benchmark/examples/monado/)
 - [Round-trip validation](/guides/roundtrip/)
