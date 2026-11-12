@@ -6,7 +6,7 @@ wide: true
 ---
 
 Use this page to look up every `mvis` subcommand and its flags.
-MVIS installs one entry point, `mvis`, with seven subcommands.
+The `pymvis` package installs one entry point, `mvis`, with eleven subcommands.
 
 Everything is config-driven:
 
@@ -25,6 +25,10 @@ mvis --help
 | [`apply-calib`](#apply-calib) | Apply a calibration to a raw bag → corrected bag |
 | [`roundtrip`](#roundtrip) | calibrate → apply-calib → recalibrate → PASS/FAIL report |
 | [`run`](#run) | Run calibration, dispatching on the config type |
+| [`inspect`](#inspect) | Inspect a dataset before writing a config |
+| [`check`](#check) | Lint the environment and/or a run config before solving |
+| [`verdict`](#verdict) | Grade a finished result GREEN / YELLOW / RED |
+| [`datasets`](#datasets) | List, download and verify the dataset catalog |
 | [`analyze`](#analyze) | Analyse calibration results |
 
 :::note[Hand-written, and therefore able to drift]
@@ -144,6 +148,94 @@ mvis run --config any_config.yaml
 |---|---|
 | `--config`, `-c` | Any MVIS config |
 
+## `inspect`
+
+Reads a dataset's metadata and a short sample of each stream, never the whole
+recording, and reports what a calibration needs to know: the container format,
+which MVIS modes can read it, the camera streams (rate, resolution, encoding),
+the IMU streams (rate, units, stamp order) and the camera/IMU time overlap.
+Every finding has a stable id and a status `pass`, `warn` or `fail`. Run it
+before writing a config.
+
+```bash
+mvis inspect /path/to/dataset
+mvis inspect recording.bag --json --out inspect.json
+```
+
+| Flag | Description |
+|---|---|
+| `path` | A ROS1 bag, EuRoC `mav0` folder, ROS2 bag or image folder |
+| `--json` | Machine-readable output |
+| `--out` | Also write the JSON report to this file |
+
+`inspect`, `check` and `verdict` are deterministic and exit with `0` (ok),
+`1` (warnings) or `2` (failure), so they work in scripts and CI.
+
+## `check`
+
+Lints the installation and a run config before you spend time on a solve.
+
+```bash
+mvis check --env --smoke        # verify the install, then run a short synthetic camera solve
+mvis check -c config.yaml       # lint a config (and the extras it needs)
+```
+
+| Flag | Description |
+|---|---|
+| `-c`, `--config` | Run config YAML to lint |
+| `--env` | Verify the installation; with `-c`, also the extras that config needs |
+| `--smoke` | Also run a short synthetic camera solve (implies `--env`) |
+| `--json` | Machine-readable output |
+| `--out` | Also write the JSON findings to this file |
+
+## `verdict`
+
+Grades a finished result GREEN, YELLOW or RED. A verdict is a list of checks
+(reprojection error, IMU residuals and similar), each with a stable id, the
+measured value, its threshold and a status; RED if any check fails, YELLOW if
+any warns, GREEN otherwise. With a config whose `reference:` block is set, the
+result is also compared with those reference values. The solver's own `ok` flag
+is never taken as evidence of a good fit.
+
+```bash
+mvis verdict results/run/calibration_result.yaml
+mvis verdict results/run/cam_imu.json -c cam_imu.yaml --independent-check roundtrip
+```
+
+| Flag | Description |
+|---|---|
+| `result` | Camera-only result YAML or cam-IMU summary JSON |
+| `-c`, `--config` | Cam-IMU run config; its `reference:` block is compared |
+| `--independent-check` | Verification you already ran: `none` (default), `roundtrip`, `holdout`, `repeatability` or `cross-tool` |
+| `--json` | Machine-readable output |
+| `--out` | Also write the JSON verdict to this file |
+
+## `datasets`
+
+Lists, downloads, verifies and converts the recordings in the
+[dataset catalog](/reference/datasets/). Downloads go to `$MVIS_DATASETS`
+(default `~/Datasets`); every example config refers to them as
+`${MVIS_DATASETS}/...`. The VI-Rig sets are gated: accept the terms on the Hub
+and log in (`huggingface-cli login`, or set `HF_TOKEN`) before downloading.
+
+```bash
+mvis datasets list
+mvis datasets list --dataset mvis_4imus_3cams
+mvis datasets download --select mvis_4imus_3cams/april_01    # about 7 GB
+mvis datasets verify --suite camera-imu
+```
+
+| Argument | Description |
+|---|---|
+| `action` | `list`, `download`, `verify`, `convert`, `upload` or `export-recipes` |
+| `--dataset` | One dataset key |
+| `--select` | Repeatable `DATASET[/SEQUENCE]` selection |
+| `--selection` | A built-in selection name (such as `smoke`) or a JSON file mapping dataset → sequences |
+| `--suite` | Restrict to one suite: `camera-only` or `camera-imu` |
+| `--mcap` | `convert`: also emit a ROS2/MCAP twin per produced bag |
+| `--dry-run` | `upload`: print the plan without pushing anything |
+| `--out` | `export-recipes`: output directory (default `recipes`) |
+
 ## `analyze`
 
 Analyse existing calibration results.
@@ -162,12 +254,15 @@ These are not subcommands, but they are part of the everyday surface:
 
 | Script | Purpose |
 |---|---|
-| `scripts/run_regression_tests.py` | Manifest-driven batch runner. `--level benchmark --parallel 8`, `--only <dataset>` |
-| `scripts/run_quick_regression.py` | Six-run subset, roughly ten minutes |
-| `scripts/compare_baseline.py` | Compare current results against a saved baseline |
-| `scripts/save_baseline.py` | Save a new baseline, with a comparison report |
-| `scripts/visualize_result.py` | Post-hoc Rerun 3D viewer for a result directory |
-| `python -m mvis.analysis.regenerate_html` | Rebuild HTML reports from saved YAML + detection cache |
-| `studies/calib_video_real.py` | Render a calibration MP4 (`--sim`, `--recover`, `--rig-view`) |
+| `scripts/setup_env.sh` | One-step conda setup; see [Installation](/getting-started/installation/) |
+| `scripts/test.sh <tier>` | Run the tests by tier: `unit`, `solver`, `integration` or `full`; extra arguments go to pytest |
+| `scripts/visualize_result.py <run_dir>` | Post-hoc Rerun 3D viewer for a result directory (`--no-spawn` to attach to a running viewer) |
+| `scripts/run_calibration.py` | Multi-camera ablation: calibrate with each camera as the reference |
+| `scripts/recalib_batch.py` | Apply one calibration across every `*.bag` in a directory (`--calib`, `--in-dir`, `--out-dir`) |
+| `python -m mvis.analysis.regenerate_html [root]` | Rebuild HTML reports from saved YAML + detection cache |
+
+The maintainers' regression runner and its baselines are not part of the public
+repository; [Regression testing](/contribute/regression-testing/) describes
+that workflow.
 
 More detail in [Evaluation & metrics](/reference/evaluation/).

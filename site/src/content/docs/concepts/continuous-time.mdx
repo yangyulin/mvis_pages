@@ -4,12 +4,12 @@ description: Where a B-spline trajectory parameterisation helps, and how it diff
 pageType: concept
 ---
 
-Use this page to see how the Open MVIS trajectory model differs from the one in
+Use this page to see how the OpenMVIS trajectory model differs from the one in
 Kalibr and Basalt. It also explains why we chose ours.
 
 Both models recover the same calibration; they differ in how they get there:
 
-- **Open MVIS** solves on a **discrete-time** graph. The trajectory is a set of
+- **OpenMVIS** solves on a **discrete-time** graph. The trajectory is a set of
   states (snapshots of the rig motion) at measurement times. Pre-integrated inertial
   factors link them: each one sums the IMU samples between two states into a
   single constraint.
@@ -19,7 +19,7 @@ Both models recover the same calibration; they differ in how they get there:
 
 ## The difference
 
-| | Discrete-time (Open MVIS) | Continuous-time (Kalibr, Basalt) |
+| | Discrete-time (OpenMVIS) | Continuous-time (Kalibr, Basalt) |
 |---|---|---|
 | Trajectory | states at discrete times | control points of a spline |
 | Between states | pre-integrated IMU factor | analytic evaluation of the spline |
@@ -37,7 +37,7 @@ errors after the fit), because the model, not the data, is what is wrong.
 
 ## Why the discrete graph is the default here
 
-Open MVIS is built for multi-IMU rigs. They push against the continuous-time
+OpenMVIS is built for multi-IMU rigs. They push against the continuous-time
 assumption from two sides:
 
 - **Many clocks.** Each IMU has its own clock and rate. So a single spline must
