@@ -1,7 +1,7 @@
 {
  "batch": "2026-01-01",
  "results_commit": "0123456",
- "how_to_read": "<ul><li>Its camera + IMU runs take intrinsics and baselines as input from an MVIS export, and T7 ELP-L readout is held at 0.</li></ul>",
+ "how_to_read": "<ul><li>Its camera + IMU runs take intrinsics and baselines as input, from an MVIS export or, on T6 and T11, from its own camera-only calibration; T7 ELP-L readout is held at 0.</li></ul>",
  "datasets": {
   "one": "<div class=\"cb\"><p>T1   </p><a href=\"/tree/0123456789abcdef0123456789abcdef01234567\">configs</a><h2>keep</h2></div>",
   "two": "<div class=\"cb\"><p>T2   </p><a href=\"/tree/0123456789abcdef0123456789abcdef01234567\">configs</a><h2>keep</h2></div>"
