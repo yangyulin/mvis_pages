@@ -70,34 +70,36 @@ is silent and systematic: no residual will reveal it.
 
 ## 4. A board is never flat
 
-A printed board bends and twists a little. A solve that assumes it is flat pushes that error into the
-calibration.
+A board can bend and twist a little, and ours does. A solve that assumes it is flat pushes that error
+into the calibration.
 
-The VI-Rig board, estimated from the camera residuals:
+The VI-Rig board, estimated from the camera residuals. The shape depends on how the board is mounted:
 
-- **Out of plane:** 10–11 mm peak to peak, 2.3–2.4 mm rms.
+- **Out of plane, on this mount:** 10–11 mm peak to peak, 2.3–2.4 mm rms.
 - **Example run:** the [4 IMUs + 4 cameras example](/benchmark/examples/virig-4imus-4cams/)
   re-estimates it at 2.21 mm rms and 8.94 mm peak to peak.
-- **Effect:** estimating the shape cut the camera-only residual by 30–45 %. On the ELP left camera alone,
-  0.771 px became 0.430 px.
+- **Effect:** estimating the shape lowers the camera-only residual and moves the focal length; the numbers
+  are in [Why calibrate the board shape](/why/board-shape/).
 
 Turn it on with one key. MVIS then solves one height per corner, in camera-only and camera–IMU runs:
 
 ```yaml title="config.yaml"
 board:
   # ... the fields above ...
-  heights_file: board_shape_4imus_4cams.yaml   # optional start values, from an earlier run
+  heights_file: board_shape_4imus_4cams.yaml   # optional start values, from an earlier run (camera–IMU only)
 estimate:
   board_points: true
 ```
 
 - **`estimate.board_points: true`:** solve the board shape with everything else.
-- **`board.heights_file`:** optional. The heights start from this file, or flat without it. A camera–IMU
+- **`board.heights_file`:** optional, camera–IMU runs only; camera-only runs do not read it yet. The heights
+  start from this file, or flat without it. A camera–IMU
   run writes its estimate next to its output as `<output>_board_shape.yaml`, which you can use here.
   The example's `board_shape_4imus_4cams.yaml` is such an earlier estimate of the VI-Rig board.
-- **Prior:** each height has a weak prior of 3 mm (solver default `board_height_sigma: 0.003`, in m).
+- **Prior:** each height has a weak prior of 3 mm (`board_height_sigma: 0.003`, in m; settable as
+  `solve.board_height_sigma` in camera–IMU runs, fixed at the default in camera-only runs).
 
-We turn it on for every VI-Rig solve.
+It is off by default. We turn it on for every VI-Rig solve. What it changes: [Why calibrate the board shape](/why/board-shape/).
 
 ## 5. No printer? Use a screen board
 

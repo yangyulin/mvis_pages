@@ -17,7 +17,7 @@ accelerometer.
 | Capability | MVIS | Kalibr | Basalt |
 |---|---|---|---|
 | Camera intrinsics + distortion | ✅ | ✅ | ✅ |
-| Distortion models | radtan, equidistant, FOV, DS, EUCM, omni_radtan | radtan, equidistant, FOV, DS, EUCM | radtan, KB, DS, EUCM |
+| Distortion models | radtan, kb4, equidistant, FOV, DS, EUCM, UCM, omni_radtan | radtan, equidistant, FOV, DS, EUCM | radtan, KB, DS, EUCM |
 | **Mixed models across one rig** | ✅ | ✖ | ✖ |
 | Camera–IMU extrinsics + time offset | ✅ | ✅ | ✅ |
 | **Multiple IMUs** | ✅ | ✖ | ✖ |
@@ -25,6 +25,8 @@ accelerometer.
 | IMU intrinsics (scale, misalignment) | ✅ — 3 conventions | ✅ | ✖ |
 | G-sensitivity `Tg` | ✅ | ✅ | ✖ |
 | **[Gyro↔accel offset `t_ga`](/why/tga/)** | ✅ | ✖ | ✖ |
+| **[Board shape (one height per corner)](/why/board-shape/)** | ✅ `estimate.board_points` | ✖ flat board | ✖ flat board |
+| [KB4-type polynomial past 90°](/why/kb4/) | ✅ `kb4` | ✖ pinhole-equi needs rays in front of the camera | ✅ KB4 |
 | Rolling-shutter readout | ✅ | via fork | ✖ |
 | **Corrected-dataset export** | ✅ `apply-calib` | ✖ | ✖ |
 | **Round-trip PASS/FAIL validation** | ✅ `roundtrip` | ✖ | ✖ |
@@ -49,6 +51,10 @@ accelerometer.
   Insight 9 and 1.9–2.0 ms on the T265 (first camera); an injection sweep predicts 3.0–3.2 and
   1.6–1.7 ms of that from the offset alone. Whose `td` is closer to the truth is
   not yet tested. [Details](/why/tga/).
+- **It can solve the board shape.** With `estimate.board_points: true` MVIS
+  solves one height per corner. Kalibr and Basalt take the board as flat. On
+  our VI-Rig mount a flat solve shifts the focal length, gyro scale and lever.
+  [Details](/why/board-shape/).
 - **Validation is a command, not a habit.** `mvis roundtrip` gives a
   PASS/FAIL. A PASS requires IMU intrinsics to collapse *and* geometry to
   hold. Nothing comparable ships with the others.

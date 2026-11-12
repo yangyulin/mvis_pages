@@ -34,9 +34,10 @@ Everything is solved in **one graph**:
   - Bags are read through `rosbags`.
   - So a ROS1 or ROS2 recording calibrates on a machine that has never had ROS
     installed.
-- **Six distortion models, mixable.**
-  - `radtan`, `equidistant`, `fov`, `double_sphere`, `eucm`, and experimental
-    `omni_radtan`.
+- **Eight distortion models, mixable.**
+  - `radtan`, `kb4` (the fisheye default, also selected by `fisheye` and
+    `kannala_brandt`; [why kb4](/why/kb4/)), `equidistant`, `fov`,
+    `double_sphere`, `eucm`, `ucm`, and experimental `omni_radtan`.
   - All work in both camera-only and camera–IMU calibration.
   - You can mix them across cameras in one rig.
 - **Multi-IMU.**

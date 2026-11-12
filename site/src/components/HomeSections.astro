@@ -11,7 +11,7 @@
         <p class="mhs-kicker">Calibrate a whole rig at once</p>
         <h2>From one recording to a full sensor model.</h2>
         <div class="mhs-prose">
-          <p>MVIS is the calibration library behind the Open MVIS benchmark. It solves camera intrinsics and distortion, extrinsics, time offsets, rolling-shutter readout, board poses, camera–IMU transforms, IMU intrinsics and biases in a single GTSAM factor graph.</p>
+          <p>MVIS is the calibration library behind the Open MVIS benchmark. It solves camera intrinsics and distortion, extrinsics, time offsets, rolling-shutter readout, board poses and (optionally) the board shape, camera–IMU transforms, IMU intrinsics and biases in a single GTSAM factor graph.</p>
           <p>ROS1 and ROS2 bags are read through <code>rosbags</code>, alongside EuRoC/ASL folders, image folders and video, on a machine that has never had ROS installed.</p>
         </div>
       </div>
@@ -47,6 +47,7 @@
           <tr><td class="q">Gyro–accel offset</td><td class="sym">t_ga</td><td class="per">IMU</td><td class="unit">ms</td><td>The T265 reads about −6 ms; <a href="/why/tga/">why it matters</a></td></tr>
           <tr><td class="q">Biases</td><td class="sym">b_g, b_a</td><td class="per">IMU</td><td class="unit">rad/s · m/s²</td><td>Along the whole trajectory</td></tr>
           <tr><td class="q">Board pose + trajectory</td><td class="sym">T_BinW, T_ItoW(t)</td><td class="per">recording</td><td class="unit">m · log(R) rad</td><td>Chessboard, AprilGrid or ArUco targets</td></tr>
+          <tr><td class="q">Board shape</td><td class="sym">z_k</td><td class="per">corner</td><td class="unit">mm</td><td>Optional; on for our VI-Rig mount; <a href="/why/board-shape/">why it matters</a></td></tr>
         </tbody>
       </table>
     </div>
@@ -59,7 +60,7 @@
         <h2>Eight projection models.</h2>
         <ul class="mhs-models">
           <li><code>radtan</code><span>Pinhole, radial–tangential</span></li>
-          <li><code>kb4</code><span>Kannala–Brandt fisheye</span></li>
+          <li><code>kb4</code><span>Kannala–Brandt fisheye, the default; <a href="/why/kb4/">why</a></span></li>
           <li><code>equidistant</code><span>KB polynomial, under 90°</span></li>
           <li><code>fov</code><span>Field-of-view model</span></li>
           <li><code>double_sphere</code><span>Wide-angle fisheye</span></li>

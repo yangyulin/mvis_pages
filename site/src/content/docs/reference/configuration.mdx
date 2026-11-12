@@ -39,6 +39,7 @@ The calibration target. The "Required for" column says which board types need th
 | `marker_size` | float (m) | aruco | Marker edge length |
 | `marker_separation` | float (m) | aruco | Gap between markers |
 | `aruco_dict` | string | aruco | OpenCV dictionary name |
+| `heights_file` | path | optional | Start values for the board shape, one height per corner (a camera–IMU run's `<output>_board_shape.yaml`). Read by camera–IMU runs only; camera-only runs do not read it yet |
 
 ### `cameras[]`
 
@@ -51,7 +52,7 @@ One entry per camera in the rig.
 | `source_type` | `images \| rosbag_topic \| ros2bag \| euroc \| timestamped_images \| video` | — | Input format |
 | `source_path` | path | — | Directory, bag, or EuRoC camera folder |
 | `topic` | string | — | Image topic — bag sources only |
-| `distortion_model` | `radtan \| equidistant \| double_sphere \| eucm \| fov \| omni_radtan` | — | See [Camera model](/concepts/camera-model/) |
+| `distortion_model` | `radtan \| kb4 \| equidistant \| double_sphere \| eucm \| ucm \| fov \| omni_radtan` | — | See [Camera model](/concepts/camera-model/). Fisheye: `kb4`, also selected by `fisheye` / `kannala_brandt` ([why](/why/kb4/)) |
 | `shutter_type` | `global \| rolling` | `global` | `rolling` enables readout calibration |
 | `factor_hz` | float | `0` | Subsample to this frame rate; `0` uses every frame |
 
@@ -83,6 +84,7 @@ relative poses between sensors; here, between the cameras.
 | `reference_camera` | int | `0` | Camera the extrinsics are expressed against |
 | `output_file` | path | — | Result path |
 | `output_format` | `yaml \| json` | `yaml` | Result format |
+| `estimate.board_points` | bool | `false` | Solve one height per board corner, the board shape, in camera-only and camera–IMU runs ([why](/why/board-shape/)) |
 
 ## Camera–IMU config
 
@@ -143,6 +145,7 @@ Settings for the camera–IMU solve. Three terms first:
 | `imu_intrinsics_model` | `kalibr \| rpng \| calyx` | — | Parameterisation. A convention, not a quality lever — all three recover identical extrinsics. See [IMU model](/concepts/imu-model/) |
 | `estimate_t_ga` | bool | `true` | Estimate the base IMU's internal gyro↔accel offset ([why](/why/tga/)) |
 | `sigma_t_ga` | float | `0.010` | Prior on `t_ga` (s), a weak 10 ms prior |
+| `board_height_sigma` | float | `0.003` | Prior on each board-corner height (m) when `estimate.board_points: true`. Camera-only runs use the same 3 mm default and do not expose it |
 | `corner_subsample` | `top_left \| two_diag \| all` | `top_left` | As above |
 | `sigma_td_prior` | float | — | Prior on the camera–IMU time offset; `0.0` disables |
 | `init_kwargs` | object | — | Initialiser options, e.g. `{keyframe_hz: 2.0, scale_rel_tol: 0.3}` |

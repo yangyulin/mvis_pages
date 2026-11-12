@@ -106,7 +106,7 @@ What the highlighted lines do:
 
 - **`input`:** a ROS1 bag. The first `imu_topics` entry (`/imu/data`, the Xsens) is the **base IMU**. Every other sensor is solved relative to it.
 - **`window_mode: motion`:** MVIS picks the `segment_length` seconds (here 80 s) with the most IMU motion.
-- **`board.heights_file` + `estimate.board_points: true`:** we solve the board shape too. Our printed board is not flat.
+- **`board.heights_file` + `estimate.board_points: true`:** we solve the board shape too. Our board is not flat on this VI-Rig mount; a flat solve shifts gyro scale and the lever ([why](/why/board-shape/)).
 - **`solve.corner_subsample: two_anti`:** uses two opposite corners of each tag (top-left and bottom-right). Our config sets it. The cam-IMU default is `all` (every corner).
 - **`solve.estimate_t_ga: true`, `sigma_t_ga: 0.01`:** solve `t_ga` for each IMU. Keep this on.
 - **`solve.vision_pose: imu`:** carries each corner's pose to its capture time through the raw base-IMU samples. It is the default.
