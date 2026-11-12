@@ -139,7 +139,8 @@ CSS = """#lb-tabs button{color:red}
 .dark .cb .x{color:white}
 main.app{padding:0}
 """
-FIXED = "Its camera + IMU runs take intrinsics and baselines as input from an MVIS export, and T7 ELP-L readout is held at 0."
+FIXED = ("Its camera + IMU runs take intrinsics and baselines as input, from an MVIS export or, on T6 and T11, from its own "
+         "camera-only calibration; T7 ELP-L readout is held at 0.")
 
 
 PAIRS = (("mk", "mvis", "kalibr", "MVIS", "− Kalibr"), ("bk", "basalt", "kalibr", "Basalt", "− Kalibr"),

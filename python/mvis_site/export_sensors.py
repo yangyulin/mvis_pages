@@ -31,6 +31,22 @@ MEDIA = "site/public/media/sensors"
 DATA_DIR = "site/src/data/sensors"
 DOCS = "site/src/content/docs/devices"
 MAKE_DIRS = (DATA_DIR, DOCS, "site/src/scripts")
+FIGURE_DIGITS = 7   # significant digits kept in the process / views figure JSON
+
+
+def figure_json(obj) -> str:
+    """Compact JSON for a process or views figure, floats cut to FIGURE_DIGITS significant digits. The last digits of a
+    float differ between machines (x86_64 vs arm64 BLAS), which made the pinned golden output machine-dependent, and
+    nothing on a figure can show them."""
+    def cut(x):
+        if isinstance(x, float):
+            return float(f"{x:.{FIGURE_DIGITS}g}")
+        if isinstance(x, dict):
+            return {k: cut(v) for k, v in x.items()}
+        if isinstance(x, (list, tuple)):
+            return [cut(v) for v in x]
+        return x
+    return json.dumps(cut(obj), separators=(",", ":"))
 
 
 @dataclass
@@ -81,8 +97,8 @@ def render(pub: dict, collected: dict, media: Path, photos: Path) -> Plan:
         vs = c["variants"]
         if c["sha"]:
             p["sha"] = c["sha"]
-        procs = [(f"views{i}.json", json.dumps(v["views"], separators=(",", ":"))) if v.get("views")
-                 else (f"process{i}.json", json.dumps(v["process"], separators=(",", ":"))) for i, v in enumerate(vs)]
+        procs = [(f"views{i}.json", figure_json(v["views"])) if v.get("views")
+                 else (f"process{i}.json", figure_json(v["process"])) for i, v in enumerate(vs)]
         plan.problems += [f"{slug} process: {x}" for _, t in procs for x in public_problems(process_strings(t))]
         if not p.get("header", {}).get("image", {}).get("file"):
             raise ValueError(f"{slug}: needs a header with an image file; the Sensors overview card shows it")

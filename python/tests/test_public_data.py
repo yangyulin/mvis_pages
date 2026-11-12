@@ -27,7 +27,7 @@ def test_t265_is_first_and_labels_keep_full_names(pub):
 
 def test_groups_follow_the_chosen_order(pub):
     assert [(g["title"], g["slugs"]) for g in sensor_groups(pub)] == [
-        ("Tracking cameras and modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "alg-avs111c", "cyperstereo", "hampo"]),
+        ("Tracking modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "alg-avs111c", "cyperstereo", "hampo"]),
         ("Head-worn cameras", ["gi-ego1", "gi-ego1gs", "xq20"]),
         ("VR headsets", ["valve-index", "hp-reverb-g2", "samsung-odyssey-plus"]),
     ]
@@ -61,7 +61,7 @@ def test_unknown_shutter_is_left_out_of_the_tags(pub):
         assert any("shutter" in t for t in c["tags"]) == known, slug
 
 
-# Live without a demo or hosted data, at the user's request (alg-avs111c 2026-11-06; cyperstereo draft 2026-11-11): no demo rendered yet, no permission to host the bag.
+# Live without a demo or hosted data, at the user's request (alg-avs111c 2026-11-06; cyperstereo 2026-11-11, which has a demo since): no permission to host the bag.
 NO_DEMO_NOT_HOSTED = ("alg-avs111c", "cyperstereo")
 
 
