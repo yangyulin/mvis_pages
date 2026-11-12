@@ -30,6 +30,7 @@ def test_groups_follow_the_chosen_order(pub):
         ("Tracking modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "alg-avs111c", "cyperstereo", "hampo"]),
         ("Head-worn cameras", ["gi-ego1", "gi-ego1gs", "xq20"]),
         ("VR headsets", ["valve-index", "hp-reverb-g2", "samsung-odyssey-plus"]),
+        ("360° cameras", ["insta360-one-rs-1inch-360"]),
     ]
 
 
@@ -62,7 +63,8 @@ def test_unknown_shutter_is_left_out_of_the_tags(pub):
 
 
 # Live without a demo or hosted data, at the user's request (alg-avs111c 2026-11-06; cyperstereo 2026-11-11, which has a demo since): no permission to host the bag.
-NO_DEMO_NOT_HOSTED = ("alg-avs111c", "cyperstereo")
+# insta360-one-rs-1inch-360 (2026-11-12): third-party recordings under CC BY-NC-SA, linked at their source and not re-hosted; no demo clip yet.
+NO_DEMO_NOT_HOSTED = ("alg-avs111c", "cyperstereo", "insta360-one-rs-1inch-360")
 
 
 def test_every_page_has_a_cited_photo_a_short_type_and_a_demo(pub):
