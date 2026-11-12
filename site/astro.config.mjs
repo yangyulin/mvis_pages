@@ -84,19 +84,16 @@ export default defineConfig({
 
   integrations: [
     starlight({
-      title: 'Open MVIS',
+      title: 'OpenMVIS',
       description:
         'The benchmark for multi-visual-inertial sensor calibration — multi-IMU, multi-camera, with leaderboard.',
       logo: { src: './src/assets/logo-placeholder.svg' },
-      // Both links must point at a PUBLIC repo or they 404 for visitors.
-      // The toolbox repos (yangyulin/MVIS, yangyulin/mvis-code) are private,
-      // so the public site repo is the only working target today. Switch the
-      // social link to MVIS once that repo is published.
+      // Header link: the toolbox repo. Edit links: this site's repo.
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/yangyulin/mvis_pages' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/openmvis/openmvis' },
       ],
       editLink: {
-        baseUrl: 'https://github.com/yangyulin/mvis_pages/edit/main/site/',
+        baseUrl: 'https://github.com/openmvis/mvis_pages/edit/main/site/',
       },
       lastUpdated: true,
       pagination: true,
