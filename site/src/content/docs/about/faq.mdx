@@ -23,7 +23,8 @@ crash, not an exception.
 ### `aprilgrid` or ArUco not found
 
 **Answer:** install the detector extra you need. Detector backends are optional
-extras:
+extras of the `pymvis` package (the full set is `apriltag`, `aruco`, `ros1`,
+`mcap`, `viz` and `dev`):
 
 ```bash
 pip install -e ".[apriltag]"    # AprilGrid
@@ -88,7 +89,6 @@ The sanity check caught a degenerate init (an unusable starting estimate). This 
 You can also use:
 
 - **`factor_hz`** to subsample frames
-- **`--parallel`** on the regression runner
 - **`cache_dir`**, which makes re-runs skip detection entirely
 
 ### A wide-FoV stereo fit diverged

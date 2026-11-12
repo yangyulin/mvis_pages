@@ -39,7 +39,7 @@ accelerometer.
 
 ## What is actually different
 
-- **No ROS.** MVIS is pure Python via `pip`, on Windows, macOS, and Linux.
+- **No ROS.** MVIS is pure Python via `pip`, on Linux and macOS.
   Bags are read with `rosbags`. If you calibrate outside a ROS environment,
   this is the whole story.
 - **More than one IMU.** MVIS puts every IMU in one graph. Kalibr and Basalt
@@ -64,8 +64,10 @@ accelerometer.
 
 ## Where the others are still ahead
 
-- **Maturity.** Kalibr has a decade of use across the field. MVIS's 228-run
-  benchmark is strong evidence, but not the same thing as that.
+- **Maturity.** Kalibr has a decade of use across the field. MVIS's 176-row
+  regression suite (12 dataset families, three tiers; see
+  [Regression testing](/contribute/regression-testing/)) is strong evidence,
+  but not the same thing as that.
 - **Ecosystem.** Kalibr's target generators, tutorials, and community answers
   have no MVIS equivalent yet.
 - **Continuous-time.** Are your sensors genuinely asynchronous at high rate?

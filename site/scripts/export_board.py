@@ -1,6 +1,6 @@
 """Write the results tables (board.json, board.css) with the leaderboard Space's renderer.
 
-  PYTHONNOUSERSITE=1 python3 site/scripts/export_board.py --leaderboard <mira>/tasks/mvis/huggingface/leaderboard \
+  PYTHONNOUSERSITE=1 python3 site/scripts/export_board.py --leaderboard <leaderboard Space checkout> \
       [--records <results snapshot> [--results-commit <its full sha>]] [--out DIR]
 
 Without --records it reads the current calibench-vi/results main, which changes the live tables.

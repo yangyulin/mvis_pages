@@ -21,7 +21,6 @@ const resultsNav = JSON.parse(readFileSync(new URL('./src/data/results-nav.json'
 // Astro EMPTIES outDir before every build. Anything that must survive a build
 // lives in `public/`, not in `docs/` directly. Currently:
 //   - CNAME  the custom domain. Lose it and openmvis.com goes down.
-//   - fig/   legacy jemdoc images, kept so old inbound image links still resolve.
 //   - .nojekyll  Pages uses LEGACY (Jekyll) builds on this repo. Without this,
 //               Jekyll strips `_astro/` (all CSS+JS -> 404) and its Liquid
 //               parser fails the build on the BibTeX `{{` in citation blocks.
@@ -184,13 +183,9 @@ export default defineConfig({
               collapsed: true,
               items: [
                 { label: 'Overview', link: '/concepts/camera-imu-math/' },
-                { label: 'Base IMU factor', link: '/concepts/camera-imu-math/base-imu/' },
-                { label: 'Auxiliary IMU factor', link: '/concepts/camera-imu-math/aux-imu/' },
               ],
             },
             { label: 'Calibration graph', link: '/concepts/calibration-graph/' },
-            { label: 'Observability', link: '/concepts/observability/' },
-            { label: 'Degeneracy', link: '/concepts/degeneracy/' },
             { label: 'Continuous-time refinement', link: '/concepts/continuous-time/' },
           ],
         },
