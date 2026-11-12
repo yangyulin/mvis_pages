@@ -65,7 +65,13 @@ trees (`virig_*` and `mvis_*` configs) — and are shown on the
 
 ## Running MVIS
 
+The toolbox ships ready configs for this dataset in
+[`examples/configs/tga_mvis/`](https://github.com/openmvis/openmvis/tree/main/examples/configs/tga_mvis):
+a camera prior (`mvis_4imus_3cams_calib.yaml`) and one camera + IMU config per
+base IMU and recording. Bags are read from `$MVIS_DATASETS` (default `~/Datasets`):
+
 ```bash
-mvis calibrate -c virig_3cams_cam.yaml   # cameras first
-mvis cam-imu   -c virig_3cams_cam_imu.yaml
+mvis datasets download --select mvis_4imus_3cams/april_01   # gated: log in to the Hub first
+mvis check -c examples/configs/tga_mvis/tga_mti_01.yaml      # lint the config
+mvis run   -c examples/configs/tga_mvis/tga_mti_01.yaml      # Xsens MTi as base IMU, bag 01
 ```
