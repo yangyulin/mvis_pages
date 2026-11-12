@@ -55,7 +55,8 @@ LIKE_FOR_LIKE = ("Every tool starts from the camera chain UZH ships and uses the
 
 WEIGHTS_NOTE = "All tools use each bag's IMU weights from UZH's Kalibr residuals."
 
-FIXED_OLD = "Its camera + IMU runs take intrinsics and baselines as input from an MVIS export, and T7 ELP-L readout is held at 0."
+FIXED_OLD = ("Its camera + IMU runs take intrinsics and baselines as input, from an MVIS export or, on T6 and T11, from its own "
+             "camera-only calibration; T7 ELP-L readout is held at 0.")
 
 FIXED_NEW = "Its camera + IMU runs take intrinsics and baselines as input, here from the calibration UZH ships."
 
