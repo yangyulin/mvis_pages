@@ -41,7 +41,7 @@ second IMU, bag 01.
 
 :::caution[Older code]
 This A/B test ran on October 2026 code. That is before the ELP stamp
-correction, board-shape estimation and `vision_pose: imu`. So the absolute
+correction, [board-shape estimation](/why/board-shape/) and `vision_pose: imu`. So the absolute
 pixel values (about 1 px) are much worse than today's 0.16–0.24 px on the ELP. Read the
 change between the two columns, not the values.
 :::
@@ -93,7 +93,7 @@ The public results compare MVIS and Kalibr on all 15 bags. See
 - **Kalibr's camera–IMU solver is global shutter only.** It takes ELP-L as global,
   with readout fixed at 0.
 - **Not a clean on/off test.** MVIS uses two corners per tag, non-base cameras
-  at 4 Hz or lower and an estimated board shape. Kalibr uses none of these. The
+  at 4 Hz or lower and an [estimated board shape](/why/board-shape/). Kalibr uses none of these. The
   gap on the global-shutter T265 suggests part of it comes from those settings.
 
 ## 4. Limits

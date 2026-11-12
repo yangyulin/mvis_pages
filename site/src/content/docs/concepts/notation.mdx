@@ -98,6 +98,8 @@ The result file states it explicitly as `(t_Ib = t_C + td)` next to each value.
   - multiplicatively for rotations,
     $\mathbf{R} \approx \hat{\mathbf{R}}\,\exp(\delta\boldsymbol{\theta}^\wedge)$;
   - additively for everything else.
-- **Board points** are exact. The target is treated as rigid and known.
-  So board geometry errors appear as a scale bias on translations rather than as
-  noise.
+- **Board points** are flat and known by default (`estimate.board_points: false`).
+  Board errors then go into the calibration: a wrong `tag_size` gives a scale bias
+  on translations, and a bent board biases the focal length, gyro scale and lever
+  ([Why calibrate the board shape](/why/board-shape/)). With
+  `estimate.board_points: true`, MVIS solves one height per corner.

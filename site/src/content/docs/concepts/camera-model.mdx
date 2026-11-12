@@ -51,7 +51,7 @@ Every result reports this angle, with any corners past the model's valid domain.
 
 - **Normal lens** → `radtan`.
 - **Fisheye** → `kb4`, which is what `fisheye` and `kannala_brandt` select. It
-  stays valid past 90° up to its first fold. It exports to Kalibr as
+  stays valid past 90° up to its first fold ([why](/why/kb4/)). It exports to Kalibr as
   pinhole-equi (exact below 90°; MVIS warns when the fit used corners past it).
 - **Every corner under 90°, equidistant asked for** → `equidistant`. It gives the
   same pixels as `kb4` there; name it explicitly.
@@ -114,8 +114,9 @@ We compared the models over a 52-run benchmark across MVIS T265 and TUM-VI
 - **Camera–IMU path:** on TUM-VI raw IMU bags, `omni_radtan` and `equidistant`
   reproduce the Kalibr cam-IMU extrinsics to **≤2 mm lever, ≤0.15 mm stereo
   baseline, ≤1 ms time offset**.
-- **`kb4` vs `equidistant`:** on TUM-VI and T265, where no corner passes 90°,
-  the fits agree to 1e-6 px and their camera–IMU extrinsics to 1e-11 rad.
+- **`kb4` vs `equidistant`:** on TUM-VI and T265, where few or no corners pass 90°,
+  the fits agree to about 2e-6 px and their camera–IMU extrinsics to 1e-11 rad.
+  Past 90°, only `kb4` holds: [Why kb4 over equidistant](/why/kb4/).
 
 Model choice does not change the geometry a good fit recovers. It changes
 whether you get a good fit at all.

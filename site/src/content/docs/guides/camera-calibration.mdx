@@ -30,7 +30,7 @@ The rig has two kinds of camera on two clocks. We solve each pair on its own.
 - **Between the pairs:** the extrinsics and time offsets (td) come from the
   joint camera–IMU solve in [step 4](/guides/camera-imu-calibration/).
 
-The evidence is on [Why calibrate cameras together](/why/multi-camera/#5-when-not-to-bundle).
+The evidence is on [Why calibrate cameras together](/why/multi-camera/#4-when-not-to-bundle).
 
 ## 2. Write the T265 config
 
@@ -77,7 +77,7 @@ corner_subsample: two_anti
 - **`board:`:** the block from [step 1](/guides/board-setup/#2-the-board-in-the-running-example).
 - **`corner_subsample: two_anti`:** two corners per tag, the default. See [Speed](#6-speed).
 - **`estimate.board_points: true`:** solves the board shape too. See
-  [A board is never flat](/guides/board-setup/#4-a-board-is-never-flat).
+  [A board is never flat](/guides/board-setup/#4-a-board-is-never-flat) · [why](/why/board-shape/).
 - **`reference_camera: 2`:** the other camera's extrinsics are given relative to
   T265-1.
 - **`shutter_type: global`:** no readout to solve.
@@ -149,8 +149,10 @@ Set `distortion_model` per camera. MVIS has eight models:
 - **T265 coverage:** on recording 01 the board corners stay under 80° off
   axis in the T265 images.
 - **Checked:** in our T265 model study every reprojection number of the two models agreed
-  to about 1e-6 px.
+  to about 2e-6 px.
 - **So:** the regression rows that use `equidistant` stand for `kb4` too.
+- **Past 90°:** `equidistant` cannot project those rays; `kb4` can. See
+  [Why kb4](/why/kb4/).
 
 How the models compare on the T265 (our study on the 5-IMU rig,
 [virig-5imus-4cams](/benchmark/results/virig-5imus-4cams/), 7 recordings, same
@@ -224,7 +226,8 @@ which gives the same numbers as `kb4` here:
 | Fisheye 1 fx (px) | 286.54 (sd 0.65) | 285.09 (sd 2.40) | 284.14 (sd 0.65) |
 
 - **Baseline:** the distance between the two T265 cameras.
-- **Board shape:** MVIS estimates it. Kalibr assumes a flat board.
+- **Board shape:** MVIS estimates it. Kalibr assumes a flat board, which on this VI-Rig mount shifts the
+  focal length ([why](/why/board-shape/)).
 - **Repeatable:** the MVIS baseline moves by about 0.03 mm between recordings.
 
 ## 5. Write the ELP config

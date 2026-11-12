@@ -77,7 +77,7 @@ more slowly.
 
 ### Stage 1 initialisation fails
 
-**Answer:** on wide fisheye, try `equidistant`.
+**Answer:** on wide fisheye, try `kb4` ([why not `equidistant`](/why/kb4/)).
 
 The sanity check caught a degenerate init (an unusable starting estimate). This is common on wide fisheye with the wrong model.
 `max_init_frames` caps how many frames the OpenCV init uses.
@@ -157,6 +157,9 @@ See [Degeneracy](/concepts/degeneracy/).
    for the same device
 2. Sensor numbering
 3. Transform direction
+4. Board shape: MVIS can estimate it (`estimate.board_points: true`); Kalibr
+   uses a flat board. On a board that is not flat, this alone moves the focal
+   length ([why](/why/board-shape/)).
 
 `mvis.io.kalibr` reads Kalibr camchains directly, which is the reliable way to
 compare.

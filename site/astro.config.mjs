@@ -148,6 +148,8 @@ export default defineConfig({
           items: [
             { label: 'IMU', link: '/why/imu/' },
             { label: 't_ga', link: '/why/tga/' },
+            { label: 'Board shape', link: '/why/board-shape/' },
+            { label: 'Fisheye model (kb4)', link: '/why/kb4/' },
             { label: 'Rolling shutter', link: '/why/rolling-shutter/' },
             { label: 'Multi-camera', link: '/why/multi-camera/' },
             { label: 'Multi-IMU', link: '/why/multi-imu/' },
