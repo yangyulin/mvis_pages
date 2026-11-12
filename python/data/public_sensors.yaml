@@ -1,6 +1,6 @@
 # Text for the public openmvis.com sensor pages. Written fresh: no maker-versus-MVIS comparison, internal path, code hash or device id.
-# Numbers come from the run named by `key` in the private sensors.yaml (kept in mira, passed to export_sensors.py by path).
-# A demo `from` names the clip; the private sensors.yaml maps it to the file in the media folder (demo_media) when that name holds a device id.
+# Numbers come from the run named by `key` in the maintainers' sensors.yaml (not in this repo; passed to export_sensors.py by path).
+# A demo `from` names the clip; the maintainers' sensors.yaml maps it to the file in the media folder (demo_media) when that name holds a device id.
 # Only sensors listed here reach the site.
 data_url: https://huggingface.co/datasets/calibench-vi/datasets/tree/main
 groups:
