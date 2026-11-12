@@ -4,7 +4,7 @@
 # Only sensors listed here reach the site.
 data_url: https://huggingface.co/datasets/calibench-vi/datasets/tree/main
 groups:
-  - {id: cameras, title: Tracking cameras and modules}
+  - {id: cameras, title: Tracking modules}
   - {id: head-worn, title: Head-worn cameras}
   - {id: vr, title: VR headsets}
 # The order below is the order on the site: sidebar and Sensors overview. Every sensor needs a group.
@@ -145,32 +145,34 @@ sensors:
     key: alg-avs111c
     title: ALG AVS111C-Y stereo module
     description: GMSL2 global-shutter stereo module from ALG Tech with a 6-axis IMU, calibrated with MVIS as stereo + IMU.
-    lead: GMSL2 stereo camera module from Shenzhen Aili-Light Technology (ALG Tech, 艾利光), with two global-shutter cameras 50 mm apart and a 6-axis IMU. One recording, solved as stereo + IMU. The recording matches ALG's AVS111C-Y; the exact model isn't confirmed by the maker.
-    chips: [Stereo, Global shutter, 88 Hz IMU, GMSL2]
-    card: {name: "AVS111C-Y stereo", maker: ALG Tech, tags: [Global shutter, 2 cameras, 88 Hz IMU], sensors: "Stereo global-shutter + IMU @ 88 Hz", format: "ROS2 bag → EuRoC mav0", shows: "A stereo + IMU solve on a chessboard, after fixing the IMU's unit scale"}
+    lead: GMSL2 stereo camera module from Shenzhen Aili-Light Technology (ALG Tech, 艾利光), with two global-shutter cameras 50 mm apart and a 6-axis IMU. Three recordings, each solved as stereo + IMU; this page shows the longest. The recordings match ALG's AVS111C-Y; the exact model isn't confirmed by the maker.
+    chips: [Stereo, Global shutter, 200 Hz IMU, GMSL2]
+    card: {name: "AVS111C-Y stereo", maker: ALG Tech, tags: [Global shutter, 2 cameras, 200 Hz IMU], sensors: "Stereo global-shutter + IMU @ 200 Hz", format: "ROS2 bag → EuRoC mav0", shows: "A stereo + IMU solve on a ChArUco board, repeated on three recordings"}
+    demo: {from: "alg-avs111c_small", note: "The 3D scene MVIS recovered from the 08:41:48 recording, the one solved on this page."}
     source: https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html
     source_label: ALG AVS111C-Y product page
-    checked: 2026-11-06
+    checked: 2026-11-11
     company: {name: Shenzhen Aili-Light Technology (ALG Tech), url: "https://www.aili-light.com/"}
     hardware:
       - [Maker, Shenzhen Aili-Light Technology (ALG Tech), Maker]
       - [Closest published model, "AVS111C-Y: 1280×800, 50 mm baseline, 120° × 76°, global shutter. Matched from this recording; the exact model isn't confirmed", Maker]
-      - [Cameras, "2 × 1280×800, about 26 Hz in this recording", Measured]
-      - [Shutter, "Global on the AVS111C-Y sheet; a rolling-shutter solve finds no readout", Measured]
+      - [Cameras, "2 × 1280×800, 30 Hz with no dropped frames in these recordings", Measured]
+      - [Shutter, "Global on the AVS111C-Y sheet; a rolling-shutter solve of an earlier recording found no readout", Measured]
       - [Lens, "1.67 mm, 120° horizontal on the AVS111C-Y sheet", Maker]
-      - [IMU, "6-axis, up to 6400 Hz on the sheet; 88 Hz in this recording", Maker]
+      - [IMU, "6-axis, up to 6400 Hz on the sheet; 200 Hz in these recordings", Maker]
       - [Link and power, "GMSL2, power over coax, 9 to 12 V", Maker]
     dataset:
-      - [Recordings, "1 recording, 24 s. cam0 623 frames, cam1 618, IMU 2,107 samples"]
-      - [Format, "ROS2 bag, converted to EuRoC layout"]
-      - [Board, "Chessboard 12×9 squares, 25 mm"]
+      - [Recordings, "3 recordings of 112, 144 and 148 s. Shown: the 148 s one, cam0 4,433 frames, cam1 4,432, IMU 29,516 samples"]
+      - [Format, "ROS2 bag with compressed images, converted to EuRoC layout"]
+      - [Board, "ChArUco 14×9 squares, 40 mm squares, 30 mm markers"]
       - [Licence, None]
       - [Hosted, Not hosted]
-    method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga estimated, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-06."
+    method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga estimated, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-11."
     limits:
       - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
-      - "A simulation of this recording, solved the same way, shows its IMU samples (about 88 Hz, unevenly spaced) can't pin the IMU scales, the lever arm or the gyro-to-accel offset t_ga, even without noise. Treat those values as unreliable. The camera intrinsics and the stereo baseline aren't affected."
-      - With evenly spaced IMU samples at 150 Hz or more, the same simulation recovers most of it. The gyro scale and lever arm also need faster rotation than this recording has.
+      - "We solved three recordings of the same unit separately. The lever arm agrees within 3 mm, the camera-to-IMU time offset within 0.2 ms, the focal lengths within 1.3 px and the IMU scales within 0.4 %. The IMU position also agrees with the maker's drawing within 2 mm."
+      - "The board reaches about 54° off-axis. Past that, toward the image edges (61°) and corners (72°), the lens model is extrapolated: the three solves differ by up to 7 px at the edges and 35 px at the corners."
+      - "The motion is gentle (about 6 to 11°/s RMS). In a simulated copy of each recording, with noise matched to this unit, MVIS recovered the lever arm within 1.1 mm, the rotation within 0.6 mrad, the time offset within 0.1 ms and the IMU scales within 0.4 %. The solver's own σ for the lever arm (2 to 4 mm) is wider, because the solve used MVIS's default IMU noise, which is looser than this IMU needs."
       - The model is matched from resolution, baseline, field of view and shutter, not confirmed by the maker.
     header:
       type: "GMSL2 stereo camera module with a 6-axis IMU"
@@ -180,14 +182,63 @@ sensors:
         - {item: Phone, v: "+86 755 2721 8150", url: "tel:+8675527218150"}
       links: {product: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html", product_label: "Closest model: AVS111C-Y"}
       image: {kind: photo, file: alg-avs111c.png, alt: "ALG AVS111C-Y stereo camera module", credit: "Photo: ALG Tech, AVS111C-Y product page. Closest published model; exact model not confirmed", url: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html"}
-      foot: "Values measured in this recording · Maker values from the AVS111C-Y product page, read 2026-11-06"
+      foot: "Values measured in the 148 s recording · Maker values from the AVS111C-Y product page, read 2026-11-06"
       key_specs:
         cameras: {v: "2 × 1280×800"}
         shutter: {v: Global, tag: maker, src: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html"}
         fov: {auto: fov}
         baseline: {auto: baseline}
-        imu: {v: "6-axis, 88 Hz here"}
+        imu: {v: "6-axis, 200 Hz here"}
         output: {v: "GMSL2, ROS2 bag"}
+  cyperstereo:
+    group: cameras
+    key: cyperstereo
+    title: CyperStereo four-camera module
+    description: Four-camera global-shutter RGB module from Tujian with a Bosch BMI088, calibrated with MVIS as four cameras + IMU.
+    lead: Four-camera inertial module from Shenzhen Tujian Intelligent Technology (图间智能). Four global-shutter RGB cameras sit on separate 25 × 25 mm boards, cabled to one controller with a Bosch BMI088 IMU; two cameras have 160° lenses and two have 200° lenses, and the baseline is set by how the boards are mounted. One recording, solved as four cameras + IMU.
+    chips: [4 cameras, Global shutter, 200° fisheye, 200 Hz IMU]
+    demo: {from: "cyperstereo_small", note: "The 3D scene MVIS recovered from this recording, first 20 s, each camera in turn."}
+    card: {name: "CyperStereo", maker: Tujian, tags: [Global shutter, 4 cameras, 200 Hz IMU], sensors: "4 global-shutter RGB fisheye + BMI088 @ 200 Hz", format: "ROS bag", shows: "Four wide-angle cameras (160° and 200°) and an IMU solved together"}
+    source: https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html
+    source_label: CyperStereo product documentation
+    checked: 2026-11-11
+    company: {name: Shenzhen Tujian Intelligent Technology, url: "https://tujian.tech"}
+    hardware:
+      - [Maker, Shenzhen Tujian Intelligent Technology (深圳市图间智能科技有限公司), Maker]
+      - [Image sensor, "SmartSens SC136HGS, RGB, global shutter, back-illuminated, 4 × 4 µm pixels", Maker]
+      - [Cameras, "4 × 1280×1024; 30 fps on the sheet, 15 Hz in this recording", Measured]
+      - ["Wide lenses (cam2, cam3)", "1.67 mm, F2.0, M12; 200° diagonal, 174° × 139°", Maker]
+      - ["Narrow lenses (cam0, cam1)", "1.79 mm, F2.0, M12; 160° diagonal, 133° × 112°", Maker]
+      - [Synchronization, "Camera to camera 10 µs, camera to IMU 100 µs on the sheet; identical camera stamps in this recording", Maker]
+      - [IMU, "Bosch BMI088, 200 Hz", Measured]
+      - [Link and power, "USB 3.0, UVC; 1.5–2 W at 5 V", Maker]
+    dataset:
+      - [Recordings, "1 recording, 74.6 s, hand-held. About 1,120 frames per camera, 14,920 IMU samples"]
+      - [Format, ROS1 bag]
+      - [Board, "AprilGrid 6×6, tag 55 mm, spacing 0.3"]
+      - [Licence, None]
+      - [Hosted, Not hosted]
+    method: "All four cameras and the IMU together. Camera intrinsics (Kannala–Brandt kb4) from four single-camera solves of the same recording, then held fixed; IMU scale and misalignment, gyro-to-accel offset t_ga and camera time offsets estimated. IMU noise from the BMI088 datasheet, about 2.5× wider. Solved 2026-11-11."
+    limits:
+      - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
+      - "The board never reached the outer side of the two 200° images (about two-thirds of each image is covered), so the lens model there is extrapolated."
+      - "The IMU noise set for the solve is wider than the residuals need (IMU χ²/dof 0.03); a solve with tighter noise is still to do."
+      - "The tag size is taken from the target file sent with the data and isn't confirmed on the printed board. It scales every baseline and lever arm."
+    header:
+      type: "Four-camera global-shutter RGB module with a 6-axis IMU"
+      maker: {name: Shenzhen Tujian Intelligent Technology, url: "https://tujian.tech"}
+      contact:
+        - {item: Email, v: support@tujian.com, url: "mailto:support@tujian.com"}
+      links: {product: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html", product_label: "Product documentation", more: [{label: SDK, url: "https://github.com/Cyperstereo/CyperstereoSDK"}, {label: Calibration guide, url: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/tools/calibration_tool.html"}]}
+      image: {kind: photo, file: cyperstereo.jpg, alt: "CyperStereo controller board with four camera boards on cables", credit: "Photo: Tujian, CyperStereo product manual", url: "https://tujian.tech"}
+      foot: "Values measured in this recording · Maker values from the CyperStereo product manual, read 2026-11-11"
+      key_specs:
+        cameras: {v: "4 × 1280×1024 RGB"}
+        shutter: {v: Global, tag: maker, src: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html"}
+        fov: {auto: fov, also: {v: "160° and 200° diagonal", tag: maker, src: "https://cyperstereo-sdk-docs-zh-cn.readthedocs.io/zh-cn/latest/src/product/contents.html"}}
+        baseline: {auto: baseline}
+        imu: {v: "Bosch BMI088, 200 Hz"}
+        output: {v: "USB 3.0 / UVC, ROS bag"}
   hampo:
     group: cameras
     key: hampo

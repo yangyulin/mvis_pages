@@ -6,7 +6,7 @@
 import RpCell from './RpCell.astro';
 import RpShape from './RpShape.astro';
 import lb from '../data/eval/index.json';
-import { data, dataset, detailId, groupOf } from './rp';
+import { data, dataset, groupOf } from './rp';
 import '../styles/results.css';
 
 const GROUPS = data.groups.map((g: any) => g.id);
@@ -73,14 +73,14 @@ const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
               <span class="lb-cells" role="cell"><span class="lb-lab">Repeatability</span>
                 {GROUPS.map((g: string) => (
                   <span class="lb-c"><span class="lb-cl">{SHORT[g]}</span>
-                    <RpCell cell={cells[g]} group={groupOf[g].label} href={`${ds.link}#${detailId(f.id, g)}`} /></span>))}
+                    <RpCell cell={cells[g]} group={groupOf[g].label} href={ds.link} /></span>))}
               </span>
               <span class="lb-diffs" role="cell"><span class="lb-lab">◆ differences larger than the spread</span>
                 {PAIRS.map(([p, a, b]) => {
                   const d = f.diffs[p];
                   const name = d ? d.label : `${a} − ${b}`;
                   return d ? (
-                    <a class="lb-d" href={`${ds.link}#diff-${p}-${f.id}`} title={`${name}: ${d.marked} of ${d.compared} compared rows differ by more than the larger spread`}>
+                    <a class="lb-d" href={ds.link} title={`${name}: ${d.marked} of ${d.compared} compared rows differ by more than the larger spread`}>
                       <span class="lb-dl">{a}{p !== 'bk' && f.mode === 'cam+imu' && <sup class="rc-k">K</sup>} − {b}{p === 'bm' && f.mode === 'cam+imu' && <sup class="rc-k">K</sup>}</span>
                       <span class="lb-frac"><i style={`width:${pct(d.marked, d.compared)}%`}></i></span>
                       <span class="lb-n"><b>{d.marked}</b>/{d.compared}</span>

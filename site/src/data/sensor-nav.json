@@ -2,27 +2,32 @@
  {
   "label": "Intel RealSense T265",
   "link": "/devices/intel-t265/",
-  "group": "Tracking cameras and modules"
+  "group": "Tracking modules"
  },
  {
   "label": "LooperRobotics Insight 9",
   "link": "/devices/looper-insight9/",
-  "group": "Tracking cameras and modules"
+  "group": "Tracking modules"
  },
  {
   "label": "Dibuli Prism-A4L",
   "link": "/devices/dibuli-prism-a4l/",
-  "group": "Tracking cameras and modules"
+  "group": "Tracking modules"
  },
  {
   "label": "ALG AVS111C-Y stereo module",
   "link": "/devices/alg-avs111c/",
-  "group": "Tracking cameras and modules"
+  "group": "Tracking modules"
+ },
+ {
+  "label": "CyperStereo four-camera module",
+  "link": "/devices/cyperstereo/",
+  "group": "Tracking modules"
  },
  {
   "label": "Hampo stereo module",
   "link": "/devices/hampo/",
-  "group": "Tracking cameras and modules"
+  "group": "Tracking modules"
  },
  {
   "label": "GI Ego1",
