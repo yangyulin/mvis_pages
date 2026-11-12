@@ -1,6 +1,6 @@
 ---
 title: Submit results
-description: How to submit your calibration method to the Open MVIS leaderboard.
+description: How to submit your calibration method to the OpenMVIS leaderboard.
 pageType: guide
 ---
 
@@ -10,9 +10,9 @@ Entries in it will not appear on the [leaderboard](/benchmark/results/). The lea
 maintainers' runs of MVIS, Kalibr and Basalt.
 :::
 
-Use this page to submit your calibration method to the Open MVIS leaderboard. In short:
+Use this page to submit your calibration method to the OpenMVIS leaderboard. In short:
 
-- **How:** open a pull request (PR, a request to merge your change) against the Open MVIS site repo.
+- **How:** open a pull request (PR, a request to merge your change) against the OpenMVIS site repo.
 - **What:** add a single YAML file that follows the schema below (the fixed set of fields a submission has).
 - **Checks:** the CI on the PR (the checks that run automatically) validates the schema. It then rebuilds the
   site with your entry included.
@@ -23,10 +23,10 @@ Use this page to submit your calibration method to the Open MVIS leaderboard. In
 # src/content/leaderboard/<method>__<config>.yaml
 method:
   name: MVIS
-  version: "0.4.2"
+  version: "0.1.0"
   family: discrete_factor_graph      # see families list below
   open_source: true
-  url_repo: https://github.com/.../MVIS
+  url_repo: https://github.com/openmvis/openmvis
   url_paper: https://arxiv.org/abs/...
 sensor_config:
   category: multi_imu_multi_cam      # one of 7 categories
@@ -80,7 +80,7 @@ Use one of these `method.family` values:
 
 ## Filing the PR
 
-1. Fork [`yangyulin/mvis_pages`](https://github.com/yangyulin/mvis_pages) on GitHub.
+1. Fork [`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages) on GitHub.
 2. Drop your YAML at `site/src/content/leaderboard/<method>__<config>.yaml`.
 3. (Optional) Add a full HTML report and raw YAML at `site/public/reports/`. Reference them in the
    `artifacts` block.
