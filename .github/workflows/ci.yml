@@ -24,6 +24,10 @@ jobs:
           cache-dependency-path: site/package-lock.json
       - run: npm ci
       - run: npm test
+      # outDir is ../docs, outside site/, so Astro 6 reads its optimised source
+      # images from site/.astro/_astro/. On a fresh install that folder does not
+      # exist and the build dies with ENOENT; point it at the build output.
+      - run: mkdir -p .astro && ln -s ../../docs/_astro .astro/_astro
       - run: npm run build
 
   python:
