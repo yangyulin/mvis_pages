@@ -4,7 +4,7 @@
 # Only sensors listed here reach the site.
 data_url: https://huggingface.co/datasets/calibench-vi/datasets/tree/main
 groups:
-  - {id: cameras, title: Tracking cameras and modules}
+  - {id: cameras, title: Tracking modules}
   - {id: head-worn, title: Head-worn cameras}
   - {id: vr, title: VR headsets}
 # The order below is the order on the site: sidebar and Sensors overview. Every sensor needs a group.

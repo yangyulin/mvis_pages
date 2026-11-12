@@ -27,7 +27,7 @@ def test_t265_is_first_and_labels_keep_full_names(pub):
 
 def test_groups_follow_the_chosen_order(pub):
     assert [(g["title"], g["slugs"]) for g in sensor_groups(pub)] == [
-        ("Tracking cameras and modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "alg-avs111c", "cyperstereo", "hampo"]),
+        ("Tracking modules", ["intel-t265", "looper-insight9", "dibuli-prism-a4l", "alg-avs111c", "cyperstereo", "hampo"]),
         ("Head-worn cameras", ["gi-ego1", "gi-ego1gs", "xq20"]),
         ("VR headsets", ["valve-index", "hp-reverb-g2", "samsung-odyssey-plus"]),
     ]
