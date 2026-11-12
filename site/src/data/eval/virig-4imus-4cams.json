@@ -2590,7 +2590,7 @@
      "tool": "Basalt"
     }
    ],
-   "read_first": "Kalibr treats ELP-L as global shutter; its intrinsics and baselines are inputs from an MVIS export. Data settings differ: see Notes.",
+   "read_first": "Kalibr treats ELP-L as global shutter; its intrinsics and baselines are inputs from an MVIS export. Data settings differ between the tools.",
    "notes": [
     [
      "Basalt not run",
@@ -5215,7 +5215,7 @@
      "tool": "Basalt"
     }
    ],
-   "read_first": "Kalibr has 3 of 15 recordings, IMUs only, from earlier runs with an MVIS export as camera input. Data settings differ: see Notes.",
+   "read_first": "Kalibr has 3 of 15 recordings, IMUs only, from earlier runs with an MVIS export as camera input. Data settings differ between the tools.",
    "notes": [
     [
      "Basalt not run",

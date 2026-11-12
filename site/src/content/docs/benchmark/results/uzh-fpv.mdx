@@ -1,6 +1,6 @@
 ---
 title: "UZH-FPV"
-description: "How MVIS, Kalibr and Basalt compare over every recording of UZH-FPV: coverage, repeatability, where the tools differ and each parameter's spread. Repeatability, not accuracy."
+description: "MVIS, Kalibr and Basalt over every recording of UZH-FPV: what each tool solved, and each parameter's spread per sensor. Repeatability, not accuracy."
 pageType: reference
 wide: true
 ---
@@ -12,10 +12,6 @@ import page from '../../../../data/eval/uzh-fpv.json';
 
 <E.EvalHeader page={page} />
 
-## Repeatability
-
-<E.NoRepeatability page={page} />
-
 <E.RpOpen />
 
 ## DAVIS · camera + IMU
@@ -26,17 +22,9 @@ import page from '../../../../data/eval/uzh-fpv.json';
 
 <E.Coverage page={page} i={0} />
 
-### Where the tools differ
-
-<E.Differences page={page} i={0} />
-
 ### Parameters by sensor
 
 <E.Parameters page={page} i={0} />
-
-### Model notes and how each tool was run
-
-<E.ModelNotes page={page} i={0} />
 
 ## SNAP · camera + IMU
 
@@ -46,22 +34,6 @@ import page from '../../../../data/eval/uzh-fpv.json';
 
 <E.Coverage page={page} i={1} />
 
-### Where the tools differ
-
-<E.Differences page={page} i={1} />
-
 ### Parameters by sensor
 
 <E.Parameters page={page} i={1} />
-
-### Model notes and how each tool was run
-
-<E.ModelNotes page={page} i={1} />
-
-## Reading these results
-
-<E.Reading page={page} />
-
-## Full tables
-
-<E.FullTables page={page} />

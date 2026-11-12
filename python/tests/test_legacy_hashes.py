@@ -1,6 +1,6 @@
 """Old deep links of the one-page results (/benchmark/results/#...) keep landing: every id the old page had either
-stays on the Leaderboard (#ds-overall, #ov-h) or is a legacy hash of one dataset eval page, and every legacy target is
-an id of that page in the built site (docs/). moved.json and check_moves cover whole pages only, not hashes."""
+stays on the Leaderboard (#ds-overall, #ov-h) or is a legacy hash of one dataset eval page, which it opens at the top
+(the repeatability ids are off those pages since 2026-11-11). moved.json and check_moves cover whole pages only, not hashes."""
 import json
 import re
 
@@ -26,11 +26,9 @@ def test_every_old_id_has_a_new_home():
     assert not legacy & STAYS and len(legacy) == sum(len(p["legacy"]) for p in NAV)  # one page per hash
 
 
-def test_every_legacy_hash_is_an_id_on_its_built_page():
+def test_every_legacy_target_page_is_built():
     for p in NAV:
-        ids = built_ids(p["link"])
-        missing = [h for h in p["legacy"] if not h.startswith("ds-") and h not in ids]
-        assert missing == [], p["slug"]
+        assert built_ids(p["link"]), p["slug"]
 
 
 def test_the_leaderboard_carries_the_jump_and_no_old_dataset_ids():

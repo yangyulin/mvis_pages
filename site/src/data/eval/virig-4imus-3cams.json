@@ -85,7 +85,7 @@
      "tool": "Basalt"
     }
    ],
-   "read_first": "Kalibr's intrinsics and baselines are inputs from its own camera-only calibration; its td and lever are solved given them. Data settings differ: see Notes.",
+   "read_first": "Kalibr's intrinsics and baselines are inputs from its own camera-only calibration; its td and lever are solved given them. Data settings differ between the tools.",
    "notes": [
     [
      "Basalt not run",

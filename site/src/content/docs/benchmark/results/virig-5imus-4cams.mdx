@@ -1,6 +1,6 @@
 ---
 title: "VI-Rig: 5 IMUs + 4 cameras"
-description: "How MVIS, Kalibr and Basalt compare over every recording of VI-Rig 5 IMUs + 4 cams: coverage, repeatability, where the tools differ and each parameter's spread. Repeatability, not accuracy."
+description: "MVIS, Kalibr and Basalt over every recording of VI-Rig 5 IMUs + 4 cams: what each tool solved, and each parameter's spread per sensor. Repeatability, not accuracy."
 pageType: reference
 wide: true
 ---
@@ -11,10 +11,6 @@ import * as E from '../../../../components/eval/index';
 import page from '../../../../data/eval/virig-5imus-4cams.json';
 
 <E.EvalHeader page={page} />
-
-## Repeatability
-
-<E.NoRepeatability page={page} />
 
 <E.RpOpen />
 
@@ -30,10 +26,6 @@ import page from '../../../../data/eval/virig-5imus-4cams.json';
 
 <E.Parameters page={page} i={0} />
 
-### Model notes and how each tool was run
-
-<E.ModelNotes page={page} i={0} />
-
 ## V5c · camera only
 
 <E.FamilyHead page={page} i={1} />
@@ -45,11 +37,3 @@ import page from '../../../../data/eval/virig-5imus-4cams.json';
 ### Parameters by sensor
 
 <E.Parameters page={page} i={1} />
-
-### Model notes and how each tool was run
-
-<E.ModelNotes page={page} i={1} />
-
-## Reading these results
-
-<E.Reading page={page} />

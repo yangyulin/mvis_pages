@@ -8,8 +8,7 @@ from urllib.parse import unquote
 
 # --- sidebar (nav_check) ---------------------------------------------------------------------------------------
 SECTIONS = ["Getting started", "Guides", "Why calibrate", "Benchmark", "Device wiki", "Concepts", "Reference", "Contribute", "About"]
-BENCHMARK = ["Examples", "Results", "Methodology"]
-RESULTS = ["Leaderboard", "Datasets eval"]
+BENCHMARK = ["Leaderboard", "Methodology", "Datasets eval", "Examples"]
 DEEP_PAGES = ["/devices/intel-t265/", "/benchmark/examples/monado/", "/benchmark/results/tum-vi/", "/concepts/notation/", "/reference/cli/", "/about/license/", "/why/tga/"]
 NOT_IN_SIDEBAR = {"/"}
 
@@ -26,13 +25,12 @@ def routes(docs: Path) -> set[str]:
 
 def sidebar_problems(s: dict, nav: list[dict], results_nav: list[dict] | None = None) -> list[str]:
     """Top-level sections, Benchmark, and the Device wiki: Overview, then one subgroup per sensor-nav.json group in its
-    order, each holding its sensors once. With results_nav, Benchmark › Results holds Leaderboard and Datasets eval,
-    and Datasets eval one page per results-nav.json entry in its order. s is a measured sidebar
+    order, each holding its sensors once. With results_nav, Benchmark › Datasets eval holds one page per results-nav.json entry in its order. s is a measured sidebar
     {sections, children, groups, links, paths}; paths maps "A › B › C" to the labels inside that group."""
     out = []
     if results_nav is not None:
         paths = s.get("paths", {})
-        want = {"Benchmark › Results": RESULTS, "Benchmark › Results › Datasets eval": [n["label"] for n in results_nav]}
+        want = {"Benchmark › Datasets eval": [n["label"] for n in results_nav]}
         out += [f"{p} holds {paths.get(p)}, want {w}" for p, w in want.items() if paths.get(p) != w]
     if s["sections"] != SECTIONS:
         out.append(f"sections are {s['sections']}")

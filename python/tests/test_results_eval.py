@@ -250,10 +250,10 @@ def test_a_dataset_page_and_its_mdx():
     p = _page(rep_ds={"groups": [], "families": []})
     assert p["link"] == "/benchmark/results/x-rig/" and p["has_repeatability"] and not p["study"] and p["legacy"] == ["ds-x"]
     text = R.mdx(p)
-    assert "## Repeatability" in text and '<RepeatabilityMatrix id="x" />' in text and "## T1 · camera + IMU" in text
-    assert "### Where the tools differ" in text and "## Full tables" in text and "Reading these results" not in text
-    study = R.mdx(dict(_page(), reading=["<b>x</b>"]))
-    assert "<E.NoRepeatability page={page} />" in study and "## Reading these results" in study and "RepeatabilityMatrix" not in study
+    assert "## T1 · camera + IMU" in text and "### Coverage" in text and "### Parameters by sensor" in text
+    for gone in ("Repeatability", "Where the tools differ", "Model notes", "Full tables", "Reading these results"):
+        assert f"## {gone}" not in text and f"### {gone}" not in text
+    assert "RepeatabilityMatrix" not in R.mdx(dict(_page(), reading=["<b>x</b>"]))
 
 
 def test_the_public_text_holds_every_dataset_in_page_order_ours_first():
@@ -434,3 +434,7 @@ def test_study_rows_write_the_study_board_with_its_own_texts(tmp_path):
     assert fams["batch"] == "b9" and fams["datasets"] == [{"id": "v5id", "title": "V5 rig", "families": ["V5", "V5c"]}]
     assert set(out["families"]) == {"V5", "V5c"} and out["families"]["V5"]["read_first"] == "MVIS only."
     assert ["Like for like", "One config."] in out["families"]["V5"]["notes"]
+
+
+def test_read_first_drops_the_notes_reference():
+    assert R._no_notes_ref("Kalibr is GS. Data settings differ: see Notes.") == "Kalibr is GS. Data settings differ between the tools."

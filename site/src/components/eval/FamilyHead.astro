@@ -1,19 +1,11 @@
 ---
-// A family's anchor (#T6), its title, the read-first line and its row of repeatability cells (the Leaderboard's).
-import RpCell from '../RpCell.astro';
-import { data, groupOf, detailId } from '../rp';
+// A family's anchor (#T6), its title and the read-first line. The repeatability strip is off the dataset pages since
+// 2026-11-11 (coverage and parameters only); the Leaderboard keeps its cells.
 interface Props { page: any; i: number }
 const { page, i } = Astro.props;
 const f = page.families[i];
-const rep = page.has_repeatability ? data.datasets.find((d: any) => d.id === page.id) : null;
-const cells = rep?.families.find((x: any) => x.id === f.id)?.cells ?? {};
 ---
 <div class="not-content ev-fam" id={f.id}>
   <p class="ev-ft"><b>{f.title}</b> · {f.n} recordings</p>
   {f.read_first && <p class="ev-rf"><b>Read first:</b> {f.read_first}</p>}
-  {rep && (
-    <p class="ev-strip"><span class="ev-sl">Repeatability</span>
-      {rep.groups.map((g: string) => <span class="lb-c"><span class="lb-cl">{groupOf[g].short}</span><RpCell cell={cells[g]} group={groupOf[g].label} href={`#${detailId(f.id, g)}`} /></span>)}
-    </p>
-  )}
 </div>
