@@ -227,3 +227,10 @@ def test_view_data_of_an_unknown_version_is_refused(world):
     (world["root"] / "runs/c/cam_imu_views.json").write_text(json.dumps({"scene": spec}))
     with pytest.raises(RuntimeError, match="view spec v3"):
         X.collect(world["pub"], world["cfg"])
+
+
+def test_figure_json_cuts_float_noise_and_keeps_the_rest():
+    a = {"xyz": [[-0.006552033990114327, 0.09978512339318114]], "n": 3, "label": "cam0", "t": [1875.7, 0.0]}
+    b = {"xyz": [[-0.006552033990114329, 0.09978512339318111]], "n": 3, "label": "cam0", "t": [1875.7, 0.0]}
+    assert X.figure_json(a) == X.figure_json(b)          # last-digit platform noise is gone
+    assert json.loads(X.figure_json(a)) == {"xyz": [[-0.006552034, 0.09978512]], "n": 3, "label": "cam0", "t": [1875.7, 0.0]}
