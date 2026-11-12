@@ -155,22 +155,17 @@ export default defineConfig({
         },
         {
           label: 'Benchmark',
+          // Order since 2026-11-11: Leaderboard, Methodology, Datasets eval, Examples.
           items: [
+            { label: 'Leaderboard', link: '/benchmark/results/' },
+            { label: 'Methodology', link: '/benchmark/methodology/' },
+            { label: 'Datasets eval', collapsed: true, items: resultsNav.map(({ label, link }) => ({ label, link })) },
             {
               label: 'Examples',
               collapsed: true,
               // Written by site/scripts/export_examples.py with the Examples overview, so both list examples in one order.
               items: JSON.parse(readFileSync(new URL('./src/data/examples-nav.json', import.meta.url), 'utf8')),
             },
-            {
-              label: 'Results',
-              collapsed: true,
-              items: [
-                { label: 'Leaderboard', link: '/benchmark/results/' },
-                { label: 'Datasets eval', collapsed: true, items: resultsNav.map(({ label, link }) => ({ label, link })) },
-              ],
-            },
-            { label: 'Methodology', link: '/benchmark/methodology/' },
           ],
         },
         {
