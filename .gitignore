@@ -1,15 +1,15 @@
-*.pyc
-otherstuff
-proctags.py
-*.swp
-tags.vim
-tags
-matlab
-build
-MANIFEST
-jo
-stage/
+# dependencies and build caches
+node_modules/
+.astro/
+
+# python
 __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# editors and OS
+.idea/
+.vscode/
+.DS_Store
+*.swp

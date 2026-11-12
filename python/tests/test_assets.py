@@ -35,3 +35,55 @@ def test_progress_matches_mvis():
             assert ast.literal_eval(n.value) == (ASSETS / "progress.js").read_text()
             return
     raise AssertionError("_PROGRESS_JS not found")
+
+
+def test_views_dir_prefers_the_env_var(tmp_path, monkeypatch):
+    (tmp_path / "views.js").write_text("x")
+    monkeypatch.setenv("MVIS_VIEWS_ASSETS", str(tmp_path))
+    assert assets.views_dir() == tmp_path
+
+
+def test_views_dir_refuses_a_folder_without_the_player(tmp_path, monkeypatch):
+    monkeypatch.setenv("MVIS_VIEWS_ASSETS", str(tmp_path))
+    with pytest.raises(FileNotFoundError, match="MVIS_VIEWS_ASSETS"):
+        assets.views_dir()
+
+
+def test_views_dir_falls_back_to_the_installed_package(tmp_path, monkeypatch):
+    import sys
+    import types
+    monkeypatch.delenv("MVIS_VIEWS_ASSETS", raising=False)
+    pkg = tmp_path / "mvis" / "analysis" / "views"
+    (pkg / "assets").mkdir(parents=True)
+    (pkg / "assets" / "views.js").write_text("x")
+    analysis = types.ModuleType("mvis.analysis")
+    views = types.ModuleType("mvis.analysis.views")
+    views.__file__ = str(pkg / "__init__.py")
+    analysis.views = views
+    monkeypatch.setitem(sys.modules, "mvis", types.ModuleType("mvis"))
+    monkeypatch.setitem(sys.modules, "mvis.analysis", analysis)
+    monkeypatch.setitem(sys.modules, "mvis.analysis.views", views)
+    assert assets.views_dir() == pkg / "assets"
+
+
+def test_views_dir_names_the_fix_when_mvis_is_not_installed(monkeypatch):
+    import sys
+    monkeypatch.delenv("MVIS_VIEWS_ASSETS", raising=False)
+    monkeypatch.setitem(sys.modules, "mvis", None)
+    monkeypatch.setitem(sys.modules, "mvis.analysis", None)
+    with pytest.raises(FileNotFoundError, match="pymvis"):
+        assets.views_dir()
+
+
+def test_views_dir_refuses_a_package_without_a_file(monkeypatch):
+    import sys
+    import types
+    monkeypatch.delenv("MVIS_VIEWS_ASSETS", raising=False)
+    analysis = types.ModuleType("mvis.analysis")
+    views = types.ModuleType("mvis.analysis.views")  # no __file__, like a namespace package
+    analysis.views = views
+    monkeypatch.setitem(sys.modules, "mvis", types.ModuleType("mvis"))
+    monkeypatch.setitem(sys.modules, "mvis.analysis", analysis)
+    monkeypatch.setitem(sys.modules, "mvis.analysis.views", views)
+    with pytest.raises(FileNotFoundError, match="__file__"):
+        assets.views_dir()
