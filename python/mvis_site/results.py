@@ -181,7 +181,9 @@ def load_variant(v: dict, roots: dict) -> dict:
             run["cams"].append({**pair, "name": c["name"], "p_CinI_mm": c["p_CinI_mm"], "rotvec": c["rotvec"]})
             uvs.append(corner_uv(root / c["pair"] / "cam_imu_report.html")[c["index"]])
             sizes.append(sizes[0])
-            readout.append(0.0)
+            pcal = root / c["pair"] / "cam_imu_calib.yaml"  # the pair's own readout, when it solved one
+            pcams = yaml.safe_load(pcal.read_text())["cameras"] if pcal.exists() else []
+            readout.append(pcams[c["index"]].get("rolling_shutter_readout", 0.0) * 1000 if c["index"] < len(pcams) else 0.0)
     proc = extract_process(d / "cam_imu_report.html") if v.get("report") else None
     views = read_views(d) if v.get("report") else None
     fov = [fov_deg(c["intr"], s, u) for c, s, u in zip(run["cams"], sizes, uvs)]

@@ -568,9 +568,9 @@ sensors:
     key: insta360-one-rs-1inch-360
     title: Insta360 ONE RS 1-Inch 360 Edition
     description: Consumer 360° camera with two back-to-back rolling-shutter fisheye lenses and a 1 kHz IMU, calibrated with MVIS on the Hilti-Trimble SLAM Challenge 2026 calibration recordings.
-    lead: Consumer 360° camera from Insta360 with two 1-inch sensors behind back-to-back fisheye lenses of about 200° each and a built-in IMU at 1 kHz. It is the camera of the Hilti-Trimble SLAM Challenge 2026 dataset. Each lens is solved with the IMU from the organisers' own calibration recording, with the rolling-shutter readout estimated.
+    lead: Consumer 360° camera from Insta360 with two 1-inch sensors behind back-to-back fisheye lenses of about 200° each and a built-in IMU at 1 kHz. It is the camera of the Hilti-Trimble SLAM Challenge 2026 dataset. Each lens is solved with the IMU from the organisers' own calibration recording, with the rolling-shutter readout estimated. The first tab puts the two solves together as one rig.
     chips: [360° camera, Rolling shutter, 2 × 200° fisheye, 1 kHz IMU, CC BY-NC-SA data]
-    card: {name: "ONE RS 1-Inch 360", maker: Insta360, tags: [Rolling shutter, 2 cameras, 1 kHz IMU], sensors: "2 back-to-back rolling-shutter fisheye + IMU @ 1 kHz", format: "ROS 2 bag", shows: "A 360° camera: each 200° lens with the IMU, readout estimated"}
+    card: {name: "ONE RS 1-Inch 360", maker: Insta360, tags: [Rolling shutter, 2 cameras, 1 kHz IMU], sensors: "2 back-to-back rolling-shutter fisheye + IMU @ 1 kHz", format: "ROS 2 bag", shows: "A 360° camera: two 200° lenses and the IMU, readout estimated"}
     source: https://github.com/Hilti-Research/hilti-trimble-slam-challenge-2026/blob/main/docs/sensors.md
     source_label: Hilti-Trimble SLAM Challenge 2026, sensors and calibration
     checked: 2026-11-12
@@ -592,9 +592,10 @@ sensors:
       - [Licence, CC BY-NC-SA 3.0]
       - [Hosted, "Not hosted here; download from the challenge dataset"]
     data_link: {url: "https://huggingface.co/datasets/Hilti-Research/hilti-trimble-slam-challenge-2026/tree/main/camera_calibration", label: "Hilti-Trimble SLAM Challenge 2026: camera_calibration"}
-    method: "Each lens alone with the IMU. Camera intrinsics (Kannala–Brandt kb4) start from a single-camera solve of the camera-pair recording and stay free; rolling-shutter readout, camera time offset, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. IMU noise measured on the camera-pair recording, where the camera stands still, and widened about 2.8×. Solved 2026-11-12."
+    method: "Each lens alone with the IMU, then both placed in the one IMU frame. Camera intrinsics (Kannala–Brandt kb4) start from a single-camera solve of the camera-pair recording and stay free; rolling-shutter readout, camera time offset, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. IMU noise measured on the camera-pair recording, where the camera stands still, and widened about 2.8×. Solved 2026-11-12."
     limits:
-      - "The two lenses are solved in separate recordings, so the distance between them comes from two camera-to-IMU results, not from a direct solve of the pair. The lenses face opposite ways and rarely see the board together."
+      - "The tab with both lenses is put together from two solves, not one joint solve: each lens is placed in the IMU frame by its own recording. Its IMU values and its calibration-process view are those of the front-lens recording."
+      - "So the distance between the lenses, about 26 mm, comes from two camera-to-IMU results, not from a direct solve of the pair. The organisers' Kalibr calibration gives about 40 mm, and the difference isn't explained yet. The lenses face opposite ways and rarely see the board together."
       - "The organisers publish a Kalibr calibration (EUCM model, IMU intrinsics fixed). It isn't an independent reference: it comes from the same recordings."
       - "The board reaches about 95° from the lens axis, so the outermost part of each 200° image is extrapolated."
       - "The images are JPEG-compressed, which can shift detected corners slightly."
@@ -603,7 +604,7 @@ sensors:
       maker: {name: Insta360, url: "https://www.insta360.com/"}
       links: {product: "https://www.insta360.com/product/insta360-oners/1inch-360", product_label: "Insta360 product page", more: [{label: Hilti-Trimble SLAM Challenge 2026, url: "https://hilti-trimble-challenge.com/dataset-2026"}, {label: Dataset paper, url: "https://arxiv.org/abs/2607.06464"}]}
       image: {kind: photo, file: insta360-one-rs-1inch-360.jpg, alt: "Insta360 ONE RS 1-Inch 360 Edition, front view", credit: "Photo: Insta360, store page", url: "https://store.insta360.com/product/one_rs_1_inch_360"}
-      foot: "Values measured in the Hilti-Trimble SLAM Challenge 2026 calibration recordings · 2 recordings shown · CC BY-NC-SA 3.0 data"
+      foot: "Values measured in the Hilti-Trimble SLAM Challenge 2026 calibration recordings · 2 recordings, put together as one rig · CC BY-NC-SA 3.0 data"
       key_specs:
         cameras: {v: "2 × 1472×1440 at 30 Hz in the recordings", tag: dataset, src: "https://github.com/Hilti-Research/hilti-trimble-slam-challenge-2026/blob/main/docs/sensors.md"}
         shutter: {v: Rolling, tag: dataset, src: "https://github.com/Hilti-Research/hilti-trimble-slam-challenge-2026/blob/main/docs/sensors.md"}
