@@ -199,6 +199,7 @@ on 3 of them, and +0.8 px with all corners on recordings 3–5.</li>
 <p>15 recordings of the ELP stereo pair with the T265 and Xsens IMUs, camera–IMU, two corners per tag. Each is
 solved once with the shape estimated (starting from an earlier 7.7 mm estimate of the same board) and once with a
 rigid flat board. A good gyroscope reads a scale close to 1.</p>
+<p>Mean ± std over the 15 recordings, with the range in brackets:</p>
 
 
 
@@ -229,14 +230,25 @@ rigid flat board. A good gyroscope reads a scale close to 1.</p>
 
 
 
-<table><thead><tr><th>Quantity</th><th>Flat board</th><th>Change with the shape, mean ± std</th></tr></thead><tbody><tr><td>T265 gyro scale x / y</td><td>1.0117 / 1.0148</td><td><strong>−1.17 ± 0.28 % / −1.13 ± 0.23 %</strong></td></tr><tr><td>Xsens gyro scale x</td><td>1.0115</td><td><strong>−1.07 ± 0.30 %</strong></td></tr><tr><td>ELP left lever z</td><td>−4.6 ± 3.3 mm</td><td><strong>+9.3 ± 2.7 mm</strong></td></tr><tr><td>Reprojection rms</td><td>0.61 ± 0.03 px</td><td>−0.28 ± 0.03 px</td></tr></tbody></table>
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Quantity</th><th>Flat board</th><th>With the shape</th></tr></thead><tbody><tr><td>T265 gyro scale x</td><td>1.0117 ± 0.0029 [1.0061–1.0161]</td><td><strong>1.0000 ± 0.0011</strong> [0.9986–1.0021]</td></tr><tr><td>T265 gyro scale y</td><td>1.0148 ± 0.0029 [1.0084–1.0188]</td><td><strong>1.0034 ± 0.0012</strong> [1.0016–1.0058]</td></tr><tr><td>T265 gyro scale z</td><td>1.0046 ± 0.0007 [1.0035–1.0066]</td><td>1.0039 ± 0.0003 [1.0034–1.0044]</td></tr><tr><td>Xsens gyro scale x</td><td>1.0115 ± 0.0032 [1.0050–1.0163]</td><td><strong>1.0008 ± 0.0012</strong> [0.9991–1.0033]</td></tr><tr><td>ELP left lever z</td><td>−4.6 ± 3.3 mm [−8.5 to 0.9]</td><td><strong>4.6 ± 1.3 mm</strong> [1.9 to 6.7]</td></tr><tr><td>Reprojection rms</td><td>0.61 ± 0.03 px [0.57–0.65]</td><td><strong>0.33 ± 0.02 px</strong> [0.30–0.39]</td></tr></tbody></table>
 <ul>
 <li><strong>Gyro scale:</strong> with the shape, every axis of both IMUs is within 0.6 % of 1 (the largest is T265 y, 1.0058,
-on recording 11; the Xsens is within 0.33 %). Flat, the T265 x and y axes read 0.6–1.9 % high per recording.
-The change has the same sign on all 15 recordings. The T265 z axis reads about 0.4 % high either way.</li>
+on recording 11; the Xsens is within 0.33 %).
+Per recording the shape lowers T265 x and y by 1.17 ± 0.28 % and 1.13 ± 0.23 %, and the Xsens x by
+1.07 ± 0.30 %, with the same sign on all 15. The T265 z axis reads about 0.4 % high either way.</li>
 <li><strong>Accelerometer:</strong> the T265 accel scale z moves by −0.31 ± 0.20 %; x and y barely move.</li>
-<li><strong>Lever:</strong> with the shape the ELP left lever z also repeats better between recordings (std 1.3 mm against
-3.3 mm flat).</li>
+<li><strong>Lever:</strong> the shape moves ELP left lever z by +9.3 ± 2.7 mm per recording, and the lever repeats better
+between recordings (std 1.3 mm against 3.3 mm flat).</li>
 <li><strong>Time offsets:</strong> <code dir="auto">t_ga</code> moves by −0.18 ms and <code dir="auto">td</code> by under 0.1 ms.</li>
 <li><strong>Start value and corner set:</strong> on recordings 3–5, solving all 144 corners from a flat start (instead of two
 per tag from the 7.7 mm estimate) gives nearly the same answer: gyro scale within about 0.1 % and lever z
