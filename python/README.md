@@ -16,7 +16,7 @@ python/
 |---|---|
 | `geometry` | rotations as log(R), lens fits, field of view, baseline |
 | `results` | reads MVIS run folders; `solve_config` takes the only slice of the private config the export may see |
-| `markup` | HTML shared with mira's private report pages (tables, SVG charts, the AprilGrid) |
+| `markup` | HTML shared with the maintainer's private report pages (tables, SVG charts, the AprilGrid) |
 | `lint` | `public_problems` (BANNED patterns), `refusals` (/home/, HF_TOKEN and the login name of whoever runs it) |
 | `sensor_rig`, `sensor_parts`, `sensor_header`, `site_files` | the parts of a sensor page and the site-wide files |
 | `export_examples` | the example pages: one run per example in seven steps, the overview cards and the sidebar entries; the config shown is the run's own with paths cut to file names |
@@ -32,7 +32,7 @@ python/
 - **Public** (committed here): `data/public_results.yaml` holds every word on the Results pages that is not computed
   (page order, titles, chips, images, links, sensor ids). `data/public_sensors.yaml` holds every word on a sensor page. It names no run path,
   recording path, commit or device id; `tests/test_lint.py` checks the committed file.
-- **Private** (stays in mira): `scripts/mvis/huggingface/community_sensors/data/sensors.yaml` holds roots, run
+- **Private** (a `sensors.yaml` outside this repository): holds roots, run
   paths and the recording to hash. It is passed by path; the lib reads only `roots` and, per sensor, `variants`
   (without `ref`), `board`, `series`, `sha256_of` and `demo_media` (public clip name to the file in `--media`, for
   clip files whose names carry a take id).
@@ -41,14 +41,17 @@ python/
   (links stripped), its MDX, its process figures' strings and `sensor-nav.json`; one problem and nothing is written.
   The overview `index.mdx` prose is fixed in `site_files`, and `sensor.css` / `sensor-page.js` are the lib's own
   assets, so those are not linted. `lint.refusals` guards the results tables (board, UZH). Camera frames in a process figure stop the export.
-- `assets/progress.js` is the `_PROGRESS_JS` player of openmvis `src/mvis/analysis/report_shell.py` at ec4475e
-  (GPL-3.0-only), byte-exact; `test_progress_matches_mvis` compares it when `MVIS_SRC` is set.
+- `assets/progress.js` is the `_PROGRESS_JS` player of MVIS (`src/mvis/analysis/report_shell.py` in
+  [openmvis/openmvis](https://github.com/openmvis/openmvis) at ec4475e), GPL-3.0-only like the rest of the code here
+  (see the repository `LICENSE` and `NOTICE`), byte-exact; `test_progress_matches_mvis` compares it when `MVIS_SRC` is set.
+- `views_dir` finds MVIS's canvas-view assets through `$MVIS_VIEWS_ASSETS`, else the installed `mvis` package
+  (`pip install pymvis`, or an editable checkout of openmvis/openmvis).
 
 ## Commands
 
-Run with a python whose numpy is < 2 (the anaconda base env; `/usr/bin/python3` has numpy 2), and always with
-`PYTHONNOUSERSITE=1`: `~/.local` holds numpy 2 (its number reprs change the output; the scripts refuse it) and a
-pytest plugin that breaks pytest.
+Run with Python 3.12 and numpy < 2 (numpy 2 changes the number reprs in the output, so the scripts refuse it), and
+with `PYTHONNOUSERSITE=1` so that nothing installed per user (another numpy, a pytest plugin) leaks in. Needs
+`numpy<2`, `pyyaml`, `pytest` and `pillow`; `gradio` only when the leaderboard Space's renderer is used.
 
 ```bash
 # tests and coverage
@@ -58,14 +61,14 @@ MVIS_GOLDEN=update PYTHONNOUSERSITE=1 python3 -m pytest -q tests/test_golden.py 
 cd site && npm test                              # post-build rename steps (node --test)
 
 # real-data tests (skipped without the env)
-MVIS_SENSORS_CONFIG=<mira sensors.yaml> MVIS_MEDIA=<clips> MVIS_LEADERBOARD=<mira leaderboard dir> \
-MVIS_UZH_ROOT=<uzh study dir, e.g. ~/Project/openmvis-internal/results/datacard/uzh_fpv> MVIS_SRC=<openmvis checkout> \
+MVIS_SENSORS_CONFIG=<private sensors.yaml> MVIS_MEDIA=<clips> MVIS_LEADERBOARD=<leaderboard dir> \
+MVIS_UZH_ROOT=<uzh study dir> MVIS_SRC=<openmvis checkout> \
 MVIS_RESULTS_RECORDS=<records snapshot of the batch> MVIS_RESULTS_STATS=<its stats file> PYTHONNOUSERSITE=1 python3 -m pytest -q -m real_data
 
 # exports (run from a worktree, review the diff before it reaches main)
-PYTHONNOUSERSITE=1 python3 site/scripts/export_sensors.py --private-config <mira sensors.yaml> --media <clips dir> [--site <checkout>]
-PYTHONNOUSERSITE=1 python3 site/scripts/export_uzh.py --leaderboard <mira leaderboard dir> --uzh-root ~/Project/openmvis-internal/results/datacard/uzh_fpv [--out FILE]
-PYTHONNOUSERSITE=1 python3 site/scripts/export_board.py --leaderboard <mira leaderboard dir> [--records <snapshot> [--results-commit <its full sha>]] [--out DIR]
+PYTHONNOUSERSITE=1 python3 site/scripts/export_sensors.py --private-config <private sensors.yaml> --media <clips dir> [--site <checkout>]
+PYTHONNOUSERSITE=1 python3 site/scripts/export_uzh.py --leaderboard <leaderboard dir> --uzh-root <uzh study dir> [--out FILE]
+PYTHONNOUSERSITE=1 python3 site/scripts/export_board.py --leaderboard <leaderboard dir> [--records <snapshot> [--results-commit <its full sha>]] [--out DIR]
 ```
 
 `export_board.py` without `--records` reads the current calibench-vi/results main, so it changes the live tables.
@@ -75,9 +78,8 @@ short sha, or `--results-commit` without `--records`, is refused.
 The Playwright drivers (`browser/*.run`) are not unit-tested: they need Chrome and a served build, and carry a
 `pragma: no cover`. Everything they print or decide is a `checks.py` function with tests.
 
-mira's private pages (`scripts/mvis/huggingface/community_sensors/page.py`) import this lib through
-`$MVIS_SITE_LIB`, default `~/Project/mvis_pages/python`. Merge this lib into main and pull the main checkout before
-mira's side, or the private pages stop building.
+The maintainer's private report pages import this lib through `$MVIS_SITE_LIB` (the path of this `python/`
+folder). Merge this lib into main and pull the main checkout before building those pages, or they stop building.
 
 The generated files still say "Generated by export_sensor.py"; that text is kept so the output stays byte-identical
 through the move.

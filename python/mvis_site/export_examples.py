@@ -1,6 +1,6 @@
 """Example pages for openmvis.com (/benchmark/examples/): one MVIS run per example, in the Device wiki's page layout, plus the overview cards.
 
-The words come from data/public_examples.yaml. The run of each example is named in the private mira sensors.yaml
+The words come from data/public_examples.yaml. The run of each example is named in the private sensors.yaml
 `examples:` section (passed by path); only its run folders and config files are read, through example_config. An example
 whose run has no cam_imu_views.json yet is pending: its page is written without the player, map, result and check.
 The config shown is the run's own, with paths cut to file names, so it is never retyped. lint.public_problems checks

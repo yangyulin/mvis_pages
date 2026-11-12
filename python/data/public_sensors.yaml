@@ -1,5 +1,5 @@
 # Text for the public openmvis.com sensor pages. Written fresh: no maker-versus-MVIS comparison, internal path, code hash or device id.
-# Numbers come from the run named by `key` in the private sensors.yaml (kept in mira, passed to export_sensors.py by path).
+# Numbers come from the run named by `key` in the private sensors.yaml (a file outside this repository, passed to export_sensors.py by path).
 # A demo `from` names the clip; the private sensors.yaml maps it to the file in the media folder (demo_media) when that name holds a device id.
 # Only sensors listed here reach the site.
 data_url: https://huggingface.co/datasets/calibench-vi/datasets/tree/main
@@ -90,7 +90,7 @@ sensors:
       - No reference exists for these recordings, so the values can't be checked for accuracy.
       - Hand-held and robot-arm recordings are kept apart, not pooled. They were solved in different batches and may not come from the same unit.
       - The arm program rotates mostly about one axis, which leaves lever arms less well determined, so treat the arm's values with more caution.
-      - The chessboard recordings come from our own unit, not the partner's, and are shown on their own. The values shown come from take 04 alone, so they show no repeatability; all 4 takes are in the hosted data.
+      - The chessboard recordings come from our own unit, not the maker's loan unit, and are shown on their own. The values shown come from take 04 alone, so they show no repeatability; all 4 takes are in the hosted data.
     header:
       type: "Spatial AI camera: stereo pair, rolling-shutter colour camera, 6-axis IMU, VIO"
       maker: {name: LooperRobotics, url: "https://looper-robotics.com/"}

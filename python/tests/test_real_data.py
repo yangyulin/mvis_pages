@@ -1,6 +1,6 @@
 """Checks on the real runs. Every path comes from the environment; skipped without it.
 
-  MVIS_SENSORS_CONFIG=<mira>/scripts/mvis/huggingface/community_sensors/data/sensors.yaml MVIS_MEDIA=<clips dir> \
+  MVIS_SENSORS_CONFIG=<private sensors.yaml> MVIS_MEDIA=<clips dir> \
   PYTHONNOUSERSITE=1 python3 -m pytest -q -m real_data
 """
 import numpy as np
