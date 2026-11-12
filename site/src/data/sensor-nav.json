@@ -58,5 +58,10 @@
   "label": "Samsung Odyssey+",
   "link": "/devices/samsung-odyssey-plus/",
   "group": "VR headsets"
+ },
+ {
+  "label": "Insta360 ONE RS 1-Inch 360 Edition",
+  "link": "/devices/insta360-one-rs-1inch-360/",
+  "group": "360\u00b0 cameras"
  }
 ]
