@@ -89,7 +89,7 @@ More: [VI-Rig 4 IMUs + 3 cams results](/benchmark/results/virig-4imus-3cams/).
 - **Test:** T7 and T8 solve the same two IMUs (T265 IMU base, Xsens aux) on the same 15 recordings. Only the
   cameras differ: T265 fisheye 1 + ELP-L in T7, the ELP pair in T8.
 - **Public medians:** Xsens distance to base 124.09 mm (T7) and 123.94 mm (T8).
-- **Internal study** (MVIS main of 2026-11-02): the gap between the two families' Xsens levers was 0.11 mm.
+- **A study we have not published:** the gap between the two families' Xsens levers was 0.11 mm.
 - **What it means:** the aux IMU lever comes from the IMUs, not from which cameras are in the solve.
 
 ## 4. Why redundancy helps
@@ -118,9 +118,9 @@ Several IMUs see the *same* motion. That redundancy constrains what one IMU leav
     0.12 mm.
   - **The knob:** `solve.aux_imu_stride`, one aux IMU factor per this many base intervals. The default is 3.
   - **Levers move with it:** keep the default unless you have a reason, and compare runs only at the same value.
-  - These are internal twin results, not public files.
-- **More IMUs do not help the readout.** The rolling-shutter readout comes from the cameras. In an older internal
-  study (June 2026, older code), adding IMUs moved the ELP readout from 15.9 to 16.6 ms and made the fit
+  - These twin results are not published files.
+- **More IMUs do not help the readout.** The rolling-shutter readout comes from the cameras. In an older study
+  we have not published (older code), adding IMUs moved the ELP readout from 15.9 to 16.6 ms and made the fit
   worse (reprojection error 3.04 → 3.49). See [Why calibrate rolling shutter](/why/rolling-shutter/).
 - **Pick the base with care.** The base IMU carries the trajectory and the reference clock. Its errors reach
   every other sensor.

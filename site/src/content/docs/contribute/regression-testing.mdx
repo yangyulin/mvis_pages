@@ -44,6 +44,14 @@ artifact**. When a change moves a number on purpose, the re-bless commit shows:
 - on which recordings
 - by how much
 
+:::note[Maintainer workflow]
+The regression runner, its manifests and the blessed baselines live in the
+maintainers' tree, not in the public repository. This page documents the
+discipline and the suite's shape; the public artefacts are the
+[results tables](/benchmark/results/) and the `tests/` folder
+(`scripts/test.sh <tier>`), which anyone can run.
+:::
+
 ## Three superset tiers
 
 | Tier | Command | Rows | Runtime | When |
