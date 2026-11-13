@@ -185,12 +185,13 @@ def board_shape_svg(b: dict, shape: dict) -> str:
                     dots.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rad:.1f}" fill="none" stroke="#999" stroke-width="{rad / 4:.1f}"><title>not seen</title></circle>')
     m = step
     bar_w = w * 0.6
+    fs = w * 0.03                                   # legend text scales with the board, not the tag pitch
     stops = "".join(f'<stop offset="{k / 10:.1f}" stop-color="{_shape_colour(k / 5 - 1)}"/>' for k in range(11))
     bar = (f'<defs><linearGradient id="bsg">{stops}</linearGradient></defs>'
-           f'<rect x="{(w - bar_w) / 2:.1f}" y="{d + m * 0.55:.1f}" width="{bar_w:.1f}" height="{m * 0.28:.1f}" fill="url(#bsg)"/>'
-           f'<text x="{(w - bar_w) / 2:.1f}" y="{d + m * 1.25:.1f}" text-anchor="middle" font-size="{m * 0.36:.1f}" fill="currentColor">{-lim:+.1f} mm</text>'
-           f'<text x="{w / 2:.1f}" y="{d + m * 1.25:.1f}" text-anchor="middle" font-size="{m * 0.36:.1f}" fill="currentColor">flat</text>'
-           f'<text x="{(w + bar_w) / 2:.1f}" y="{d + m * 1.25:.1f}" text-anchor="middle" font-size="{m * 0.36:.1f}" fill="currentColor">{lim:+.1f} mm</text>')
+           f'<rect x="{(w - bar_w) / 2:.1f}" y="{d + m * 0.55:.1f}" width="{bar_w:.1f}" height="{fs * 0.8:.1f}" fill="url(#bsg)"/>'
+           f'<text x="{(w - bar_w) / 2:.1f}" y="{d + m * 0.55 + fs * 2.0:.1f}" text-anchor="middle" font-size="{fs:.1f}" fill="currentColor">{-lim:+.1f} mm</text>'
+           f'<text x="{w / 2:.1f}" y="{d + m * 0.55 + fs * 2.0:.1f}" text-anchor="middle" font-size="{fs:.1f}" fill="currentColor">flat</text>'
+           f'<text x="{(w + bar_w) / 2:.1f}" y="{d + m * 0.55 + fs * 2.0:.1f}" text-anchor="middle" font-size="{fs:.1f}" fill="currentColor">{lim:+.1f} mm</text>')
     return (f'<figure class=board><svg viewBox="{-m * 0.6:.1f} {-m * 0.6:.1f} {w + m * 1.2:.1f} {d + m * 2.1:.1f}" role="img" '
             f'aria-label="Board shape, AprilGrid {rows} by {cols}: heights off the flat board">'
             f'<rect x="{-m * 0.3:.1f}" y="{-m * 0.3:.1f}" width="{w + m * 0.6:.1f}" height="{d + m * 0.6:.1f}" fill="none" stroke="currentColor" stroke-opacity="0.35"/>'
