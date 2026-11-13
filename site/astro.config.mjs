@@ -21,7 +21,6 @@ const resultsNav = JSON.parse(readFileSync(new URL('./src/data/results-nav.json'
 // Astro EMPTIES outDir before every build. Anything that must survive a build
 // lives in `public/`, not in `docs/` directly. Currently:
 //   - CNAME  the custom domain. Lose it and openmvis.com goes down.
-//   - fig/   legacy jemdoc images, kept so old inbound image links still resolve.
 //   - .nojekyll  Pages uses LEGACY (Jekyll) builds on this repo. Without this,
 //               Jekyll strips `_astro/` (all CSS+JS -> 404) and its Liquid
 //               parser fails the build on the BibTeX `{{` in citation blocks.
@@ -84,19 +83,16 @@ export default defineConfig({
 
   integrations: [
     starlight({
-      title: 'Open MVIS',
+      title: 'OpenMVIS',
       description:
         'The benchmark for multi-visual-inertial sensor calibration — multi-IMU, multi-camera, with leaderboard.',
       logo: { src: './src/assets/logo-placeholder.svg' },
-      // Both links must point at a PUBLIC repo or they 404 for visitors.
-      // The toolbox repos (yangyulin/MVIS, yangyulin/mvis-code) are private,
-      // so the public site repo is the only working target today. Switch the
-      // social link to MVIS once that repo is published.
+      // Header link: the toolbox repo. Edit links: this site's repo.
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/yangyulin/mvis_pages' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/openmvis/openmvis' },
       ],
       editLink: {
-        baseUrl: 'https://github.com/yangyulin/mvis_pages/edit/main/site/',
+        baseUrl: 'https://github.com/openmvis/mvis_pages/edit/main/site/',
       },
       lastUpdated: true,
       pagination: true,
@@ -188,13 +184,9 @@ export default defineConfig({
               collapsed: true,
               items: [
                 { label: 'Overview', link: '/concepts/camera-imu-math/' },
-                { label: 'Base IMU factor', link: '/concepts/camera-imu-math/base-imu/' },
-                { label: 'Auxiliary IMU factor', link: '/concepts/camera-imu-math/aux-imu/' },
               ],
             },
             { label: 'Calibration graph', link: '/concepts/calibration-graph/' },
-            { label: 'Observability', link: '/concepts/observability/' },
-            { label: 'Degeneracy', link: '/concepts/degeneracy/' },
             { label: 'Continuous-time refinement', link: '/concepts/continuous-time/' },
           ],
         },

@@ -1,0 +1,40 @@
+OpenMVIS site (https://openmvis.com) — licence notice
+
+Copyright (C) 2021-2026 Yulin Yang <contact@openmvis.com> and the
+contributors listed at https://openmvis.com/about/contributors/.
+
+This repository holds two kinds of work under two licences.
+
+1. Code: GNU General Public License v3.0 only (GPL-3.0-only), see LICENSE.
+   This covers the site source in site/ (Astro components, layouts, scripts,
+   styles, the generated JavaScript), the Python library in python/, and the
+   scripts of the build output in docs/. The site embeds code from the MVIS
+   toolbox (https://github.com/openmvis/openmvis), itself GPL-3.0-only:
+   python/mvis_site/assets/progress.js (the MVIS report player),
+   site/src/scripts/sensor-page.js (generated from the MVIS views player) and
+   the MVIS report pages under site/public/media/guides/. The toolbox is also
+   available under a paid commercial licence for closed-source products; see
+   COMMERCIAL-LICENSE.md in the toolbox repository or write to
+   licensing@openmvis.com.
+
+2. Text and figures: Creative Commons Attribution 4.0 International
+   (CC BY 4.0), see LICENSE-CONTENT. This covers the prose pages in
+   site/src/content/, the page text in python/data/*.yaml, and the figures,
+   diagrams and plots made for the site. Attribute as "OpenMVIS,
+   https://openmvis.com".
+
+Exceptions, which neither licence covers:
+
+- Clips, frames and figures derived from the VI-Rig and Looper recordings
+  (the hero clips, the sensor and example pages) carry the licence of those
+  datasets, CC BY-NC 4.0; commercial use by request to contact@openmvis.com.
+- Clips, frames and figures derived from a third-party dataset (TUM-VI,
+  UZH-FPV, Monado and others named on the page) carry that dataset's own
+  licence, stated on the page.
+- Product photos (python/data/photos/, the sensor pages) belong to their
+  makers and are credited with a link to the source.
+- The calibration board images and configs under site/public/downloads/boards/
+  are CC BY 4.0 like the other figures. Download packs that carry a README
+  (site/public/downloads/*.zip) state their own licences in that README.
+- Third-party packages installed by npm or pip keep their own licences; the
+  site does not distribute Kalibr or Basalt, it only reports results of them.

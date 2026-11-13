@@ -7,7 +7,7 @@ pageType: concept
 Use this page to see what MVIS is, what it solves, and how a run works.
 
 MVIS is a Python toolbox that calibrates single- and multi-camera systems.
-It is the calibration library behind Open MVIS. It replaces the earlier C++/ROS
+It is the calibration library behind OpenMVIS. It replaces the earlier C++/ROS
 implementation.
 
 - **Built on:** GTSAM factor-graph optimisation (one big least-squares problem
@@ -30,7 +30,7 @@ Everything is solved in **one graph**:
 
 ## What makes it different
 
-- **No ROS required.** Pure Python, `pip install`, Linux and macOS.
+- **No ROS required.** Pure Python, `pip install`, Linux and macOS, Python 3.11–3.12.
   - Bags are read through `rosbags`.
   - So a ROS1 or ROS2 recording calibrates on a machine that has never had ROS
     installed.
@@ -96,7 +96,6 @@ Detection → Quality gating → Init → Per-camera opt → Alignment → Joint
 
 ## Where to go next
 
-- Coming from Kalibr or Basalt → [Comparison vs Kalibr / Basalt](/getting-started/comparison/).
 - Never run it → [Quickstart](/getting-started/quickstart/).
 - Have a rig → [Camera calibration](/guides/camera-calibration/), then
   [Camera–IMU](/guides/camera-imu-calibration/).

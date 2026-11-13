@@ -7,69 +7,131 @@ pageType: reference
 Use this page to see what you may do with MVIS, this site and our datasets.
 Each part has its own licence:
 
-- **Toolbox (MVIS):** MIT License
-- **This site:** MIT License, with exceptions for third-party clips and figures, and product photos
-- **Datasets:** their own licences; contributed recordings in `calibench-vi/community` are CC BY-NC 4.0
+- **Toolbox (MVIS):** GPL-3.0-only, with a commercial licence for closed-source products
+- **This site:** code GPL-3.0-only; text and figures CC BY 4.0, with exceptions for third-party clips, product photos and the replay pack
+- **Datasets:** VI-Rig and Looper recordings CC BY-NC 4.0; converted third-party sets CC BY 4.0
 - **Third-party components:** their own licences
 
 ## Toolbox
 
-MVIS declares the **MIT License** in its `pyproject.toml`.
+MVIS (the `pymvis` package, repository
+[`openmvis/openmvis`](https://github.com/openmvis/openmvis)) is released under
+the **GNU General Public License, version 3 only** (GPL-3.0-only). The full
+text is in
+[`LICENSE`](https://github.com/openmvis/openmvis/blob/main/LICENSE). MVIS is
+Copyright (C) 2026 Yulin Yang.
 
-MIT is permissive. You may:
+Under the GPL you may use, study, modify and share MVIS, for any purpose,
+including commercial ones. In particular:
 
-- use it
-- modify it
-- redistribute it, including in closed-source products
+- **Research, teaching and company-internal use** are free. Running MVIS to
+  calibrate your own devices, in a lab or in a company, needs no agreement.
+- **Products that include or derive from MVIS** must themselves be released
+  under GPL-3.0, with their source.
+- **Calibration results are yours.** The GPL covers the code, not what it
+  computes: intrinsics, extrinsics, time offsets, residuals, plots and reports
+  you produce by running MVIS on your own recordings may be published anywhere,
+  including on commercial product pages. Results computed on a dataset follow
+  that dataset's licence.
 
-The condition: the copyright notice and licence text travel with it.
+**Commercial licence.** If you want to ship MVIS inside a closed-source product,
+or cannot meet the GPL terms for another reason, a paid commercial licence is
+available. The terms are in
+[`COMMERCIAL-LICENSE.md`](https://github.com/openmvis/openmvis/blob/main/COMMERCIAL-LICENSE.md);
+write to licensing@openmvis.com.
 
-:::caution[No LICENSE file yet]
-The declaration lives in package metadata. The repository does not yet carry a
-`LICENSE` file with the full text. Until it does, treat this page as
-*indicative* rather than authoritative. Adding the file is on the
-[roadmap](/about/roadmap/).
-:::
+**Names.** You may say that results were computed with MVIS ("Calibrated with
+MVIS", linking https://openmvis.com). Do not use the MVIS or OpenMVIS names or
+logos in a way that suggests the project endorses or certifies your product
+without written permission.
 
 ## This site
 
-[`yangyulin/mvis_pages`](https://github.com/yangyulin/mvis_pages) — source,
-content, and generated pages — is released under the **MIT License**. Prose and
-figures here can be reused with attribution.
+The site repository is
+[`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages).
 
-Two exceptions:
+- **Code** (the Astro site, its components, scripts and the embedded MVIS
+  report views): **GPL-3.0-only**, the same licence as the toolbox.
+- **Text and figures** written for this site: **CC BY 4.0**. Reuse them with
+  attribution to OpenMVIS and a link to the page.
 
-- **Third-party clips and figures:** clips and figures made from a third-party
-  recording, such as those on the sensor pages, carry that recording's licence,
-  stated on the page.
-- **Product photos:** product photos on the sensor pages belong to their makers.
-  Each is credited with a link to its source and isn't covered by this licence.
+Exceptions, which keep their own terms:
+
+- **Third-party dataset clips and figures.** Clips and figures on the homepage,
+  the example pages and the device pages that are made from a third-party
+  recording carry that recording's licence, stated on the page:
+  [TUM-VI](/benchmark/examples/tum-vi/) CC BY 4.0,
+  [Monado MSD](/benchmark/examples/monado/) CC BY 4.0,
+  [UZH-FPV](/benchmark/examples/uzh-fpv/) CC BY-NC-SA 3.0,
+  GiLabs, [Looper](/benchmark/examples/looper-insight9/) and
+  [VI-Rig](/reference/datasets/) CC BY-NC 4.0, and the Dibuli maker example
+  data under Dibuli's terms.
+- **Product photos** on the device pages belong to their makers. Each is
+  credited with a link to its source and is not covered by this licence.
+- **The replay pack** on [Record the dataset](/guides/calibration-motion/#replay-it-yourself)
+  states its own split: the guide motions, rigs and results CC BY 4.0, the two
+  real-example trajectories CC BY-NC 4.0.
 
 If you are the maker and want a photo changed or removed, write to
 contact@openmvis.com.
 
 ## Datasets
 
-Released datasets carry their own licences, stated on each dataset's page — see
+Each dataset page states its licence and citation — see
 [Datasets](/reference/datasets/).
 
-Contributed recordings hosted in
-[`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
-are CC BY-NC 4.0. See
-[Submit a dataset](/contribute/submit-dataset/).
+- **Our own recordings** (VI-Rig and Looper Insight 9, hosted on Hugging Face):
+  **CC BY-NC 4.0**. Access is gated with automatic approval, so you accept the
+  terms once and download. Commercial use is possible by request: write to
+  contact@openmvis.com.
+- **Converted third-party sets** that we host (format-converted copies of
+  CC BY sets): **CC BY 4.0**, with the original authors credited on the page.
+- **TUM-VI** and other third-party datasets we only reference: their own
+  licences (TUM-VI is CC BY 4.0). Download them from their owners.
+- **Contributed recordings** in
+  [`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
+  are CC BY-NC 4.0. See [Submit a dataset](/contribute/submit-dataset/).
+
+Results computed on a dataset follow that dataset's licence: results from the
+CC BY-NC 4.0 data may not be used commercially without permission.
+
+[Kalibr](https://github.com/ethz-asl/kalibr) and
+[Basalt](https://gitlab.com/VladyslavUsenko/basalt) appear in the benchmark as
+reference tools. We only run them; we do not distribute them.
 
 ## Third-party components
 
 MVIS builds on software under its own terms. Their licences govern their own
-code:
+code and are unchanged by the MVIS licence.
+
+| Component | Used for | Licence |
+|---|---|---|
+| [GTSAM](https://github.com/borglab/gtsam) | factor-graph optimisation | BSD-3-Clause |
+| [OpenCV](https://opencv.org/) (`opencv-python`, `opencv-contrib-python`) | image handling, ArUco | Apache-2.0 |
+| [NumPy](https://numpy.org/) | arrays | BSD-3-Clause |
+| [SciPy](https://scipy.org/) | numerics | BSD-3-Clause |
+| [PyYAML](https://pyyaml.org/) | config files | MIT |
+| [Matplotlib](https://matplotlib.org/) | static plots | Matplotlib licence (BSD-style) |
+| [Plotly](https://plotly.com/python/) | interactive report plots | MIT |
+| [tqdm](https://github.com/tqdm/tqdm) | progress bars | MIT and MPL-2.0 |
+| [`aprilgrid`](https://github.com/powei-lin/aprilgrid) (optional) | AprilGrid detection | MIT |
+| [`rosbags`](https://gitlab.com/ternaris/rosbags) (optional) | ROS 1 / ROS 2 bag reading | Apache-2.0 |
+| [`mcap`](https://github.com/foxglove/mcap) (optional) | MCAP reading | MIT |
+| [`rerun-sdk`](https://github.com/rerun-io/rerun) (optional) | 3-D viewer | MIT or Apache-2.0 |
+
+This site bundles:
 
 | Component | Licence |
 |---|---|
-| [GTSAM](https://github.com/borglab/gtsam) | BSD |
-| OpenCV | Apache 2.0 |
-| NumPy | BSD |
-| `aprilgrid` | see project |
-| `rosbags` | see project |
+| [Plotly.js](https://github.com/plotly/plotly.js) 3.0.1 (vendored, device pages) | MIT |
+| [KaTeX](https://katex.org/) (maths rendering) | MIT; fonts SIL OFL 1.1 |
+| [Astro](https://astro.build/) + [Starlight](https://starlight.astro.build/) | MIT |
+
+## Analytics
+
+We count visits with [GoatCounter](https://www.goatcounter.com/) on every page
+and [MapMyVisitors](https://mapmyvisitors.com/) on the homepage; neither uses
+cookies.
 
 ## Citing
 

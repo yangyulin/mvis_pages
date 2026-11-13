@@ -1,7 +1,7 @@
 """Write the UZH-FPV results table (site/src/data/leaderboard/uzh_fpv.json) with the leaderboard Space's renderer.
 
-  PYTHONNOUSERSITE=1 python3 site/scripts/export_uzh.py --leaderboard <mira>/tasks/mvis/huggingface/leaderboard \
-      --uzh-root <openmvis-internal>/results/datacard/uzh_fpv [--hub-stage DIR] [--out FILE]
+  PYTHONNOUSERSITE=1 python3 site/scripts/export_uzh.py --leaderboard <leaderboard Space checkout> \
+      --uzh-root <openmvis checkout>/results/datacard/uzh_fpv [--hub-stage DIR] [--out FILE]
 """
 import argparse
 from pathlib import Path

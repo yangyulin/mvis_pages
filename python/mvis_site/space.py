@@ -1,4 +1,4 @@
-"""Adapter to the leaderboard Space (mira tasks/mvis/huggingface/leaderboard): runs its own renderer so the site and
+"""Adapter to the leaderboard Space (the Hugging Face Space's code, passed by path): runs its own renderer so the site and
 the Space show the same rows. The Space stays the source; this only calls the names in CONTRACT.
 
 Gradio isn't needed to render, so a stub stands in when it is missing. Every import is undone afterwards (sys.path,

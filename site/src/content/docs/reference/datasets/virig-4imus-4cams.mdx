@@ -73,7 +73,13 @@ When calibrating IMU and ELP cameras with Kalibr, the
 
 ## Running MVIS
 
+The toolbox ships ready configs for this dataset in
+[`examples/configs/tga_t265_4cams/`](https://github.com/openmvis/openmvis/tree/main/examples/configs/tga_t265_4cams):
+a camera prior (`t265_calib.yaml`) and one camera + IMU config per recording.
+Bags are read from `$MVIS_DATASETS` (default `~/Datasets`):
+
 ```bash
-mvis calibrate -c virig_4cams_cam.yaml   # cameras first
-mvis cam-imu   -c virig_4cams_cam_imu.yaml
+mvis datasets download --dataset mvis_4imus_4cams                 # gated: log in to the Hub first
+mvis check -c examples/configs/tga_t265_4cams/cam_imu_t265_01.yaml
+mvis run   -c examples/configs/tga_t265_4cams/cam_imu_t265_01.yaml   # bag 01
 ```

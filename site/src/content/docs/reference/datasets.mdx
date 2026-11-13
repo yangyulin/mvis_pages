@@ -16,9 +16,20 @@ cite it.
 - **Source of truth:** the
   [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
   repository.
-- **Hosted:** our own VI-Rig captures (CC BY-NC 4.0).
-- **Recipes:** download recipes for the third-party datasets the benchmark
-  evaluates against.
+- **Hosted, ours:** the VI-Rig captures and the Looper Insight 9 recordings,
+  **CC BY-NC 4.0**. Access is gated with automatic approval: accept the terms on
+  the Hub and log in (`huggingface-cli login`, or set `HF_TOKEN`) before
+  downloading; a bare download link returns an error without a token. Commercial
+  use is by request (licensing@openmvis.com).
+- **Hosted, converted:** copies of third-party sets whose licence allows
+  redistribution, converted to the benchmark's layout, under
+  [`converted/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted)
+  (**CC BY 4.0**, each with its upstream citation).
+- **Community:** recordings of other makers' devices, in
+  [`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
+  (CC BY-NC 4.0; the [device pages](/devices/) link each folder).
+- **Recipes:** download recipes for the other third-party datasets the
+  benchmark evaluates against.
 - **Old links:** the Google Drive links from the legacy site are retired.
 
 ## Hosted — VI-Rig captures
@@ -26,6 +37,12 @@ cite it.
 We collected these on a self-built VI-Rig for research on multi-visual-inertial
 calibration. Reference Kalibr and MVIS results for these captures are in
 [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
+The toolbox downloads them for you:
+
+```bash
+mvis datasets list
+mvis datasets download --select mvis_4imus_3cams/april_01    # about 7 GB
+```
 
 Terms in the table:
 
@@ -42,12 +59,15 @@ Terms in the table:
 | 4 IMUs + 3 cameras — ArUco | same rig, ArUco-tag sequences | 17 | [`virig-4imus-3cams-aruco`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams-aruco) |
 | [4 IMUs + 4 cameras](/reference/datasets/virig-4imus-4cams/) | 4 IMUs, 2 GS + 2 rolling shutter | 15 AprilGrid (+7 raw) | [`virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams) |
 | 5 IMUs + 4 cameras | 5 IMUs (two T265 stereo fisheye pairs), 4 cameras | 7 AprilGrid | [`virig-5imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams) |
+| [Looper Insight 9](/devices/looper-insight9/) | 3 cameras (2 GS + 1 rolling shutter), 400 Hz IMU | 10 hand-held AprilGrid | [`looper-insight9`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9) |
 
 ## Third-party datasets (recipes)
 
-Calibench hosts only data we own. Every third-party dataset the benchmark
-evaluates ships as a `download.py` recipe (manifest + checksums). The recipe
-pulls the data from its original host. The recipes cover:
+Third-party data is hosted only where its licence allows it: those sets are
+under [`converted/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted)
+as CC BY 4.0, with the upstream citation. Every other third-party dataset the
+benchmark evaluates ships as a `download.py` recipe (manifest + checksums). The
+recipe pulls the data from its original host. The recipes cover:
 
 - EuRoC MAV
 - TUM VI

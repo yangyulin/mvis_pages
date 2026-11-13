@@ -1,4 +1,9 @@
-# Open MVIS Site — Design Document
+# OpenMVIS Site — Design Document
+
+> **Status (2026-11):** the cut-over is done. `docs/` is the Astro build and the
+> live site; the legacy jemdoc sources and toolchain were removed from the tree
+> (history on the branch `backup/jemdoc-site-2023`). Passages below that describe
+> the migration are kept as the record of the decisions, not as the current state.
 
 Companion to [`PLAN.md`](./PLAN.md). `PLAN.md` is the *what* and *why*; this
 document is the *how* — concrete architecture decisions, file layout, schemas,
@@ -71,14 +76,15 @@ mvis_pages/
 │   ├── scripts/             # thin CLIs over python/mvis_site, post-build.mjs
 │   └── tsconfig.json
 ├── python/                  # mvis_site lib, its data and tests (§11)
-├── docs/                    # GitHub Pages serves this (legacy + future cut-over)
-│   └── CNAME
-├── openmvis/                # legacy jemdoc sources (kept for reference until cut-over)
+├── docs/                    # the build GitHub Pages serves, written by npm run build
+├── .github/workflows/       # CI: npm test, npm run build, pytest
+├── LICENSE, LICENSE-CONTENT, NOTICE
 └── README.md
 ```
 
-The legacy `openmvis/` and `jemdoc` toolchain stay in place during the
-transition. After the cut-over (Phase 1 exit) they can be archived or removed.
+The legacy `openmvis/` jemdoc sources and the `jemdoc` toolchain were removed
+after the cut-over; the old page addresses are served by redirect stubs in
+`site/public/` and the history stays on the branch `backup/jemdoc-site-2023`.
 
 ---
 
@@ -148,7 +154,7 @@ collections = {
 
 Mirrors the legacy `MENU` jemdoc file 1:1:
 
-- **Open MVIS** — Home, Compilation, Quick Start, Contributors
+- **OpenMVIS** — Home, Compilation, Quick Start, Contributors
 - **Calibration** — Overview, Procedures, Results
 - **MVIS Datasets** — Sensors, MVIS Data, 4 IMUs + 3 Cams, 4 IMUs + 4 Cams,
   Analysis
@@ -283,18 +289,16 @@ npm run build      # astro build into ../docs, then scripts/post-build.mjs
 
 ### 7.2 Production deploy
 
-The legacy jemdoc site lives in `docs/` and is served by GitHub Pages via the
-`CNAME` file. The new Starlight site builds into `site/dist/`.
+GitHub Pages serves `main:/docs` with the custom domain from `site/public/CNAME`.
+`npm run build` writes `docs/` directly (§7.3), so there is no separate deploy
+step: commit the build with the source and push `main`. CI
+(`.github/workflows/ci.yml`) runs the tests and a build on every push and pull
+request but does not commit the output; the build in `docs/` is made and
+reviewed by the maintainer.
 
-**Cut-over (one-time, when ready):**
-
-1. `mv docs docs_jemdoc_archive`
-2. `cp -r site/dist docs`
-3. `cp docs_jemdoc_archive/CNAME docs/CNAME`
-4. Commit, push, verify the live site.
-
-After cut-over, automate the build with a GitHub Action that runs
-`npm run build` on every push to `main` and commits `site/dist/` → `docs/`.
+The cut-over from the jemdoc site was done once by hand (build, replace
+`docs/`, keep `CNAME`); the 18 legacy addresses are served by the redirect
+stubs in `site/public/*.html` and `site/src/data/moved.json`.
 
 ### 7.3 Astro 6 outDir
 
@@ -317,7 +321,7 @@ legacy Jekyll Pages build drops paths starting with `_`. Always use `npm run bui
 | Submission flow | PR-based | Web form + Google Sheet | No infra; mirrors Hilti; PR diff is the audit trail. |
 | Verification | Self-reported v1 | Hidden-GT server eval | No infra. Revisit at Phase 3. |
 | Schema location | `site/src/content/leaderboard/` | Sibling repo `mvis_benchmark` | Same repo for v1; split if size demands. |
-| Cut-over strategy | Manual `cp` to `docs/` | Direct outDir override | Astro 6 asset bug forces this; revisit. |
+| Cut-over strategy | Manual `cp` to `docs/` (done once) | Direct outDir override | Astro 6 asset bug at the time; `outDir: '../docs'` since (§7.3). |
 
 ---
 
@@ -354,7 +358,7 @@ commands in `python/README.md`). The rules:
   sensor export is pinned by golden files. Only the Playwright `run()` drivers are excluded, by pragma. Scripts in
   `site/scripts/` parse arguments and make one lib call.
 - Page text is public (`python/data/public_sensors.yaml`). Run paths, recording paths and reference columns stay in
-  mira's private `sensors.yaml`, passed by path; the lib reads only its solve slice (`results.solve_config`).
+  a private `sensors.yaml` outside this repository, passed by path; the lib reads only its solve slice (`results.solve_config`).
 - `lint.public_problems` runs on every sensor text drawn from the data (page JSON, MDX, process figures, sidebar)
   before anything is written; `lint.refusals` on the results tables. Neither is ever relaxed to let a page through.
 - The results tables come from the leaderboard Space's renderer (`space.py`, names in `space.CONTRACT`), so the

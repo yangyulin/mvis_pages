@@ -38,7 +38,14 @@
    "td": "−2.77 <small>ms</small>",
    "corners": "93–119",
    "xlabel": "Kalibr baseline",
-   "xval": "Δp 2.6 <small>mm</small>"
+   "xval": "Δp 2.6 <small>mm</small>",
+   "credit": {
+    "holder": "OpenMVIS",
+    "dataset": "VI-Rig 4 IMUs + 3 cameras",
+    "url": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams",
+    "licence": "CC BY-NC 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+   }
   },
   {
    "key": "looper",
@@ -78,7 +85,14 @@
    "td": "+1.22 <small>ms</small>",
    "corners": "60–116",
    "xlabel": "RS readout",
-   "xval": "31.6 <small>ms</small>"
+   "xval": "31.6 <small>ms</small>",
+   "credit": {
+    "holder": "OpenMVIS, recorded with a LooperRobotics Insight 9",
+    "dataset": "Looper Insight 9 hand-held recordings",
+    "url": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9",
+    "licence": "CC BY-NC 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+   }
   },
   {
    "key": "virig4",
@@ -126,7 +140,14 @@
    "td": "−6.00 <small>ms</small>",
    "corners": "75–118",
    "xlabel": "ELP time offset",
-   "xval": "−124.4 <small>ms</small>"
+   "xval": "−124.4 <small>ms</small>",
+   "credit": {
+    "holder": "OpenMVIS",
+    "dataset": "VI-Rig 4 IMUs + 4 cameras",
+    "url": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams",
+    "licence": "CC BY-NC 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+   }
   },
   {
    "key": "mic",
@@ -158,7 +179,14 @@
    "td": "−2.20 <small>ms</small>",
    "corners": "107–125",
    "xlabel": "cam0–cam1 baseline",
-   "xval": "133.8 <small>mm</small>"
+   "xval": "133.8 <small>mm</small>",
+   "credit": {
+    "holder": "Collabora",
+    "dataset": "Monado SLAM Datasets, MIC",
+    "url": "https://huggingface.co/datasets/collabora/monado-slam-datasets",
+    "licence": "CC BY 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by/4.0/"
+   }
   },
   {
    "key": "moc",
@@ -190,7 +218,14 @@
    "td": "−0.87 <small>ms</small>",
    "corners": "39–48",
    "xlabel": "cam0–cam1 baseline",
-   "xval": "105.6 <small>mm</small>"
+   "xval": "105.6 <small>mm</small>",
+   "credit": {
+    "holder": "Collabora",
+    "dataset": "Monado SLAM Datasets, MOC",
+    "url": "https://huggingface.co/datasets/collabora/monado-slam-datasets",
+    "licence": "CC BY 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by/4.0/"
+   }
   },
   {
    "key": "mgc",
@@ -222,7 +257,14 @@
    "td": "−1.72 <small>ms</small>",
    "corners": "87–95",
    "xlabel": "cam0–cam1 baseline",
-   "xval": "108.4 <small>mm</small>"
+   "xval": "108.4 <small>mm</small>",
+   "credit": {
+    "holder": "Collabora",
+    "dataset": "Monado SLAM Datasets, MGC",
+    "url": "https://huggingface.co/datasets/collabora/monado-slam-datasets",
+    "licence": "CC BY 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by/4.0/"
+   }
   },
   {
    "key": "tumvi",
@@ -254,7 +296,14 @@
    "td": "+0.18 <small>ms</small>",
    "corners": "144–144",
    "xlabel": "cam0–cam1 baseline",
-   "xval": "101.0 <small>mm</small>"
+   "xval": "101.0 <small>mm</small>",
+   "credit": {
+    "holder": "TUM Computer Vision Group",
+    "dataset": "TUM VI",
+    "url": "https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset",
+    "licence": "CC BY 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by/4.0/"
+   }
   },
   {
    "key": "uzhs",
@@ -286,7 +335,14 @@
    "td": "−7.17 <small>ms</small>",
    "corners": "77–78",
    "xlabel": "cam0–cam1 baseline",
-   "xval": "79.4 <small>mm</small>"
+   "xval": "79.4 <small>mm</small>",
+   "credit": {
+    "holder": "UZH Robotics and Perception Group",
+    "dataset": "UZH-FPV",
+    "url": "https://fpv.ifi.uzh.ch/datasets/",
+    "licence": "CC BY-NC-SA 3.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+   }
   },
   {
    "key": "uzhd",
@@ -310,7 +366,14 @@
    "td": "+5.79 <small>ms</small>",
    "corners": "73",
    "xlabel": "Camera model",
-   "xval": "equidistant"
+   "xval": "equidistant",
+   "credit": {
+    "holder": "UZH Robotics and Perception Group",
+    "dataset": "UZH-FPV",
+    "url": "https://fpv.ifi.uzh.ch/datasets/",
+    "licence": "CC BY-NC-SA 3.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+   }
   },
   {
    "key": "dibuli",
@@ -358,7 +421,13 @@
    "td": "+1.97 <small>ms</small>",
    "corners": "64–198",
    "xlabel": "Kalibr baseline",
-   "xval": "Δp ≤ 1.8 <small>mm</small>"
+   "xval": "Δp ≤ 1.8 <small>mm</small>",
+   "credit": {
+    "holder": "DIBULI",
+    "dataset": "Prism-A4L example data",
+    "url": "https://files.dibuli.com/sharing/public/Prism/datasets/",
+    "terms": "the maker's example data, under its own terms"
+   }
   },
   {
    "key": "gilabs",
@@ -390,7 +459,14 @@
    "td": "−1.33 <small>ms</small>",
    "corners": "136–137",
    "xlabel": "Kalibr baseline",
-   "xval": "Δp 0.1 <small>mm</small>"
+   "xval": "Δp 0.1 <small>mm</small>",
+   "credit": {
+    "holder": "OpenMVIS, recorded with a GI EGO1GS; everything except the board is blurred",
+    "dataset": "Calibench community, gi-ego1gs",
+    "url": "https://huggingface.co/datasets/calibench-vi/community/tree/main/gi-ego1gs",
+    "licence": "CC BY-NC 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc/4.0/"
+   }
   }
  ]
 }

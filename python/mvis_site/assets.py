@@ -12,7 +12,7 @@ from . import ASSETS, SITE
 
 
 # Colours the site's stylesheet lacks (warnings, the reference overlay, cameras 2-3, axes), shared by the public
-# sensor.css and mira's private pages so the two can't drift apart. No trailing ";": each caller joins them.
+# sensor.css and the maintainer's private pages so the two can't drift apart. No trailing ";": each caller joins them.
 EXTRA_DARK = "--warn:#e0b25c;--warn-bg:#3a2f18;--ghost:#f59e0b;--c2:#34d399;--c3:#e879f9;--x:#f87171;--y:#4ade80;--z:#60a5fa"
 EXTRA_LIGHT = "--warn:#8a5a06;--warn-bg:#fdf3dc;--ghost:#b45309;--c2:#059669;--c3:#a21caf;--x:#dc2626;--y:#16a34a;--z:#2563eb"
 
@@ -59,11 +59,22 @@ def site_tokens(css: str) -> dict:
 
 
 def views_dir():
-    """MVIS's canvas-view assets (views.js, views.css): $MVIS_VIEWS_ASSETS, else the openmvis-internal checkout.
-    The site ships MVIS's own player, never a copy kept here."""
+    """MVIS's canvas-view assets (views.js, views.css): $MVIS_VIEWS_ASSETS, else the installed `mvis` package
+    (pip install pymvis, or an editable checkout of github.com/openmvis/openmvis). The site ships MVIS's own
+    player, never a copy kept here."""
     import os
     from pathlib import Path
-    d = Path(os.environ.get("MVIS_VIEWS_ASSETS", "~/Project/openmvis-internal/src/mvis/analysis/views/assets")).expanduser()
+    env = os.environ.get("MVIS_VIEWS_ASSETS")
+    if env:
+        d = Path(env).expanduser()
+    else:
+        try:
+            from mvis.analysis import views
+        except ImportError:
+            raise FileNotFoundError("MVIS view assets not found: install pymvis, set MVIS_VIEWS_ASSETS or pass --mvis-views") from None
+        if not getattr(views, "__file__", None):  # a namespace package has no file to start from
+            raise FileNotFoundError("MVIS view assets not found: mvis.analysis.views has no __file__; set MVIS_VIEWS_ASSETS or pass --mvis-views")
+        d = Path(views.__file__).resolve().parent / "assets"
     if not (d / "views.js").exists():
         raise FileNotFoundError(f"MVIS view assets not found in {d}; set MVIS_VIEWS_ASSETS or pass --mvis-views")
     return d

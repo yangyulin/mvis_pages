@@ -11,22 +11,24 @@ import viRig from '../../../assets/vi_rig.jpg';
 Use this page to check what MVIS needs before you install it. It also lists
 what MVIS calibrates and which inputs and boards it reads.
 
-- **Pure Python:** runs on Linux and macOS (Python 3.11–3.12)
-- **Install:** `pip install`; nothing to compile, no ROS dependency
+- **Pure Python:** runs on Linux and macOS (x86-64 / arm64), Python 3.11 or 3.12
+- **Install:** `pip install` of the `pymvis` package; nothing to compile, no ROS dependency
 - **Build steps:** see [Installation](/getting-started/installation/)
 
 ## Dependencies
 
 | Dependency | Required | Notes |
 |---|---|---|
-| Python | yes | — |
+| Python 3.11 or 3.12 | yes | No 3.13 yet: the NumPy 1.x pin below has no wheel for it |
 | [GTSAM](https://github.com/borglab/gtsam) 4.2 | yes | Factor-graph optimisation, native SO(3)/SE(3) |
 | NumPy **< 2** | yes | GTSAM 4.2 from pip is built against the NumPy 1.x ABI |
 | OpenCV | yes | Detection and PnP initialisation |
-| [`aprilgrid`](https://pypi.org/project/aprilgrid/) | for AprilGrid | `pip install -e ".[apriltag]"` |
-| `opencv-contrib` | for ArUco | `pip install -e ".[aruco]"` |
-| [`rosbags`](https://pypi.org/project/rosbags/) | to read bags | Pure Python — **no ROS installation** |
-| `pytest` | dev | `pip install -e ".[dev]"` |
+| [`aprilgrid`](https://pypi.org/project/aprilgrid/) | for AprilGrid | extra `[apriltag]` |
+| `opencv-contrib` | for ArUco | extra `[aruco]` |
+| [`rosbags`](https://pypi.org/project/rosbags/) | to read bags | extra `[ros1]`; pure Python — **no ROS installation** |
+| `mcap` | for MCAP episodes | extra `[mcap]` |
+| `rerun-sdk` | 3D viewer | extra `[viz]` |
+| `pytest` | dev | extra `[dev]` |
 
 ## What can be calibrated
 

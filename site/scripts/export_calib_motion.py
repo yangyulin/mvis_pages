@@ -1,6 +1,6 @@
 """Copy the calibration-motion guide data into site/public/data/calib-motion/ (stdlib only).
 
-  python3 site/scripts/export_calib_motion.py --anim <mira>/slides/mvis/calib-motion-demo/data \
+  python3 site/scripts/export_calib_motion.py --anim <calib-motion demo data folder> \
       [--verdicts <dir>/twin_verdicts.json] [--placeholder "text"] [--out DIR] [--variants ID ...]
   python3 site/scripts/export_calib_motion.py --refresh public/data/calib-motion/v4/guide06c_60.json ...
   python3 site/scripts/export_calib_motion.py --cams <solve>/cam_imu/cam_imu_views.json \
@@ -15,13 +15,13 @@ Three folders feed the page (each run copies one):
                                                                        (--variants guide04_60 --verdict-ids ...)
 
 --anim      folder with index.json (or --variants) + <variant>.json (calib-motion-demo/anim v1, written by
-            mira scripts/mvis/calib_motion_demo/export_anim.py). Each variant is slimmed for the page: the
+            the maintainers' calib-motion demo export script, outside this repo). Each variant is slimmed for the page: the
             *_cam IMU copies and the internal "description" are dropped, the image outline is rounded to 0.1 px and
             every segment gets its beats (below).
 --refresh   recompute the beats of already exported anim files in place (nothing else changes).
 --cams      an MVIS cam_imu_views.json of the real take that --cams-anim (an exported anim file) shows: writes the
             camera-card sidecar <variant>.cams.json next to that anim file (schema below).
---verdicts  twin_verdicts.json written by mira scripts/mvis/calib_motion_demo/gate.py
+--verdicts  twin_verdicts.json written by the maintainers' calib-motion gate script, outside this repo
             (schema "calib-motion-demo/twin-verdict v1", "v2" or "v3"). The local results paths ("root", a string
             or, for real takes, a dict of paths) are dropped.
             Default: <anim>/twin_verdicts.json when it exists.

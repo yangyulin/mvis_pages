@@ -1,4 +1,4 @@
-/* Open MVIS — palette
+/* OpenMVIS — palette
  * Light is the default (academic / benchmark norm).
  * Dark is a slate (Tailwind slate-900 family), not pure black: cohesive with
  * the sky-blue accent and reads more "research" than "consumer product".
@@ -174,7 +174,7 @@ a.example-card:hover .example-card__title {
   .lb-wrap .cb pre.cfg { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: visible; }
 }
 
-/* Repeatability matrix and cell folds on the results page (RepeatabilityMatrix/Details/Header, RatioPlot).
+/* Repeatability cell folds on the results page (RepeatabilityDetails, RpCell, RpShape, RatioPlot).
  * Tool colours: the dataviz reference categorical slots 1-3, validated all-pairs in both themes; the tool name is
  * always written beside its shape. Verdicts use tints of these, never red or green; --flag stays in the tables. */
 :root {

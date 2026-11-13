@@ -2,7 +2,7 @@
 
   python site/scripts/check_hero_media.py [site/public/media/hero]
 
-rigs.json (written by openmvis-internal demo_video/build_site_media.py) must list, for every recording,
+rigs.json (written by the maintainers' hero-media build script) must list, for every recording,
 files the page will request, and those files must be playable in sync: the files and fields each recording needs,
 one frame count per rig (they share one clock), the sizes, keyframe spacing (sparse keyframes froze companion seeks
 on phones) and the phone first-load budget. The rules and limits are in mvis_site/checks.py (check_hero_media).

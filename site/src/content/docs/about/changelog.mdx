@@ -1,16 +1,39 @@
 ---
 title: Changelog
-description: Notable changes to the Open MVIS toolbox, datasets, and documentation.
+description: Notable changes to the OpenMVIS toolbox, datasets, and documentation.
 pageType: reference
 ---
 
-Use this page to see what changed on the documentation site and in the datasets.
-Notable changes come newest first.
+Use this page to see what changed in the toolbox, on the documentation site and
+in the datasets. Notable changes come newest first.
 
-- **No tagged releases yet:** the toolbox has not cut any. Entries here track the
-  documentation site and the datasets.
-- **Toolbox changes:** see the
-  [commit history](https://github.com/yangyulin/mvis_pages/commits/master).
+- **Toolbox releases:** listed below and in the toolbox's
+  [`CHANGELOG.md`](https://github.com/openmvis/openmvis/blob/main/CHANGELOG.md);
+  the full
+  [commit history](https://github.com/openmvis/openmvis/commits/main) has every change.
+- **Site changes:** see the
+  [site repository](https://github.com/openmvis/mvis_pages).
+
+## Toolbox
+
+### 0.1.0 — first public release
+
+The first public release of MVIS, the calibration toolbox behind this site.
+
+- **Repository:** [`openmvis/openmvis`](https://github.com/openmvis/openmvis),
+  package `pymvis` (CLI `mvis`), version 0.1.0.
+- **Licence:** GPL-3.0-only, with a commercial licence for closed-source
+  products. See [License](/about/license/).
+- **Platforms:** Linux and macOS, Python 3.11 and 3.12. No Windows (GTSAM ships
+  no Windows wheels).
+- **Install:** `pip install pymvis` once the release is on PyPI; until then,
+  from the repository. See [Installation](/getting-started/installation/).
+- **What is in it:** camera-only and camera–IMU calibration for multi-camera,
+  multi-IMU rigs (pinhole and omnidirectional models, `kb4` as the fisheye
+  default, rolling shutter, `t_ga`, board shape), the digital-twin check, the
+  simulator examples, HTML reports and the Kalibr camchain import and export.
+  The regression suite that reproduces the benchmark tables stays with the
+  maintainers; see [Regression testing](/contribute/regression-testing/).
 
 ## Documentation site
 
@@ -81,7 +104,7 @@ We migrated from jemdoc to Astro + Starlight. The first site brought:
 
 See the [roadmap](/about/roadmap/).
 
-:::note[Dates pending]
-Entries are ordered but not yet dated, and the toolbox is not yet versioned.
-Adding release tags and dating these entries is on the roadmap.
+:::note[Dates]
+Site entries before 2026-11 are ordered but not dated. Toolbox entries carry
+their release version; the release date is added when the tag is cut.
 :::
