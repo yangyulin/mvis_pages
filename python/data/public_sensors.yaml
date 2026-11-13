@@ -571,6 +571,11 @@ sensors:
     lead: Consumer 360° camera from Insta360 with two 1-inch sensors behind back-to-back fisheye lenses of about 200° each and a built-in IMU at 1 kHz. It is the camera of the Hilti-Trimble SLAM Challenge 2026 dataset. Each lens is solved with the IMU from the organisers' own calibration recording, using only the part where the camera turns about all three axes, with the rolling-shutter readout and the shape of the calibration board estimated. The first tab puts the two solves together as one rig.
     chips: [360° camera, Rolling shutter, 2 × 200° fisheye, 1 kHz IMU, CC BY-NC-SA data]
     card: {name: "ONE RS 1-Inch 360", maker: Insta360, tags: [Rolling shutter, 2 cameras, 1 kHz IMU], sensors: "2 back-to-back rolling-shutter fisheye + IMU @ 1 kHz", format: "ROS 2 bag", shows: "A 360° camera: two 200° lenses and the IMU, readout estimated"}
+    demo:
+      by_variant:
+        - {from: "insta360-front_small", note: "The 3D scene MVIS recovered from the front-lens recording of the Hilti-Trimble SLAM Challenge 2026 (CC BY-NC-SA 3.0)."}
+        - {from: "insta360-front_small", note: "The 3D scene MVIS recovered from the front-lens recording of the Hilti-Trimble SLAM Challenge 2026 (CC BY-NC-SA 3.0)."}
+        - {from: "insta360-back_small", note: "The 3D scene MVIS recovered from the back-lens recording of the Hilti-Trimble SLAM Challenge 2026 (CC BY-NC-SA 3.0)."}
     source: https://github.com/Hilti-Research/hilti-trimble-slam-challenge-2026/blob/main/docs/sensors.md
     source_label: Hilti-Trimble SLAM Challenge 2026, sensors and calibration
     checked: 2026-11-12
