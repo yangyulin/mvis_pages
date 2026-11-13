@@ -79,7 +79,7 @@ these topics:
 | RealSense T265 IMU | `/t265/imu` | 200 Hz | IMU |
 
 - **Download:** [`calibench-vi/datasets` → `virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams)
-  on the Hub. Access is gated. The licence is CC BY-NC 4.0; for commercial use, ask us.
+  on the Hub. Access is gated.
 - **Which file:** use `4imus_4cams_NN.bag`. In it, the ELP image stamps sit on the camera's own clock. The
   `4imus_4cams_NN_raw.bag` next to it is the recording as captured, with the ELP driver's stamps. Moving
   the stamps drops the ELP frames that cannot be matched to the camera clock, so the ELP rate in
@@ -153,8 +153,7 @@ Run our motions through your own simulator and calibration tool with the
 Its README gives the frames, units and replay steps. The files are plain CSV, YAML and JSON, so you do not
 need MVIS to use them. We ran the twin with the MVIS simulator (`mvis.simulation`).
 
-**Licence:** the pack's README names the licence of each file. The two real-example trajectories and their
-results come from our Looper Insight 9 recordings and are CC BY-NC 4.0.
+**Licence:** the pack's README names the licence of each file.
 
 ## Next
 
