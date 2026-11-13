@@ -21,7 +21,6 @@ const others = page.families.some((f: any) => f.columns.some((c: any) => c.tool 
     <p class="ev-chips">
       {page.ours && <span class="ev-chip ev-ours">our data</span>}
       {page.chips.map((c: string) => <span class="ev-chip">{c}</span>)}
-      <span class="ev-chip">{page.licence}</span>
     </p>
     <p class="ev-prov">
       {page.study ? <>Separate study · batch {page.batch} · not part of the leaderboard batch</>
