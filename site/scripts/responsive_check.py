@@ -3,7 +3,7 @@
   pip install playwright            # uses the system Chrome (channel="chrome"), no browser download
   python site/scripts/responsive_check.py <base_url> <out_dir> [--only phone|laptop|...]
 
-Checks per device (see docs/plans/mvis/web-pages/homepage-responsive in mira):
+Checks per device (the design note lives in the maintainers' plan, outside this repo):
   overflow   no horizontal page scroll
   first      phones/tablets: title, video and a primary call to action inside the first viewport
   fold       laptops/desktops: the whole hero including the readout bar inside the first viewport

@@ -21,7 +21,7 @@ def _no_cells(kind, i, c, j):
 
 
 def public_results(v, cells=_no_cells, ref_label: str | None = None) -> str:
-    """The full results table. cells(kind, cam index, cam, row index) adds cells to a row; mira's private pages put
+    """The full results table. cells(kind, cam index, cam, row index) adds cells to a row; the maintainer's private pages put
     their reference columns there, headed by ref_label. The public pages add none."""
     extra = 0 if ref_label is None else 2
     span = f"<th colspan={2 + extra}>"
@@ -66,7 +66,7 @@ def rig_json(v, site: bool = True) -> dict:
     return out
 
 
-# Section text and markup shared with mira's private pages, so the two can't drift apart.
+# Section text and markup shared with the maintainer's private pages, so the two can't drift apart.
 PROCESS_LEAD = "The path of the rig around the board, as MVIS solved it. Press Play or drag the bar to follow the calibration."
 MAP_LEAD = "The solved positions and orientations, to scale in the IMU frame. Drag sideways to orbit. Tap a sensor to see its values."
 LENS_NOTE = ("We read these from the calibrated lens fit at the image edges, through the principal point (where the optical axis meets the image). "

@@ -140,12 +140,14 @@ not which one is right. Reprojection error is not compared across tools, because
 
 Where a recording has published or factory values, the regression suite reports the
 percentage difference to them (`--gt`). These values are compared, never used as a pass or fail gate.
-They live in `examples/regression/gt/` in the [repository](https://github.com/openmvis/openmvis).
+They are kept with the regression suite.
 
 ## Regression suite
 
 We run MVIS over real recordings and digital twins, and gate every change against stored baselines
 with per-metric tolerances (focal length, distortion, extrinsics, time offsets, readout, reprojection).
+The runner and its baselines stay with the maintainers, not in the public repository; the commands
+below are how we run it. See [Regression testing](/contribute/regression-testing/) for the tests you can run.
 
 ```bash
 python scripts/run_regression.py --mode all --level fast      # the gate

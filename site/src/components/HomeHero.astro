@@ -9,8 +9,9 @@
 //   tablet (641–1099 px)    text | video (inset) · bar underneath · Details
 //   wide   (≥ 1100 px)      text over the left of a contained, right-aligned loop · tile column sized from the
 //                           available height · one-line bar; the whole hero fits the first viewport
-// Media: public/media/hero/, rendered from MVIS solve views (1920 px loop; 960 px loop with the live
-// camera baked in; per-camera tiles 400 + 240 px).
+// Media: public/media/hero/, rendered by the maintainers' video scripts from each calibration's result
+// (1920 px loop; 960 px loop with the live camera baked in; per-camera tiles 400 + 240 px).
+// Each rig's `credit` in rigs.json names the recording's holder, dataset page and licence; it is shown under the bar.
 // All encodes have a keyframe every second so companion seeks stay cheap on phones.
 //
 // Cache busting: every media URL carries a short content hash (?v=...) computed at build time.
@@ -27,6 +28,14 @@ const u = (f) => `/media/hero/${f}?v=${V[f] ?? '0'}`;
 
 const { rigs } = JSON.parse(readFileSync(MEDIA_DIR + 'rigs.json', 'utf8'));
 const first = rigs[0];
+const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// One line of provenance per recording: holder, dataset page and licence, precomputed here; the browser script swaps it per rig.
+const creditHtml = (c) => {
+  if (!c) return '';
+  const lic = c.licence_url ? `<a href="${esc(c.licence_url)}">${esc(c.licence)}</a>` : esc(c.licence ?? c.terms ?? '');
+  return `Recording: <a href="${esc(c.url)}">${esc(c.dataset)}</a>, ${esc(c.holder)}; ${lic}.`;
+};
+for (const r of rigs) r.credit_html = creditHtml(r.credit);
 const countWords = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
 const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} recordings`;
 ---
@@ -99,6 +108,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
       <p class="mh-legend"><span data-k="caption">{first.caption}</span> Each camera has its own colour. The outlined camera is the one shown in 3-D. The board corners it detects take that colour. In the camera views, coloured circles are detected corners. White crosses are reprojections: where the calibration places each corner.</p>
       <ul class="mh-strip" id="mhStrip"></ul>
     </details>
+    <p class="mh-credit" data-k="credit_html" set:html={first.credit_html} />
   </div>
 </section>
 
@@ -202,6 +212,9 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
   .mh-play:hover { color: var(--mh-ink); }
   .mh-note { font-size: 12px; line-height: 1.5; color: var(--mh-dim); grid-column: 1 / -1; }
   .mh-more { grid-column: 1 / -1; color: var(--mh-dim); font-size: 13px; }
+  .mh-credit { grid-column: 1 / -1; font-size: 11px; line-height: 1.5; color: var(--mh-dim); }
+  .mh-credit a { color: var(--mh-dim); text-decoration: underline; text-underline-offset: 2px; }
+  .mh-credit a:hover { color: var(--mh-ink); }
   .mh-more summary { cursor: pointer; list-style: none; font: 500 13px/1 var(--mh-mono); color: var(--mh-ink); min-height: 44px; display: flex; align-items: center; }
   .mh-more summary::-webkit-details-marker { display: none; }
   .mh-more summary::before { content: "▸"; color: var(--mh-sky); margin-right: 8px; }

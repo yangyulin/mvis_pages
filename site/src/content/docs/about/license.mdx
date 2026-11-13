@@ -11,7 +11,7 @@ datasets. Each part has its own licence.
 |---|---|
 | MVIS toolbox | GPL-3.0-only, or a commercial licence |
 | Calibration results you compute | yours; results on a dataset follow that dataset's licence |
-| This site | MIT, except third-party figures and product photos |
+| This site | code GPL-3.0-only; text and figures CC BY 4.0, except third-party clips, product photos and the replay pack |
 | VI-Rig datasets (ours) | CC BY-NC 4.0, gated; commercial licence on request |
 | Converted third-party datasets | CC BY 4.0 |
 | Third-party software | its own licence |
@@ -58,20 +58,33 @@ licence.
 
 ## This site
 
-The [`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages) README
-states that the source and content of this site are released under the **MIT
-License**. You may reuse the text and figures with
-attribution.
+The site repository is
+[`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages).
 
-Two exceptions:
+- **Code** (the Astro site, its components, scripts and the embedded MVIS
+  report views): **GPL-3.0-only**, the same licence as the toolbox.
+- **Text and figures** written for this site: **CC BY 4.0**. Reuse them with
+  attribution to OpenMVIS and a link to the page.
 
-- **Third-party figures:** clips and figures made from a third-party recording,
-  such as those on the device pages, carry that recording's licence, stated on
-  the page.
-- **Product photos:** photos on the device pages belong to their makers. Each is
-  credited with a link to its source and is not covered by the MIT License. If
-  you are the maker and want a photo changed or removed, write to
-  contact@openmvis.com.
+Exceptions, which keep their own terms:
+
+- **Third-party dataset clips and figures.** Clips and figures on the homepage,
+  the example pages and the device pages that are made from a third-party
+  recording carry that recording's licence, stated on the page:
+  [TUM-VI](/benchmark/examples/tum-vi/) CC BY 4.0,
+  [Monado MSD](/benchmark/examples/monado/) CC BY 4.0,
+  [UZH-FPV](/benchmark/examples/uzh-fpv/) CC BY-NC-SA 3.0,
+  GiLabs, [Looper](/benchmark/examples/looper-insight9/) and
+  [VI-Rig](/datasets/) CC BY-NC 4.0, and the Dibuli maker example
+  data under Dibuli's terms.
+- **Product photos** on the device pages belong to their makers. Each is
+  credited with a link to its source and is not covered by this licence.
+- **The replay pack** on [Record the dataset](/guides/calibration-motion/#replay-it-yourself)
+  states its own split: the guide motions, rigs and results CC BY 4.0, the two
+  real-example trajectories CC BY-NC 4.0.
+
+If you are the maker and want a photo changed or removed, write to
+contact@openmvis.com.
 
 ## Datasets
 
@@ -123,6 +136,20 @@ MVIS uses these libraries. Each keeps its own licence.
 
 Kalibr and Basalt are not part of MVIS. We run them only as separate programs
 for the comparisons on this site.
+
+This site bundles:
+
+| Component | Licence |
+|---|---|
+| [Plotly.js](https://github.com/plotly/plotly.js) 3.0.1 (vendored, device pages) | MIT |
+| [KaTeX](https://katex.org/) (maths rendering) | MIT; fonts SIL OFL 1.1 |
+| [Astro](https://astro.build/) + [Starlight](https://starlight.astro.build/) | MIT |
+
+## Analytics
+
+We count visits with [GoatCounter](https://www.goatcounter.com/) on every page
+and [MapMyVisitors](https://mapmyvisitors.com/) on the homepage; neither uses
+cookies.
 
 ## Citing
 

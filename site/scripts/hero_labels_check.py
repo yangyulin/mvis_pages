@@ -3,7 +3,7 @@
 The hero bar lists one chip per recording in rigs.json. With seven recordings the chips no
 longer fitted the narrow column they used to live in, and nothing scrolled them, so from the
 third recording on the highlighted name was faded out or off-screen for the whole cycle
-(see mira docs/plans/mvis/web-pages/hero-rig-labels).
+(the design note lives in the maintainers' plan, outside this repo).
 
 Rules checked, for every device profile and every recording:
   wide (checks.WIDE_PX and up)  every chip fits without scrolling, so no name is ever cut

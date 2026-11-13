@@ -351,7 +351,15 @@ These ship in the source repository, not as subcommands:
 
 | Script | What it does |
 |---|---|
-| `python -m mvis.analysis.regenerate_html <run folder> --config <config>` | Rebuild a camera-only HTML report from a finished run folder, without solving |
-| `python scripts/visualize_result.py <run folder>` | Open a finished run in the Rerun 3D viewer (needs the `viz` extra) |
-| `python scripts/recalib_batch.py` | Apply one calibration to many bags |
-| `python scripts/run_regression.py` | The regression suite over real recordings; see [Regression testing](/contribute/regression-testing/) |
+| `scripts/setup_env.sh` | One-step conda setup; see [Installation](/getting-started/installation/) |
+| `scripts/test.sh <tier>` | Run the tests by tier: `unit`, `solver`, `integration` or `full`; extra arguments go to pytest |
+| `scripts/visualize_result.py <run_dir>` | Post-hoc Rerun 3D viewer for a result directory (`--no-spawn` to attach to a running viewer) |
+| `scripts/run_calibration.py` | Multi-camera ablation: calibrate with each camera as the reference |
+| `scripts/recalib_batch.py` | Apply one calibration across every `*.bag` in a directory (`--calib`, `--in-dir`, `--out-dir`) |
+| `python -m mvis.analysis.regenerate_html [root]` | Rebuild HTML reports from saved YAML + detection cache |
+
+The maintainers' regression runner and its baselines are not part of the public
+repository; [Regression testing](/contribute/regression-testing/) describes
+that workflow.
+
+More detail in [Evaluation & metrics](/reference/evaluation/).

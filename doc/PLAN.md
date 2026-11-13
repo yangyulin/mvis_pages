@@ -1,16 +1,20 @@
-# Open MVIS — Site Modernization & Leaderboard Plan
+# OpenMVIS — Site Modernization & Leaderboard Plan
 
-> **Vision (10–20 year horizon).** Establish Open MVIS as the de-facto public benchmark
+> **Status (2026-11):** Phase 1 (the Starlight site, the cut-over from jemdoc)
+> is done and the legacy sources are removed from the tree. The sections below
+> are the plan as written at the start; later phases are still the roadmap.
+
+> **Vision (10–20 year horizon).** Establish OpenMVIS as the de-facto public benchmark
 > for camera and visual-inertial sensor calibration, in the same role KITTI/nuScenes
 > play for autonomous driving and Papers with Code plays for ML. Every paper that
 > proposes a new calibration method should be expected to report its results on the
-> Open MVIS leaderboard.
+> OpenMVIS leaderboard.
 
 ---
 
 ## 1. Why now
 
-The current site is built with `jemdoc` (early-2010s static generator). It works but:
+The site at the time of writing was built with `jemdoc` (early-2010s static generator). It works but:
 
 - **Looks dated** — table-based layout, no responsive design, no dark mode, no search.
 - **Hard to extend** — adding interactive pages (a leaderboard) requires hand-rolled HTML.
@@ -111,7 +115,7 @@ sorting is correct, mobile layout is usable.
 
 ### Phase 3 — Polish & growth
 - Per-row "details" page with full report, plots, and reproducibility instructions.
-- Versioned leaderboard snapshots (so paper authors can cite "Open MVIS v1.2 leaderboard, accessed YYYY-MM-DD").
+- Versioned leaderboard snapshots (so paper authors can cite "OpenMVIS v1.2 leaderboard, accessed YYYY-MM-DD").
 - Public submission queue (open PRs visible on the site).
 - Annual challenge announcement (model: Hilti SLAM Challenge — saw 27→42→69 teams in three years).
 
@@ -142,7 +146,7 @@ sorting is correct, mobile layout is usable.
 - AprilGrid, ChArUco, Chessboard, ArUco, Targetless, Custom
 
 **Dataset / sequence** (filter to scope the comparison):
-- Open MVIS sequences (4IMU+3Cam, 4IMU+4Cam, etc.)
+- OpenMVIS sequences (4IMU+3Cam, 4IMU+4Cam, etc.)
 - EuRoC MAV
 - TUM-VI
 - Monado SLAM
@@ -227,7 +231,7 @@ emit this format, and external submitters file PRs adding files of this shape.
 
 - **Scope creep into a full benchmark suite.** Adding LiDAR, depth cameras, event cameras is tempting. Keep v1 to camera + IMU; document the extensibility.
 - **Submission verification.** Hilti runs server-side eval on hidden GT. We don't have that infrastructure. Start with self-reported + reproducibility links; revisit hidden-GT eval at Phase 3.
-- **GT availability.** For some Open MVIS sequences, true extrinsic GT may not exist (only consensus from multiple methods). Mark these explicitly as "consensus baseline" not "ground truth".
+- **GT availability.** For some OpenMVIS sequences, true extrinsic GT may not exist (only consensus from multiple methods). Mark these explicitly as "consensus baseline" not "ground truth".
 - **Schema bikeshed.** The schema in §5.4 will need one or two iterations once real data flows through it. Lock it after Phase 2.
 
 ---

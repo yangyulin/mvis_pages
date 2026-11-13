@@ -1,5 +1,5 @@
 # Text for the public openmvis.com example pages (/benchmark/examples/<slug>/). No internal path, code hash or device id.
-# Numbers come from the run named in the private sensors.yaml `examples:` section (passed to export_examples.py by
+# Numbers come from the run named in the maintainers' sensors.yaml `examples:` section (not in this repo; passed to export_examples.py by
 # path), never from here. The config shown on a page is that run's own config with paths cut to file names.
 # The order below is the order on the site: overview cards and sidebar. Every photo lives in data/photos, 800×533.
 steps:
