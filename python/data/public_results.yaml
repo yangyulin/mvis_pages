@@ -82,7 +82,7 @@ datasets:
     intro: "Our rig with two RealSense T265 units (two global-shutter fisheye pairs) and five IMUs: an Xsens MTi as base, a GX3-25, a GX3-35 and the two T265 IMUs. A one-off MVIS study of 7 recordings, not part of the leaderboard batch or the regression suite. Kalibr and Basalt were not run on it."
     chips: ["4 global-shutter fisheye cameras", "5 IMUs, 100–500 Hz", "7 recordings", "MVIS only"]
     links:
-      dataset: /datasets/
+      dataset: /datasets/virig-5imus-4cams/
       sensor: /devices/intel-t265/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams
       example: /benchmark/examples/virig-5imus-4cams/

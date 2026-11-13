@@ -1,17 +1,124 @@
 ---
 title: Degeneracy
-description: Degenerate motion patterns for visual-inertial calibration.
+description: The motions that leave calibration values unobservable, what each one loses, how MVIS shows it in its checks and results, and how to fix the recording.
 pageType: concept
 ---
 
-## Degeneracy
+Use this page when a calibration value looks wrong or varies between
+recordings, and you suspect the motion.
 
-This page will explain which motions leave parts of the calibration unsolved.
-It is coming soon.
+A motion is **degenerate** for a value when it gives the data no way to measure
+that value ([Observability](/concepts/observability/) explains the reasons). A
+degenerate value does not make the solve fail. It converges, the residuals look
+fine, and the value sits near its start or drifts with noise. So you have to look
+for it.
 
-We call such a motion degenerate: under it, some calibration parameters cannot be recovered.
-The planned analysis covers degenerate motion patterns such as:
+Symbols follow [Notation & glossary](/concepts/notation/).
 
-- one-axis rotation
-- planar translation
-- constant velocity
+## Degenerate motions
+
+| Motion | What is lost | How it shows |
+|---|---|---|
+| **Pure translation** (no rotation) | lever arm (all 3 axes); gyro scale $\mathbf{D}_w$; the extrinsic rotation is fixed only by the direction of gravity and acceleration, so it is weak; readout and time offset are weak | lever stays near its start with a wide 1σ; $\mathbf{D}_w$ diagonal stays near 1 |
+| **Rotation about one axis only** | the lever-arm component along that axis; extrinsic rotation about that axis; $\mathbf{D}_w$ columns of the other two axes; readout, if the axis is the optical axis | one lever component with a much wider 1σ than the others; the rotation-excitation check shows one large singular value and two tiny ones |
+| **Constant velocity** (steady turning and moving) | time offset $t_{d,i}$ (a time shift looks like a fixed transform); `t_ga` (no change in acceleration); $\mathbf{D}_a$ gets no signal beyond the gravity tilts | $t_{d,i}$ and the lever move together between recordings |
+| **Planar motion** (rig slides in a plane and turns only about its normal, as on a cart or a table) | everything one-axis rotation loses; with a vertical normal, gravity stays on one IMU axis, so the other $\mathbf{D}_a$ columns and the accel bias along gravity trade off | as one-axis rotation, plus $\mathbf{D}_a$ diagonals with a wide 1σ |
+| **Too slow** | time offset, readout and `t_ga` (all need fast change); weak $\mathbf{D}_w$ | wide 1σ on the timing values; readout far from the sensor's spec |
+| **Too short** | fewer distinct orientations; biases and IMU scales separate poorly | values move a lot between recordings |
+| **Board always centred, face-on** | lens distortion and focal length | distortion differs between recordings; residuals grow toward the image edges |
+
+$\mathbf{T}_g$ is weak under almost any hand-held motion. That is why it is pinned
+unless you set `estimate.imu.intrinsics: full`.
+
+## How MVIS shows it
+
+MVIS does not stop a run because the motion was weak. It reports, at four points.
+
+### Before the solve
+
+- **Recording length:** `mvis inspect` warns when a recording with an IMU is
+  shorter than 30 s.
+- **Window choice:** for bags longer than 80 s, the camera–IMU run keeps the 80 s
+  with the most gyro and accelerometer excitation, scored per IMU as the mean
+  squared angular rate plus the variance of the acceleration magnitude
+  (`input.window_mode: motion`).
+
+### In the start values
+
+The start-value step runs simple fits before the joint solve and checks them:
+
+- **Rotation excitation:** the singular values of the camera–gyro angular-velocity
+  fit. One large and two tiny ones mean rotation about one axis.
+- **Time-offset sharpness:** how much the fit error rises away from the best
+  offset. A flat minimum means the offset is weak.
+- **Lever arm:** if its 1σ in the linear fit is over 5 cm, it starts at 0.
+- **Accelerometer bias:** it starts at 0. The start step estimates it only when
+  asked (an advanced start option); it then falls back to 0 when the linear fit
+  cannot separate it (smallest singular value of the scaled system under 10⁻³, or
+  1σ over 0.05 m/s²).
+- **Gravity and scale:** the fitted gravity should be close to 9.81 m/s² and the
+  scale within 3 % of 1. A miss points at wrong intrinsics, units or stamps.
+- **Auxiliary IMUs:** the gyro-to-gyro start needs a clear minimum (1.5 times
+  sharper than the edges) and more than 10 s of overlap.
+
+A value that starts at 0 is still solved jointly; the start only keeps a poor
+guess out.
+
+### In the joint solve
+
+Freed IMU intrinsics carry a weak prior (0.1 on $\mathbf{D}_w$ and
+$\mathbf{D}_a$). On a direction the motion does not excite, that prior wins: the
+value stays near its start instead of wandering. Its 1σ then stays close to the
+prior's 0.1: that is the sign the motion did not excite it.
+
+### In the results
+
+- **1σ for every value:** from the marginal covariance of the joint solve, in the
+  result JSON and the report. Compare each with the others of its kind and across
+  recordings.
+- **Camera-only report, motion grades:** each camera gets a grade (good,
+  marginal, poor) per value, from its board poses. The thresholds are empirical:
+
+| Grade for | Measure | Good | Marginal |
+|---|---|---|---|
+| focal length | farthest over nearest board distance | over 2.0 | over 1.5 |
+| distortion | image area covered by the board corners | over 60 % | over 30 % |
+| rotation diversity | smallest over largest spread of the rotation axes | over 0.1 | over 0.03 |
+| time offset | spread of the angular speed | over 0.5 rad/s | over 0.2 rad/s |
+| readout | peak angular speed about the camera's x and y axes | over 1.0 rad/s | over 0.3 rad/s |
+
+- **Camera–IMU report, motion and excitation:** the angular velocity of the
+  solved trajectory over time. Gaps and one-axis stretches are easy to see.
+- **`mvis verdict`:** grades a result green, yellow or red. It flags a χ² per
+  degree of freedom (the weighted squared error divided by its degrees of
+  freedom, about 1 when the noise model fits) over 1.5 (yellow) or 3.0 (red), a solve that hit its
+  iteration cap, an IMU scale more than 5 % from 1, and a camera time offset over
+  50 ms. A wrong value from weak motion can still pass these; the 1σ and a second
+  recording are the stronger checks.
+
+## Check it yourself
+
+- **Calibrate two or more recordings.** A value that moves far more than its 1σ
+  between them was not observed.
+- **Run the digital twin.** MVIS replays your motion on a simulated copy of your
+  rig with known truth, solves it, and shows which values come back
+  ([step 7: digital-twin check](/guides/simulation/)).
+- **Run the round trip.** Correct the data with the result and calibrate again;
+  if the first result was right, the second finds nothing left to correct
+  ([step 8: round-trip validation](/guides/roundtrip/)).
+
+## What to do
+
+| If you see | Add to the motion |
+|---|---|
+| lever arm weak, or one component weak | rotation about the other axes, with brisk changes of turning speed |
+| $t_{d,i}$ moves between recordings | changes of speed and direction; avoid long steady sweeps |
+| readout weak or off | faster tilts about the camera's x and y axes, board across all rows |
+| `t_ga` weak | short, sharp reversals |
+| $\mathbf{D}_a$ weak | tilt the rig so each axis points up and down at some point |
+| $\mathbf{D}_w$ weak | turns about every axis, at several speeds |
+| distortion differs | move the board into the image corners and edges |
+
+The motion in [step 2: record the dataset](/guides/calibration-motion/) covers all
+of these in about 60 s. Its [motions that fail](/guides/calibration-motion/#motions-that-fail)
+list the same cases from the recording side.

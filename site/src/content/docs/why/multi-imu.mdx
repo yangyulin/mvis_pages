@@ -5,16 +5,18 @@ pageType: example
 wide: true
 ---
 
-Use this page to see why a rig with several IMUs needs them calibrated against each other. You need nothing to
-run here; the numbers come from our published runs on [VI-Rig](/benchmark/results/virig-4imus-4cams/).
+This page shows why a rig with several IMUs needs them calibrated against each other. You need nothing to run
+here. Most numbers come from our published runs on [VI-Rig](/benchmark/results/virig-4imus-4cams/); sections 3
+and 5 add unpublished studies, marked where used.
 
 **The answer first:**
 
-- **No shared clock:** Each IMU stamps its data on its own clock; on the running example, the T265 IMU is
-  7.2 ms off the Xsens.
-- **No shared origin:** Each IMU sits at its own place on the rig, with its own rotation.
-- **What MVIS solves:** For each auxiliary IMU (aux IMU: every IMU after the first), MVIS solves its lever arm,
-  rotation, $t_d$ and $t_{ga}$ against the base IMU.
+- **No shared clock:** each IMU stamps its data on its own clock. On the running example, the T265 IMU is 7.2 ms
+  off the Xsens.
+- **No shared origin:** each IMU sits at its own place on the rig, with its own rotation.
+- **What MVIS solves:** the **base IMU** is the one the trajectory and the reference clock hang on; every other
+  IMU is an **aux IMU**. For each aux IMU, MVIS solves its lever (position), rotation, $t_d$ and $t_{ga}$
+  against the base IMU.
 
 How to turn it on: [Turn on the aux spatial and temporal terms](/guides/multi-sensor-rigs/#2-turn-on-the-aux-spatial-and-temporal-terms).
 
@@ -23,51 +25,50 @@ How to turn it on: [Turn on the aux spatial and temporal terms](/guides/multi-se
 All four cameras and all four IMUs in one solve: [example run](/benchmark/examples/virig-4imus-4cams/).
 
 - **Data:** [VI-Rig 4 IMUs + 4 cams](/datasets/virig-4imus-4cams/), recording 4imus_4cams_01.
-- **Base IMU:** We use the Xsens MTi as base and solve the other three against it.
+- **Base IMU:** the Xsens MTi; the other three are solved against it.
 
-| IMU | Rate | Lever arm (mm) | $\log\mathbf{R}$ (rad) | $t_d$ (ms) | $t_{ga}$ (ms) |
+| IMU | Rate | Lever (mm) | $\log\mathbf{R}$ (rad) | $t_d$ (ms) | $t_{ga}$ (ms) |
 |---|---|---|---|---|---|
 | Xsens MTi (base) | 400 Hz | 0 | 0 | 0 | −0.82 ± 0.02 |
 | MicroStrain GX3-25 | 500 Hz | [−122.8, −45.3, −3.1] | [+2.2502, +2.1849, −0.0279] | −0.69 | +0.10 ± 0.02 |
 | MicroStrain GX3-35 | 100 Hz | [−82.3, −46.2, −3.5] | [+2.2304, +2.2070, −0.0192] | −2.07 | +0.01 ± 0.02 |
 | T265 IMU | 200 Hz | [+54.7, −107.4, −30.3] | [+1.5724, −0.0054, −0.0113] | −7.17 | −6.74 ± 0.02 |
 
-- **Frames:** Lever arms and rotations are each IMU in the base IMU frame.
-- **Rotation:** We show $\log\mathbf{R}$, in rad.
+- **Frames:** each lever and rotation is the aux IMU in the base IMU frame. Rotations are $\log\mathbf{R}$ in rad.
 - **$t_d$ sign:** $t_I = t_{I_j} + t_d$, with $t_I$ on the base clock and $t_{I_j}$ the aux IMU's own stamp.
-- **Time:** The aux IMU clocks are 0.69 to 7.17 ms off the base clock, and MVIS solves each one.
-- **$t_{ga}$:** Only the T265 IMU has a real gyro–accel offset; the other three read near 0. See
+- **Time:** the aux IMU clocks are 0.69 to 7.17 ms off the base clock.
+- **$t_{ga}$:** only the T265 IMU has a large gyro–accel offset; the other three read near 0. See
   [Why calibrate t_ga](/why/tga/).
 
 ## 2. MVIS levers repeat several times tighter than Kalibr's
 
-Every recording of each dataset, numbers from the public results pages.
+Every recording of each dataset, from the results pages.
 
-- **Spread:** We looked at how much each value moves over recordings. Small spread means the value repeats; it
-  does not prove it is right.
-- **MVIS column:** "MVIS (K-IMU)" is MVIS run with Kalibr's IMU model, so the IMU terms mean the same thing in
-  both tools.
-- **No Kalibr run:** The 5 IMUs + 4 cams set has no Kalibr run, so its numbers are the plain "MVIS" column.
-- **sd:** The standard deviation over recordings.
+- **Spread:** how much each value moves over recordings, as the standard deviation (sd). A small spread means the
+  value repeats; it does not prove it is right.
+- **MVIS column:** for the 4 IMUs + 4 cams set we use "MVIS (K-IMU)", MVIS run with Kalibr's IMU convention, so
+  the IMU terms mean the same in both tools.
+- **No Kalibr run:** the 5 IMUs + 4 cams set has none, so its numbers are plain MVIS.
 
-**4 IMUs + 4 cams, T7** (T265 IMU base, Xsens aux):
+**4 IMUs + 4 cams, mixed T265 fisheye 1 + ELP-L run, [T7](/benchmark/results/virig-4imus-4cams/#T7)** (T265
+IMU base, Xsens aux):
 
 | Xsens vs T265 IMU | MVIS (15 recordings) | Kalibr (14 recordings) |
 |---|---|---|
 | $t_d$ | 7.240 ms (sd 0.146) | 7.260 ms (sd 0.122) |
 | distance to base $\lVert\mathbf{p}\rVert$ | 124.09 mm (sd 0.32) | 114.10 mm (sd 2.96) |
 
-- **$t_d$ agrees:** The two tools are 0.02 ms apart.
-- **Same offset, other side:** With the Xsens as base (section 1), the T265 IMU $t_d$ is −7.17 ms. With the
-  T265 IMU as base, the Xsens $t_d$ is +7.24 ms.
-- **Lever differs:** The tools are 10 mm apart, and Kalibr's spread is about 9× larger.
-- **Unequal counts:** Kalibr failed on one recording, so it has 14 against MVIS's 15.
-- **T8, a rough check:** On the ELP pair with the same two IMUs, MVIS gives 123.94 mm, sd 0.30 over
-  15 recordings, and Kalibr 115.85 mm, sd 1.24 over 3 recordings. Kalibr's 3 come from separate earlier runs.
+- **$t_d$ agrees:** the two tools are 0.02 ms apart.
+- **Same offset, other side:** with the Xsens as base (section 1), the T265 IMU $t_d$ is −7.17 ms. With the T265
+  IMU as base, the Xsens $t_d$ is +7.24 ms.
+- **Lever differs:** the tools are 10 mm apart, and Kalibr's spread is about 9× larger.
+- **Unequal counts:** Kalibr failed on one recording.
+- **[T8](/benchmark/results/virig-4imus-4cams/#T8), a rough check:** on the ELP pair with the same two IMUs, MVIS gives 123.94 mm, sd 0.30 over
+  15 recordings, and Kalibr 115.85 mm, sd 1.24 over 3 recordings from separate earlier runs.
 
 More: [VI-Rig 4 IMUs + 4 cams results](/benchmark/results/virig-4imus-4cams/).
 
-**4 IMUs + 3 cams, T6** (Xsens base, three aux IMUs, 10 recordings each):
+**4 IMUs + 3 cams, [T6](/benchmark/results/virig-4imus-3cams/#T6)** (Xsens base, three aux IMUs, 10 recordings each):
 
 | Aux IMU | MVIS lever sd | Kalibr lever sd |
 |---|---|---|
@@ -84,35 +85,32 @@ More: [VI-Rig 4 IMUs + 3 cams results](/benchmark/results/virig-4imus-3cams/).
 | T265 A IMU | −7.170 (sd 0.115) | 180.77 (sd 0.40) |
 | T265 B IMU | −7.259 (sd 0.120) | 188.60 (sd 0.41) |
 
-- **Two units, same offset:** Both T265 IMUs sit about 7.2 ms off the Xsens.
-- **Nothing compared:** This set has no Kalibr run. More:
+- **Two units, same offset:** both T265 IMUs sit about 7.2 ms off the Xsens.
+- **Nothing to compare:** this set has no Kalibr run. More:
   [VI-Rig 5 IMUs + 4 cams results](/benchmark/results/virig-5imus-4cams/).
 
 ## 3. The aux IMU lever does not depend on the cameras
 
-Public medians from the results pages; the gap study is internal (see Data).
-
-- **Test:** T7 and T8 solve the same two IMUs (T265 IMU base, Xsens aux) on the same 15 recordings.
-- **Only the cameras differ:** T7 uses T265 fisheye 1 + ELP-L, T8 the ELP pair.
-- **Public medians:** The Xsens distance to base is 124.09 mm in T7 and 123.94 mm in T8.
-- **Internal study:** The gap between the two families' Xsens levers was 0.11 mm.
-- **What it means:** The aux IMU lever comes from the IMUs, not from which cameras are in the solve.
+- **Test:** T7 and T8 solve the same two IMUs (T265 IMU base, Xsens aux) on the same 15 recordings. Only the
+  cameras differ: T7 uses T265 fisheye 1 + ELP-L, T8 the ELP pair.
+- **Results medians:** the Xsens distance to base is 124.09 mm in T7 and 123.94 mm in T8.
+- **Per-recording gap:** in an unpublished study, the gap between the two runs' Xsens levers was 0.11 mm.
+- **What it means:** the aux IMU lever comes from the IMUs, not from which cameras are in the solve.
 
 ## 4. Several IMUs constrain each other
 
 Several IMUs see the *same* motion. That redundancy constrains what one IMU leaves weak:
 
-- **Time offsets:** Every IMU must agree on when each motion happened.
-- **IMU intrinsics:** Scale, misalignment and similar sensor errors, such as $\mathbf{D}_w$ and $\mathbf{D}_a$.
-- **A meaningful check:** A wrong calibration usually cannot satisfy every IMU at once. This is what makes the
+- **Time offsets:** every IMU must agree on when each motion happened.
+- **IMU intrinsics:** scale, misalignment and similar sensor errors, $\mathbf{D}_w$ and $\mathbf{D}_a$.
+- **A meaningful check:** a wrong calibration usually cannot satisfy every IMU at once. This makes the
   [round-trip check](/guides/roundtrip/) useful on these rigs.
 
 ## 5. Slow IMUs bias levers on short windows
 
-Internal noise-free twin, not public files.
-
-- **Twin:** A simulated copy of the 4 IMUs + 3 cams rig with known truth and true $t_{ga}$ 0.
-- **Measured:** Lever error at aux factor intervals 1 / 2 / 3.
+- **Twin:** a noise-free simulated copy of the 4 IMUs + 3 cams rig with known truth and true $t_{ga}$ = 0.
+  Unpublished.
+- **Measured:** lever error at aux factor intervals 1 / 2 / 3.
 
 | IMU rate | Interval 1 | Interval 2 | Interval 3 |
 |---|---|---|---|
@@ -120,31 +118,30 @@ Internal noise-free twin, not public files.
 | 200 Hz | 0.56 mm | 0.30 mm | 0.17 mm |
 | 500 Hz | 0.11 mm | 0.05 mm | 0.05 mm |
 
-- **Why:** At 100 Hz an aux factor at interval 1 holds only about 3 samples.
-- **Default now:** MVIS upsamples an IMU slower than 200 Hz before it integrates it
+- **Why:** at 100 Hz an aux factor at interval 1 holds only about 3 samples.
+- **Default:** MVIS upsamples an IMU slower than 200 Hz before it integrates it
   (`solve.imu_min_rate_hz: 200`, `solve.imu_upsample_method: cubic`).
-- **Upsampling helps:** In the same twin, cubic upsampling of the 100 Hz IMU gave 0.80 / 0.52 / 0.12 mm.
+- **Upsampling helps:** in the same twin, cubic upsampling of the 100 Hz IMU gave 0.80 / 0.52 / 0.12 mm.
 - **The knob:** `solve.aux_imu_stride` sets one aux IMU factor per this many base intervals. The default is 3.
-- **Levers move with it:** Keep the default unless you have a reason, and compare runs only at the same value.
+- **Levers move with it:** keep the default unless you have a reason, and compare runs only at the same value.
 
 **Conclusion:**
 
-- **Calibrate every IMU:** Each aux IMU has its own clock offset and pose, and MVIS solves both in one graph.
+- **Calibrate every IMU:** each aux IMU has its own clock offset and pose, and MVIS solves both in one graph.
 - **The levers repeat:** MVIS levers repeat more tightly than Kalibr's and do not depend on the cameras.
-- **Mind slow IMUs:** Keep the upsampling and stride defaults, and compare runs only at the same stride.
+- **Mind slow IMUs:** keep the upsampling and stride defaults, and compare runs only at the same stride.
 
 ## Limits
 
 <div class="not-content rp-honest">
   <ul>
-    <li><b>Slow IMUs:</b> On short windows they bias the lever; the twin numbers above are internal results, not
-      public files.</li>
-    <li><b>More IMUs do not help the readout:</b> The rolling-shutter readout comes from the cameras. In an older
-      internal study, adding IMUs moved the ELP readout from 15.9 to 16.6 ms and made the fit worse, with
-      reprojection error 3.04 → 3.49. See <a href="/why/rolling-shutter/">Why calibrate rolling shutter</a>.</li>
-    <li><b>Pick the base with care:</b> The base IMU carries the trajectory and the reference clock. Its errors
+    <li><b>Slow IMUs:</b> on short windows they bias the lever; the twin numbers above are unpublished.</li>
+    <li><b>More IMUs do not help the readout:</b> the rolling-shutter readout comes from the cameras. In an older
+      study, adding IMUs moved the ELP readout from 15.9 to 16.6 ms and made the fit worse, reprojection error
+      3.04 → 3.49. See <a href="/why/rolling-shutter/">Why calibrate rolling shutter</a>.</li>
+    <li><b>Pick the base with care:</b> the base IMU carries the trajectory and the reference clock. Its errors
       reach every other sensor.</li>
-    <li><b>Repeatable is not right:</b> Spread over recordings shows precision. There is no reference lever for
+    <li><b>Repeatable is not right:</b> spread over recordings shows precision. There is no reference lever for
       these rigs.</li>
   </ul>
 </div>
@@ -153,12 +150,12 @@ Internal noise-free twin, not public files.
 
 - **Recordings:** the VI-Rig datasets on the Hub,
   [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets). Licence CC BY-NC 4.0, gated;
-  commercial use by request. Please cite the VI-Rig dataset and MVIS.
-- **Public runs:** the results pages and the example run linked in each section.
-- **Camera-set gap study:** MVIS main of 2026-11-02; internal.
-- **Slow-IMU twin:** internal noise-free twin; not published.
-- **Readout study:** June 2026, on older code; internal.
-- **Commits:** this page cites no commit hash.
+  commercial use on request. Please cite the VI-Rig dataset and MVIS.
+- **Published runs:** the results pages and the example run linked in each section. The 4 IMUs + 4 cams and
+  4 IMUs + 3 cams rows are batch 2026-11-10a; the 5 IMUs + 4 cams rows are batch 2026-11-02.
+- **Camera-set gap study:** MVIS main of 2026-11-02; unpublished.
+- **Slow-IMU twin:** noise-free twin; unpublished.
+- **Readout study:** June 2026, on older code; unpublished.
 
 ## Related
 

@@ -1,72 +1,217 @@
 ---
 title: Camera–IMU calibration math
-description: How the inertial factors carry calibration state — overview of the base and auxiliary IMU derivations.
+description: The cost the camera–IMU solve minimises, the reprojection factor with time offset and rolling-shutter row time, and how each corner's pose comes from the IMU.
 pageType: concept
 ---
 
-Use this page for an overview of the IMU maths. It shows how the inertial
-factors carry the calibration state, and links to the two derivations.
+Use this page to see what the camera–IMU solve minimises and how a board corner
+ties the cameras to the IMU trajectory. The two IMU factors have their own pages:
 
-The camera factor constrains geometry. (A factor is one term of the cost the
-solver minimises.) The inertial factors carry the rig through the gaps between
-images.
+- **[Base IMU factor](/concepts/camera-imu-math/base-imu/):** links consecutive
+  states of the base IMU. Its intrinsics, biases and `t_ga` sit inside it.
+- **[Auxiliary IMU factor](/concepts/camera-imu-math/aux-imu/):** each extra IMU
+  sees the same motion through its own extrinsic, time offset and intrinsics.
 
-Both are written so that calibration parameters appear *inside* the residual
-(the error a factor measures). They are not applied afterwards. That is what
-lets the graph solve them.
+A **factor** is one term of the cost. A **residual** is the error one factor
+measures. The **base IMU** is the first IMU in the config; its clock is the
+reference clock, and the trajectory is its pose over time. Symbols follow
+[Notation & glossary](/concepts/notation/).
 
-This section splits along the same line the implementation does:
+## The cost
 
-- **[Base IMU factor](/concepts/camera-imu-math/base-imu/)** — pre-integration
-  (the IMU readings between two states combined into one relative motion) between
-  consecutive states. The base IMU's own intrinsics (its internal sensor
-  parameters) sit in the residual. The base IMU defines the trajectory, so its
-  errors move everything.
-- **[Auxiliary IMU factor](/concepts/camera-imu-math/aux-imu/)** — an
-  auxiliary IMU observes the *same* motion through a rigid transform and a time
-  offset. That redundancy is what makes the extra IMUs worth carrying. It is
-  also what the factor encodes.
+The solve finds the one set of values that makes every measurement fit best,
+given the priors. It minimises:
 
-Related pages:
+$$
+\min_{\mathbf{x}}\;
+\sum_{i,f}\rho\!\left(\big\|\mathbf{r}_{\text{cam}}^{i,f}\big\|^2_{\sigma_{px}}\right)
++\sum_{k}\big\|\mathbf{r}_{\text{imu}}^{k}\big\|^2_{\mathbf{P}_k}
++\sum_{j,k}\big\|\mathbf{r}_{\text{aux}}^{j,k}\big\|^2_{\mathbf{P}_{j,k}}
++\sum_{p}\big\|\mathbf{r}_{\text{prior}}^{p}\big\|^2_{\boldsymbol{\Sigma}_p}
+$$
 
-- **Camera side:** [Camera model](/concepts/camera-model/)
-- **The cost that assembles all of them:**
-  [Calibration graph](/concepts/calibration-graph/)
-- **Symbols:** [Notation & glossary](/concepts/notation/)
+- **$\mathbf{x}$:** everything solved: the IMU states, the board pose, and every
+  calibration value. The full list is on [Calibration graph](/concepts/calibration-graph/).
+- **$i, f$:** camera, frame. **$m$:** a board corner. [Notation](/concepts/notation/)
+  writes the corner index as $k$; here $k$ is taken by the IMU states, so corners
+  use $m$ ($h_m$ and $\mathbf{z}_{i,m}$ are Notation's $h_k$ and $\mathbf{z}_{i,k}$).
+- **$\mathbf{r}_{\text{cam}}^{i,f}$:** the residuals of all corners $m$ of frame $f$
+  in camera $i$, stacked into one vector (2 rows per corner).
+- **$k$:** an interval between two IMU states. **$j$:** an auxiliary IMU.
+- **$\rho$:** the Huber loss. It acts on a frame's stacked residual, not on single
+  corners: past a whitened norm of 2 (2 px at $\sigma_{px}$ = 1 px) the error grows
+  linearly instead of quadratically, so a frame with a large total error is
+  down-weighted as a whole (`solve.huber_px`, default 2.0).
+- **$\|\mathbf{r}\|^2_{\boldsymbol\Sigma} = \mathbf{r}^\top\boldsymbol\Sigma^{-1}\mathbf{r}$:**
+  the squared error weighted by its covariance. Pixels use $\sigma_{px}$ = 1 px
+  (`solve.sigma_px`). The IMU terms use $\mathbf{P}$, the covariance the
+  integration propagates from the IMU noise densities.
 
-## Why calibration goes inside the factor
+The solver is Levenberg–Marquardt (a damped Gauss–Newton method) with analytic
+Jacobians (the derivatives of each residual with respect to each variable).
 
-The naive alternative cannot work in a solver. That alternative is to integrate
-the IMU, then correct the result using a calibration estimate. It fails because
-the correction has no derivative with respect to the parameters being solved.
+## The reprojection factor
 
-So we put these inside the pre-integration:
+The reprojection factor asks: given the current estimate, where should board
+corner $m$ appear in the image, and how far is that from where it was detected?
 
-- $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$
-- the extrinsics (the transforms between sensors)
-- the time offsets
+### When was the corner captured?
 
-Then each has a Jacobian (the derivative of the residual with respect to that
-parameter), and the optimiser can move it.
+A frame carries one stamp $t_C$ on the camera clock. Two things move the real
+capture time of each corner:
 
-The cost is that pre-integration is no longer a one-time operation. Changing an
-intrinsic changes the integrated quantity. So the factor must expose how its
-value responds.
+- **Time offset $t_{d,i}$:** the camera clock runs offset from the base-IMU clock.
+- **Rolling shutter:** a rolling-shutter camera exposes its rows one after
+  another. The whole frame takes the readout time $t_{r,i}$. A corner on row
+  $v_m$ of an image $H$ rows high is captured later than the first row.
 
-Both derivation pages are structured the same way:
+$$
+t_m = t_C + t_{d,i} + \eta(v_m)\, t_{r,i},
+\qquad
+\eta(v_m) = \frac{v_m}{H}
+$$
 
-1. measurement model
-2. residual
-3. the Jacobian for every calibration variable it touches
+$\eta(v)$ is the row factor of [Notation](/concepts/notation/). $\eta(v_m) = v_m/H$
+is for a stamp at the top row, the default. With `solve.rolling_mode: 1` (stamp at
+the middle row) $\eta(v_m) = v_m/H - 0.5$; with `solve.rolling_mode: 2` (stamp at
+the bottom row) $\eta(v_m) = v_m/H - 1$. The readout $t_{r,i}$ is solved only for a
+rolling-shutter camera with `estimate.camera.tr: true` (off by default). Otherwise
+the camera is treated as global shutter and $t_{r,i}$ is held at 0.
+
+### Where was the IMU at that time?
+
+The IMU states sit at discrete times $t_k$ (30 Hz by default, `solve.state_hz`).
+A corner's capture time $t_m$ almost never lands on one. MVIS gets the pose at
+$t_m$ from the IMU itself. This is `solve.vision_pose: imu`, the default.
+
+Take the state $k$ at or just before the frame (the **anchor**). Integrate the
+raw base-IMU samples from $t_k$ over the signed interval $\Delta_m = t_m - t_k$:
+
+$$
+{}^{G}_{I}\mathbf{R}(t_m) = {}^{G}_{I_k}\mathbf{R}\;\Delta\mathbf{R}_m
+$$
+
+$$
+{}^{G}\mathbf{p}_{I}(t_m) = {}^{G}\mathbf{p}_{I_k} + {}^{G}\mathbf{v}_{I_k}\,\Delta_m
++ \tfrac12\,{}^{G}\mathbf{g}\,\Delta_m^2 + {}^{G}_{I_k}\mathbf{R}\;\Delta\mathbf{p}_m
+$$
+
+- **$\Delta\mathbf{R}_m$, $\Delta\mathbf{p}_m$:** the rotation and position change
+  integrated from the IMU readings over $\Delta_m$, in the anchor's frame. They
+  use the **corrected** readings: current biases, $\mathbf{D}_w$, $\mathbf{D}_a$,
+  $\mathbf{T}_g$ and `t_ga` (see [Base IMU factor](/concepts/camera-imu-math/base-imu/#corrected-readings)).
+- **${}^{G}\mathbf{g} = [0,\ 0,\ -9.81]^\top$ m/s²:** gravity in the global frame,
+  which is gravity-aligned.
+- **A negative $\Delta_m$** is integrated backwards in time. The window follows
+  the current $t_{d,i}$ and $t_{r,i}$, so it moves as they change.
+
+The corner pose therefore follows the measured motion between states (for
+example 200 Hz IMU samples between 30 Hz states). There is no interpolation
+error for the calibration values to absorb. The IMU velocity and intrinsics enter
+the reprojection factor too, so the gyro scale is fitted by the camera and the
+IMU terms together.
+
+To save time the factor integrates once and corrects the result to first order
+as the estimate moves (`solve.vision_imu_linearized`, default on). It integrates
+again when a capture time has moved more than 1 ms.
+
+:::note[The older model: interpolation]
+`solve.vision_pose: interp` places the corner on the straight path between the
+two neighbouring states. With $\lambda = (t_m - t_k)/(t_{k+1} - t_k)$:
+
+$$
+{}^{G}_{I}\mathbf{R}(t_m) = {}^{G}_{I_k}\mathbf{R}\,\mathrm{Exp}\!\big(\lambda\,\mathrm{Log}({}^{G}_{I_k}\mathbf{R}^\top\,{}^{G}_{I_{k+1}}\mathbf{R})\big),
+\qquad
+{}^{G}\mathbf{p}_{I}(t_m) = (1-\lambda)\,{}^{G}\mathbf{p}_{I_k} + \lambda\,{}^{G}\mathbf{p}_{I_{k+1}}
+$$
+
+Its error grows with angular acceleration times the state spacing squared. On
+fast motion the time offsets, gyro scale and lever arm absorb it.
+:::
+
+### Project and compare
+
+With the IMU pose at $t_m$, chain the transforms from the board to the camera:
+
+$$
+{}^{C_i}\mathbf{p}_m =
+\big({}^{G}_{I}\mathbf{T}(t_m)\;{}^{I}_{C_i}\mathbf{T}\big)^{-1}\;
+{}^{G}_{B}\mathbf{T}\;\big({}^{B}\mathbf{p}_m + h_m\,\mathbf{e}_z\big)
+$$
+
+$$
+\mathbf{r}_{\text{cam}}^{i,f,m} =
+\Pi\big({}^{C_i}\mathbf{p}_m;\ \mathbf{f}_i,\ \mathbf{d}_i\big) - \mathbf{z}_{i,m}
+$$
+
+- **${}^{B}\mathbf{p}_m$:** the corner's position on the board, from the board
+  config.
+- **$h_m$:** the corner's height off the flat board, along the board normal
+  $\mathbf{e}_z$. It is 0 unless `estimate.board_points: true`
+  ([Why calibrate the board shape](/why/board-shape/)).
+- **${}^{G}_{B}\mathbf{T}$:** the board pose. The board stays still, so it is one
+  pose for the whole recording.
+- **$\Pi$:** the camera model, with intrinsics $\mathbf{f}_i$ and
+  distortion $\mathbf{d}_i$ ([Camera model](/concepts/camera-model/)).
+- **$\mathbf{z}_{i,m}$:** the detected pixel.
+
+One factor holds all corners of one frame. It touches the anchor pose, the
+anchor velocity and biases, the board pose, the camera's calibration
+(${}^{I}_{C_i}\mathbf{T}$, $t_{d,i}$, $t_{r,i}$, $\mathbf{f}_i$, $\mathbf{d}_i$),
+the IMU intrinsics, `t_ga`, and the board heights when they are solved.
+
+### How the time offsets get their gradient
+
+The time offsets have a derivative because the pose depends on the capture time:
+
+$$
+\frac{\partial\,{}^{G}_{I}\mathbf{T}(t_m)}{\partial t_{d,i}} \;\propto\;
+\begin{bmatrix} {}^{I}\boldsymbol{\omega}(t_m) \\ {}^{G}\mathbf{v}_{I}(t_m) \end{bmatrix},
+\qquad
+\frac{\partial\,\mathbf{r}_{\text{cam}}}{\partial t_{r,i}} = \eta(v_m)\,\frac{\partial\,\mathbf{r}_{\text{cam}}}{\partial t_{d,i}}
+$$
+
+So $t_{d,i}$ is seen only while the rig turns or moves, and $t_{r,i}$ only when
+corners on different rows move differently. [Observability](/concepts/observability/)
+works this through.
+
+## Why calibration sits inside the factors
+
+One could integrate the IMU with fixed values and correct the result later. The
+solver could not move those values then: the correction has no derivative with
+respect to them.
+
+MVIS puts every calibration value inside the residual instead:
+
+- the IMU intrinsics $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$ and the biases;
+- the extrinsics ${}^{I}_{C_i}\mathbf{T}$ and ${}^{I}_{I_{s_j}}\mathbf{T}$;
+- the time offsets $t_{d,i}$, $t_{d,j}$, `t_ga` and the readout $t_{r,i}$.
+
+Each then has a Jacobian, and the optimiser can move it. The price: the IMU
+integrals depend on the values being solved. The factors carry first-order
+corrections for small changes and integrate again when a value moves far.
 
 ## What each factor constrains
 
-| Factor | Constrains directly | Constrains indirectly |
+| Factor | Constrains directly | Constrains through the others |
 |---|---|---|
-| Base IMU | biases, $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$ | trajectory scale and gravity direction |
-| Auxiliary IMU | ${}^{I}_{I_{s_j}}\mathbf{T}$, $t_{d,j}$, its own intrinsics | base-IMU intrinsics, via redundancy |
-| Camera | intrinsics, ${}^{I}_{C_i}\mathbf{T}$, $t_{d,i}$, $t_{r,i}$ | trajectory in the board frame |
+| Reprojection | camera intrinsics, ${}^{I}_{C_i}\mathbf{T}$, $t_{d,i}$, $t_{r,i}$, board pose and shape | the trajectory, and the gyro scale through the corner poses |
+| Base IMU | biases, $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$, `t_ga` | metric trajectory, gravity direction |
+| Auxiliary IMU | ${}^{I}_{I_{s_j}}\mathbf{T}$, $t_{d,j}$, its own intrinsics and `t_ga` | the base trajectory, through the shared motion |
 
-No single factor observes the whole state. Which parameters actually become
-observable depends on the motion. That is the subject of
-[Observability](/concepts/observability/).
+No single factor sees the whole state. Which values the data can fix depends on
+the motion: see [Observability](/concepts/observability/) and
+[Degeneracy](/concepts/degeneracy/).
+
+## What this means for your recording and setup
+
+- **Turn and move while the board is in view.** The time offsets and the readout
+  get their signal only from motion.
+- **Fill the image rows.** The readout is fitted from how the error changes from
+  the top row to the bottom row.
+- **Give the solve a good camera prior.** The camera intrinsics are refined here,
+  but they start from the camera-only result
+  ([step 3](/guides/camera-calibration/)).
+- **Use the cleanest camera as the first camera.** Its frames set the state times.
+  A global-shutter, low-latency camera is best
+  ([step 4](/guides/camera-imu-calibration/)).

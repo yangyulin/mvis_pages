@@ -1,0 +1,76 @@
+source: t265 fisheye pair from examples/configs/tga_t265_4cams/t265_calib.yaml + ELP
+  pair from examples/regression/mvis_elp/mvis_elp_calib.yaml (camera-only priors);
+  extrinsics and time offsets solved in the cam-IMU run
+cameras:
+- id: 0
+  model: pinhole_equidistant
+  intrinsics:
+    fx: 288.45028524127156
+    fy: 288.31600201205777
+    cx: 413.59182134957484
+    cy: 405.59653169921654
+  distortion:
+    model: equidistant
+    coeffs:
+    - -0.01353253648414382
+    - 0.0512424516206294
+    - -0.04882902652177906
+    - 0.009886399972063668
+  image_size:
+  - 848
+  - 800
+  rolling_shutter_readout: 0.0
+- id: 1
+  model: pinhole_equidistant
+  intrinsics:
+    fx: 287.7482739866319
+    fy: 287.6343392443708
+    cx: 413.5950528973679
+    cy: 399.13430459376866
+  distortion:
+    model: equidistant
+    coeffs:
+    - -0.006278737997731206
+    - 0.03679493777620283
+    - -0.03737071308966482
+    - 0.0069192789959992085
+  image_size:
+  - 848
+  - 800
+  rolling_shutter_readout: 0.0
+- id: 2
+  model: pinhole_equidistant
+  intrinsics:
+    fx: 425.34123012047246
+    fy: 425.1826926004675
+    cx: 351.89600724721646
+    cy: 269.8255720169832
+  distortion:
+    model: equidistant
+    coeffs:
+    - -0.08744451977213301
+    - -0.026049910814334505
+    - 0.013499084424825336
+    - -0.0035066904826848697
+  image_size:
+  - 640
+  - 480
+  rolling_shutter_readout: 0.014839319586455808
+- id: 3
+  model: pinhole_equidistant
+  intrinsics:
+    fx: 422.111063352669
+    fy: 421.85537995046366
+    cx: 337.69469599854546
+    cy: 260.85971063952223
+  distortion:
+    model: equidistant
+    coeffs:
+    - -0.08683058738769524
+    - -0.016661689319463917
+    - -0.0008778625099783606
+    - 0.003331205135595901
+  image_size:
+  - 640
+  - 480
+  rolling_shutter_readout: 0.014251881981177182

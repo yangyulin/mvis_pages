@@ -4,52 +4,53 @@ description: Add more IMUs to the camera–IMU solve and get a lever, rotation, 
 pageType: guide
 ---
 
-Use this page to add more IMUs to the solve. You need the step-4 config from
-[Camera–IMU calibration](/guides/camera-imu-calibration/). You get a lever,
-rotation, td and t_ga for every extra IMU.
+Step 6 of the walkthrough. Here you add more IMUs to the camera–IMU solve.
 
-- **Base IMU:** the IMU every other sensor is measured against. It sets the
-  clock and carries the trajectory.
-- **Aux IMU** (auxiliary IMU): any other IMU on the rig. MVIS solves where it
-  sits and how its clock runs against the base.
+- **You need:** the config from [step 4](/guides/camera-imu-calibration/).
+- **You get:** for every extra IMU, its lever arm and rotation to the base IMU, its time offset td and its
+  t_ga.
+- **Check:** compare the numbers across recordings (section 3), and name the base IMU when you quote them.
+
+Two terms:
+
+- **Base IMU:** the IMU every other sensor is measured against. It sets the clock and carries the
+  trajectory.
+- **Aux IMU** (auxiliary IMU): any other IMU on the rig. MVIS solves where it sits and how its clock runs
+  against the base.
 
 All IMUs enter one factor graph with the cameras. There is no pairwise step.
 
-The running example is [VI-Rig: 4 IMUs + 4 cameras](/datasets/virig-4imus-4cams/),
-bag `4imus_4cams_01`.
+The running example is [VI-Rig: 4 IMUs + 4 cameras](/datasets/virig-4imus-4cams/), bag
+`4imus_4cams_01`.
 
 ## 1. Pick the base
 
-The **first entry in `input.imu_topics` is the base IMU**:
-
-- **Reference clock** for the whole rig
-- **The only IMU that carries the trajectory**
-- Every other entry is an aux IMU, in the order you list it.
+The **first entry in `input.imu_topics` is the base IMU**. It is the reference clock for the whole rig and
+the only IMU that carries the trajectory. Every other entry is an aux IMU, in the order you list it.
 
 In the running example the base is the Xsens (`/imu/data`):
 
 ```yaml title="virig_4imus_4cams_cam_imu.yaml"
 input:
   imu_topics:
-  - /imu/data          # base: Xsens MTI-100
+  - /imu/data          # base: Xsens MTi-100
   - /gx3_25/data       # aux: GX3-25
   - /gx3_35/imu/data   # aux: GX3-35
   - /t265/imu          # aux: T265 IMU
 ```
 
-- **Pick a good base:** its errors spread to the whole rig.
-- **Say which base you used** when you quote a number. A td or lever means
-  "against this base".
+- **Pick a good IMU as the base:** its errors spread to the whole rig.
+- **Say which base you used** when you quote a number. A td or a lever means "against this base".
 
 :::note[Two bases on this dataset]
-The bag-01 run on this page uses the **Xsens** as base. The 15-bag results
-(families T7 and T8 on the [results page](/benchmark/results/virig-4imus-4cams/))
-use the **T265 IMU** as base, with the Xsens as the only aux IMU.
+The bag-01 run on this page uses the **Xsens** as base. The 15-bag runs on the
+[results page](/benchmark/results/virig-4imus-4cams/) that include IMUs use the **T265 IMU** as base, with
+the Xsens as the only aux IMU.
 :::
 
 ## 2. Turn on the aux spatial and temporal terms
 
-Add these to the step-4 config:
+These keys in the step-4 config control the aux IMUs:
 
 ```yaml title="virig_4imus_4cams_cam_imu.yaml"
 estimate:
@@ -57,45 +58,41 @@ estimate:
     extrinsics: true   # lever + rotation of each aux IMU to the base
     td: true           # time offset of each aux IMU to the base
 solve:
-  estimate_t_ga: true  # also covers the aux IMUs
+  estimate_t_ga: true  # base and aux IMUs
 ```
 
-- **`estimate.imu.extrinsics`:** solves each aux IMU's lever and rotation.
-  Default `true`.
-- **`estimate.imu.td`:** solves each aux IMU's time offset to the base.
-  Default `true`.
-- **`false` on either** holds that value at its seed instead.
-- **t_ga** (the delay between an IMU's accel and its gyro) uses the same
-  `solve.estimate_t_ga` flag for base and aux IMUs. It is on by default.
-- **IMU intrinsics** follow `estimate.imu.intrinsics` (`dw_da` in step 4) for
-  every IMU, base and aux.
+- **`estimate.imu.extrinsics`:** solves each aux IMU's lever and rotation. Default `true`.
+- **`estimate.imu.td`:** solves each aux IMU's time offset to the base. Default `true`.
+- **`false` on either** holds that value at its start value instead.
+- **`solve.estimate_t_ga`:** t_ga is the delay between an IMU's accelerometer and its gyroscope. One flag
+  covers the base and the aux IMUs. Default `true`.
+- **IMU intrinsics** (scale and misalignment) follow `estimate.imu.intrinsics` for every IMU, base and aux.
+  Step 4 sets it to `dw_da`.
 
 ### An aux IMU with a bad accelerometer
 
-Set `gyro_only: true` on that IMU. Entries in `input.imus` match
-`input.imu_topics` by order:
+Set `gyro_only: true` on that IMU. The entries in `input.imus` match `input.imu_topics` by order:
 
 ```yaml title="virig_4imus_4cams_cam_imu.yaml"
 input:
   imu_topics: [/imu/data, /gx3_25/data, /gx3_35/imu/data, /t265/imu]
   imus:
-    - {}                   # base: needs its accel
+    - {}                   # base: needs its accelerometer
     - {}
     - {}
-    - {gyro_only: true}    # aux calibrated from its gyro alone
+    - {gyro_only: true}    # aux calibrated from its gyroscope alone
 ```
 
-- **What it solves:** rotation, td, `Dw` (gyro scale and misalignment) and gyro bias.
-- **What it pins:** the lever and the accel terms.
-- **No t_ga:** a `gyro_only` aux IMU skips t_ga.
-- **Not on the base:** the base always needs its accel.
+- **What it solves:** rotation, td, `Dw` (gyroscope scale and misalignment) and gyroscope bias.
+- **What it holds fixed:** the lever and the accelerometer terms. There is no t_ga.
+- **Not on the base:** the base always needs its accelerometer. MVIS stops with an error if you set it there.
 
-The running example does not need it: all four IMUs run in full mode. When to
-prefer it over t_ga: [IMU model](/concepts/imu-model/#gyro-only-auxiliaries).
+The running example does not need it: all four IMUs run in full mode. When to prefer it over t_ga:
+[IMU model](/concepts/imu-model/#gyro-only-auxiliaries).
 
-### Speed knobs
+### Speed
 
-Each aux IMU adds factors. Two keys thin them out:
+Each aux IMU adds factors to the graph. Two keys thin them out:
 
 | Key | Default | What it does |
 |---|---|---|
@@ -103,7 +100,7 @@ Each aux IMU adds factors. Two keys thin them out:
 | `solve.aux_imu_factor_hz` | `0` | Aux factor rate in Hz. `0` = one per base interval. |
 
 :::caution[Not accuracy-neutral]
-Levers change with `aux_imu_stride`. Keep it fixed across runs you compare.
+The levers change with `aux_imu_stride`. Keep it the same across runs you compare.
 :::
 
 Run it as in step 4:
@@ -114,8 +111,8 @@ mvis cam-imu -c virig_4imus_4cams_cam_imu.yaml
 
 ## 3. Read the result
 
-Bag 01, Xsens base. Values from the
-[example run](/benchmark/examples/virig-4imus-4cams/) ("Solved rig"):
+Bag 01, Xsens base. The values are from the [example run](/benchmark/examples/virig-4imus-4cams/)
+("Solved rig"):
 
 | IMU | td to base (ms) | t_ga (ms) | lever (mm) | rotation log(R) (rad) |
 |---|---|---|---|---|
@@ -124,12 +121,14 @@ Bag 01, Xsens base. Values from the
 | GX3-35 | −2.07 | +0.01 ± 0.02 | [−82.3, −46.2, −3.5] | [+2.2304, +2.2070, −0.0192] |
 | T265 IMU | −7.17 | −6.74 ± 0.02 | [+54.7, −107.4, −30.3] | [+1.5724, −0.0054, −0.0113] |
 
-- **Frame:** lever and rotation are each IMU in the base IMU frame.
+- **Frame:** lever and rotation place each IMU in the base IMU frame. The rotation is the log(R) rotation
+  vector.
 - **td sign:** `t_imu = t_sensor + td`, with `t_imu` on the base clock.
-- **t_ga:** the T265 IMU has by far the largest offset (−6.74 ms). The Xsens
-  shows −0.82 ms. The two MicroStrain IMUs sit near 0.
+- **t_ga:** the T265 IMU has by far the largest offset (−6.74 ms), the Xsens −0.82 ms. The two MicroStrain
+  IMUs sit near 0.
 
-**Repeatability over 15 bags** (family T7, **T265 IMU base**, Xsens aux):
+**Repeatability over 15 bags** ("Mixed t265-f1 + ELP-L, aux Xsens" on the results page, **T265 IMU base**,
+Xsens aux), median and sd:
 
 | Xsens to base | MVIS | Kalibr |
 |---|---|---|
@@ -137,73 +136,74 @@ Bag 01, Xsens base. Values from the
 | distance ‖p‖ (mm) | 124.09 (sd 0.32) | 114.10 (sd 2.96) |
 
 - **td agrees** with Kalibr to 0.02 ms.
-- **The lever does not:** the two tools are 10 mm apart, and Kalibr spreads
-  about 9× wider.
-- **MVIS column:** MVIS with Kalibr's IMU model, 15 bags. Kalibr has 14
-  (bag 8 failed).
-- **Base swap:** T7's +7.24 ms and bag 01's −7.17 ms both link the Xsens and
-  the T265 IMU. The sign flips because the base flips.
+- **Kalibr inputs:** Kalibr got its camera intrinsics and baselines from an MVIS export, and ELP-L's stamps
+  were shifted by the MVIS td of the same bag before each run. It treats ELP-L as global shutter. So its td
+  and lever are solved given these MVIS inputs, not independently.
+- **The lever does not:** the two tools are 10 mm apart, and Kalibr spreads about 9 × wider.
+- **MVIS column:** MVIS with Kalibr's IMU model, 15 bags. Kalibr has 14 (bag 8 failed).
+- **Base swap:** this +7.24 ms and bag 01's −7.17 ms both link the Xsens and the T265 IMU. The sign flips
+  because the base flips.
 
-Full tables: [VI-Rig 4 IMUs + 4 cams results](/benchmark/results/virig-4imus-4cams/).
+Full tables: [VI-Rig 4 IMUs + 4 cameras results](/benchmark/results/virig-4imus-4cams/).
 
 ## 4. Sensor numbering when comparing with Kalibr
 
-Both tools number sensors in input order. They name the IMUs differently.
-Getting this wrong silently compares the wrong pair.
+Both tools number sensors in input order, but they name the IMUs differently. Getting this wrong silently
+compares the wrong pair.
 
-- **MVIS:** `Ib` is the base IMU, the first `input.imu_topics` entry. `Is0`,
-  `Is1`, … are the aux IMUs in list order.
-- **Kalibr:** `imu0` is its reference IMU, the first IMU it is given.
-- **Same input order, same base:** in the runs below both tools get the same
-  topic lists, so `imu0` and `Ib` are the same IMU.
+- **MVIS:** cameras are `cam0`, `cam1`, … in `input.cam_topics` order. The base IMU, the first
+  `input.imu_topics` entry, is `imu0`. Each aux IMU is named after the first part of its topic:
+  `/gx3_25/data` becomes `gx3_25`, `/t265/imu` becomes `t265`, `/imu/data` becomes `imu`. These names appear
+  in `cam_imu.json`, the calibration YAML and the HTML report.
+- **Kalibr:** cameras are `cam0`, `cam1`, …; `imu0` is its reference IMU, the first IMU it is given, and the
+  others are `imu1`, `imu2`, … in input order.
+- **Same input order, same base:** in the runs below both tools get the same topic lists, so `imu0` is the
+  same IMU in both. Match the aux IMUs by topic, not by number.
 
-**4 IMUs + 3 cameras** (family T6, Xsens base)
+**4 IMUs + 3 cameras** ([virig-4imus-3cams](/benchmark/results/virig-4imus-3cams/), Xsens base)
 
-| Sensor | BlackFly | T265 L | T265 R | Xsens MTI-100 | GX3-25 | GX3-35 | T265 IMU |
+| Sensor | Blackfly | T265 L | T265 R | Xsens MTi-100 | GX3-25 | GX3-35 | T265 IMU |
 |---|---|---|---|---|---|---|---|
 | Kalibr | cam0 | cam1 | cam2 | imu0 | imu1 | imu2 | imu3 |
-| MVIS | Cam0 | Cam1 | Cam2 | Ib | Is0 | Is1 | Is2 |
+| MVIS | cam0 | cam1 | cam2 | imu0 | gx3_25 | gx3_35 | t265 |
 
-**4 IMUs + 4 cameras** (bag-01 run above, Xsens base, MVIS only)
+**4 IMUs + 4 cameras** (the bag-01 run above, Xsens base, MVIS only)
 
 | Sensor | T265 L | T265 R | ELP L | ELP R | Xsens | GX3-25 | GX3-35 | T265 IMU |
 |---|---|---|---|---|---|---|---|---|
-| MVIS | Cam0 | Cam1 | Cam2 | Cam3 | Ib | Is0 | Is1 | Is2 |
+| MVIS | cam0 | cam1 | cam2 | cam3 | imu0 | gx3_25 | gx3_35 | t265 |
 
-**Family T7** (T265 IMU base, Xsens aux)
+**Mixed t265-f1 + ELP-L, aux Xsens** (T265 IMU base)
 
 | Sensor | T265 L | ELP L | T265 IMU | Xsens |
 |---|---|---|---|---|
 | Kalibr | cam0 | cam1 | imu0 | imu1 |
-| MVIS | Cam0 | Cam1 | Ib | Is0 |
+| MVIS | cam0 | cam1 | imu0 | imu |
 
-MVIS reads Kalibr `camchain` and `camchain-imucam` files and writes
-`camchain-imucam`. See [Result formats](/reference/result-formats/).
+MVIS reads Kalibr `camchain` and `camchain-imucam` files and writes `camchain-imucam`. See
+[Result formats](/reference/result-formats/).
 
 ## 5. Several cameras
 
-Cameras join the same graph. Set them up in
-[Camera-only calibration](/guides/camera-calibration/):
+Cameras join the same graph. You set them up in [step 3](/guides/camera-calibration/):
 
-- **`reference_camera`:** the camera the others' extrinsics are expressed
-  against.
-- **`optimize_time_offset: true`:** solves a time offset for unsynchronised
-  cameras.
-- **Per-camera td:** in the cam-IMU solve every camera gets its own td to the
-  base IMU. In bag 01 the T265 cameras sit at −5.41 / −7.47 ms and the ELP
-  cameras at −123.25 / −123.30 ms.
+- **`reference_camera`:** the camera the other cameras' extrinsics are expressed against.
+- **`estimate.camera.td: true`** (camera-only): solves a time offset between cameras that are not
+  synchronised.
+- **Per-camera td:** in the camera–IMU solve every camera gets its own td to the base IMU. In bag 01 the T265
+  cameras sit at −5.41 and −7.47 ms, the ELP cameras at −123.25 and −123.30 ms.
 
 Why one joint solve beats separate ones: [Why calibrate cameras together](/why/multi-camera/).
 Why extra IMUs pay off: [Why calibrate IMUs together](/why/multi-imu/).
 
 ## Worked runs
 
-- [4 IMUs + 3 cams](/datasets/virig-4imus-3cams/)
-- [4 IMUs + 4 cams](/datasets/virig-4imus-4cams/)
+- [4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/)
+- [4 IMUs + 4 cameras](/datasets/virig-4imus-4cams/)
+- [4 IMUs + 3 cameras, ArUco board](/datasets/virig-4imus-3cams-aruco/)
+- [5 IMUs + 4 cameras](/datasets/virig-5imus-4cams/)
 
 ## Next
 
-Check that the solve can recover a known answer:
-[Digital-twin check](/guides/simulation/).
-
-Math behind the aux terms: [Auxiliary IMU factor](/concepts/camera-imu-math/aux-imu/).
+- **Step 7:** check that the solve recovers a known answer: [Digital-twin check](/guides/simulation/).
+- **The math behind the aux terms:** [Auxiliary IMU factor](/concepts/camera-imu-math/aux-imu/).

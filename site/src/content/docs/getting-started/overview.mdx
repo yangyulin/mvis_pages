@@ -4,101 +4,91 @@ description: What MVIS is, what it calibrates, and how a calibration run works.
 pageType: concept
 ---
 
-Use this page to see what MVIS is, what it solves, and how a run works.
+MVIS is an open-source Python toolbox for camera and camera–IMU calibration. It
+handles rigs with several cameras and several IMUs. An IMU (inertial
+measurement unit) is the sensor with a gyroscope and an accelerometer.
 
-MVIS is a Python toolbox that calibrates single- and multi-camera systems.
-It is the calibration library behind Open MVIS. It replaces the earlier C++/ROS
-implementation.
+- **Package:** `pymvis`. You import it as `mvis` and run it as the `mvis` command.
+- **Built on:** [GTSAM](https://github.com/borglab/gtsam) factor graphs. A
+  factor graph writes the whole calibration as one least-squares problem over
+  linked unknowns.
+- **Runs on:** Linux and macOS, Python 3.11 and 3.12, with no ROS install.
+  See [Requirements](/getting-started/requirements/).
+- **Licence:** GPL-3.0-only, with a commercial licence for closed-source
+  products. See [License](/about/license/).
+- **Code:** [github.com/openmvis/openmvis](https://github.com/openmvis/openmvis).
 
-- **Built on:** GTSAM factor-graph optimisation (one big least-squares problem
-  over linked unknowns)
-- **Rotations and poses:** native SO(3)/SE(3) Lie group support (3D
-  rotations and full rigid poses are handled as their own types)
+OpenMVIS, the project around MVIS, also publishes calibration
+[datasets](/datasets/), a [benchmark](/benchmark/results/) against Kalibr and
+Basalt, and a [device wiki](/devices/) of calibrated sensors.
 
 ## What it solves
 
-Everything is solved in **one graph**:
+MVIS solves the quantities below from one recording, in a camera solve and
+then a camera–IMU solve.
 
-- **Intrinsics** (focal length, centre and other values inside each camera)
-- **Distortion**
-- **Extrinsics** (where each camera sits relative to the others)
-- **Time offsets**
-- **Rolling-shutter readout** (the time a camera takes to read its rows top to
-  bottom)
-- **Board poses**
-- **With an IMU:** the camera–IMU transform, IMU intrinsics, and biases
+| Quantity | Scope | Notes |
+|---|---|---|
+| Camera intrinsics + distortion | per camera | Focal length, image centre and lens model. Eight models, mixable in one rig ([Camera model](/concepts/camera-model/)) |
+| Camera extrinsics | per camera | Where each camera sits relative to the reference camera |
+| Camera–camera time offset | per camera | For cameras that are not hardware-synced |
+| Rolling-shutter readout | per rolling-shutter camera | The time the camera takes to read its rows, top to bottom ([why](/why/rolling-shutter/)) |
+| Board poses and board shape | per frame / per corner | The shape is one height per corner, off by default ([why](/why/board-shape/)) |
+| Camera–IMU extrinsics `T_CtoI` and time offset `td` | per camera | |
+| IMU–IMU extrinsics and time offset | per auxiliary IMU | Each extra IMU relative to the base IMU, the first IMU in the config |
+| IMU intrinsics `Dw`, `Da`, optional `Tg` | per IMU | Gyro and accel scale and misalignment, in one of three conventions ([IMU model](/concepts/imu-model/)) |
+| IMU biases | per IMU | |
+| Gyro–accel time offset `t_ga` | per IMU (not gyro-only IMUs) | The delay between the gyro and accel channels of one IMU, on by default ([why](/why/tga/)) |
 
-## What makes it different
+Several of these have no counterpart in Kalibr or Basalt. The
+[comparison](/getting-started/comparison/) lists them.
 
-- **No ROS required.** Pure Python, `pip install`, Linux and macOS.
-  - Bags are read through `rosbags`.
-  - So a ROS1 or ROS2 recording calibrates on a machine that has never had ROS
-    installed.
-- **Eight distortion models, mixable.**
-  - `radtan`, `kb4` (the fisheye default, also selected by `fisheye` and
-    `kannala_brandt`; [why kb4](/why/kb4/)), `equidistant`, `fov`,
-    `double_sphere`, `eucm`, `ucm`, and experimental `omni_radtan`.
-  - All work in both camera-only and camera–IMU calibration.
-  - You can mix them across cameras in one rig.
-- **Multi-IMU.**
-  - Several IMUs in one graph.
-  - Each has its own extrinsics, time offset, and intrinsics.
-  - Per-IMU gyro-only mode, for sensors whose accelerometer you cannot trust.
-- **It checks its own work.** `mvis roundtrip` applies a calibration to the
-  data it came from, then recalibrates.
-  - A PASS requires the IMU intrinsics to collapse to identity *and* the
-    geometry to stay put.
-  - That is a much stronger statement than a low residual.
+## How a run works
 
-## Three ways it is used
+A calibration has two solves and a check.
 
-| Mode | What you do |
-|---|---|
-| **Full calibration** | Solve everything from a board sequence. |
-| **Refinement** | Start from an existing calibration and refine it. Kalibr output reads directly via `mvis.io.kalibr`. |
-| **Partial calibration** | Pin what you trust and solve the rest. |
+1. **Cameras:** `mvis cam` solves each camera's lens and the camera–camera
+   extrinsics from a board recording. It writes a camera YAML and an HTML
+   report.
+2. **Cameras + IMUs:** `mvis cam-imu` reads that camera YAML as its starting
+   point and solves the camera–IMU extrinsics, time offsets and IMU
+   intrinsics. It writes a JSON result, a calibration YAML, a Kalibr
+   camchain where the camera model allows, and an HTML report.
+3. **Check:** `mvis verdict` grades a result GREEN, YELLOW or RED.
+   `mvis roundtrip` applies a camera–IMU calibration to its own recording and
+   calibrates again: the IMU intrinsics must come back as identity and the
+   geometry must not move. A [digital twin](/guides/simulation/) of your rig
+   tells you what the recording can pin down before you trust it.
 
-The common partial case is camera–IMU calibration with intrinsics pinned from a
-prior camera-only run. This is the recommended two-step workflow.
+`mvis run` starts either solve from the config's `mode:` field. Every command
+is in the [CLI reference](/reference/cli/).
 
-## Why one graph
+Inside the camera solve, the steps are:
 
-Solving jointly keeps the links between errors that pairwise calibration loses.
-Calibrating a rig pairwise accumulates error. Each pairwise result carries its
-own uncertainty, and composing them discards the correlations between them.
+1. **Detection:** find the board corners in every image.
+2. **Quality gating:** drop frames with too few tags and corners seen too
+   rarely.
+3. **Init:** a first guess of each lens and each board pose.
+4. **Per-camera solve:** refine each camera on its own, with its
+   rolling-shutter readout if it has one.
+5. **Alignment:** find where the cameras sit relative to each other, and
+   their time offsets.
+6. **Joint solve:** refine all cameras together.
+7. **Outlier rerun:** drop corners with large error and solve again.
 
-Keeping those correlations matters most for the weakly observable parameters
-(the ones the data pins down least):
+The camera–IMU solve starts from the camera YAML, picks the part of the
+recording with the most motion and runs one joint solve with the IMU data.
 
-- time offsets
-- rolling-shutter readout
-- IMU intrinsics
-
-See [Calibration graph](/concepts/calibration-graph/).
-
-The implementation follows the same principle. Pose interpolation, extrinsic
-composition, time offset, rolling shutter, and projection are **one unified
-factor**, not a chain of corrections.
-
-## The shape of a run
-
-```
-Detection → Quality gating → Init → Per-camera opt → Alignment → Joint opt → Outlier rerun
-```
-
-1. **Target and data** — print a board, record with well-excited motion.
-2. **Config** — one YAML: board, cameras, optimiser.
-3. **Run** — `mvis calibrate -c config.yaml`.
-4. **Read** — `*_calib.yaml` to deploy, `*_full.yaml` to replay, and a
-   self-contained HTML report.
-5. **Validate** — repeatability across sequences, and `mvis roundtrip` for
-   camera–IMU.
+You can also start from an existing calibration, such as Kalibr output, and
+pin what you trust. See [Configuration](/reference/configuration/).
 
 ## Where to go next
 
-- Coming from Kalibr or Basalt → [Comparison vs Kalibr / Basalt](/getting-started/comparison/).
-- Never run it → [Quickstart](/getting-started/quickstart/).
-- Have a rig → [Camera calibration](/guides/camera-calibration/), then
-  [Camera–IMU](/guides/camera-imu-calibration/).
-- Public data → [Examples](/benchmark/examples/).
-- The maths → [Concepts](/concepts/notation/).
+- **First run:** [Installation](/getting-started/installation/), then
+  [Quickstart](/getting-started/quickstart/).
+- **Coming from Kalibr or Basalt:** [Comparison](/getting-started/comparison/).
+- **Your own rig:** the [guides](/guides/board-setup/), from the board to the
+  round-trip check.
+- **Results on public data:** [Leaderboard](/benchmark/results/) and
+  [Examples](/benchmark/examples/).
+- **The maths:** [Concepts](/concepts/notation/).

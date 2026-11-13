@@ -1,37 +1,43 @@
 ---
 title: Camera model
-description: The eight projection and distortion models MVIS supports, and how to choose between them.
+description: The eight projection and distortion models MVIS supports, their equations, valid domains, and the rolling-shutter time model.
 pageType: concept
 wide: true
 ---
 
-Use this page to pick the camera model for each camera in your rig.
-A camera model maps a 3D point to a pixel: a projection plus a lens distortion.
+Use this page to pick the camera model for each camera in your rig, and to see
+the exact equations MVIS uses.
 
-MVIS implements eight distortion models. Each lives in one place:
-`camera/CameraModel` holds its projection, Jacobians (the derivatives the
-optimiser uses) and unprojection. So the same models are available:
+A camera model $\Pi$ maps a 3D point $\mathbf{P} = [X\ Y\ Z]^\top$ in the camera
+frame $\{C_i\}$ to a pixel $[u\ v]^\top$: a projection plus a lens distortion.
+Symbols follow [Notation & glossary](/concepts/notation/).
+
+Each model lives in one class under
+[`src/mvis/camera/`](https://github.com/openmvis/openmvis/tree/main/src/mvis/camera).
+The class holds the projection, its Jacobians (the derivatives the optimiser
+uses) and the unprojection. So every model works:
 
 - in **camera-only and camera–IMU** calibration;
-- in board and feature mode;
-- **mixed across cameras** in a single rig.
-
-Models outside GTSAM's built-ins carry custom analytical Jacobians.
-
-Symbols follow [Notation & glossary](/concepts/notation/).
+- with a calibration board of known corner positions, and in **feature mode**,
+  where the corners' 3D positions are not given and are solved as well
+  (example: [VI-Rig 4 IMUs + 3 cams, ArUco](/datasets/virig-4imus-3cams-aruco/));
+- **mixed across cameras** in one rig.
 
 ## The eight models
 
-| Model | Config value | Origin | Suits |
-|---|---|---|---|
-| Pinhole + radial-tangential | `radtan` | Brown–Conrady | Normal lenses |
-| Kannala–Brandt KB4 | `kb4` (also `fisheye`, `kannala_brandt`) | Kannala–Brandt, θ from atan2 | Fisheye, including corners past 90° |
-| Equidistant | `equidistant` | Kannala–Brandt on x/z | Fisheye with every corner under 90° (the same pixels as `kb4` there) |
-| FOV | `fov` | Devernay–Faugeras | Wide-angle, single parameter |
-| Double Sphere | `double_sphere` | Usenko / Basalt | Very wide FoV |
-| EUCM | `eucm` | Khomutenko | Very wide FoV |
-| UCM | `ucm` | Unified (Mei), α form | Very wide FoV; Kalibr `omni-none` |
-| Omni + radtan | `omni_radtan` | Mei — **experimental** | Catadioptric, ultra-wide |
+| Model | Config value | Origin | Distortion coefficients, in file order | Suits |
+|---|---|---|---|---|
+| Pinhole + radial-tangential | `radtan` | Brown–Conrady | `k1 k2 p1 p2` | Normal lenses |
+| Kannala–Brandt KB4 | `kb4` (also `fisheye`, `kannala_brandt`) | Kannala–Brandt, $\theta$ from atan2 | `k1 k2 k3 k4` | Fisheye, including corners past 90° |
+| Equidistant | `equidistant` | Kannala–Brandt on $X/Z, Y/Z$ | `k1 k2 k3 k4` | Fisheye with every corner under 90° |
+| FOV | `fov` | Devernay–Faugeras | `omega` | Wide-angle, one parameter |
+| Double Sphere | `double_sphere` | Usenko et al. (Basalt) | `xi alpha` | Very wide field of view |
+| EUCM | `eucm` | Khomutenko et al. | `alpha beta` | Very wide field of view |
+| UCM | `ucm` | Unified model (Mei), $\alpha$ form | `alpha` | Very wide field of view; Kalibr `omni` / `none` |
+| Omni + radtan | `omni_radtan` | Mei, **experimental** | `xi k1 k2 p1 p2` | Catadioptric, ultra-wide |
+
+Every model shares the four intrinsics $f_u, f_v, c_u, c_v$ (`fx fy cx cy`).
+The distortion coefficients follow them.
 
 ```yaml title="config.yaml"
 cameras:
@@ -39,52 +45,264 @@ cameras:
     distortion_model: kb4
 ```
 
+## Projection equations
+
+Each model ends with the same affine step from a normalised point
+$[m_x\ m_y]^\top$ to pixels:
+
+$$
+u = f_u\, m_x + c_u, \qquad v = f_v\, m_y + c_v
+$$
+
+What differs is how $[m_x\ m_y]$ comes from $\mathbf{P}$.
+A point outside a model's valid domain has no pixel. That corner is left out
+of the error statistics and, in camera–IMU, out of the cost. Left uncounted,
+it would make the error look smaller than it is. So the result counts dropped
+corners:
+
+- `past_fold`: a Kannala–Brandt corner past the fold;
+- `other_invalid`: anything else, such as $Z \le 0$ under `equidistant`.
+
+### radtan
+
+Source: [`src/mvis/camera/pinhole_radtan.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/pinhole_radtan.py) (GTSAM `Cal3DS2`).
+
+$$
+x = \frac{X}{Z},\quad y = \frac{Y}{Z},\quad r^2 = x^2 + y^2
+$$
+
+$$
+\begin{aligned}
+m_x &= x\,(1 + k_1 r^2 + k_2 r^4) + 2 p_1 x y + p_2\,(r^2 + 2x^2) \\
+m_y &= y\,(1 + k_1 r^2 + k_2 r^4) + p_1\,(r^2 + 2y^2) + 2 p_2 x y
+\end{aligned}
+$$
+
+**Valid:** $Z > 0$.
+
+### kb4 and equidistant
+
+Both use the Kannala–Brandt odd polynomial in the incidence angle $\theta$
+(the angle of the ray off the optical axis):
+
+$$
+\theta_d = \theta\,(1 + k_1\theta^2 + k_2\theta^4 + k_3\theta^6 + k_4\theta^8)
+$$
+
+$$
+m_x = \frac{\theta_d}{\rho}\, X, \qquad m_y = \frac{\theta_d}{\rho}\, Y, \qquad \rho = \sqrt{X^2 + Y^2}
+$$
+
+The two differ only in how they get $\theta$:
+
+| Model | $\theta$ | Valid domain |
+|---|---|---|
+| `kb4` | $\theta = \operatorname{atan2}(\rho, Z)$ | $0 \le \theta < \pi$ and $\theta$ below the first fold $\theta_f$ |
+| `equidistant` | $\theta = \arctan(\rho / Z)$, after dividing by $Z$ | $Z > 0$, so $\theta < 90°$ |
+
+The **first fold** $\theta_f$ is the smallest $\theta > 0$ where
+$\mathrm{d}\theta_d / \mathrm{d}\theta = 1 + 3k_1\theta^2 + 5k_2\theta^4 + 7k_3\theta^6 + 9k_4\theta^8 = 0$
+($\pi$ when there is none). Past it, $\theta_d$ falls again and two rays share
+one pixel, so the inverse is no longer unique.
+
+- **Below 90°** the two models give the same pixels for the same coefficients.
+- **At or past 90°** only `kb4` has a pixel. This is why `fisheye` means `kb4`
+  ([Why kb4 for fisheye](/why/kb4/)).
+- **After a solve** MVIS logs the fold angle and the radius in pixels where the
+  valid domain ends. It warns when that radius lies inside the image.
+
+Source: [`src/mvis/camera/kb4.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/kb4.py),
+[`src/mvis/camera/kb_domain.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/kb_domain.py),
+[`src/mvis/camera/pinhole_equidistant.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/pinhole_equidistant.py) (GTSAM `Cal3Fisheye`).
+
+### fov
+
+Source: [`src/mvis/camera/fov_model.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/fov_model.py).
+
+$$
+x = \frac{X}{Z},\quad y = \frac{Y}{Z},\quad r_u = \sqrt{x^2 + y^2},\quad
+r_d = \frac{1}{\omega}\arctan\!\Big(2\, r_u \tan\frac{\omega}{2}\Big)
+$$
+
+$$
+m_x = \frac{r_d}{r_u}\, x, \qquad m_y = \frac{r_d}{r_u}\, y
+$$
+
+On the optical axis the scale $r_d / r_u$ is its limit $2\tan(\omega/2)/\omega$.
+As $\omega \to 0$ the model becomes a plain pinhole.
+**Valid:** $Z > 0$.
+
+### double_sphere
+
+Source: [`src/mvis/camera/double_sphere.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/double_sphere.py).
+
+$$
+d_1 = \lVert \mathbf{P} \rVert, \qquad
+d_2 = \sqrt{X^2 + Y^2 + (\xi d_1 + Z)^2}
+$$
+
+$$
+w = \alpha\, d_2 + (1 - \alpha)(\xi d_1 + Z), \qquad
+m_x = \frac{X}{w}, \quad m_y = \frac{Y}{w}
+$$
+
+**Valid:** $w > 0$. Expected ranges: $\xi \in [-1, 1]$, $\alpha \in [0, 1]$.
+
+### eucm
+
+Source: [`src/mvis/camera/eucm.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/eucm.py).
+
+$$
+d = \sqrt{\beta\,(X^2 + Y^2) + Z^2}, \qquad
+w = \alpha\, d + (1 - \alpha) Z, \qquad
+m_x = \frac{X}{w}, \quad m_y = \frac{Y}{w}
+$$
+
+**Valid:** $w > 0$. Expected ranges: $\alpha \in [0, 1]$, $\beta > 0$.
+
+### ucm
+
+Source: [`src/mvis/camera/ucm.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/ucm.py).
+UCM is EUCM with $\beta = 1$:
+
+$$
+d = \lVert \mathbf{P} \rVert, \qquad
+w = \alpha\, d + (1 - \alpha) Z, \qquad
+m_x = \frac{X}{w}, \quad m_y = \frac{Y}{w}
+$$
+
+**Valid:** $Z > -w_f\, d$, with
+$w_f = (1-\alpha)/\alpha$ for $\alpha > 0.5$, else $w_f = \alpha/(1-\alpha)$.
+Past that bound the image folds back. Expected range: $\alpha \in [0, 1)$.
+
+Kalibr's `omni` camera with distortion `none` is the same model in $\xi$ form.
+MVIS converts on import and export only:
+
+$$
+\xi = \frac{\alpha}{1 - \alpha}, \qquad \gamma = \frac{f}{1 - \alpha}
+$$
+
+### omni_radtan (experimental)
+
+Source: [`src/mvis/camera/omni_radtan.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/camera/omni_radtan.py).
+A projection onto the unit sphere with mirror parameter $\xi$, then radtan
+distortion on the normalised plane:
+
+$$
+d = \lVert \mathbf{P} \rVert, \qquad
+x = \frac{X}{Z + \xi d}, \quad y = \frac{Y}{Z + \xi d}
+$$
+
+then $m_x, m_y$ from $x, y$ exactly as in [radtan](#radtan).
+**Valid:** $Z + \xi d > 0$. Expected range: $\xi \in [0, 5]$.
+This is Kalibr's `omni` / `radtan`.
+
+All projection kernels outside GTSAM are in
+[`src/mvis/calibration/factors/custom_projections.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/calibration/factors/custom_projections.py),
+with analytical Jacobians.
+
 ## Choosing one
 
-More parameters is not better. A model richer than the lens needs will fit
-noise. On wide-FoV (field of view) data it can slide into a basin (a wrong local
+More parameters are not better. A model richer than the lens needs fits
+noise. On wide field-of-view data it can slide into a basin (a wrong local
 minimum) that looks converged and is not.
 
-Choose by the largest incidence angle of the board corners, that is, their angle
-off the optical axis. Do not choose by the lens's advertised field of view.
-Every result reports this angle, with any corners past the model's valid domain.
+Choose by the largest incidence angle of the board corners, not by the lens's
+advertised field of view. Every result reports this angle
+(`max_theta_deg`, and `max_theta_used_deg` for the corners the fit kept), and
+counts any corners past the model's valid domain.
 
-- **Normal lens** → `radtan`.
-- **Fisheye** → `kb4`, which is what `fisheye` and `kannala_brandt` select. It
-  stays valid past 90° up to its first fold ([why](/why/kb4/)). It exports to Kalibr as
-  pinhole-equi (exact below 90°; MVIS warns when the fit used corners past it).
-- **Every corner under 90°, equidistant asked for** → `equidistant`. It gives the
-  same pixels as `kb4` there; name it explicitly.
-- **Very wide FoV, a different shape** → `eucm`, `ucm` or `double_sphere`.
-- **Catadioptric** (lens plus mirror) → `omni_radtan`, with the caveat that it is
-  experimental.
+- **Normal lens:** `radtan`.
+- **Fisheye:** `kb4`, which is what `fisheye` and `kannala_brandt` select. It
+  stays valid past 90° up to its first fold ([why](/why/kb4/)).
+- **Every corner under 90°, and you want equidistant by name:** `equidistant`.
+  It gives the same pixels as `kb4` there.
+- **Very wide field of view, a different shape:** `eucm`, `ucm` or `double_sphere`.
+- **Catadioptric** (lens plus mirror): `omni_radtan`. It is experimental.
+
+### Kalibr export
+
+The camchain written for Kalibr uses these names:
+
+| MVIS | Kalibr `camera_model` / `distortion_model` |
+|---|---|
+| `radtan` | `pinhole` / `radtan` |
+| `equidistant` | `pinhole` / `equidistant` |
+| `kb4` | `pinhole` / `equidistant`: exact for $Z > 0$; MVIS warns when the fit used corners at or past 90°, which Kalibr cannot project |
+| `fov` | `pinhole` / `fov` |
+| `double_sphere` | `ds` / `none` |
+| `eucm` | `eucm` / `none` |
+| `ucm` | `omni` / `none`, converted to $\xi$ form |
+| `omni_radtan` | `omni` / `radtan` |
 
 :::caution[Wide-FoV models can diverge on stereo]
-On TUM-VI, stereo `double_sphere` and `eucm` fits diverge into an fx–xi /
-alpha basin, while the **single-camera** fit is stable. The working recipe is
-two-step:
+In our TUM-VI runs, stereo `double_sphere` and `eucm` fits can diverge into a
+basin where the focal length and $\xi$ or $\alpha$ trade off, while the
+**single-camera** fit is stable. The working recipe has two steps:
 
 1. Fit each camera alone.
-2. Pin those intrinsics for the joint solve (`examples/configs/tumvi_cam_imu/`).
+2. Pin those intrinsics for the joint solve
+   ([`examples/configs/tumvi_cam_imu/`](https://github.com/openmvis/openmvis/tree/main/examples/configs/tumvi_cam_imu)).
 
-You recognise a diverged fit by an implausible focal length or blown-out
-distortion, not by a large residual.
+You recognise a diverged fit by an implausible focal length or very large
+distortion coefficients, not by a large residual.
 :::
 
-MVIS guards against this with the two-pass **pathology guardrail**. It reverts
-to pass 1 if the optimiser lands on any of these:
+Camera-only calibration runs two passes: a first solve, then a second one
+after outlier rejection. A **guardrail** keeps the first-pass result if the
+second pass lands on any of these
+([`src/mvis/calibration/pipeline_cam.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/calibration/pipeline_cam.py)):
 
-- a non-positive focal;
-- blown-out distortion;
-- a P95 regression (the 95th-percentile value gets worse).
+- a focal length of 1 px or less;
+- $f_u$ and $f_v$ more than 30 % apart;
+- a distortion coefficient above 2 in magnitude (for `ucm`: $\alpha$ outside
+  $[0, 1)$; for `omni_radtan`: $\xi$ outside $[0, 5]$);
+- a 95th-percentile reprojection error more than 1.5 times the first pass's,
+  on a camera whose $f_u$ moved less than 5 %;
+- a mean RMS reprojection error over all cameras more than 1.5 times the first
+  pass's.
 
 It is a backstop, not a substitute for picking the right model.
 
 ## Rolling shutter
 
-A rolling-shutter camera exposes rows one after another, so one image spans a
-range of times. Set `shutter_type: rolling` and the per-row readout is solved
-with everything else:
+A rolling-shutter camera exposes its rows one after another, so one image
+spans a range of times. The readout $t_r$ is the time from the first row to
+the last.
+
+A corner observed in row $v$ of an image of height $H$ was captured at
+
+$$
+t_I = t_C + t_d + \eta(v)\, t_r
+$$
+
+The row factor $\eta(v)$ depends on which row the driver stamps
+(`rolling_mode`, default 0):
+
+| `rolling_mode` | Frame stamp at | $\eta(v)$ |
+|---|---|---|
+| 0 | top row | $v / H$ |
+| 1 | middle row | $v / H - 0.5$ |
+| 2 | bottom row | $(v - H) / H$ |
+
+Source: [`src/mvis/core/shutter.py`](https://github.com/openmvis/openmvis/blob/main/src/mvis/core/shutter.py).
+For a global-shutter camera $t_r = 0$, so every corner of a frame shares one time.
+
+The camera–IMU vision factor uses that per-corner time directly. It takes the
+pose of $\{I\}$ at $t_I$ from the base IMU, composes the extrinsics, and then
+projects:
+
+$$
+\mathbf{z}_{i,k} = \Pi\big({}^{C_i}\mathbf{p}_{k}(t_I)\big) + \mathbf{n}
+$$
+
+where ${}^{C_i}\mathbf{p}_k(t_I)$ is board corner $k$ in the camera frame at
+the corner's capture time. Projection, time offset, readout and extrinsics sit
+in one factor, so $t_d$ and $t_r$ get Jacobians and are solved with everything
+else, not corrected afterwards. The HTML report uses the same projection code,
+so the residuals it shows are the ones the optimiser minimised.
+
+Turn it on per camera:
 
 ```yaml title="config.yaml"
 cameras:
@@ -92,31 +310,5 @@ cameras:
     shutter_type: rolling
 ```
 
-These all live in **one unified factor** rather than being applied in sequence:
-
-- projection;
-- time offset;
-- rolling shutter;
-- extrinsic composition;
-- SLERP pose interpolation (smooth blending between two poses).
-
-That is what lets readout be estimated jointly rather than corrected
-afterwards. The same projection code backs the HTML report. So reported
-residuals are the ones the optimiser actually minimised.
-
+Or through the `estimate:` block, with `estimate.camera.tr: true`.
 Practical guidance: [Rolling shutter](/guides/rolling-shutter/).
-
-## Validation
-
-We compared the models over a 52-run benchmark across MVIS T265 and TUM-VI
-1024 (`doc/investigation_ds_convergence.md`).
-
-- **Camera–IMU path:** on TUM-VI raw IMU bags, `omni_radtan` and `equidistant`
-  reproduce the Kalibr cam-IMU extrinsics to **≤2 mm lever, ≤0.15 mm stereo
-  baseline, ≤1 ms time offset**.
-- **`kb4` vs `equidistant`:** on TUM-VI and T265, where few or no corners pass 90°,
-  the fits agree to about 2e-6 px and their camera–IMU extrinsics to 1e-11 rad.
-  Past 90°, only `kb4` holds: [Why kb4 for fisheye](/why/kb4/).
-
-Model choice does not change the geometry a good fit recovers. It changes
-whether you get a good fit at all.

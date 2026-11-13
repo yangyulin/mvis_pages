@@ -1,129 +1,167 @@
 ---
 title: Evaluation & metrics
-description: How a calibration is scored — reports, metrics, the regression harness, and baselines.
+description: How to tell whether a calibration is good — the report, the verdict thresholds, independent checks and the benchmark metrics.
 pageType: reference
 wide: true
 ---
 
-Use this page to tell whether a calibration is good. The same metrics back the
-[leaderboard](/benchmark/results/). So a local run and a published entry are
-comparable.
+Use this page to tell whether a calibration is good.
+Check it in this order:
 
-## Read the report first
+1. **Read the report:** did the motion exercise every parameter?
+2. **Run `mvis verdict`:** are the fit and the values plausible?
+3. **Run an independent check:** round trip, repeatability, another tool or a digital twin.
 
-Every run writes a self-contained HTML report. Read its **calibration data
-quality** section before the error numbers. It shows:
+The same metrics back the [leaderboard](/benchmark/results/), so a local run and a
+published entry measure the same thing.
 
-- **Motion-excitation metrics** with letter grades (how well the motion
-  exercised the parameters)
-- **Rotation-axis spread**
-- **Angular-velocity timeline**
-- **Feature-coverage heatmap** with convex hull (where the board corners fell
-  in the image)
+## 1. Read the report first
+
+Every run writes a self-contained HTML report ([what is in it](/reference/result-formats/#html-reports)).
+Read its **data quality** section before the error numbers. It shows:
+
+- **Motion excitation:** grades for how much the motion moved each axis
+- **Rotation-axis spread:** whether you rotated about all three axes
+- **Angular-velocity timeline:** where in the recording the motion was
+- **Image coverage:** where the board corners fell in each image
 
 :::caution[Reprojection error is not accuracy]
-Reprojection error (the pixel distance between observed and predicted board
-corners) measures how well the solution explains the data it was fitted to.
-A parameter the motion never excited settles near its initial value. It does
-so without raising the residual. A low error on a poorly-excited sequence
-means very little.
+Reprojection error is the pixel distance between the detected and the predicted board corners.
+It says how well the result explains the data it was fitted to.
+A parameter the motion never excited stays near its start value without raising the error.
+A low error on a poorly excited recording means little.
 :::
 
-## Metrics
+## 2. Grade it with `mvis verdict`
 
-| Metric | Units | Against | Notes |
-|---|---|---|---|
-| Reprojection median / P95 | px | own observations | Robust statistics, not mean — P95 is where model mismatch shows |
-| Extrinsic rotation error | deg | a reference | Geodesic angle |
-| Extrinsic translation error | cm | a reference | Includes the camera–IMU lever arm |
-| Stereo baseline | mm | a reference | The most stable cross-check on a rig |
-| Time-offset error | ms | a reference | Per camera and auxiliary IMU |
-| Runtime | s | — | Wall-clock, hardware reported |
-| Convergence rate | % | repeated runs | Successful / total |
+```bash
+mvis verdict results/run/t265_cam_calib.yaml            # camera-only
+mvis verdict results/run/cam_imu.json -c cam_imu.yaml   # camera–IMU, with its reference: block
+```
 
-Read convergence first. Excellent errors at a 60% convergence rate is not a
-better toolbox than one that always converges.
+Each check is `pass`, `warn` or `fail`.
+The grade is RED if any check fails, YELLOW if any warns, GREEN otherwise.
+The camera–IMU HTML report uses the same thresholds for its badges.
 
-## Ground truth, where it exists
+| Check | `id` | Pass | Warn | Fail |
+|---|---|---|---|---|
+| Reprojection median | `reproj.median` | ≤ 1.41 px | ≤ 2.83 px | above |
+| Reprojection P95 | `reproj.p95` | ≤ 2.83 px | ≤ 5.66 px | above |
+| Reprojection RMS (when no median) | `reproj.rms` | ≤ 1.41 px | ≤ 2.83 px | above |
+| Camera and IMU fit, χ²/dof | `fit.cam_chi2_dof`, `fit.imu_chi2_dof`, `fit.aux_imu_chi2_dof` | ≤ 1.5 | ≤ 3.0 | above |
+| Focal length | `intr.focal_positive` | fx, fy > 0 | — | otherwise |
+| Focal aspect | `intr.focal_aspect` | \|fx/fy − 1\| ≤ 0.02 | above | — |
+| Principal point | `intr.principal_point` | within 10 % of the image size from the centre | further | — |
+| Distortion | `intr.distortion_finite` | finite | — | not finite |
+| Reprojection present | `reproj.missing` | every camera has errors | — | a camera has none |
+| Cameras in the result | `result.cameras` | at least one | — | none |
+| Corner observations per camera (camera-only) | `data.observations` | ≥ 500 | fewer | — |
+| IMU scale (camera–IMU) | `imu.dw_scale`, `imu.da_scale` | \|diagonal − 1\| ≤ 0.05 | above | — |
+| Camera–IMU time offset | `time.td` | \|td\| ≤ 50 ms | above | — |
+| Solver status | `solve.ok` | `true` | — | `false` |
+| Iterations | `solve.converged` | below `max_iterations` | hit the cap | — |
+| Solver step | `solve.lm_step` | took at least one step | took no step | took no step and failed |
+| Lever against `reference:` | `ref.lever` | ≤ 10 mm | above | — |
+| Baseline against `reference:` | `ref.baseline` | ≤ 5 mm | above | — |
 
-- **Where:** per-dataset ground-truth YAMLs live under
-  `examples/regression/gt/`.
-- **Dashboard:** annotates each parameter with its deviation —
-  `Δ +0.27% GT=190.97` — colour-coded by accuracy band.
-- **Result:** version 3 results match the published TUM-VI and Intel T265
-  calibrations to under 0.6% on focals.
+Notes:
 
-## Round-trip: the strongest check without ground truth
+- **Pixel units:** the reprojection thresholds are on the length of each corner's 2D error,
+  as Kalibr reports it. They are per-axis limits times √2: 1 and 2 px for the median and RMS, 2 and 4 px for the P95.
+- **χ²/dof:** the solve's cost per degree of freedom. Near 1 means the noise settings match the data.
+- **Warnings can be real:** a raw consumer IMU can have a scale error above 5 %, and a USB camera
+  a `td` above 50 ms. Confirm them across recordings.
+- **`ok: true`** from the solver only means it finished and passed its own gates. `verdict` never
+  counts it as proof of a good fit.
+
+## 3. Check it independently
+
+`mvis verdict --independent-check <kind>` records which of these you ran.
+
+### Round trip
 
 ```bash
 mvis roundtrip -c cam_imu.yaml
 ```
 
-PASS requires both:
+It needs no ground truth.
+MVIS applies the calibration to its own bag and calibrates the corrected bag again.
+PASS needs every one of these on the corrected bag:
 
-- IMU intrinsics (the IMU's scale and axis-misalignment corrections) **collapse**
-  to identity on the corrected bag, *and*
-- extrinsics (where each sensor sits relative to the others) and stereo baseline
-  are **preserved**.
+| Quantity | Expected after correction | Tolerance |
+|---|---|---|
+| `Dw`, `Da` diagonals | 1 | within 0.01 |
+| Gyroscope and accelerometer bias | 0 | below 0.02 (rad/s, m/s²) |
+| Lever and stereo baseline | unchanged | within 2 mm |
+| `td` | 0 | above 2 ms is a warning only, because `td` can be weakly observable |
 
-The two conditions pull in opposite directions. That makes it hard to satisfy
-by accident. See [Round-trip validation](/guides/roundtrip/).
+The IMU terms must collapse to identity and zero while the geometry stays the same.
+See [Round-trip validation](/guides/roundtrip/).
 
-## Repeatability across sequences
+### Repeatability
 
-This is the most practical field check.
+Calibrate several recordings of one rig with `input.bags` and compare the results.
+A parameter that moves between recordings was not pinned down by the motion in them.
+See [Camera–IMU calibration](/guides/camera-imu-calibration/).
 
-1. Run a
-   [batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config).
-2. Compare the results. Parameters that move between sequences were not
-   constrained by the motion in them.
+### Another tool
 
-The regression harness reports this directly. It gives mean ± stddev of
-intrinsics, distortion, and baseline across a collection.
+Run Kalibr or Basalt on the same recordings.
+`mvis.io.kalibr` reads Kalibr's camchains and results ([Kalibr files](/reference/result-formats/#kalibr-files)).
+The [leaderboard](/benchmark/results/) shows MVIS, Kalibr and Basalt side by side.
 
-## Regression harness
+### Digital twin
 
-MVIS validates itself with a three-tier regression suite. Every row re-solves a
-real recording. It compares the result against a committed per-collection
-baseline with per-metric tolerances:
+A digital twin replays a real recording's motion, frame times and corner layout with known
+parameters. Solving it measures bias against a truth no one gave the solver.
+See [Digital-twin check](/guides/simulation/).
 
-- focal
-- distortion
-- extrinsics
-- time offsets
-- readout
-- reprojection
+## Benchmark metrics
 
-Tiers are supersets — a deeper tier re-runs everything above it:
+The [leaderboard](/benchmark/results/) and each dataset's eval page use these numbers.
+[Methodology](/benchmark/methodology/) explains how to read them.
 
-| Tier | Command | Rows | Runtime | Role |
-|---|---|---|---|---|
-| fast | `--level fast` | 10 | ~35 min | the gate — every change passes it |
-| mid | `--level mid` | 30 | ~1.5–2.5 h | routine deep check (3 recordings per family) |
-| full | `--level full` | 106 | ~6–10 h | every collection of every suite dataset |
+| Metric | Unit | What it is |
+|---|---|---|
+| Median ± sd (n) | per parameter | Median and standard deviation of one tool's estimate over the n recordings it solved |
+| Difference | per parameter | Difference of two tools' medians; ◆ when it is larger than the larger of the two spreads |
+| Focal length, principal point | px | Camera intrinsics |
+| Lever arm | mm | Camera position in the base IMU frame, or auxiliary IMU position |
+| Rotation | rad | log(R) rotation vector of an extrinsic |
+| Stereo baseline | mm | Distance between two cameras |
+| `td`, `t_ga` | ms | Camera–IMU and gyro-to-accelerometer time offsets |
+| Solved | n of N | Recordings a tool solved |
+
+The benchmark datasets have no ground truth.
+A small spread shows repeatability, not accuracy, and a difference shows that two tools disagree,
+not which one is right. Reprojection error is not compared across tools, because it measures fit.
+
+## Reference values
+
+Where a recording has published or factory values, the regression suite reports the
+percentage difference to them (`--gt`). These values are compared, never used as a pass or fail gate.
+They live in `examples/regression/gt/` in the [repository](https://github.com/openmvis/openmvis).
+
+## Regression suite
+
+We run MVIS over real recordings and digital twins, and gate every change against stored baselines
+with per-metric tolerances (focal length, distortion, extrinsics, time offsets, readout, reprojection).
 
 ```bash
-python scripts/run_regression.py --mode all --level fast
-python scripts/run_regression.py --only mvis_elp/imu_bag1      # one row
-python scripts/run_regression.py --only <row> --update-baseline # re-bless
+python scripts/run_regression.py --mode all --level fast      # the gate
+python scripts/run_regression.py --only-collection mvis_4imus_3cams/april_01
+python scripts/run_regression.py --mode all --level all --dry  # compare existing results only
 ```
 
-The 10 seed rows span the calibration space on five datasets:
+| `--level` | Runs |
+|---|---|
+| `fast` | The first recording of each family: the gate for every change |
+| `mid` | Three recordings per family |
+| `full` | Every recording of every family |
+| `optional` | Rows outside the gates, such as camera-model variants |
+| `all` | `full` and `optional` |
 
-- global- and rolling-shutter
-- mono/stereo/3-camera
-- single-, two- and mixed-IMU configurations
-
-The other 96 row configs are *generated* from the seeds (only the recording
-changes). A test that regenerates them guards against drift. So solver settings
-cannot silently diverge across a family. The design story is on the
-[regression testing](/contribute/regression-testing/) page.
-
-## Baselines
-
-- **Storage:** one committed JSON per (dataset, collection) under
-  `examples/regression/baselines/` holds the blessed metrics.
-- **Gate run:** re-solves and compares.
-- **`--update-baseline`:** re-blesses after an intentional change.
-- **Review:** the diff of the baseline file *is* the review artifact. Every
-  numeric shift a change causes is visible in the PR.
+`--help` prints the current row counts.
+`--update-baseline` rewrites the stored baselines after an intended change; the baseline diff
+then shows every number the change moved.
+How the suite is built: [Regression testing](/contribute/regression-testing/).

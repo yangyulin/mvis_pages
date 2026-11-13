@@ -4,13 +4,13 @@
 //
 // Each MVIS calibration listed in rigs.json plays a 15 s real-time pass (rig flying its recovered
 // trajectory, frustums, board corners in the colour of the camera shown in 3-D), then the next one.
-// Layouts (plan: mira docs/plans/mvis/web-pages/homepage-responsive):
+// Layouts:
 //   phone  (< 641 px)       title · 16:9 video (live camera baked into its corner) · CTA · chips · 3 readout values · Details
 //   tablet (641–1099 px)    text | video (inset) · bar underneath · Details
 //   wide   (≥ 1100 px)      text over the left of a contained, right-aligned loop · tile column sized from the
 //                           available height · one-line bar; the whole hero fits the first viewport
-// Media: public/media/hero/ — openmvis-internal demo_video/render_hero.py, render_hero_tiles.py and
-// build_site_media.py (1920 px loop; 960 px loop with the live camera baked in; per-camera tiles 400 + 240 px).
+// Media: public/media/hero/, rendered from MVIS solve views (1920 px loop; 960 px loop with the live
+// camera baked in; per-camera tiles 400 + 240 px).
 // All encodes have a keyframe every second so companion seeks stay cheap on phones.
 //
 // Cache busting: every media URL carries a short content hash (?v=...) computed at build time.
@@ -41,11 +41,12 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     <h1>OpenMVIS</h1>
     <p class="mh-sub">Open-source <em>multi-visual-inertial</em> <span class="mh-nw">system calibration</span></p>
     <div class="mh-actions">
-      <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
+      <a class="mh-btn mh-primary" href="/getting-started/overview/">Get started
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </a>
-      <a class="mh-btn mh-ghost" href="/benchmark/results/">Results</a>
+      <a class="mh-btn mh-ghost" href="/benchmark/results/">Leaderboard</a>
       <a class="mh-btn mh-ghost" href="/benchmark/examples/">Examples</a>
+      <a class="mh-btn mh-ghost" href="/devices/">Device wiki</a>
     </div>
   </div>
 
@@ -62,10 +63,10 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
   <ul class="mh-tiles" id="mhTiles" aria-label="Detections in each camera"></ul>
 
   <div class="mh-cta-phone">
-    <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
+    <a class="mh-btn mh-primary" href="/getting-started/overview/">Get started
       <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
     </a>
-    <div class="mh-links"><a href="/benchmark/results/">Results</a><a href="/benchmark/examples/">Examples</a></div>
+    <div class="mh-links"><a href="/benchmark/results/">Leaderboard</a><a href="/benchmark/examples/">Examples</a><a href="/devices/">Device wiki</a></div>
   </div>
 
   <div class="mh-bar">
@@ -218,7 +219,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     .mh .mh-sub { font-size: 20px; margin-top: 10px; }
     .mh-cta-phone { display: grid; gap: 4px; padding: 14px var(--mh-gutter) 0; }
     .mh-cta-phone .mh-primary { width: 100%; min-height: 48px; font-size: 16px; }
-    .mh-links { display: flex; justify-content: center; gap: 24px; }
+    .mh-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 20px; }
     .mh-links a { color: var(--mh-ink); text-decoration: none; font-size: 15px; font-weight: 500; min-height: 44px; display: inline-flex; align-items: center; }
     .mh-links a:hover { color: var(--mh-sky); }
     .mh-bar { padding: 10px var(--mh-gutter) 4px; border-top: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; }

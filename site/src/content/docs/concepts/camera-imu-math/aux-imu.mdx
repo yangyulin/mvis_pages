@@ -1,9 +1,167 @@
 ---
 title: Auxiliary IMU factor
-description: Auxiliary IMU factor with calibration.
+description: How each extra IMU is tied to the base trajectory through its extrinsic and time offset, with its own intrinsics and t_ga, and the gyro-only mode.
 pageType: concept
 ---
 
-## Auxiliary IMU Factor with Calibration
+Use this page to see how MVIS calibrates every IMU after the first one.
 
-Coming soon — derivation and Jacobians for auxiliary IMUs (full-IMU and gyro-only modes) with extrinsic and time-offset calibration to the base IMU.
+An **auxiliary IMU** is any IMU after the first in `input.imu_topics`. It is
+rigidly mounted, so it feels the same motion as the base IMU, seen from another
+place, along other axes and on another clock. MVIS solves, for each one:
+
+- **Extrinsic** ${}^{I}_{I_{s_j}}\mathbf{T}$: its rotation and position in the
+  base-IMU frame. The position part is its **lever arm**.
+- **Time offset** $t_{d,j}$: an auxiliary sample stamped $t$ is the motion at
+  base-IMU time $t + t_{d,j}$.
+- **Its own intrinsics:** $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$, in the
+  same convention as the base IMU.
+- **Its own `t_ga`** and its own biases.
+
+Below we write $I_s$ for $I_{s_j}$. Symbols follow
+[Notation & glossary](/concepts/notation/). The base factor this builds on is
+[Base IMU factor](/concepts/camera-imu-math/base-imu/).
+
+## Variables
+
+| Variable | Size | Where |
+|---|---|---|
+| calibration: ${}^{I}_{I_s}\mathbf{T}$, $t_{d,j}$, 24 intrinsics | 6 + 1 + 24 = 31 | one per auxiliary IMU |
+| velocity ${}^{G}\mathbf{v}_{I_s}$, biases $\mathbf{b}_{g,s}$, $\mathbf{b}_{a,s}$ | 9 | at the auxiliary knots |
+| `t_ga` of this IMU | 1 | one per auxiliary IMU |
+
+The auxiliary IMU has no pose states of its own. Its poses come from the base
+trajectory, so every auxiliary factor pulls on the base states too.
+
+**Knots:** one auxiliary factor spans 3 base intervals by default
+(`solve.aux_imu_stride: 3`). Fewer factors make the solve faster. The stride is not
+accuracy-neutral: the lever arms shift with it. When the lever arm matters, solve
+again with `solve.aux_imu_stride: 1` (one factor per interval, slower) and compare.
+
+## From the base pose to the auxiliary pose
+
+At each knot $k$ MVIS builds the auxiliary IMU's pose from the base state, the
+extrinsic and the time offset:
+
+$$
+{}^{G}_{I_s}\mathbf{R}_k = {}^{G}_{I_k}\mathbf{R}\;\mathrm{Exp}\!\big({}^{I}_{I_s}\mathbf{R}\;{}^{I_s}\boldsymbol{\omega}_k\;\delta t_{d}\big)\;{}^{I}_{I_s}\mathbf{R}
+$$
+
+$$
+{}^{G}\mathbf{p}_{I_s,k} = {}^{G}\mathbf{p}_{I_k} + {}^{G}\mathbf{v}_{I_k}\,\delta t_{d}
++ {}^{G}_{I_k}\mathbf{R}\;\mathrm{Exp}\!\big({}^{I}_{I_s}\mathbf{R}\;{}^{I_s}\boldsymbol{\omega}_k\;\delta t_{d}\big)\;{}^{I}\mathbf{p}_{I_s}
+$$
+
+- **${}^{I_s}\boldsymbol{\omega}_k$:** the auxiliary IMU's corrected angular
+  velocity at the knot.
+- **$\delta t_d = t_{d,j} - \bar t_{d,j}$:** only the part of the time offset not
+  yet absorbed. MVIS cuts the auxiliary samples for interval $[t_k, t_{k+1}]$ at
+  stamps $[t_k - \bar t_{d,j},\ t_{k+1} - \bar t_{d,j}]$, with $\bar t_{d,j}$ the
+  starting value. The pose then needs only a small shift, which keeps the
+  first-order propagation accurate even for offsets of tens of ms.
+
+## The residual
+
+The auxiliary IMU's own readings are preintegrated over the knot interval,
+exactly as for the base IMU: corrected by its own biases, intrinsics and `t_ga`.
+The residual is the same 15-row residual as the
+[base factor](/concepts/camera-imu-math/base-imu/#the-residual), evaluated on the
+auxiliary poses above and the auxiliary velocity and biases:
+
+$$
+\mathbf{r}_{\text{aux}}^{j,k} =
+\mathbf{r}_{\text{imu}}\Big(
+{}^{G}_{I_s}\mathbf{T}_{k},\ {}^{G}_{I_s}\mathbf{T}_{k'},\
+{}^{G}\mathbf{v}_{I_s,k},\ {}^{G}\mathbf{v}_{I_s,k'},\
+\mathbf{b}_{s,k},\ \mathbf{b}_{s,k'};\
+\mathbf{x}_{in,s},\ t_{ga,s}\Big)
+$$
+
+with $k'$ the next knot. The Jacobians chain the base-factor Jacobians through
+the pose map above, so they reach the base poses, the base velocities, the
+extrinsic and $t_{d,j}$. All are analytic and checked against finite differences.
+
+### Why the lever arm needs rotation
+
+A point at ${}^{I}\mathbf{p}_{I_s}$ on a rigid body feels the base acceleration
+plus two rotation terms:
+
+$$
+{}^{I_s}\mathbf{a} = {}^{I}_{I_s}\mathbf{R}^\top\Big({}^{I}\mathbf{a}
++ \big[{}^{I}\dot{\boldsymbol\omega}\big]_\times{}^{I}\mathbf{p}_{I_s}
++ \big[{}^{I}\boldsymbol\omega\big]_\times^2\,{}^{I}\mathbf{p}_{I_s}\Big)
+$$
+
+$[\cdot]_\times$ is the cross-product matrix. With no rotation both terms vanish
+and the lever arm leaves no trace. The rotation of the extrinsic and $t_{d,j}$
+come from the gyro alone: two gyros on one body read the same angular velocity,
+rotated and shifted in time.
+
+## Starting values
+
+Before the joint solve, MVIS initialises each auxiliary IMU from its gyro and the
+base gyro alone. Both are direct angular-rate measurements at 100 Hz or more, so
+this is sharper than going through a camera.
+
+1. **Time offset:** scan $t_{d,j}$ and keep the value where the two gyro signals,
+   aligned by the best rotation, agree best. A parabola refines the minimum.
+2. **Rotation:** the best rotation between the two gyro signals at that offset
+   (the Kabsch method, a closed-form least-squares rotation fit).
+3. **Gyro bias** from the means of the two signals.
+4. **Lever arm:** 0. Only the joint solve can see it.
+
+The start is accepted when the minimum is sharp (the error at
+$\pm$ half the search window is more than 1.5 times the minimum) and the two
+streams overlap by more than 10 s.
+
+## Priors
+
+- **First knot:** velocity and biases, as for the base IMU (0.5 m/s, 0.01 rad/s,
+  0.1 m/s² by default).
+- **Extrinsic and time offset:** free. `estimate.imu.extrinsics: false` or
+  `estimate.imu.td: false` holds them at their start.
+- **Intrinsics:** staged as for the base IMU (`estimate.imu.intrinsics`).
+- **`t_ga`:** the same weak 10 ms prior as the base IMU.
+
+## Gyro-only mode
+
+Some accelerometers are noisy or interpolated by their driver. Mark such an IMU
+`gyro_only: true` and MVIS calibrates it from its gyro alone:
+
+```yaml title="cam_imu.yaml"
+input:
+  imus:
+    - {}                    # base IMU: always full
+    - {gyro_only: true}     # second IMU: gyro only
+```
+
+The factor keeps only the rotation and gyro-bias rows:
+
+$$
+\mathbf{r}_{\text{gyro}} =
+\begin{bmatrix}
+\mathrm{Log}\!\Big(\Delta\mathbf{R}^\top\;{}^{G}_{I_s}\mathbf{R}_k^\top\,{}^{G}_{I_s}\mathbf{R}_{k'}\;\mathrm{Exp}(\delta\boldsymbol\theta)^\top\Big)\\[2pt]
+\mathbf{b}_{g,s,k'} - \mathbf{b}_{g,s,k}
+\end{bmatrix}
+$$
+
+| | Gyro-only IMU |
+|---|---|
+| **Solved** | extrinsic rotation, $t_{d,j}$, gyro bias, and $\mathbf{D}_w$ unless `estimate.imu.intrinsics: pinned` |
+| **Held** | lever arm, $\mathbf{D}_a$, $\mathbf{T}_g$, `t_ga` (none of them reach the gyro) |
+| **States** | the gyro bias at each knot, no velocity |
+
+The base IMU cannot be gyro-only: it needs its accelerometer for gravity and
+metric scale.
+
+## What this means for your recording
+
+- **Rotate about at least two axes**, briskly. The auxiliary rotation and time
+  offset come from angular velocity; the lever arm from angular velocity and
+  angular acceleration.
+- **Record long enough for the gyro start:** the two IMUs must overlap by more
+  than 10 s.
+- **Mount the IMUs rigidly.** The model assumes one rigid body.
+
+How we run multi-IMU rigs: [step 6: multi-IMU calibration](/guides/multi-sensor-rigs/).
+Why it pays off: [Why calibrate IMUs together](/why/multi-imu/).

@@ -1,5 +1,5 @@
 # Text for the public openmvis.com example pages (/benchmark/examples/<slug>/). No internal path, code hash or device id.
-# Numbers come from the run named in the private mira sensors.yaml `examples:` section (passed to export_examples.py by
+# Numbers come from the run named in the private sensors.yaml `examples:` section (passed to export_examples.py by
 # path), never from here. The config shown on a page is that run's own config with paths cut to file names.
 # The order below is the order on the site: overview cards and sidebar. Every photo lives in data/photos, 800×533.
 steps:
@@ -114,7 +114,7 @@ examples:
       - [Format, "ROS1 bag"]
       - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on recording 5imus_4cams_01: all four cameras and all five IMUs solved together."
-    dataset: {url: /datasets/#hosted--vi-rig-captures, label: VI-Rig datasets}
+    dataset: {url: /datasets/virig-5imus-4cams/, label: VI-Rig 5 IMUs + 4 cams dataset page}
     eval: {slug: virig-5imus-4cams, label: All 7 recordings}
     data:
       - "Recording 5imus_4cams_01, one of the 7 recordings of this rig. It is about 59 s long, shorter than the 80 s window MVIS asks for, so the whole recording is used."

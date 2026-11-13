@@ -1,6 +1,6 @@
 ---
 title: FAQ & troubleshooting
-description: Install problems, run failures, and results that look wrong.
+description: Common questions about installing MVIS 0.1.0, choosing models, reading the time offsets, and fixing runs that fail or look wrong.
 pageType: reference
 ---
 
@@ -9,179 +9,336 @@ Each entry gives the short answer first, then the reason.
 
 ## Install
 
-### Segfault when constructing `gtsam.Pose3`
+### Which platforms and Python versions work?
 
-**Answer:** install NumPy 1.x.
+**Answer:** Linux or macOS (x86-64 or arm64), Python 3.11 or 3.12.
+
+- **No Windows:** GTSAM, the optimisation library MVIS builds on, publishes no
+  Windows wheels.
+- **No Python 3.13:** MVIS needs NumPy 1.x (see below), and NumPy 1.x has no
+  3.13 wheel.
+- **No Python 3.10 or older:** GTSAM publishes wheels for 3.11 and newer only.
+
+### How do I install it?
+
+**Answer:** from source, until `pymvis` is on PyPI.
+
+```bash
+git clone https://github.com/openmvis/openmvis && cd openmvis
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[apriltag,aruco,ros1]"
+mvis check --env --smoke        # checks the environment and runs a small solve
+```
+
+With the v0.1.0 release on PyPI, `pip install "pymvis[apriltag,aruco,ros1]"`
+will install the same. The package is `pymvis`; the import and the command are `mvis`. Full
+steps: [Installation](/getting-started/installation/).
+
+### Which extras do I need?
+
+**Answer:** only the ones for your board and your input.
+
+- **`apriltag`:** AprilGrid boards (the grid of square AprilTag markers).
+- **`aruco`:** ArUco boards. It installs `opencv-contrib-python`; install it in
+  a fresh environment, because it and `opencv-python` both provide `cv2`.
+- **`ros1`:** ROS1 and ROS2 bags, through the pure-Python `rosbags` reader.
+- **`viz`:** the optional Rerun 3D viewer.
+- **`mcap`:** converting MCAP episodes with H.265 video (it installs PyAV).
+  ROS2 bags stored as `.mcap` need only `ros1`.
+
+Chessboards, image folders and EuRoC folders need no extra.
+
+### Do I need ROS to read a bag?
+
+**Answer:** no, for ROS1 or ROS2 bags. The `ros1` extra installs `rosbags`, a
+pure-Python reader, so you need no ROS installation or catkin workspace.
+
+- **ROS2 bags:** give the bag folder with its `metadata.yaml`, or one `.db3` or
+  `.mcap` file.
+- **ROS1 only:** `mvis apply-calib` and `mvis roundtrip` work on ROS1 bags only.
+
+- **Image topics:** `sensor_msgs/Image`, and `sensor_msgs/CompressedImage` in
+  PNG or JPEG.
+- **JPEG:** lossy, so it can shift corners. MVIS warns once per topic.
+- **Rejected:** `compressedDepth` and video codecs stop the run with an error.
+
+### Can I calibrate from a video file?
+
+**Answer:** not directly. Extract the frames into an image folder first.
+
+The inputs are image folders, timestamped image folders, ROS1 bags, ROS2 bags
+and EuRoC / ASL folders.
+
+### Segfault when MVIS builds a pose
+
+**Answer:** you have NumPy 2. Install NumPy 1.x.
 
 ```bash
 pip install "numpy<2"
 ```
 
-GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2 you get a
-crash, not an exception.
+GTSAM 4.2 from pip is built against the NumPy 1.x ABI. With NumPy 2,
+constructing a `gtsam.Pose3` crashes instead of raising an error. `pymvis` pins
+`numpy<2`, so this only happens when something else upgrades NumPy later. The
+same pin keeps OpenCV below 4.12, whose wheels need NumPy 2.
 
-### `aprilgrid` or ArUco not found
+### Does it work on macOS?
 
-**Answer:** install the detector extra you need. Detector backends are optional
-extras:
+**Answer:** yes. We test on Apple silicon (arm64) with Python 3.11. Intel Macs
+are not tested.
 
-```bash
-pip install -e ".[apriltag]"    # AprilGrid
-pip install -e ".[aruco]"       # ArUco
-```
+## Choosing settings
 
-### Cannot read a ROS bag
+### Which camera model should I use?
 
-**Answer:** install `rosbags`.
+**Answer:** pick by the lens.
 
-```bash
-pip install rosbags
-```
+- **Ordinary (non-fisheye) lens:** `radtan`, the pinhole model with
+  radial-tangential distortion.
+- **Fisheye:** `kb4`, the Kannala-Brandt model. `fisheye` and `kannala_brandt`
+  mean `kb4`. It stays valid past 90° from the optical axis.
+- **`equidistant`:** the same polynomial, but it stops at 90°. It gives the same
+  pixels as `kb4` when every corner is under 90°. MVIS warns you to switch to
+  `kb4` when a fit has corners past 90°.
+- **Others:** `fov`, `double_sphere`, `eucm`, `ucm` and `omni_radtan`
+  (experimental) are there to match a downstream system that expects them.
 
-It is pure Python. You do not need ROS installed.
+Why `kb4` is the fisheye default: [Fisheye model (kb4)](/why/kb4/). The
+equations: [Camera model](/concepts/camera-model/).
 
-### Something else
+### Which IMU convention should I use?
 
-**Answer:** run `bash scripts/setup_env.sh`.
+**Answer:** the one your downstream estimator reads. The default is `calyx`.
 
-It builds the `mvis` environment and runs the test suite. That separates an
-install problem from a data problem.
+The convention sets how the IMU intrinsics are written down, not how well they
+fit. We calibrated TUM-VI (4 raw recordings) and Monado MIC (8 recordings) with
+each of the three. The reprojection error, lever arm, baseline, `td` and the
+corrected readings agreed across conventions; only the way the matrices are
+laid out differs.
+
+- **`kalibr`:** lower-triangular scale and misalignment matrices `Dw` (gyro)
+  and `Da` (accel), plus a free gyro-to-IMU rotation.
+- **`rpng`:** upper-triangular `Dw` and `Da`, plus a free accel-to-IMU rotation.
+- **`calyx`:** a full 3×3 `Dw` and an upper-triangular `Da`, with no separate
+  rotation. The gyro rotation is recovered from `Dw` after the solve.
+
+All three can add `Tg`, the gyro's sensitivity to linear acceleration. Set the
+convention with `estimate.imu.model` or `solve.imu_intrinsics_model`. How to
+correct raw readings with each one: [IMU model](/concepts/imu-model/).
+
+### Which sign does `td` have?
+
+**Answer:** `td` is the camera–IMU time offset. An image stamped $t_\text{cam}$
+sees the IMU pose at $t_\text{cam} + t_d$.
+
+- **Kalibr:** `timeshift_cam_imu` uses the same sign
+  ($t_\text{imu} = t_\text{cam} + \text{shift}$), so compare the two values as
+  they are.
+- **Basalt:** the same sign as well.
+- **Aux IMUs:** their `td` is relative to the base IMU, with the same sign as
+  Kalibr's per-IMU `time_offset`.
+
+### What is `t_ga`, and why is it on by default?
+
+**Answer:** `t_ga` is the time offset between an IMU's gyroscope and its
+accelerometer. MVIS estimates it in every camera–IMU run
+(`solve.estimate_t_ga: true`).
+
+- **Meaning:** the accelerometer sample stamped $t$ was taken at
+  $t - t_\text{ga}$; the gyroscope defines the IMU clock.
+- **Why it matters:** some drivers merge a slower accelerometer into the gyro
+  stream by interpolation. The Intel T265 is one: its 62.5 Hz accelerometer is
+  resampled to 200 Hz. Without `t_ga`, that delay goes into `td`.
+- **Correcting it:** `mvis apply-calib` shifts the accelerometer channel by
+  `t_ga`; `--no-t-ga` turns that step off.
+
+Kalibr and Basalt have no `t_ga`. That is why the MVIS `td` can differ from
+theirs on the same recording. See [Why calibrate t_ga](/why/tga/).
+
+### Should I estimate the board shape?
+
+**Answer:** yes, unless you know the board is flat. Set
+`estimate.board_points: true`.
+
+A printed board is never flat. Held flat in the solve, a bent board pulls the
+focal length and, in camera–IMU runs, the gyro scale and the lever arm. With
+`board_points` on, MVIS estimates a height per corner along the board normal,
+with a 3 mm prior. It is off by default; our VI-Rig runs turn it on. See
+[Why calibrate the board shape](/why/board-shape/).
 
 ## Running
 
 ### Few or no detections
 
-**Answer:** check the board settings against the board you actually printed:
+**Answer:** check the board settings against the board you printed.
 
-- `tag_family`
-- `rows`
-- `cols`
-- `tag_spacing`
+- **AprilGrid:** `rows` and `cols` count tags; check `tag_size` (metres),
+  `tag_spacing` (gap over tag size) and `tag_family`.
+- **Chessboard:** `rows` and `cols` count inner corners; check `square_size`.
+- **ArUco:** check `marker_size`, `marker_separation` and `aruco_dict`.
 
-`rows`/`cols` are **inner corners** for a chessboard but tag counts for an
-AprilGrid. Multi-scale detection handles far and near boards. It cannot fix a
-wrong family.
+Then run `mvis inspect <dataset path>` for a summary of what MVIS sees in the
+recording, and `mvis check -c config.yaml` to lint the config. MVIS detects at
+several scales, so far and near boards both work. It cannot fix a wrong tag
+family. Board set-up: [Set up the board](/guides/board-setup/).
 
-### Quality gating is dropping my frames
+### Every translation is off by the same factor
 
-**Answer:** this is by design. Quality gating (the checks that drop weak frames)
-uses these limits:
+**Answer:** the board size in the config does not match the print. Measure a tag
+(or square) with calipers and set `tag_size` or `square_size` in metres.
 
-- **Pooled-pose filter:** ≥20% of tags across cameras
-- **Per corner:** ≥5 views
-- **Per camera:** ≥3 views
-- **Per frame:** minimum 6 tags
+### Quality gating drops most of my frames
 
-If most frames are dropped, the recording is too sparse. Get closer, or move
-more slowly.
+**Answer:** the recording is too sparse. Get closer to the board, keep more of
+it in view, or move more slowly.
 
-### Stage 1 initialisation fails
+Quality gating removes frames and corners that would be poorly constrained:
 
-**Answer:** on wide fisheye, try `kb4` ([why not `equidistant`](/why/kb4/)).
+- **Per frame:** at least 6 tags.
+- **Per corner:** at least 5 views across all cameras, and at least 3 in each
+  camera.
+- **Shared frames:** a reference frame needs at least 20 % of the tags across
+  the cameras.
 
-The sanity check caught a degenerate init (an unusable starting estimate). This is common on wide fisheye with the wrong model.
-`max_init_frames` caps how many frames the OpenCV init uses.
+### Initialisation fails on a wide fisheye
+
+**Answer:** use `kb4`.
+
+- **Why:** with `equidistant`, corners past 90° can make the first estimate
+  unusable.
+- **What MVIS does:** it checks the first estimate of each camera. If the
+  principal point falls outside the image or the distortion is extreme, it logs
+  a warning naming the camera and restarts from a plain guess (focal length half
+  the longer image side, principal point at the centre).
+- **If the warning appears:** switch the camera to `kb4` and run again.
+
+### A wide-field stereo fit diverged
+
+**Answer:** fit each camera alone, then use those intrinsics in the stereo or
+camera–IMU solve.
+
+On TUM-VI, stereo camera-only fits with `double_sphere`, `eucm` or `fov` can
+drift into a wrong solution, where the focal length trades against the model's
+shape parameter. Single-camera fits stay stable. The two-step recipe is in
+[`examples/configs/tumvi_cam_imu/`](https://github.com/openmvis/openmvis/tree/main/examples/configs/tumvi_cam_imu).
 
 ### It is slow
 
-**Answer:** `corner_subsample: top_left` is already the default (3–5× faster).
-You can also use:
+**Answer:** check these, in order.
 
-- **`factor_hz`** to subsample frames
-- **`--parallel`** on the regression runner
-- **`cache_dir`**, which makes re-runs skip detection entirely
+- **BLAS threads:** the `mvis` command pins the numerical library (BLAS) to one
+  thread, because the solve works on small matrices and extra threads only spin.
+  If you import `mvis` from your own Python, set `OPENBLAS_NUM_THREADS=1`,
+  `OMP_NUM_THREADS=1` and `MKL_NUM_THREADS=1` before NumPy loads.
+  `MVIS_BLAS_THREADS=<n>` changes the CLI's choice. Details:
+  [`doc/blas_threads.md`](https://github.com/openmvis/openmvis/blob/main/doc/blas_threads.md).
+- **Detection cache:** set `input.cache_dir`. Re-runs on the same recording then
+  skip detection, and a camera-only and a camera–IMU run share it.
+- **Frame rate in the solve:** `factor_hz` sets how many frames per second enter
+  the camera factors. Lower it to cut the solve time.
+- **Corner subsampling:** camera-only runs already keep two diagonal corners per
+  tag (`two_anti`). Do not drop to one corner (`top_left`): it shifts the
+  principal point by up to about 0.8 px.
+- **Window:** by default (`input.window_mode: motion`), a camera–IMU run
+  solves the 80 s segment with the most IMU motion. Lower
+  `input.segment_length` to cut the time, or set `window_mode: manual` with
+  `t0` and `window` (seconds) to choose the span yourself. Recordings shorter
+  than `segment_length` are used whole.
 
-### A wide-FoV stereo fit diverged
+### Results did not change after I changed detection settings
 
-**Answer:** fit each camera alone, then pin those intrinsics for the joint
-solve. The recipe is in `examples/configs/tumvi_cam_imu/`.
-
-This is known. `double_sphere` and `eucm` stereo fits can slide into an fx–xi /
-alpha basin on TUM-VI. Single-camera fits stay stable. See
-[Camera model](/concepts/camera-model/).
+**Answer:** clear the detection cache. The cache is keyed on the recording, the
+image topic and the board, so other detection changes reuse the old detections.
+Delete the `cache_dir` folder and run again.
 
 ## Results that look wrong
 
 ### Reprojection error is low but the extrinsics look off
 
-**Answer:** read the **motion-excitation grade** in the HTML report. For
-camera–IMU, also run [`mvis roundtrip`](/guides/roundtrip/).
+**Answer:** check that the motion constrained them. Read the motion-excitation
+grade in the HTML report, and for camera–IMU runs on a ROS1 bag also run
+[`mvis roundtrip`](/guides/roundtrip/).
 
-A low residual means the solution explains its own observations. A parameter the
-motion never constrained settles near its initial value. It does so without
-raising the error.
+A low reprojection error means the solution explains its own observations. A
+parameter the motion never constrained stays near its starting value without
+raising the error. See [Degeneracy](/concepts/degeneracy/).
 
-### Round-trip FAILs
+### The round trip fails
 
-**Answer:** that is a real finding. Usual causes:
+**Answer:** treat it as a real finding. (`mvis roundtrip` works on ROS1 bags
+only.) Common causes:
 
-- Wrong camera model
-- Wrong IMU convention
-- An interpolated accelerometer corrupting `td` (the camera–IMU time offset):
-  try `gyro_only` or `estimate_t_ga`
-- Insufficient excitation (not enough motion to constrain the parameters)
+- **Wrong camera model:** on a fisheye, use `kb4`.
+- **An interpolated accelerometer:** keep `estimate_t_ga` on, or set
+  `gyro_only: true` for that auxiliary IMU.
+- **Too little motion:** record again with rotation about every axis and
+  changes of speed.
 
 See [Round-trip validation](/guides/roundtrip/#when-it-fails).
 
-### `td` or the lever arm look wrong on a dynamic rig
+### `td` or the lever arm look wrong on a fast-moving rig
 
-**Answer:** check `state_hz`.
+**Answer:** keep `state_hz` at its default, 30 Hz.
 
-It defaults to 30 Hz. Below that, reprojection, lever, and `td` alias on
-dynamic-motion rigs. Gentle sequences are insensitive to it.
+`state_hz` is how many pose states per second the camera–IMU solve places along
+the trajectory. Below 30 Hz, reprojection, lever arm and `td` get worse on fast
+motion. Slow, gentle recordings barely notice.
 
-### The T265's time offset is unstable
+### One IMU's accelerometer is unreliable
 
-**Answer:** either set `gyro_only: true` on that IMU or turn on
-`solve.estimate_t_ga`. The t_ga term is the time offset between the gyroscope
-and accelerometer channels.
+**Answer:** set `gyro_only: true` for that IMU under `input.imus`.
 
-The T265's Bosch BMI055 publishes a 62.5 Hz accelerometer interpolated to 200 Hz.
-That injects a gyro-accel timing offset. See [IMU model](/concepts/imu-model/).
-It is also not a pure shift; see [Why calibrate t_ga](/why/tga/#limits).
+MVIS then calibrates that IMU from its gyroscope alone: rotation, `td`, gyro
+scale (`Dw`) and gyro bias. Its lever arm, `Da` and `Tg` stay fixed. This works
+for auxiliary IMUs only; the base IMU needs its accelerometer for gravity and
+metric scale.
 
-### IMU intrinsics come back at their initial values
+### IMU intrinsics come back at their starting values
 
-**Answer:** they were not observed.
+**Answer:** the motion did not constrain them.
 
-- Scale and misalignment need excitation on every axis.
-- `Tg` needs simultaneous rotation and strong linear acceleration.
+- **Scale and misalignment:** need rotation and acceleration on every axis.
+- **`Tg`:** needs rotation and strong linear acceleration at the same time.
 
 See [Degeneracy](/concepts/degeneracy/).
 
 ### Results differ from Kalibr's
 
-**Answer:** check these in order:
+**Answer:** check these, in order.
 
-1. The IMU convention: `kalibr`, `rpng`, and `calyx` produce different matrices
-   for the same device
-2. Sensor numbering
-3. Transform direction
-4. Board shape: MVIS can estimate it (`estimate.board_points: true`); Kalibr
-   uses a flat board. On a board that is not flat, this alone moves the focal
-   length ([why](/why/board-shape/)).
+1. **IMU convention:** `kalibr`, `rpng` and `calyx` write different matrices for
+   the same device. Compare like with like.
+2. **Transform direction and sensor numbering:** MVIS stores `T_cam_imu` like
+   Kalibr; check which camera and IMU each value belongs to.
+3. **`t_ga`:** Kalibr has none, so `td` can differ on IMUs with a gyro–accel
+   offset.
+4. **Board shape:** Kalibr holds the board flat. With
+   `estimate.board_points: true`, MVIS does not, and that alone moves the focal
+   length on a bent board.
 
-`mvis.io.kalibr` reads Kalibr camchains directly, which is the reliable way to
-compare.
+`mvis.io.kalibr` reads and writes Kalibr camchains, which is the reliable way to
+compare. Our side-by-side results are on the [Leaderboard](/benchmark/results/).
 
-### Every translation is off by the same factor
+### Results differ between recordings of the same rig
 
-**Answer:** `tag_size` does not match the printed board. Measure a tag with
-calipers.
+**Answer:** the parameters that differ were not well constrained by the motion
+in some recordings.
 
-### Results differ between sequences of the same rig
-
-**Answer:** those parameters were not constrained by the motion in them.
-
-Run a
-[batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config).
-Spread across sequences is the most honest accuracy signal available without
-ground truth.
+Calibrate every recording from one config with `input.bags` (see
+[Camera–IMU calibration](/guides/camera-imu-calibration/)) and compare the
+spread. Without ground truth, the spread across recordings is the most honest
+accuracy measure.
 
 ## Still stuck
 
-Open an issue on [the repository](https://github.com/openmvis/mvis_pages). Include:
+Open an issue on
+[github.com/openmvis/openmvis](https://github.com/openmvis/openmvis/issues).
+Include:
 
-- Your config
-- The console output
-- What the rig is
+- Your config YAML
+- The full log
+- The output of `mvis --version`
+- Your OS, CPU and Python version
+- A link to the data, if you can share it
+
+Report security problems privately to contact@openmvis.com, not in an issue.

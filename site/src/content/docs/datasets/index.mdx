@@ -3,7 +3,7 @@ sidebar:
   order: 0
   label: Overview
 title: Datasets
-description: Datasets for the MVIS multi-visual-inertial calibration benchmark, hosted in the Calibench Hugging Face organization.
+description: Every calibration dataset on the Calibench Hugging Face hub, our own VI-Rig recordings first, with licences, sources and links to their benchmark results.
 pageType: reference
 wide: true
 ---
@@ -11,91 +11,131 @@ wide: true
 import { Image } from 'astro:assets';
 import viRig from '../../../assets/vi_rig.jpg';
 
-Use this page to find the benchmark data, see what each dataset holds, and
-cite it.
+This page lists every dataset we use to test and benchmark MVIS, where to get it, and its licence.
 
-- **Where:** all benchmark data lives in the
-  [**Calibench** Hugging Face organization](https://huggingface.co/calibench-vi).
-- **Source of truth:** the
-  [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
-  repository.
-- **Hosted:** our own VI-Rig captures (CC BY-NC 4.0).
-- **Recipes:** download recipes for the third-party datasets the benchmark
-  evaluates against.
-- **Old links:** the Google Drive links from the legacy site are retired.
+- **Where the data lives:** the [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
+  repository on Hugging Face. Calibench is the name of our calibration benchmark.
+- **What it hosts:** our own VI-Rig recordings, two partner recordings, third-party sets whose licence allows
+  us to share them again (CC BY 4.0), and result files for some sets (`tum-fisheye/results/`, `uzh-fpv/results/`,
+  `virig-5imus-4cams/results/`).
+- **What it does not host:** all other third-party sets. For those, a download recipe fetches the files from the
+  original site.
+- **Results:** the reference results for each set are on the [leaderboard](/benchmark/results/) and in
+  [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
 
-## Hosted — VI-Rig captures
+## VI-Rig: our own recordings
 
-We collected these on a self-built VI-Rig for research on multi-visual-inertial
-calibration. Reference Kalibr and MVIS results for these captures are in
-[`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
+We built the VI-Rig to research calibration of rigs with several cameras and several IMUs. An IMU (inertial
+measurement unit) is a gyroscope plus an accelerometer. Each dataset below is one sensor setup on the same frame,
+recorded as ROS1 bags (one bag per recording) while we move the rig in front of a calibration board.
 
-Terms in the table:
+<Image src={viRig} alt="The VI-Rig: a FLIR Blackfly camera, a RealSense T265, an ELP stereo module and four IMUs on one white frame" width="420" />
 
-- **IMU:** inertial measurement unit (a gyroscope and an accelerometer)
-- **GS / global shutter:** the camera exposes the whole image at once
-- **Rolling shutter:** the camera reads the image out row by row
-- **AprilGrid:** a printed grid of AprilTag markers (square codes the software
-  finds in each image)
-- **ArUco:** another family of square marker tags
+| Dataset | Cameras | IMUs | Board | Recordings | Size | Results |
+|---|---|---|---|---|---|---|
+| [4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/) | Blackfly + T265 pair, all global shutter | 4, 100–500 Hz | AprilGrid | 10, 131–161 s | 76 GB | [results](/benchmark/results/virig-4imus-3cams/) · [example](/benchmark/examples/virig-4imus-3cams/) |
+| [4 IMUs + 3 cameras, ArUco](/datasets/virig-4imus-3cams-aruco/) | same 3 cameras | 4 IMUs (3 in recordings 11–17) | ArUco tags | 17, 102–139 s | 117 GB | not benchmarked |
+| [4 IMUs + 4 cameras](/datasets/virig-4imus-4cams/) | T265 pair (global) + ELP stereo (rolling) | 4, 100–500 Hz | AprilGrid | 15, 131–152 s | 113 GB | [results](/benchmark/results/virig-4imus-4cams/) · [example](/benchmark/examples/virig-4imus-4cams/) |
+| [5 IMUs + 4 cameras](/datasets/virig-5imus-4cams/) | two T265 pairs, all global shutter | 5, 100–500 Hz | AprilGrid | 7, 41–64 s | 28 GB | [results](/benchmark/results/virig-5imus-4cams/) · [example](/benchmark/examples/virig-5imus-4cams/) |
 
-| Dataset | Sensors | Sequences | Data |
-|---|---|---|---|
-| [4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/) | 4 IMUs, 3 global-shutter | 10 AprilGrid | [`virig-4imus-3cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams) |
-| 4 IMUs + 3 cameras — ArUco | same rig, ArUco-tag sequences | 17 | [`virig-4imus-3cams-aruco`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams-aruco) |
-| [4 IMUs + 4 cameras](/datasets/virig-4imus-4cams/) | 4 IMUs, 2 GS + 2 rolling shutter | 15 AprilGrid (+7 raw) | [`virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams) |
-| 5 IMUs + 4 cameras | 5 IMUs (two T265 stereo fisheye pairs), 4 cameras | 7 AprilGrid | [`virig-5imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams) |
+Terms used in the table:
 
-## Third-party datasets (recipes)
+- **Global shutter:** the camera exposes every row of the image at the same time.
+- **Rolling shutter:** the camera reads the image out row by row, so each row has its own capture time.
+- **AprilGrid:** a printed grid of AprilTags, square codes that the software finds and identifies in each image.
+- **ArUco:** another family of square marker tags.
 
-Calibench hosts only data we own. Every third-party dataset the benchmark
-evaluates ships as a `download.py` recipe (manifest + checksums). The recipe
-pulls the data from its original host. The recipes cover:
+### Licence and access
 
-- EuRoC MAV
-- TUM VI
-- TUM RGB-D
-- TUM VIE
-- TUM Double-Sphere
-- TUM RS
-- Monado MSD
-- Hilti 2022
-- Hilti 2023 Handheld
-- PennCOSYVIO
-- an urban fisheye set
+- **Licence:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Free for research, teaching and
+  other non-commercial use, with attribution.
+- **Gated:** log in to Hugging Face and accept the terms on the
+  [dataset page](https://huggingface.co/datasets/calibench-vi/datasets). Access is granted at once.
+- **Benchmark exception:** anyone, a company included, may run a calibration tool on these recordings to produce
+  Calibench results and publish them with attribution.
+- **Other commercial use:** needs a separate licence. Ask in the Community tab of the Hub repository or at
+  licensing@openmvis.com.
 
-For the exact list and licenses, see
-[`recipes/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/recipes)
-and its
-[`SOURCES.md`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/recipes/SOURCES.md).
-The [leaderboard](/benchmark/results/) evaluates calibration methods across
-these datasets plus the hosted VI-Rig captures.
+### Download
 
-These datasets have complete MVIS runs, documented as worked examples on this site:
+Accept the terms on the Hub first, then set `HF_TOKEN` to a read token from your Hugging Face settings (or log in once with `hf auth login`, after `pip install huggingface_hub`).
 
-| Dataset | Rig | Example |
-|---|---|---|
-| TUM VI | Stereo 1024² fisheye + BMI160 | [TUM VI](/benchmark/examples/tum-vi/) |
-| Monado SLAM (HP Reverb G2) | Tracking-camera pair + 1 kHz IMU | [Monado](/benchmark/examples/monado/) |
-| VI-Rig 4 IMUs + 3 cams | 3 global-shutter cameras + 4 IMUs | [VI-Rig](/benchmark/examples/virig-4imus-3cams/) |
-| UZH-FPV | Snapdragon Flight stereo + IMU; mDAVIS346 + IMU | [UZH-FPV](/benchmark/examples/uzh-fpv/) |
-| Looper Insight 9 | 3 cameras (one rolling shutter) + 400 Hz IMU | [Looper Insight 9](/benchmark/examples/looper-insight9/) |
+```bash
+mvis datasets list                                          # every dataset key, recording and size
+mvis datasets download --select mvis_4imus_3cams/april_01   # one recording, 6.9 GB
+```
 
-To contribute one, see [Submit a dataset](/contribute/submit-dataset/).
+- **Where files land:** in `$MVIS_DATASETS` (default `~/Datasets`). The example configs refer to the data as
+  `${MVIS_DATASETS}/...`.
+- **Checks:** `mvis datasets` checks each file's size and SHA-256 checksum.
+- **Without MVIS:** use the Hugging Face CLI; each dataset page gives the exact command.
+
+## Partner recordings on the Hub
+
+Two partners agreed to share their recordings under the same terms as the VI-Rig sets (CC BY-NC 4.0, gated, with
+the benchmark exception).
+
+| Dataset | Rig | Recordings | Hub folder | On this site |
+|---|---|---|---|---|
+| Looper Robotics Insight 9 | 2 global-shutter mono cameras + 1 rolling-shutter colour camera + 400 Hz IMU | 10 ROS1 bags, AprilGrid | [`looper-insight9`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/looper-insight9) | [device](/devices/looper-insight9/) · [results](/benchmark/results/looper-insight9/) · [example](/benchmark/examples/looper-insight9/) |
+| GiLabs examples | GI Ego1 and GI EGO1GS head-worn cameras: 2 cameras + IMU | 3 MCAP recordings, not in the benchmark | [`gilabs-examples`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/gilabs-examples) | [GI Ego1](/devices/gi-ego1/) · [GI EGO1GS](/devices/gi-ego1gs/) |
+
+## Third-party datasets
+
+These sets come from other groups. Each keeps its own licence and citation; please cite the original authors.
+
+- **Hosted:** the calibration recordings of sets under CC BY 4.0, converted to ROS1 bags. A `.provenance.json`
+  beside each bag records the source address, the source checksum and the conversion steps.
+- **Recipe:** we never copy these files. The Hub's
+  [`recipes/download.py`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/recipes) fetches them
+  from the original site and checks them.
+- **Key:** `mvis datasets download --dataset <key>` also fetches from the original site and checks each file. For
+  the hosted sets it gets the original archives; `mvis datasets convert` then turns them into ROS1 bags. Urban
+  fisheye and part of PennCOSYVIO have no checksum in the catalog; add `--allow-unverified` to fetch them
+  unchecked.
+
+| Dataset | Rig | Licence | How to get it | Original source | On this site |
+|---|---|---|---|---|---|
+| TUM-VI | stereo fisheye 1024² (and 512²) + BMI160 IMU | CC BY 4.0 | recipe · keys `tum_vi_raw`, `tum_vi_standard_512` | [TUM](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset) | [results](/benchmark/results/tum-vi/) · [example](/benchmark/examples/tum-vi/) |
+| Monado SLAM, MIC (Valve Index) | 2 fisheye + 1 kHz IMU | CC BY 4.0 | hosted: [`converted/tum_mic`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted/tum_mic) · key `tum_mic` | [Collabora](https://huggingface.co/datasets/collabora/monado-slam-datasets) | [device](/devices/valve-index/) |
+| Monado SLAM, MGC (HP Reverb G2) | 4 fisheye + 1 kHz IMU | CC BY 4.0 | hosted: [`converted/monado_mgc`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted/monado_mgc) · key `monado_mgc` | [Collabora](https://huggingface.co/datasets/collabora/monado-slam-datasets) | [device](/devices/hp-reverb-g2/) · [results](/benchmark/results/monado-mgc/) · [example](/benchmark/examples/monado/) |
+| Monado SLAM, MOC (Samsung Odyssey+) | 2 fisheye + 1 kHz IMU | CC BY 4.0 | hosted: [`converted/monado_moc`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted/monado_moc) · key `monado_moc` | [Collabora](https://huggingface.co/datasets/collabora/monado-slam-datasets) | [device](/devices/samsung-odyssey-plus/) |
+| TUM-VIE, frame cameras | stereo 1024² + BMI160 IMU | CC BY 4.0 | hosted: [`converted/tum_event`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted/tum_event) · key `tum_event` | [TUM](https://cvg.cit.tum.de/data/datasets/visual-inertial-event-dataset) | – |
+| UZH-FPV | DAVIS346 + IMU; Snapdragon stereo + IMU | CC BY-NC-SA 3.0 | keys `uzh_fpv_davis`, `uzh_fpv_snapdragon` | [UZH](https://fpv.ifi.uzh.ch/) | [results](/benchmark/results/uzh-fpv/) · [example](/benchmark/examples/uzh-fpv/) |
+| TUM-Fisheye (Double Sphere) | 1 camera, 5 fisheye lenses | none stated | recipe · key `tum_fisheye` | [TUM](https://cvg.cit.tum.de/research/vslam/double-sphere) | [Why kb4](/why/kb4/) · [MVIS results on the Hub](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/tum-fisheye/results/2026-11-04) |
+| TUM RGB-D | Kinect and Xtion RGB + IR cameras | CC BY 4.0 | recipe · key `tum_rgbd_bag` | [TUM](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) | – |
+| PennCOSYVIO | GoPro, Tango and VI-Sensor cameras + IMUs | citation only | recipe · key `penncosyvio` | [Penn](https://daniilidis-group.github.io/penncosyvio/) | – |
+| Urban fisheye (ImprovedOcamCalib) | fisheye and GoPro stills | GPL v2 | recipe · key `fisheye_dataset` | [GitHub](https://github.com/urbste/ImprovedOcamCalib) | – |
+| EuRoC MAV | stereo + IMU | CC BY | Hub recipe only | [ETH Zurich](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) | – |
+| TUM RS (rolling shutter) | rolling- and global-shutter cameras + IMU | none stated | Hub recipe only | [TUM](https://cvg.cit.tum.de/data/datasets/rolling-shutter-dataset) | – |
+| Hilti 2022 | multi-camera + IMU | CC BY-NC-SA 3.0 | Hub recipe only | [Hilti](https://hilti-challenge.com/dataset-2022.html) | – |
+| Hilti 2023 handheld | multi-camera + IMU | CC BY-NC-SA 3.0 | Hub recipe only | [Hilti](https://hilti-challenge.com/dataset-2023.html) | – |
+
+- **Exact sources and licences:** see
+  [`recipes/SOURCES.md`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/recipes/SOURCES.md) on the
+  Hub.
+- **Add your own:** see [Submit a dataset](/contribute/submit-dataset/).
 
 ## Citation
 
 If you use the Calibench data, please cite:
 
-- **The benchmark**
-- **The MVIS paper,** for the VI-Rig captures
+- **Calibench**, for any of the data.
+- **The MVIS paper**, for the VI-Rig sets with 4 IMUs (3 cameras, 3 cameras ArUco, 4 cameras). The 5-IMU set has no
+  paper yet; cite Calibench for it.
+- **The original paper** of every third-party set you use. The
+  [dataset card](https://huggingface.co/datasets/calibench-vi/datasets) lists them.
+
+The MVIS paper entry below is the same as on [Contributors & citation](/about/contributors/#citing-mvis), which
+also has the entries for the software and the benchmark results.
 
 ```bibtex
 @misc{calibench2026,
-  title        = {Calibench: Calibration Benchmark Datasets},
   author       = {Yang, Yulin},
+  title        = {Calibench: Visual-Inertial Datasets for Calibration Benchmark},
   year         = {2026},
-  howpublished = {\url{https://huggingface.co/datasets/calibench-vi/datasets}}
+  howpublished = {Hugging Face Datasets},
+  note         = {https://huggingface.co/datasets/calibench-vi/datasets}
 }
 ```
 
@@ -105,46 +145,9 @@ If you use the Calibench data, please cite:
   author  = {Yang, Yulin and Geneva, Patrick and Huang, Guoquan},
   journal = {The International Journal of Robotics Research},
   year    = {2024},
+  volume  = {43},
+  number  = {13},
+  pages   = {1995--2026},
   doi     = {10.1177/02783649241245726}
 }
 ```
-
-Third-party datasets keep their own licenses and citations. The
-[dataset card](https://huggingface.co/datasets/calibench-vi/datasets) maps each
-config to its required upstream citation.
-
-## VI-Rig sensors
-
-We use a self-built VI-Rig to collect data. The rig has 4 IMUs, one monocular
-camera and 2 stereo pairs. Counting each stereo camera as two monocular cameras,
-we have 5 cameras total.
-
-<Image src={viRig} alt="VI-Rig with 4 IMUs and 5 cameras" width="320" />
-
-**Visual-Inertial (VI)-Rig** — 4 IMUs and 5 cameras:
-
-- MicroStrain GX3-25
-- MicroStrain GX3-35
-- Xsens MTI-100
-- RealSense T265 IMU
-- FLIR BlackFly
-- RealSense T265 Left & Right cameras
-- ELP Left & Right rolling-shutter cameras
-
-The ROS drivers can be found [here](https://github.com/yangyulin/multi_sensor_drivers).
-
-### Dataset info
-
-The datasets contain the following ROS topics:
-
-| Sensor | Hz | Topic | Resolution |
-|---|---|---|---|
-| MicroStrain GX3-25 | 500 | `/gx3_25/data` | — |
-| MicroStrain GX3-35 | 100 | `/gx3_35/imu/data` | — |
-| Xsens MTI-100 | 400 | `/imu/data` | — |
-| RealSense T265 IMU | 200 | `/t265/imu` | — |
-| FLIR BlackFly | 30 | `/blackfly/image_raw` | 720×540 |
-| RealSense T265 Left | 30 | `/t265/fisheye1/image_raw` | 848×800 |
-| RealSense T265 Right | 30 | `/t265/fisheye2/image_raw` | 848×800 |
-| ELP Left rolling shutter | 25 | `/elp/split_sync_image_node/left/image_raw` | 640×480 |
-| ELP Right rolling shutter | 25 | `/elp/split_sync_image_node/right/image_raw` | 640×480 |

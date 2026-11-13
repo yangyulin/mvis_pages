@@ -1,82 +1,135 @@
 ---
 title: License
-description: Licensing for MVIS, this site, and the released datasets.
+description: Licences for MVIS, the calibration results it computes, this site, the datasets and the third-party software MVIS uses.
 pageType: reference
 ---
 
-Use this page to see what you may do with MVIS, this site and our datasets.
-Each part has its own licence:
+Use this page to see what you may do with MVIS, its results, this site and our
+datasets. Each part has its own licence.
 
-- **Toolbox (MVIS):** MIT License
-- **This site:** MIT License, with exceptions for third-party clips and figures, and product photos
-- **Datasets:** their own licences; contributed recordings in `calibench-vi/community` are CC BY-NC 4.0
-- **Third-party components:** their own licences
+| Part | Licence |
+|---|---|
+| MVIS toolbox | GPL-3.0-only, or a commercial licence |
+| Calibration results you compute | yours; results on a dataset follow that dataset's licence |
+| This site | MIT, except third-party figures and product photos |
+| VI-Rig datasets (ours) | CC BY-NC 4.0, gated; commercial licence on request |
+| Converted third-party datasets | CC BY 4.0 |
+| Third-party software | its own licence |
 
-## Toolbox
+## MVIS toolbox
 
-MVIS declares the **MIT License** in its `pyproject.toml`.
+MVIS is dual-licensed. The copyright holder is named in the header of each
+source file.
 
-MIT is permissive. You may:
+- **GPL-3.0-only** ([`LICENSE`](https://github.com/openmvis/openmvis/blob/main/LICENSE)):
+  free for everyone, companies included, for research, teaching and internal
+  use. If you distribute software that includes or is derived from MVIS, you
+  must release it under GPL-3.0.
+- **Commercial licence**
+  ([`COMMERCIAL-LICENSE.md`](https://github.com/openmvis/openmvis/blob/main/COMMERCIAL-LICENSE.md)):
+  for closed-source products, or whenever you cannot meet the GPL-3.0 terms.
+  Write to licensing@openmvis.com.
 
-- use it
-- modify it
-- redistribute it, including in closed-source products
+### Calibration results
 
-The condition: the copyright notice and licence text travel with it.
+The GPL covers the MVIS code, not what it computes.
 
-:::caution[No LICENSE file yet]
-The declaration lives in package metadata. The repository does not yet carry a
-`LICENSE` file with the full text. Until it does, treat this page as
-*indicative* rather than authoritative. Adding the file is on the
-[roadmap](/about/roadmap/).
-:::
+- **Your recordings:** results you compute on your own recordings
+  (intrinsics, extrinsics, time offsets, residuals, plots, reports) are yours.
+  You may publish them anywhere, including on commercial product pages, without
+  a commercial licence.
+- **Our datasets:** results computed on a dataset follow that dataset's licence.
+  Results on the CC BY-NC 4.0 VI-Rig data may not be used commercially without a
+  dataset licence.
+
+### The MVIS name
+
+You may say that results were computed with MVIS, for example "Calibrated with
+MVIS" with a link to https://openmvis.com. Do not use the MVIS or OpenMVIS names
+or logos in a way that suggests the project endorses or certifies your product
+without written permission.
+
+### Contributing code
+
+Pull requests come with a contributor licence agreement, stated in
+[`CONTRIBUTING.md`](https://github.com/openmvis/openmvis/blob/main/CONTRIBUTING.md).
+It lets the maintainer also offer your contribution under the commercial
+licence.
 
 ## This site
 
-[`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages) — source,
-content, and generated pages — is released under the **MIT License**. Prose and
-figures here can be reused with attribution.
+The [`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages) README
+states that the source and content of this site are released under the **MIT
+License**. You may reuse the text and figures with
+attribution.
 
 Two exceptions:
 
-- **Third-party clips and figures:** clips and figures made from a third-party
-  recording, such as those on the sensor pages, carry that recording's licence,
-  stated on the page.
-- **Product photos:** product photos on the sensor pages belong to their makers.
-  Each is credited with a link to its source and isn't covered by this licence.
-
-If you are the maker and want a photo changed or removed, write to
-contact@openmvis.com.
+- **Third-party figures:** clips and figures made from a third-party recording,
+  such as those on the device pages, carry that recording's licence, stated on
+  the page.
+- **Product photos:** photos on the device pages belong to their makers. Each is
+  credited with a link to its source and is not covered by the MIT License. If
+  you are the maker and want a photo changed or removed, write to
+  contact@openmvis.com.
 
 ## Datasets
 
-Released datasets carry their own licences, stated on each dataset's page — see
-[Datasets](/datasets/).
+All datasets are in the [Calibench](https://huggingface.co/calibench-vi)
+organisation on Hugging Face. The licence is set per dataset; see
+[Datasets](/datasets/) and the
+[dataset card](https://huggingface.co/datasets/calibench-vi/datasets).
 
-Contributed recordings hosted in
-[`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
-are CC BY-NC 4.0. See
-[Submit a dataset](/contribute/submit-dataset/).
+- **VI-Rig recordings (ours):** `virig-4imus-3cams`, `virig-4imus-3cams-aruco`,
+  `virig-4imus-4cams` and `virig-5imus-4cams` are
+  [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Access is
+  gated: accept the terms on the Hub once, then download. Free for research,
+  teaching and other non-commercial use with attribution. Commercial use needs a
+  separate licence: write to licensing@openmvis.com.
+- **Partner recordings:** `looper-insight9` and `gilabs-examples` have the same
+  CC BY-NC 4.0 terms, with the partner's approval. Anyone, a company included,
+  may run a calibration tool on the non-commercial datasets to produce results
+  for the benchmark, and publish those results with attribution.
+- **Converted third-party sets:** the calibration recordings under `converted/`
+  (Monado SLAM datasets MIC, MGC and MOC, and the TUM-VIE frame cameras) stay
+  under their original [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+  commercial use included. Each bag carries a `.provenance.json` with its source
+  address. Cite the original dataset.
+- **Other third-party datasets:** we do not re-host them. `mvis datasets` and the
+  recipes on the dataset card download them from their owners, under the owners'
+  terms. TUM-VI, for example, is CC BY 4.0.
+- **Contributed recordings:** recordings in
+  [`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
+  are CC BY-NC 4.0. See [Submit a dataset](/contribute/submit-dataset/).
 
-## Third-party components
+## Third-party software
 
-MVIS builds on software under its own terms. Their licences govern their own
-code:
+MVIS uses these libraries. Each keeps its own licence.
 
-| Component | Licence |
-|---|---|
-| [GTSAM](https://github.com/borglab/gtsam) | BSD |
-| OpenCV | Apache 2.0 |
-| NumPy | BSD |
-| `aprilgrid` | see project |
-| `rosbags` | see project |
+| Component | Used for | Licence |
+|---|---|---|
+| [GTSAM](https://github.com/borglab/gtsam) | factor-graph optimisation | BSD (simplified) |
+| [NumPy](https://numpy.org/) | arrays | BSD-3-Clause |
+| [SciPy](https://scipy.org/) | numerics | BSD-3-Clause |
+| [OpenCV](https://opencv.org/) (`opencv-python`, `opencv-contrib-python`) | images, initialisation, ArUco | Apache 2.0 |
+| [PyYAML](https://pyyaml.org/) | config and result files | MIT |
+| [Matplotlib](https://matplotlib.org/) | report plots | Matplotlib licence (PSF-based) |
+| [Plotly](https://plotly.com/python/) | interactive report plots | MIT |
+| [tqdm](https://github.com/tqdm/tqdm) | progress bars | MPL-2.0 and MIT |
+| [aprilgrid](https://pypi.org/project/aprilgrid/) (`apriltag` extra) | AprilGrid detection | BSD-3-Clause |
+| [rosbags](https://gitlab.com/ternaris/rosbags) (`ros1` extra) | ROS1 and ROS2 bag reading | Apache 2.0 |
+| [Rerun](https://rerun.io/) (`viz` extra) | 3D viewer | MIT or Apache 2.0 |
+| [MCAP](https://mcap.dev/) and [PyAV](https://pyav.org/) (`mcap` extra) | converting MCAP episodes (PyAV decodes their H.265 video) | MIT; BSD-3-Clause |
+
+Kalibr and Basalt are not part of MVIS. We run them only as separate programs
+for the comparisons on this site.
 
 ## Citing
 
-- **Citation details:** on [Contributors & citation](/about/contributors/).
-- **Datasets:** they have their own DOIs and citations.
+How to cite MVIS, the benchmark and the datasets:
+[Contributors & citation](/about/contributors/).
 
 :::note[Not legal advice]
-This page summarises licensing for orientation. The licence files in each
-repository are what actually govern use.
+This page summarises the licences for orientation. The licence files in each
+repository, and the dataset card on Hugging Face, are what govern use.
 :::

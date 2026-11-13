@@ -1,6 +1,6 @@
 ---
 title: Contributors & citation
-description: People behind Open MVIS, and how to cite the toolbox, the datasets, and the leaderboard.
+description: Who builds MVIS, and how to cite the toolbox, the method, the benchmark and the datasets.
 pageType: reference
 ---
 
@@ -10,35 +10,88 @@ import yang from '../../../assets/yangyulin.jpg';
 import patrick from '../../../assets/patrick.jpg';
 import paul from '../../../assets/Huang2014small.jpg';
 
-Use this page to see who builds Open MVIS and how to cite it.
+Use this page to see who builds MVIS and how to cite it.
 
-Open MVIS is developed by the [Robot Perception and Navigation Group
-(RPNG)](https://sites.udel.edu/robot/) at the University of Delaware.
+- **OpenMVIS:** the project.
+- **MVIS:** the calibration toolbox, installed as the Python package `pymvis`.
+- **Calibench:** the datasets and results on
+  [Hugging Face](https://huggingface.co/calibench-vi).
 
-## Maintainers
+## Maintainer
+
+- **Yulin Yang:** author and maintainer of MVIS
+  ([personal website](https://yangyulin.net)).
+- **Contact:** contact@openmvis.com. Licensing questions go to
+  licensing@openmvis.com.
+
+## Contributors
+
+- **Yuantai-Z:** camera-only pipeline fixes (outlier rejection, pose alignment,
+  frame selection) and the ROS1 recalibration tool (`tools/ros1_recalib`).
+
+The list follows
+[`AUTHORS`](https://github.com/openmvis/openmvis/blob/main/AUTHORS) in the MVIS
+repository. We add people who contribute code, datasets or results.
+How we credit them is in [Governance](/contribute/governance/).
+
+## Authors of the MVIS paper
+
+MVIS implements the method of the MVIS paper (Yang, Geneva and Huang, IJRR
+2024), written at the [Robot Perception and Navigation Group
+(RPNG)](https://sites.udel.edu/robot/), University of Delaware.
 
 <CardGrid>
   <Card title="Yulin Yang">
     <Image src={yang} alt="Yulin Yang" width="150" />
-    - [Personal Website](https://yangyulin.net)
-    - yangyulin1@gmail.com
-    - yuyang@udel.edu
+    - [Personal website](https://yangyulin.net)
   </Card>
   <Card title="Patrick Geneva">
     <Image src={patrick} alt="Patrick Geneva" width="150" />
-    - [Personal Website](https://udel.edu/~pgeneva/)
-    - pgeneva@udel.edu
+    - [Personal website](https://udel.edu/~pgeneva/)
   </Card>
   <Card title="Guoquan (Paul) Huang">
     <Image src={paul} alt="Guoquan (Paul) Huang" width="150" />
-    - [Personal Website](https://udel.edu/~ghuang/)
-    - ghuang@udel.edu
+    - [Personal website](https://udel.edu/~ghuang/)
   </Card>
 </CardGrid>
 
-## Citing Open MVIS
+<a id="citing-open-mvis"></a>
 
-If you use the toolbox or the benchmark, please cite:
+## Citing MVIS
+
+Cite the software and the MVIS paper, as
+[`CITATION.cff`](https://github.com/openmvis/openmvis/blob/main/CITATION.cff)
+asks. The paper is the preferred citation.
+
+```bibtex
+@article{yang2024mvis,
+  title   = {Multi-visual-inertial system: Analysis, calibration, and estimation},
+  author  = {Yang, Yulin and Geneva, Patrick and Huang, Guoquan},
+  journal = {The International Journal of Robotics Research},
+  year    = {2024},
+  volume  = {43},
+  number  = {13},
+  pages   = {1995--2026},
+  doi     = {10.1177/02783649241245726}
+}
+```
+
+The software, with the version you ran:
+
+```bibtex
+@software{mvis,
+  title   = {{MVIS}: camera and camera-IMU calibration toolbox},
+  author  = {Yang, Yulin},
+  version = {0.1.0},
+  year    = {2026},
+  url     = {https://github.com/openmvis/openmvis},
+  license = {GPL-3.0-only}
+}
+```
+
+## Citing the benchmark
+
+If you compare against the benchmark results, cite the benchmark:
 
 ```bibtex
 @misc{openmvis,
@@ -49,26 +102,24 @@ If you use the toolbox or the benchmark, please cite:
 }
 ```
 
-## Citing the leaderboard
+Results come in dated batches. Name the batch you used, so the comparison stays
+citable after later batches land:
 
-Cite the leaderboard snapshot, not the live page. Snapshots are versioned, so a
-comparison stays citable after later submissions land. Use this form:
-
-> Open MVIS leaderboard, batch 2026-11-04a, accessed &lt;date&gt;.
+> OpenMVIS leaderboard, batch 2026-11-10a, accessed &lt;date&gt;.
 > https://openmvis.com/benchmark/results/
 
-See [Methodology](/benchmark/methodology/) for what the numbers mean.
+The batch shown on the [Leaderboard](/benchmark/results/) is the current one.
+[Methodology](/benchmark/methodology/) explains what the numbers mean.
 
 ## Citing the datasets
 
-When your results depend on a dataset, cite the dataset as well as the toolbox.
+When your results depend on a dataset, cite the dataset as well as MVIS.
 
-- **Citation and DOI:** each released dataset has its own, given on its page.
-- **Where to find them:** see [Datasets](/datasets/).
-
-## Contributing
-
-We credit contributors of datasets and verified results on this page.
-
-- **Credit and co-authorship:** how we handle them is in [Governance](/contribute/governance/).
-- **Getting started:** see [Contribute](/contribute/submit-results/).
+- **VI-Rig recordings (our own):** cite Calibench for every VI-Rig set. For the
+  4-IMU sets (`virig-4imus-3cams`, `virig-4imus-3cams-aruco` and
+  `virig-4imus-4cams`), also cite the MVIS paper above. `virig-5imus-4cams` has
+  no paper yet; cite Calibench only. The Calibench entry is on
+  [Datasets](/datasets/).
+- **Third-party datasets:** cite the original authors. The
+  [dataset card](https://huggingface.co/datasets/calibench-vi/datasets) lists
+  the citation each one requires.

@@ -5,18 +5,17 @@ pageType: example
 wide: true
 ---
 
-Use this page to see what you gain from putting several cameras into one solve. You need nothing to follow along.
-Data: every number here comes from the [VI-Rig 4 IMUs + 4 cams](/datasets/virig-4imus-4cams/) dataset.
+This page shows what you gain from putting several cameras into one solve. You need nothing to follow along.
+Data: every number comes from the [VI-Rig 4 IMUs + 4 cams](/datasets/virig-4imus-4cams/) dataset.
 
 **The answer first:**
 
-- **Sub-mm extrinsics:** Solving all cameras in one graph gives camera-to-camera extrinsics that repeat to a
+- **Sub-mm extrinsics:** solving all cameras in one graph gives camera-to-camera extrinsics that repeat to a
   fraction of a millimetre over 15 recordings.
-- **One $t_d$ per camera:** Each camera gets its own camera–IMU time offset $t_d$. The cameras on this rig are
-  about 116–118 ms apart.
-- **Wide helps narrow:** A narrow camera alone pins its own lever arm poorly. Adding the other cameras tightens it.
-- **Not every rig bundles:** A global-shutter camera and an unsynchronised rolling-shutter camera are better
-  solved one by one in the camera-only step.
+- **One $t_d$ per camera:** each camera gets its own camera–IMU time offset $t_d$. The two camera pairs on this
+  rig are about 116–118 ms apart.
+- **Not every rig bundles:** solve a global-shutter camera and an unsynchronised rolling-shutter camera one by one
+  in the camera-only step.
 
 How to turn it on: [Solve the cameras in pairs](/guides/camera-calibration/#1-solve-the-cameras-in-pairs), then
 join them in [Camera–IMU calibration](/guides/camera-imu-calibration/).
@@ -26,11 +25,14 @@ join them in [Camera–IMU calibration](/guides/camera-imu-calibration/).
 The rig has two camera pairs:
 
 - **T265 L / R:** global-shutter fisheye, 848×800, 30 Hz.
-- **ELP L / R:** rolling-shutter, 640×480, 25 Hz.
+- **ELP L / R:** rolling shutter, 640×480, 25 Hz as recorded (about 20–22 Hz after restamping).
+
+The **lever** is the translation between a camera and the IMU.
 
 ## 1. Cameras do not share a clock
 
-[Example run](/benchmark/examples/virig-4imus-4cams/) on recording 01: all 4 cameras and 4 IMUs in one camera–IMU solve.
+[Example run](/benchmark/examples/virig-4imus-4cams/) on recording 01: all 4 cameras and 4 IMUs in one camera–IMU
+solve.
 
 | Camera | $t_d$ (ms) |
 |---|---|
@@ -39,76 +41,76 @@ The rig has two camera pairs:
 | ELP L (cam2) | −123.25 |
 | ELP R (cam3) | −123.30 |
 
-- **Pairs agree:** Inside each pair the offsets are close.
-- **Pairs disagree:** The ELP pair sits about 116–118 ms behind the T265 pair.
-- **One shared offset fails:** One shared $t_d$ for the rig would be wrong by over 100 ms for one pair. Give each
+- **Pairs agree inside:** the two offsets of each pair are close.
+- **Pairs disagree:** the ELP pair sits about 116–118 ms behind the T265 pair.
+- **One shared offset fails:** one $t_d$ for the whole rig would be wrong by over 100 ms for one pair. Give each
   camera its own $t_d$.
 
 ## 2. Extrinsics repeat to a fraction of a millimetre
 
-Public results over 15 recordings, batch 2026-11-08a ([full tables](/benchmark/results/virig-4imus-4cams/)).
-
+Results over 15 recordings, batch 2026-11-10a ([full tables](/benchmark/results/virig-4imus-4cams/)).
 Median and standard deviation (sd) of the camera-to-camera distance:
 
-| Camera pair | Family | MVIS | Kalibr | Basalt |
+| Camera pair | Run | MVIS | Kalibr | Basalt |
 |---|---|---|---|---|
-| T265 L – T265 R | T1, camera only | 63.663 mm (sd 0.034) | 63.468 mm (sd 0.099) | 63.555 mm (sd 0.135) |
-| ELP L – ELP R | T8, camera–IMU | 59.207 mm (sd 0.084) | not run | — |
-| T265 L – ELP L | T7, camera–IMU | 153.50 mm (sd 0.17), 14 of 15 recordings | — | — |
+| T265 L – T265 R | [T1](/benchmark/results/virig-4imus-4cams/#T1), camera-only | 63.667 mm (sd 0.036) | 63.468 mm (sd 0.099) | 63.555 mm (sd 0.135) |
+| ELP L – ELP R | [T8](/benchmark/results/virig-4imus-4cams/#T8), camera–IMU | 59.207 mm (sd 0.084) | not run | — |
+| T265 L – ELP L | [T7](/benchmark/results/virig-4imus-4cams/#T7), camera–IMU | 153.51 mm (sd 0.17), 14 of 15 recordings | — | — |
 
-- **T265 pair:** The MVIS spread is about 3× tighter than Kalibr and 4× tighter than Basalt.
-- **Mixed pair:** Even a fisheye and a rolling-shutter camera on different clocks repeat to 0.17 mm.
-- **Kalibr in T7:** Kalibr's camera baselines there are inputs from an MVIS export, so we do not compare them here.
+- **T265 pair:** the MVIS spread is about 3× tighter than Kalibr's and 4× tighter than Basalt's.
+- **Mixed pair:** a fisheye and a rolling-shutter camera on different clocks still repeat to 0.17 mm.
+- **Kalibr in T7:** its camera baselines there are inputs from an MVIS export, so we do not compare them.
 
-## 3. A wide camera fixes a narrow one
+## 3. A wide camera can help a narrow one
 
-- **Narrow view:** The ELP sees about 92° across. A board seen by it alone constrains the lever arm weakly along
-  some axes (section 3).
-- **Wide view:** The T265 fisheyes see the board over a much wider range of angles. In one graph their poses pin
-  the rig, and the ELP gains from it.
-- **Time offsets across lenses:** On fisheye + narrow rigs, plain time-offset estimation often fails. MVIS then
-  uses two independent estimators: PnP-based and homography cross-correlation. See
+What we expect, not measured here:
+
+- **Narrow view:** the ELP sees about 92° across. A board seen by the ELP alone constrains its lever weakly along
+  some axes.
+- **Wide view:** the T265 fisheyes see the board over a much wider range of angles. In one graph their poses pin
+  the rig, which should help the ELP. We have not measured the ELP lever with and without the T265.
+- **Time offsets across lenses:** with `optimize_time_offset: true`, MVIS estimates the camera-to-camera offsets
+  two ways, from PnP board poses and from homography cross-correlation. See
   [What the pipeline does](/guides/camera-calibration/#what-the-pipeline-does).
 
 ## 4. When not to bundle
 
-Joint is not always better. Two cases:
+Joint is not always better:
 
-- **Hybrid rigs:** We tested a global-shutter camera plus an unsynchronised rolling-shutter camera, T265 L + ELP L.
+- **Hybrid rigs:** we tested a global-shutter camera plus an unsynchronised rolling-shutter camera, T265 L + ELP L.
   On recordings 03–05 a joint camera-only bundle gave:
   - 2.4–2.5 px rms reprojection
   - readout scatter of 15–19 ms
   - lever z shifts of 5 mm
 
   One mono solve per camera gave 0.43 px and 0.1 ms readout scatter.
-- **What we do:** We solve each such camera on its own in the camera-only step. Then we join them in the
-  camera–IMU solve, which brings the extrinsics and the $t_d$ of each camera.
-- **Synced pairs are fine:** Hardware-synced, same-shutter pairs such as ELP L + R are fine as a joint camera-only
+- **What we do:** solve each such camera on its own in the camera-only step, then join them in the camera–IMU
+  solve, which gives the extrinsics and each camera's $t_d$.
+- **Synced pairs are fine:** hardware-synced, same-shutter pairs such as ELP L + R work as a joint camera-only
   solve.
-- **A bad camera can pull a solve:** In an older test, we added ELP L to a Kalibr T265 run as a global-shutter
-  camera. It pulled the T265 gyro scale up about 3 % on two axes. We later traced the cause to the ELP frame
-  stamps. Check each camera's residuals before you trust the joint result.
+- **A bad camera can pull a solve:** in an older test, adding ELP L as a global-shutter camera to a Kalibr T265
+  run pulled the T265 gyro scale up about 3 % on two axes. We later traced the cause to the ELP frame stamps,
+  which the published bags now correct (see [Recordings](/datasets/virig-4imus-4cams/#recordings)).
+  Check each camera's residuals before you trust a joint result.
 
 **Conclusion:**
 
-- **Own offset:** Give each camera its own $t_d$.
-- **Bundle what shares a clock and a shutter:** Solve hybrid cameras one by one in the camera-only step and join
+- **Own offset:** give each camera its own $t_d$.
+- **Bundle what shares a clock and a shutter:** solve hybrid cameras one by one in the camera-only step and join
   them in the camera–IMU solve.
-- **Check residuals:** One bad camera can pull the joint result.
+- **Check residuals:** one bad camera can pull the joint result.
 
 ## Limits
 
 <div class="not-content rp-honest">
   <ul>
-    <li><b>One rig:</b> Every number is from our own runs on one rig, VI-Rig 4 IMUs + 4 cams.</li>
-    <li><b>Time offsets from one recording:</b> The per-camera offsets in section 1 are from the example run on
+    <li><b>One rig:</b> every number is from our own runs on one rig, VI-Rig 4 IMUs + 4 cams.</li>
+    <li><b>Time offsets from one recording:</b> the per-camera offsets in section 1 come from the example run on
       recording 01.</li>
-    <li><b>Mixed pair:</b> The T265 L – ELP L row covers 14 of 15 recordings.</li>
+    <li><b>Mixed pair:</b> the T265 L – ELP L row covers 14 of 15 recordings.</li>
     <li><b>Kalibr and Basalt coverage:</b> Kalibr was not run on the ELP pair, and in T7 its camera baselines are
-      inputs from an MVIS export, so we do not compare them.</li>
-    <li><b>Hybrid test:</b> The joint versus mono comparison used recordings 03–05 only.</li>
-    <li><b>The older Kalibr test:</b> Its gyro-scale shift was later traced to the ELP frame
-      stamps.</li>
+      inputs from an MVIS export.</li>
+    <li><b>Hybrid test:</b> the joint against mono comparison used recordings 03–05 only.</li>
   </ul>
 </div>
 
@@ -116,11 +118,11 @@ Joint is not always better. Two cases:
 
 - **Dataset:** [VI-Rig 4 IMUs + 4 cams](/datasets/virig-4imus-4cams/), our own recordings on the Hub,
   [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets). Licence CC BY-NC 4.0, gated;
-  commercial use by request. Please cite the VI-Rig dataset and MVIS.
+  commercial use on request. Please cite the VI-Rig dataset and MVIS.
 - **Section 1:** the [example run](/benchmark/examples/virig-4imus-4cams/) on recording 01.
-- **Section 2:** public results, batch 2026-11-08a, in the
-  [full tables](/benchmark/results/virig-4imus-4cams/).
-- **Commits:** this page names no MVIS commit for these runs.
+- **Section 2:** results batch 2026-11-10a, in the [full tables](/benchmark/results/virig-4imus-4cams/).
+- **Section 3:** no measurement; an expectation.
+- **Section 4:** our own diagnostic runs; not dated by commit.
 
 ## Related
 

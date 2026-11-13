@@ -1,97 +1,121 @@
 ---
 title: Submit a dataset
-description: Contribute a calibration dataset — required format, dataset card, and licensing.
+description: Give us a calibration recording of your rig — what it must contain, the formats MVIS reads, the dataset card, the licence, and where to send it.
 pageType: guide
 ---
 
-Use this page to give us a calibration dataset. The steps are:
+Use this page to give us a calibration recording of your rig. A rig we have not
+seen is worth more than another run on one we have. We credit every dataset we
+host.
 
-1. Check it is usable.
-2. Package it.
+The steps:
+
+1. Check that it is usable.
+2. Package it in a format MVIS reads.
 3. Write a dataset card.
-4. Check the licence.
+4. Choose the licence.
 5. Send it.
 
-A rig we do not have is more useful than another run on a rig we do.
-Datasets are what make the benchmark meaningful. We cite and credit every
-contributed dataset.
+## 1. Check that it is usable
 
-## 1. Check it is usable
+We can only calibrate from a recording that has:
 
-A dataset only helps if we can actually run a calibration on it. It needs:
+- **Raw sensor streams:** no rectified (pre-undistorted) images and no
+  vendor-corrected IMU output. The IMU (inertial measurement unit) is the
+  gyroscope and accelerometer. A correction we cannot undo hides the intrinsics,
+  the sensor's own parameters, so they cannot be calibrated.
+- **A calibration board in view** for most of the recording. MVIS reads
+  AprilGrid, chessboard and ArUco boards. See [Set up the board](/guides/board-setup/).
+- **Motion on every axis:** rotation about all three axes and translation along
+  them, not just one kind. See [Record the dataset](/guides/calibration-motion/)
+  and [Degeneracy](/concepts/degeneracy/).
+- **Timestamps from one clock** for all streams, or a stated offset between
+  clocks.
 
-- **Raw, synchronised sensor streams** — no pre-rectified images, no
-  vendor-corrected IMU output. (The IMU is the inertial measurement unit: the
-  gyroscope and accelerometer.) Corrections you cannot undo make intrinsics
-  (the camera's own lens and sensor parameters) uncalibratable.
-- **A visible calibration target** for a meaningful part of the recording, with
-  its geometry stated (tag family, tag size, spacing).
-- **Well-excited motion** — rotation about all three axes, not just translation.
-  See [Degeneracy](/concepts/degeneracy/).
-- **A static period at the start** so IMU initialisation has something to work
-  with.
-- **A licence you have the right to grant.**
+Run `mvis inspect <path>` on your recording before you send it. It reports
+which MVIS modes can read it, each camera stream (rate, resolution, encoding),
+each IMU stream (rate, units, timestamp order) and how long the camera and IMU
+streams overlap.
 
 ## 2. Package it
 
-| Item | Requirement |
-|---|---|
-| Data | ROS bag or EuroC layout |
-| Target | Tag family, tag size, spacing, board dimensions |
-| Sensors | Model, rate, resolution, and topic for each |
-| Timing | Whether streams are hardware-synchronised; rolling-shutter convention if applicable |
-| Reference | Any existing calibration, and what produced it |
+MVIS reads these inputs. Pick one that fits what you recorded:
 
-Include any reference calibration, even an imperfect one, and say how it was
-obtained. Then a method can be validated *against* the dataset, not merely run
-on it.
+- **ROS1 bag:** `Image` messages, or PNG or JPEG `CompressedImage`. Reading it
+  needs no ROS install.
+- **ROS2 bag.**
+- **EuRoC / ASL folder:** the `mav0` layout used by EuRoC and TUM-VI.
+- **Image folder, or timestamped images:** camera only. These carry no IMU
+  data, so use one of the formats above for a camera–IMU recording.
+
+`mvis inspect` lists the modes (`cam`, `cam-imu`) that can read your
+recording.
+
+[Configuration](/reference/configuration/) lists the input fields for each.
+
+MVIS does not read video files. Convert video to images first.
+
+Send these details with the data:
+
+| Item | What to give |
+|---|---|
+| Board | type, rows and columns, tag or square size in metres, tag spacing, tag family |
+| Sensors | model, rate, resolution and topic of each camera and IMU |
+| Shutter | global or rolling for each camera; for rolling shutter, the readout direction if you know it |
+| Timing | hardware-synchronised or not, and how timestamps are taken |
+| Reference | any existing calibration, and the tool that produced it |
+
+Send a reference calibration even if it is rough, and say how you got it. Then a
+method can be checked against your recording, not only run on it.
 
 ## 3. Write a dataset card
 
-Put one page alongside the data. It covers:
+Add one short page (a `README.md`) next to the data:
 
-- **Rig:** what it is and what makes it interesting
-- **Recording:** how and where it was made
-- **Known problems:** dropped frames, clock glitches, saturated segments,
-  soft-synchronised streams
-- **Licence:** the licence and how to cite it
-- **Contact:** who to ask with questions
+- **Rig:** what it is and what makes it different.
+- **Recording:** how and where you recorded it.
+- **Known problems:** dropped frames, clock jumps, saturated IMU segments,
+  streams synchronised in software.
+- **Licence:** the licence, and how to cite the data.
+- **Contact:** who answers questions about it.
 
 :::note[Say what is wrong with it]
-The known-problems section is the most valuable part. A documented flaw is a
-usable dataset. An undocumented one produces results nobody can explain, and
-costs every later user the same debugging.
+The known-problems section matters most. A documented flaw leaves a usable
+dataset. An undocumented one gives results nobody can explain, and every later
+user repeats the same debugging.
 :::
 
-## 4. Licensing
+## 4. Licence
 
-Datasets need a licence that permits redistribution and derivative results.
+The licence must let us publish results computed on the data. For us to host a
+copy, it must also allow redistribution.
 
-- **Community repository:** contributed recordings hosted in
+- **Hosted by us:** recordings we host in the Hugging Face dataset
   [`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community)
-  are CC BY-NC 4.0, with access by automatic approval.
-- **Otherwise:** data you can't license that way comes in as a download
-  recipe that points to where it's hosted.
-- **People and private spaces:** recordings containing identifiable people or
-  private spaces need that resolved before submission, not after.
+  use CC BY-NC 4.0 (non-commercial, attribution required). Downloads need a free
+  Hugging Face login with automatic approval.
+- **Hosted by you:** if your data must stay under another licence, keep it where
+  it is. We add a download recipe that points to your copy.
+- **People and private spaces:** blur faces, screens, documents and anything
+  else private before you send the data. We do not publish recordings that
+  still show them.
+- **Your rights:** you must own the data or have the right to grant the licence.
 
 ## 5. Send it
 
-Open an issue on [the site repository](https://github.com/openmvis/mvis_pages).
-Describe the dataset and link the data.
+Open an issue on [`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages/issues).
+In it:
 
-We arrange hosting from there. Large datasets go to Hugging Face with a Zenodo
-DOI (a permanent digital object identifier) so they are citable.
+- describe the rig in one or two sentences
+- link the data (any download link works)
+- attach or link the dataset card
+
+We reply on the issue and arrange hosting from there. Data we host ends up in
+[`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community);
+open the request on the issue tracker, not there.
 
 ## Credit
 
-Contributed datasets get:
-
-- a per-dataset DOI and citation
-- a named entry on [Contributors](/about/contributors/)
-- co-authorship, where the dataset drives a benchmark or dataset paper
-
-Details are in [Governance](/contribute/governance/).
-
-To submit a *result* on an existing dataset instead, see
-[Submit results](/contribute/submit-results/).
+We credit every dataset we host. What that includes is listed in
+[Governance › Credit](/contribute/governance/#credit). To send results on an
+existing dataset instead, see [Submit results](/contribute/submit-results/).
