@@ -1,180 +1,137 @@
 ---
 title: Regression testing
-description: How MVIS validates itself — the three-tier suite, blessed baselines, generated row configs, and the gate discipline every change passes.
+description: How to run the MVIS test tiers before you open a pull request, what CI checks, and how the digital-twin tests work.
 pageType: reference
 ---
 
-Use this page before you touch solver code. It explains how we check every change
-to the MVIS solvers.
+Use this page before you change MVIS code. It lists the test tiers you can run
+from a clone of [github.com/openmvis/openmvis](https://github.com/openmvis/openmvis)
+and tells you which one to run when.
 
-- **The rule:** a change must show, on real recordings, that it changed only what
-  it meant to change.
-- **This page:** the design of the test machinery.
-- **The metrics themselves:** see [Evaluation & metrics](/reference/evaluation/).
-
-## The idea: reproducibility against blessed baselines
-
-Each test re-solves a recording and compares the result with a saved, approved
-result. Any metric outside its tolerance fails the run.
-
-- **Row:** one calibration solve of one recording ("collection") of one dataset.
-- **Baseline:** a committed JSON file with the blessed result metrics for a row.
-  "Blessed" means reviewed and approved as the reference.
-- **Run:** re-solves the row and gates every metric against the baseline. Each
-  metric has its own tolerance.
-
-The gated metrics are:
-
-- focal length
-- distortion coefficients
-- extrinsics (the poses between sensors) and stereo baseline (the distance
-  between a stereo pair)
-- time offsets: `td` (camera-to-IMU time offset) and `t_ga` (the time offset
-  between the gyroscope and accelerometer channels)
-- rolling-shutter readout (the time a rolling-shutter camera takes to read out
-  one image, row by row)
-- reprojection statistics
-
-Any exceeded tolerance fails the run and the exit code.
-
-Baselines are committed files, so **the diff of a baseline is the review
-artifact**. When a change moves a number on purpose, the re-bless commit shows:
-
-- which metrics moved
-- on which recordings
-- by how much
-
-:::note[Maintainer workflow]
-The regression runner, its manifests and the blessed baselines live in the
-maintainers' tree, not in the public repository. This page documents the
-discipline and the suite's shape; the public artefacts are the
-[results tables](/benchmark/results/) and the `tests/` folder
-(`scripts/test.sh <tier>`), which anyone can run.
-:::
-
-## Three superset tiers
-
-| Tier | Command | Rows | Runtime | When |
-|---|---|---|---|---|
-| **fast** | `--level fast` | 19 | ~1 h | every change (the gate) |
-| **mid** | `--level mid` | 57 | ~3 h | weekly; after solver-behavior changes |
-| **full** | `--level full` | 176 | ~2 h at `--parallel 6` | before releases; after re-blessing events |
-
-Tiers are supersets (`fast ⊂ mid ⊂ full`):
-
-- Each manifest row is tagged with the lowest tier that includes it.
-- Running a tier executes every row at or below it.
-- No row is ever duplicated.
+## Set up
 
 ```bash
-python scripts/run_regression.py --mode all --level fast
-python scripts/run_regression.py --only mvis_elp/imu_bag1        # single row
-python scripts/run_regression.py --only <row> --update-baseline  # re-bless
+git clone https://github.com/openmvis/openmvis
+cd openmvis
+python -m venv .venv && source .venv/bin/activate   # Python 3.11 or 3.12, Linux or macOS
+pip install -e ".[apriltag,aruco,ros1,dev]"
 ```
 
-## The twelve families: T1–T12
+The `dev` extra installs pytest. See [Installation](/getting-started/installation/)
+for the other extras.
 
-We number the families with our own VI-Rig datasets first in each block:
+## The four tiers
 
-- **Camera-only:** T1–T5
-- **Camera + IMU:** T6–T12
+Run the smallest tier that covers your change. Each one is a single command
+from the repository root.
 
-The numbers changed on 2026-11-02, so older material may use different ones.
+| Tier | Command | What it runs | Time | When |
+|---|---|---|---|---|
+| Unit | `scripts/test.sh unit` | every test except the slow and integration ones | about 4 min | while coding |
+| Solver | `scripts/test.sh solver` | five real solves: a simulated camera–IMU solve, the `t_ga` term end to end, two checks on one digital twin, and a check that the fast linearised [IMU factor](/concepts/camera-imu-math/) matches the exact one | about 1 min | with unit; CI runs it |
+| Integration | `scripts/test.sh integration` | digital twins, and a simulated camera whose frames are stamped by polling the sensor clock, through the full solver | about 3 min | before you commit a solver change |
+| Full | `scripts/test.sh full` | everything in `tests/` | about 20 min | before a merge |
 
-In the table, GS is a global-shutter camera (the whole image is exposed at once).
-RS is a rolling-shutter camera (rows are exposed one after another).
+- **`t_ga`:** the time offset between the gyroscope and the accelerometer of one
+  IMU. See [Why t_ga](/why/tga/).
+- **Times** are approximate and depend on your machine.
+- **What `scripts/test.sh` does:** it pins the linear-algebra library (BLAS) to
+  one thread, so results repeat. It tests the `src/` of this checkout, not an
+  installed copy.
+- **Extra arguments** go to pytest: `scripts/test.sh unit -k imu`.
+- **Interpreter:** set `PYTHON` to choose it.
 
-| Family | Mode | Seed row | Coverage |
-|---|---|---|---|
-| T1 | cam | `mvis_t265/stereo` | VI-Rig T265 GS fisheye stereo (848×800 equidistant) |
-| T2 | cam | `mvis_elp/stereo_rs` | VI-Rig ELP RS stereo + readout |
-| T3 | cam | `tum_vi_raw/cam1` | GS stereo, equidistant |
-| T4 | cam | `looper_insight9/stereo01` | GS synced stereo pair |
-| T5 | cam | `monado_mgc/stereo01` | GS equidistant stereo pair |
-| T6 | cam-IMU ×2 | `mvis_4imus_3cams/april_01` | VI-Rig 3 GS cameras + 4 IMUs |
-| T7 | cam-IMU ×2 | `mvis_elp_t265/imu_mixed` | VI-Rig mixed shutter + IMU + aux IMU (the physical time-offset references) |
-| T8 | cam-IMU ×2 | `mvis_elp/imu_bag1` | VI-Rig RS stereo + two IMUs |
-| T9 | cam-IMU ×2 | `tum_vi_raw/imu1` | GS stereo + raw (pre-factory-cal) IMU |
-| T10 | cam-IMU ×2 | `tum_vi_standard_512/imu1` | GS stereo + factory-corrected IMU |
-| T11 | cam-IMU ×2 | `looper_insight9/bag1` | 3 cameras (2 GS + 1 RS) + MEMS IMU |
-| T12 | cam-IMU ×2 | `monado_mgc/imucalib01` | GS equidistant stereo + IMU |
+## What CI runs
 
-Every cam-IMU row runs in two IMU-model variants:
+- **When:** on every pull request and every push to `main`.
+- **What:** the unit and solver tiers only.
+- **What it skips:** the slow and integration tests. Run
+  `scripts/test.sh full` yourself before you ask for a merge.
 
-| Variant | IMU model |
+## Tests that need recordings
+
+Some tests read real recordings. They skip when the data is missing, so a
+clean clone passes without any download.
+
+To run them:
+
+1. Log in with `huggingface-cli login`, or set `HF_TOKEN`. The VI-Rig sets are gated: accept their terms on the
+   [dataset page](https://huggingface.co/datasets/calibench-vi/datasets) first.
+2. Pick a folder for the data and set `MVIS_DATASETS` to it. Without it, MVIS
+   uses `~/Datasets`.
+3. Download what you need with `mvis datasets download`. Use `mvis datasets list`
+   to see the catalogue, and `--dataset <key>` to fetch one dataset.
+
+```bash
+huggingface-cli login
+export MVIS_DATASETS=/path/to/datasets
+mvis datasets list
+mvis datasets download --dataset <key>
+scripts/test.sh full
+```
+
+See [Datasets](/datasets/) for what each set contains and its licence.
+
+## Digital-twin tests
+
+A digital twin is a simulated copy of a real recording. The integration tier
+solves twins of two real stereo camera–IMU recordings, without images:
+
+| Twin | Covers |
 |---|---|
-| **calyx** | scale + cross-coupling, no g-sensitivity; reported as the decomposed Dw = R·U |
-| **kalibr** | full intrinsics including Tg g-sensitivity and the gyro→accel rotation, directly comparable with the Kalibr toolbox |
+| `twin_gs` | global-shutter cameras, 470 Hz IMU, `t_ga` +5.3 ms |
+| `twin_rs` | [rolling-shutter](/why/rolling-shutter/) cameras with negative readout (rows read bottom to top), 200 Hz IMU, `t_ga` −7.4 ms |
 
-How many recordings each tier runs per family:
+How a twin works:
 
-- **mid tier:** 3 recordings
-- **full tier:** **every recording the dataset has** (all 15 bags of the
-  multi-IMU rig, all 10 Looper recordings, all 12 TUM-VI calib bags)
+- **The truth:** a real solve, moved by a fixed random step so that no real
+  device calibration ships in the test files. Focal length moves by up to 1 %,
+  the principal point by 4 px, other intrinsics by 5 %, the extrinsic rotation by
+  10 mrad and the lever arm by 5 mm per axis, `td` (the time offset between the
+  camera and IMU clocks) by 1 ms and `t_ga` by 0.5 ms.
+- **What it keeps:** the real frame times, corner ids, IMU timestamps and solve
+  settings.
+- **The precise check:** the solve without noise. Any error left there is bias
+  in the estimator.
+- **The limits:** set just above the measured errors, so a failure means
+  something changed.
+- **Iteration check:** each test also checks that the optimiser iterated. A
+  result flagged `ok` alone does not show that it solved.
 
-## Generated row configs, drift-guarded
+The noise is Gaussian, and a twin has no lens or timing model errors. So the
+twin tests check the estimator, not a real recording. The fixtures are in
+`tests/data/twins/`. Making a new fixture needs the recording; running the tests
+needs only the fixture.
 
-We write only the seed configs by hand. A seed config is the config of a family's
-seed row (listed in the table above). All the others (including every kalibr variant) are
-**generated** from their seed.
+To simulate your own rig, see [Digital-twin check](/guides/simulation/).
 
-- **What changes:** nothing but the input recording and the output path.
-- **Who owns it:** one generator script owns the mapping.
-- **The guard:** a unit test regenerates all of them in memory. It asserts the
-  committed files match byte-for-byte. It also asserts the manifests carry exactly
-  the expected tier shape.
+## Where new tests go
 
-So a family's solver settings cannot silently diverge between recordings. A
-settings change to a family is, by construction, a one-line seed diff plus a
-regeneration.
+- **Place:** `tests/<area>/test_<topic>.py`, one folder per area: `camera`,
+  `detection`, `calibration`, `cam_imu`, `simulation`, `config`, `io`, `mvisdb`,
+  `datasets`, `cli`, `recalib` and `integration`.
+- **Helpers:** shared helpers go in `tests/helpers/`. A test module does not
+  import from another test module.
+- **Library code** belongs in `src/mvis`. Tests import from `scripts/` only to
+  test a script's own command line.
+- **Do not refactor `tests/_reference/`.** It is a frozen copy of earlier code
+  that the speed-up tests compare against bit for bit.
+- **Slow tests:** `tests/slow_tests.txt` lists the tests that take over 5 s, and
+  `tests/conftest.py` marks them `slow`. Add a new slow test to that list by
+  hand; no marker is needed in the test file.
 
-## Blessing discipline
+## Beyond the test tiers
 
-- **Vet before blessing**: we solve a new row once and review it before writing
-  its baseline. We compare its values against sibling recordings and physical
-  expectations. Unusable recordings are excluded with a manifest note, not left
-  failing.
-- **Re-bless narrowly**: `--update-baseline --only dataset/collection` touches
-  exactly one row. Family-wide re-blessing is scripted and resumable: rows whose
-  baseline already exists are skipped. So an interrupted sweep continues where it
-  stopped.
-- **Cross-validating references**: some rows exist to check each other. We measure
-  the same IMU's gyro↔accel offset twice:
-  - as an auxiliary IMU under rolling-shutter cameras
-  - as the base IMU under a global-shutter camera
+We also run two larger suites: real benchmark recordings, and digital twins of
+them, each compared parameter by parameter with earlier approved results. They
+need the full dataset collection and many hours of compute, so they are not
+part of the tiers above. The same recordings, solved with MVIS, Kalibr and
+Basalt, make the [leaderboard](/benchmark/results/); [Methodology](/benchmark/methodology/)
+explains how we run them and [Evaluation & metrics](/reference/evaluation/)
+defines the metrics.
 
-  Both must agree every run.
-- **Repeatability across recordings** is the deepest check the tiers add. A
-  parameter that is really observable comes out the same on every recording of
-  the same rig:
-  - stereo baselines repeat within fractions of a millimetre
-  - time offsets repeat within fractions of a millisecond
+## Related pages
 
-  A parameter that scatters across recordings is flagged as weakly constrained
-  rather than trusted.
-
-## Digital twins: accuracy against known truth
-
-Real recordings show repeatability, not accuracy, because they have no ground
-truth. So each camera + IMU dataset also has a digital twin (a simulated copy of
-the recording):
-
-- Its real solve becomes the truth.
-- The sensors are re-simulated from it with the noise measured on the real data.
-- `scripts/run_twin_regression.py` solves each twin once without noise and with 3
-  noise seeds.
-- It then checks the errors against saved references.
-
-It runs on demand, not on every change.
-
-## What this has caught
-
-The tier build-out itself demonstrated the design. It caught two things before any
-baseline froze bad values:
-
-- **A frame-selection bug:** the vetting pass exposed a long-standing
-  frame-selection ordering bug. It only manifested on 3 of 87 recordings. A
-  working-set/selection-flag consistency assert caught it.
-- **Poorly-conditioned setups:** the cross-recording spread immediately separated
-  well-conditioned configurations from poorly-conditioned ones. One example is a
-  weak base IMU under rolling-shutter-only anchoring.
+- [CONTRIBUTING.md](https://github.com/openmvis/openmvis/blob/main/CONTRIBUTING.md):
+  pull-request rules and the licence header for new files
+- [Governance](/contribute/governance/)

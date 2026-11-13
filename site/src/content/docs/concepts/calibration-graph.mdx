@@ -1,46 +1,222 @@
 ---
 title: Calibration graph
-description: Main graph formulation and cost functions for the calibration.
+description: The full camera–IMU factor graph (its variables, factors and priors) and the stages that estimate each value, for camera-only and camera–IMU runs.
 pageType: concept
 ---
 
-## Main Graph Formulation
+Use this page to see everything MVIS solves at once, and in what order it gets
+there.
 
-Use this page to see the main cost functions for the calibration. The derivation
-of each residual block has its own page, linked at the end.
+A **factor graph** links the unknowns (**variables**) to the measurements and
+priors that constrain them (**factors**). Each factor adds one term to the cost;
+the solver moves all variables together until the total is smallest. That joint
+solve is what lets a camera's time offset, an IMU's scale and a lever arm be
+fitted from one recording.
 
-The MVIS factor graph (a graph that links the unknowns to the measurements that
-constrain them) optimises everything jointly. It finds a single
-maximum-a-posteriori estimate: the most likely values given the measurements
-and the priors. The graph solves for:
+Symbols follow [Notation & glossary](/concepts/notation/). The factor equations are
+on [Camera–IMU calibration math](/concepts/camera-imu-math/),
+[Base IMU factor](/concepts/camera-imu-math/base-imu/) and
+[Auxiliary IMU factor](/concepts/camera-imu-math/aux-imu/).
 
-- **camera intrinsics** (each camera's own model parameters)
-- **IMU intrinsics** (each IMU's own model parameters)
-- **all extrinsics** (the poses between the sensors)
-- **time offsets**
-- **rolling-shutter readout times** (the time a rolling-shutter camera takes to
-  read out one image)
+## The camera–IMU graph
 
-Schematically:
+<figure>
+<div style="overflow-x:auto">
+<svg viewBox="0 0 720 360" width="100%" role="img" aria-labelledby="cg-title cg-desc" style="min-width:560px;max-width:720px;display:block;margin:0 auto;font-family:inherit">
+  <title id="cg-title">Camera–IMU factor graph</title>
+  <desc id="cg-desc">A row of IMU states linked by IMU factors. Reprojection factors tie each frame to its anchor state, the camera calibration and the board. The IMU factors share the base IMU intrinsics and t_ga. An auxiliary IMU factor spans three intervals and ties to the auxiliary IMU calibration. A gauge prior holds the first state.</desc>
+  <g stroke="var(--sl-color-gray-3)" stroke-width="1.4" fill="none">
+    <line x1="120" y1="120" x2="90" y2="183" />
+    <line x1="260" y1="120" x2="230" y2="183" />
+    <line x1="400" y1="120" x2="370" y2="183" />
+    <line x1="540" y1="120" x2="510" y2="183" />
+    <line x1="120" y1="120" x2="200" y2="57" />
+    <line x1="260" y1="120" x2="200" y2="57" />
+    <line x1="400" y1="120" x2="200" y2="57" />
+    <line x1="540" y1="120" x2="200" y2="57" />
+    <line x1="120" y1="120" x2="470" y2="57" />
+    <line x1="260" y1="120" x2="470" y2="57" />
+    <line x1="400" y1="120" x2="470" y2="57" />
+    <line x1="540" y1="120" x2="470" y2="57" />
+    <line x1="540" y1="120" x2="640" y2="57" stroke-dasharray="4 3" />
+    <line x1="400" y1="120" x2="640" y2="57" stroke-dasharray="4 3" />
+    <line x1="260" y1="120" x2="640" y2="57" stroke-dasharray="4 3" />
+    <line x1="120" y1="120" x2="640" y2="57" stroke-dasharray="4 3" />
+    <line x1="26" y1="200" x2="55" y2="200" />
+    <line x1="125" y1="200" x2="195" y2="200" />
+    <line x1="265" y1="200" x2="335" y2="200" />
+    <line x1="405" y1="200" x2="475" y2="200" />
+    <line x1="545" y1="200" x2="615" y2="200" />
+    <line x1="160" y1="200" x2="300" y2="283" />
+    <line x1="300" y1="200" x2="300" y2="283" />
+    <line x1="440" y1="200" x2="300" y2="283" />
+    <line x1="580" y1="200" x2="300" y2="283" />
+    <line x1="440" y1="258" x2="230" y2="217" />
+    <line x1="440" y1="258" x2="650" y2="217" />
+    <line x1="440" y1="258" x2="610" y2="283" />
+  </g>
+  <g fill="var(--sl-color-bg)" stroke="var(--sl-color-accent)" stroke-width="1.6">
+    <rect x="100" y="23" width="200" height="34" rx="8" />
+    <rect x="395" y="23" width="150" height="34" rx="8" />
+    <rect x="585" y="23" width="110" height="34" rx="8" stroke-dasharray="5 3" />
+    <rect x="180" y="283" width="240" height="34" rx="8" />
+    <rect x="515" y="283" width="190" height="34" rx="8" />
+  </g>
+  <g fill="var(--sl-color-bg)" stroke="currentColor" stroke-width="1.6">
+    <rect x="55" y="183" width="70" height="34" rx="17" />
+    <rect x="195" y="183" width="70" height="34" rx="17" />
+    <rect x="335" y="183" width="70" height="34" rx="17" />
+    <rect x="475" y="183" width="70" height="34" rx="17" />
+    <rect x="615" y="183" width="70" height="34" rx="17" />
+  </g>
+  <g fill="currentColor">
+    <rect x="114" y="114" width="12" height="12" />
+    <rect x="254" y="114" width="12" height="12" />
+    <rect x="394" y="114" width="12" height="12" />
+    <rect x="534" y="114" width="12" height="12" />
+    <rect x="154" y="194" width="12" height="12" />
+    <rect x="294" y="194" width="12" height="12" />
+    <rect x="434" y="194" width="12" height="12" />
+    <rect x="574" y="194" width="12" height="12" />
+    <rect x="434" y="252" width="12" height="12" />
+    <rect x="14" y="194" width="12" height="12" />
+  </g>
+  <g fill="currentColor" font-size="13" text-anchor="middle">
+    <text x="200" y="45">camera i: extrinsic, td, tr, f, d</text>
+    <text x="470" y="45">board pose</text>
+    <text x="640" y="45">board shape</text>
+    <text x="90" y="205">state 0</text>
+    <text x="230" y="205">state 1</text>
+    <text x="370" y="205">state 2</text>
+    <text x="510" y="205">state 3</text>
+    <text x="650" y="205">state 4</text>
+    <text x="300" y="305">base IMU intrinsics, t_ga</text>
+    <text x="610" y="305">aux IMU j calibration</text>
+  </g>
+  <g fill="var(--sl-color-gray-2)" font-size="12">
+    <text x="106" y="124" text-anchor="end">reprojection</text>
+    <text x="160" y="186" text-anchor="middle">IMU</text>
+    <text x="20" y="232">gauge</text>
+    <text x="432" y="276" text-anchor="end">aux IMU</text>
+    <text x="14" y="345">■ factor · ▢ variable · dashed: only with estimate.board_points</text>
+  </g>
+</svg>
+</div>
+<figcaption>
+The camera–IMU graph for one camera, one auxiliary IMU and five states. Each
+state holds the base-IMU pose, velocity and biases. Not drawn, to keep it
+readable: the reprojection factors also touch the anchor's velocity and biases,
+the IMU intrinsics and t_ga; the auxiliary IMU has its own velocity and bias at
+each of its knots. The IMU calibration variables have priors; camera calibration
+gets one only on what is held (see Priors below).
+</figcaption>
+</figure>
 
-$$
-\arg\min_{\boldsymbol{x}} \;
-\sum_{i,k} \rho\!\left(\| \mathbf{r}_{\text{cam}}^{i,k} \|_{\Sigma_c}^2\right) +
-\sum_{j,k} \rho\!\left(\| \mathbf{r}_{\text{imu}}^{j,k} \|_{\Sigma_i}^2\right) +
-\sum_{j,k} \rho\!\left(\| \mathbf{r}_{\text{imu-imu}}^{j,k} \|_{\Sigma_{ij}}^2\right) +
-\Pi(\boldsymbol{x}, \boldsymbol{\mu}_0)
-$$
+## Variables
 
-where:
+| Variable | Symbol | Size | How many |
+|---|---|---|---|
+| IMU pose | ${}^{G}_{I_k}\mathbf{T}$ | 6 | one per state, at `solve.state_hz` (30 Hz) on the first camera's frames |
+| IMU velocity and biases | ${}^{G}\mathbf{v}_{I_k}$, $\mathbf{b}_{g,k}$, $\mathbf{b}_{a,k}$ | 9 | one per state |
+| Board pose | ${}^{G}_{B}\mathbf{T}$ | 6 | one; the board stays still |
+| Board shape | $h_m$, one per board corner $m$ (Notation's $h_k$) | 1 per corner | only with `estimate.board_points: true` |
+| Camera calibration | ${}^{I}_{C_i}\mathbf{T}$, $t_{d,i}$, $t_{r,i}$, $\mathbf{f}_i$, $\mathbf{d}_i$ | 8 + intrinsics | one per camera |
+| Base IMU intrinsics | $\mathbf{D}_w$, $\mathbf{D}_a$, $\mathbf{T}_g$ (and a triad rotation) | 24 | one |
+| Gyro-to-accel offset | $t_{ga}$ | 1 | one per IMU, when `estimate_t_ga` is on (the default) |
+| Auxiliary IMU calibration | ${}^{I}_{I_{s_j}}\mathbf{T}$, $t_{d,j}$, its intrinsics | 31 | one per auxiliary IMU |
+| Auxiliary IMU velocity and biases | ${}^{G}\mathbf{v}_{I_{s_j}}$, $\mathbf{b}_{g,s}$, $\mathbf{b}_{a,s}$ | 9 (3 if gyro-only) | one per auxiliary knot |
 
-- $\boldsymbol{x}$ is the full calibration state vector;
-- $\rho(\cdot)$ is a robust loss (Huber), which down-weights large residuals;
-- $\Pi$ encodes Gaussian priors on each calibration parameter.
+$\mathbf{x}$ stacks all of them. A 60 s recording at 30 Hz has 1800 states,
+each with a pose, a velocity and two biases.
 
-Detailed derivations of each residual block are documented in:
+## Factors
 
-- [Base IMU Calib](/concepts/camera-imu-math/base-imu/)
-- [Aux IMU Calib](/concepts/camera-imu-math/aux-imu/)
-- [Camera Calib](/concepts/camera-model/)
-- [Observability](/concepts/observability/)
-- [Degeneracy](/concepts/degeneracy/)
+| Factor | Links | Weight |
+|---|---|---|
+| [Reprojection](/concepts/camera-imu-math/#the-reprojection-factor) | one frame's corners to its anchor state, the board, the camera calibration, the IMU intrinsics and `t_ga` | 1 px per axis; Huber past 2 on the frame's stacked residual |
+| [Base IMU](/concepts/camera-imu-math/base-imu/) | two consecutive states, the IMU intrinsics, `t_ga` | the integration covariance |
+| Bias random walk | the bias rows of the base and auxiliary IMU factors | the random-walk densities |
+| [Auxiliary IMU](/concepts/camera-imu-math/aux-imu/) | two base states 3 intervals apart, the auxiliary states and calibration | the integration covariance |
+| Priors | single variables (below) | per prior |
+
+**Rates.** Each camera adds about 10 reprojection factors per second
+(`solve.factor_hz`, settable per camera). The state rate stays 30 Hz, so the
+trajectory stays dense even when the cameras are thinned.
+
+**Priors:**
+
+- **Gauge on the first pose:** a gauge prior fixes directions the data cannot
+  see. Here it holds the first pose's position and its rotation about gravity.
+  The tilt (the direction of gravity in the IMU frame) stays free, since the
+  accelerometer sees gravity.
+- **First velocity and biases:** weak (0.5 m/s, 0.01 rad/s, 0.1 m/s²).
+- **IMU intrinsics:** a tight prior on the pinned blocks, a weak one on the freed
+  blocks ([which blocks](/concepts/camera-imu-math/base-imu/#which-intrinsics-are-solved)).
+- **`t_ga`:** zero-mean, 10 ms.
+- **Camera calibration:** free, except a tight prior on whatever is held: $t_{r,i}$
+  on a global-shutter camera, and any `estimate.camera.*: false`.
+- **Board shape:** each height has a 3 mm prior. A gauge prior holds the mean height
+  and the two tilts at 0, so the board pose keeps the plane and the heights keep
+  only the shape.
+
+## The cost
+
+The solve minimises the weighted sum of all factor errors, given on
+[Camera–IMU calibration math](/concepts/camera-imu-math/#the-cost).
+After the solve, MVIS computes the marginal covariance of every calibration
+variable. Its square root is the 1σ (one standard deviation) printed next to
+each value. A wide 1σ is how a weakly observed value shows itself.
+
+## Stages of a camera–IMU run
+
+`mvis cam-imu` reaches the joint solve in steps. Each step gives the next a
+starting point close enough to converge.
+
+| Stage | What happens | What is estimated |
+|---|---|---|
+| 1. Window | Bags longer than 80 s: keep the 80 s with the most gyro and accelerometer excitation (`input.window_mode: motion`). Shorter bags: from 3 s in (`input.t0`). | — |
+| 2. Detection | Board corners in every frame. | — |
+| 3. Frame selection | Keep frames with enough corners and a valid board pose (PnP: the camera pose from known board points); thin each camera to `factor_hz`. | the board pose per frame, from the camera prior |
+| 4. Start values | Per camera: time offset from angular rates, rotation and gyro bias from a rotation fit, then a linear solve for gravity, scale, velocities and lever arm; the accelerometer bias starts at 0. Per auxiliary IMU: offset, rotation and gyro bias from gyro-to-gyro. | rough $t_{d,i}$, ${}^{I}_{C_i}\mathbf{R}$, ${}^{I}\mathbf{p}_{C_i}$, gyro bias, gravity direction; ${}^{I}_{I_{s_j}}\mathbf{R}$, $t_{d,j}$ |
+| 5. Joint solve | The graph above, Levenberg–Marquardt, up to 50 iterations. `t_ga` re-integration as needed. | everything at once |
+| 6. Clock retiming (opt-in) | For cameras marked `retime_sensor_clock`: a first solve gives each frame its own capture offset, a regular sensor clock is fitted to them, the frames are re-stamped, and the joint solve runs again. | per-frame offsets, then everything |
+| 7. Results | Residuals; χ² per degree of freedom per factor type (the weighted squared error divided by its degrees of freedom, about 1 when the noise model fits); 1σ for every value. | — |
+
+Checks on the way:
+
+- **Start values:** a lever-arm start with 1σ over 5 cm starts at 0 instead. The start reports its
+  gravity magnitude and scale (both should come out near 9.81 m/s² and 1) and how
+  sharp the time-offset minimum is.
+- **The joint solve:** Levenberg–Marquardt can stop at its damping cap far from
+  a minimum, which looks like convergence. MVIS spots this from the step the
+  linear system still predicts, solves again from the same start with a different
+  damping, and keeps that result only if its cost is lower. A solve whose linear
+  system cannot be solved (no step at all) is marked not ok.
+
+## Stages of a camera-only run
+
+`mvis cam` has no IMU. Its graph holds one board pose per timestamp, the
+intrinsics of every camera, the extrinsic of every camera to the first one, the
+rolling-shutter readout, the board shape when asked, and time offsets between
+cameras when `optimize_time_offset` is on (off by default).
+
+| Stage | What happens | What is estimated |
+|---|---|---|
+| 1. Detection | Board corners in every frame. | — |
+| 2. Start values | Per camera: OpenCV intrinsics (radtan) or a vanishing-point start (other models), and a board pose per frame. | intrinsics, board poses |
+| 3. Gating | Drop frames with too few tags (6) or too small a spread, poses with a PnP error over 10 px, corners seen in too few frames. | — |
+| 4. Per-camera solve | One graph per camera. | intrinsics, distortion, board poses, readout of rolling-shutter cameras |
+| 5. Alignment | Align the board-pose tracks of the cameras. | camera-to-camera extrinsics, time offsets |
+| 6. Joint solve | All cameras in one graph. | everything at once |
+| 7. Outlier rerun | Drop corners and frames whose error is over 2 px and above the 99th percentile; solve again from the previous values. On by default. | everything again |
+
+The camera-only solves after the start values thin the corners to two per tag
+(`corner_subsample: two_anti`); the start values use every corner. The camera–IMU solve keeps all of them.
+
+## What this means for your recording
+
+- **Record about 60 s.** Past 80 s, MVIS keeps the 80 s with the most motion.
+- **Read the 1σ, not only the residual.** A small residual with a wide 1σ means
+  the value was not observed: see [Degeneracy](/concepts/degeneracy/).
+- **Leave `solve.state_hz` at 30 Hz.** Lower rates undersample fast motion
+  ([step 4](/guides/camera-imu-calibration/#6-leave-state_hz-alone)).

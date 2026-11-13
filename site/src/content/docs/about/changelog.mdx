@@ -14,91 +14,106 @@ in the datasets. Notable changes come newest first.
 - **Site changes:** see the
   [site repository](https://github.com/openmvis/mvis_pages).
 
-## Toolbox
+## MVIS 0.1.0
 
-### 0.1.0 — first public release
+The first public release. There is no earlier public version, so the list
+describes the toolbox as it ships. On 2026-11-12 the release was not yet tagged.
 
-The first public release of MVIS, the calibration toolbox behind this site.
-
-- **Repository:** [`openmvis/openmvis`](https://github.com/openmvis/openmvis),
-  package `pymvis` (CLI `mvis`), version 0.1.0.
+- **Package:** `pymvis` (import and command `mvis`), Linux and macOS, Python
+  3.11 and 3.12.
 - **Licence:** GPL-3.0-only, with a commercial licence for closed-source
   products. See [License](/about/license/).
-- **Platforms:** Linux and macOS, Python 3.11 and 3.12. No Windows (GTSAM ships
-  no Windows wheels).
-- **Install:** `pip install pymvis` once the release is on PyPI; until then,
-  from the repository. See [Installation](/getting-started/installation/).
-- **What is in it:** camera-only and camera–IMU calibration for multi-camera,
-  multi-IMU rigs (pinhole and omnidirectional models, `kb4` as the fisheye
-  default, rolling shutter, `t_ga`, board shape), the digital-twin check, the
-  simulator examples, HTML reports and the Kalibr camchain import and export.
-  The regression suite that reproduces the benchmark tables stays with the
-  maintainers; see [Regression testing](/contribute/regression-testing/).
 
-## Documentation site
+### Calibration
 
-### Why calibrate: board shape and fisheye model (2026-11-11)
+- **Camera-only** (`mvis cam`): one or more cameras; intrinsics, distortion,
+  extrinsics, camera–camera time offset and rolling-shutter readout (the time
+  the sensor takes to read the image row by row).
+- **Camera–IMU** (`mvis cam-imu`): camera–IMU extrinsics, time offset `td`,
+  readout, camera intrinsics, IMU intrinsics, biases, the base IMU's
+  gyro–accel offset `t_ga`, and the extrinsics and time offsets of further IMUs.
+- **Camera models:** eight, usable in both modes and mixed within one rig:
+  `radtan`, `equidistant`, `kb4`, `fov`, `double_sphere`, `eucm`, `ucm` and
+  `omni_radtan` (experimental). `fisheye` means `kb4`.
+- **IMU conventions:** `kalibr`, `rpng` and `calyx`, with scale and
+  misalignment (`Dw`, `Da`) and optional g-sensitivity (`Tg`).
+- **`estimate:` block:** chooses what is solved and what is held, including the
+  board shape (`board_points`).
+- **One command for both modes:** `mvis run` runs either mode from one config
+  (`mode: cam` or `mode: cam-imu`).
+- **Batch:** `input.bags` calibrates a whole set of recordings from one config.
 
-Two new pages in the Why calibrate section:
-[board shape](/why/board-shape/) and [fisheye model (kb4)](/why/kb4/). The
-overview, configuration reference and comparison now list all eight
-distortion models, with `kb4` the fisheye default.
+### Input and output
 
-### Why calibrate section (2026-11-10)
+- **Inputs:** image folders, timestamped images, ROS1 bags (`Image`, and PNG or
+  JPEG `CompressedImage`), ROS2 bags and EuRoC / ASL folders.
+- **ROS2 without ROS:** ROS2 bags (a bag folder, or one `.db3` or `.mcap` file)
+  are read with the pure-Python `rosbags`, with no ROS install.
+- **Boards:** AprilGrid, chessboard and ArUco.
+- **Kalibr interop:** read and write Kalibr camchains.
+- **Output:** YAML calibration files, JSON results and self-contained HTML
+  reports for both modes.
+- **Datasets:** `mvis datasets` lists, downloads and verifies the Calibench
+  datasets on Hugging Face.
 
-A new section on what each calibrated quantity changes: [IMU](/why/imu/),
-[t_ga](/why/tga/) (moved from `/benchmark/tga/`), [rolling shutter](/why/rolling-shutter/),
+### Tools
+
+- **`mvis apply-calib`:** writes a corrected copy of a ROS1 bag: IMU intrinsics
+  and bias removed, streams re-stamped by `td`, accelerometer shifted by `t_ga`,
+  images optionally undistorted.
+- **`mvis roundtrip`:** calibrates, applies the result, calibrates again, and
+  gives a PASS/FAIL report. ROS1 bags only.
+- **`mvis check`, `mvis inspect`, `mvis verdict`:** check the environment and
+  config, summarise a dataset, and grade a finished result.
+- **Simulator** (`mvis.simulation`): digital twins of real recordings.
+
+## Site
+
+### Release preparation (2026-11-12)
+
+- **Datasets section:** [Datasets](/datasets/) is now its own section. The old
+  `/reference/datasets/` addresses redirect.
+- **Continuous-time page removed:** its address redirects to
+  [Calibration graph](/concepts/calibration-graph/).
+- **Pages updated for 0.1.0:** install steps, defaults and licences follow the
+  release; benchmark figures come from batch 2026-11-10a.
+
+### New addresses (2026-11-09 and 2026-11-10)
+
+- **Device wiki:** now at [/devices/](/devices/) (2026-11-10).
+- **Benchmark:** its own section (2026-11-09), with results at [/benchmark/results/](/benchmark/results/),
+  examples at [/benchmark/examples/](/benchmark/examples/).
+- **Old addresses** redirect.
+
+### Why calibrate (2026-11-10 and 2026-11-12)
+
+A section on what each calibrated quantity changes: [IMU](/why/imu/),
+[t_ga](/why/tga/), [board shape](/why/board-shape/),
+[fisheye model (kb4)](/why/kb4/), [rolling shutter](/why/rolling-shutter/),
 [multi-camera](/why/multi-camera/) and [multi-IMU](/why/multi-imu/).
 
 ### Leaderboard shows results, not scores (2026-11-03)
 
-The leaderboard no longer gives scores or ranks. Each dataset now shows the
-calibration results of MVIS, Kalibr and Basalt side by side. The differences
-between them are shown too. See [Methodology](/benchmark/methodology/).
+Each dataset shows the results of MVIS, Kalibr and Basalt side by side, with
+the differences between them. There are no scores or ranks. See
+[Methodology](/benchmark/methodology/).
 
-### Guide-site restructure
+### Move to Astro + Starlight (August 2026)
 
-We reorganised the documentation from five sections into eight. It now follows a
-tutorial / guide / concept / reference / example separation.
-[Governance](/contribute/governance/) states the rule. Practical consequences:
-
-- **Getting started** now separates Requirements, Installation, and Quickstart.
-  Before, it was one Compilation page and a mixed Quick Start.
-- **Guides** are task-oriented and no longer explain theory. Camera calibration,
-  rolling shutter (the sensor reads the image row by row), multi-sensor rigs,
-  and simulation each have their own page.
-- **Concepts** collects the maths, with a shared
-  [notation and glossary](/concepts/notation/).
-- **Reference** holds the exhaustive material:
-  - configuration
-  - CLI
-  - result formats
-  - evaluation
-  - datasets
-- **Examples** became a per-dataset gallery. It includes validation against
-  external references.
-- **Old URLs** redirect. The legacy `openmvis.com/*.html` pages redirect too.
-
-### Initial Starlight site
-
-We migrated from jemdoc to Astro + Starlight. The first site brought:
-
-- KaTeX maths
-- search
-- dark mode
-- edit-this-page links
-- the first leaderboard prototype
+The site moved from jemdoc to Astro + Starlight, with search, dark mode and
+KaTeX maths. The old `openmvis.com/*.html` pages redirect.
 
 ## Datasets
 
-### VI-Rig releases
+The datasets are on
+[Hugging Face](https://huggingface.co/datasets/calibench-vi/datasets). Each set
+and its licence is listed on [Datasets](/datasets/).
 
-- **4 IMUs + 3 cameras** — 10 AprilGrid sequences plus one static bag, with
-  Kalibr and MVIS reference results.
-  [Details](/reference/datasets/virig-4imus-3cams/)
-- **4 IMUs + 4 cameras** — 15 sequences adding two rolling-shutter cameras, with
-  separate Kalibr references for the T265 and ELP pairs.
-  [Details](/reference/datasets/virig-4imus-4cams/)
+- **VI-Rig recordings (ours):** multi-camera, multi-IMU recordings, CC BY-NC 4.0
+  and gated.
+- **Partner recordings:** Looper and GiLabs, on the same terms.
+- **Converted third-party sets:** Monado MIC, MGC and MOC, and the TUM-VIE frame
+  cameras, CC BY 4.0.
 
 ## Planned
 

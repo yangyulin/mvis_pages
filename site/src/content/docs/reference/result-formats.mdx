@@ -1,125 +1,201 @@
 ---
 title: Result formats
-description: The files MVIS writes — dual YAML, cam-IMU JSON, HTML reports, and Kalibr interop.
+description: The files MVIS writes — camera YAML, camera–IMU JSON and YAML, HTML reports, corrected bags and Kalibr files.
 pageType: reference
 wide: true
 ---
 
-Use this page to see what a run writes, and which file to use for what.
+Use this page to see what a run writes and which file to use for what.
 
-- **Camera calibration:** two YAML files, one to deploy and one to replay
-- **Cam-IMU:** one JSON result, with fields per sensor
-- **Report:** one self-contained HTML file per run
-- **Kalibr:** read and write Kalibr files through `mvis.io.kalibr`
+| Run | Files | Use for |
+|---|---|---|
+| `mvis cam` | `<name>_calib.yaml`, `<name>_full.yaml`, `<name>.html`, `<name>.log` | Deploy the `_calib.yaml`; keep the rest to reproduce the run |
+| `mvis cam-imu` | `cam_imu.json`, `cam_imu_calib.yaml`, `cam_imu_camchain-imucam.yaml`, `cam_imu_report.html` | Read the JSON; deploy or apply the `_calib.yaml`; give Kalibr users the camchain |
+| `mvis apply-calib` | `<bag>.corrected.bag`, `<bag>.corrected.bag.recalib.yaml` | The corrected recording and how it was made |
+| `mvis roundtrip` | `forward/`, `recal/`, `report.txt`, `report.json` | PASS or FAIL with every check |
 
-## Dual YAML — camera calibration
+Rotations are stored as matrices (3×3 or 4×4) or log(R) rotation vectors in radians,
+never roll, pitch and yaw. Board tilt against gravity is the one angle given in degrees.
 
-Camera calibration writes two files on purpose:
+## Camera-only results
+
+`mvis cam` writes into the run folder (`-o`; by default a folder named `ablation` next to `output_file`).
+`<name>` is `<config folder>_<config file name>`: `-c t265/cam.yaml` gives `t265_cam_calib.yaml`.
 
 | File | Contains | Use for |
 |---|---|---|
-| `*_calib.yaml` | Intrinsics, distortion, extrinsics, time offsets, readout | **Deploy.** The calibration itself |
-| `*_full.yaml` | The above **plus per-frame board poses** | **Replay.** Re-run analysis without redetecting |
+| `<name>_calib.yaml` | Intrinsics, distortion, extrinsics, time offsets, readout, reprojection statistics | **Deploy.** The calibration itself |
+| `<name>_full.yaml` | The above, plus per-frame board poses, board corners, timings, filter statistics, motion metrics | **Replay.** Rebuild the report or the 3D view without detecting again |
+| `<name>.html` | The report | Read it first; see [below](#html-reports) |
+| `<name>.log` | The run log | Debugging |
+| `detections.mvisdb` | Detections and this run's estimates | See [Capture database](/reference/database/) |
 
-Intrinsics are the camera's own projection parameters.
-Extrinsics are the poses between sensors.
-Readout is the rolling-shutter readout.
+With `rerun_outliers: true`, the first pass is kept as `<name>_pass1_calib.yaml`,
+`<name>_pass1_full.yaml` and `<name>_pass1.html` when it differs from the final result.
+The config's `output_file` gets a copy of the result, in YAML or JSON (`output_format`).
 
-- **Deploy** the small one.
-- **Keep** the full one to reproduce the run.
-
-Both carry a `timings:` block. It holds hierarchical per-stage timings with metadata.
-With it, you can ask whether a change was faster overall or only in one stage.
-
-`output_format: json` writes JSON instead.
-
-## Cam-IMU JSON
-
-`mvis cam-imu` writes a JSON result containing, per sensor:
+### Fields of `_calib.yaml`
 
 | Field | Meaning |
 |---|---|
-| `T_CtoI` | Camera → IMU transform |
-| `td` | Camera–IMU time offset |
-| readout | Rolling-shutter readout, when estimated |
-| `Dw`, `Da`, `Tg` | IMU intrinsics, in the configured convention |
-| `b_g`, `b_a` | Biases |
-| `t_ga` | Gyro↔accel offset (the time offset between the gyroscope and accelerometer channels), when estimated |
-| `gyro_only` | Per-IMU flag — the result self-documents which IMUs skipped the accel |
-| source topic | Per sensor; this is what lets `apply-calib` derive the topic→sensor map without a hand-written file |
+| `cameras[]` | Per camera: `id`, `model` (`pinhole_<distortion model>`), `intrinsics` (`fx`, `fy`, `cx`, `cy`), `distortion` (`model`, `coeffs`), `image_size`, `rolling_shutter_readout` (s) |
+| `cameras[].rolling_shutter_readout_sigma` | Formal 1σ of the readout (s), when it was estimated |
+| `cameras[].valid_domain` | `kb4` only: the largest angle the fit can project, up to the model's first fold |
+| `extrinsics` | `reference_camera` and `transforms[]`: `from`, `to`, `T_to_from` (4×4), `so3` (log(R), rad), `translation` (m) |
+| `time_offsets` | `reference_camera` and `offsets[]`: `camera`, `dt` (s) |
+| `reprojection_errors` | `overall_rms` and `per_camera[]`: `rms`, `mean`, `median`, `p90`, `p95`, `max` (px), `num_observations` |
+| `board_shape` | With `estimate.board_points: true`: `heights_m` per corner, `rms_mm`, `peak_to_peak_mm`, `n_obs` |
+| `board_point_bias` | Mean residual per board corner: `median_px`, `max_px`, `n_points_seen` |
+| `corner_accounting` | What became of every detected corner; see [below](#corner-accounting) |
 
-:::caution[Intrinsics are convention-dependent]
-`Dw` / `Da` are only comparable between calibrations that used the same
-`imu_intrinsics_model`. Read the convention before comparing numbers — see
-[IMU model](/concepts/imu-model/).
+## Camera–IMU results
+
+`mvis cam-imu` names every file after `output.path`.
+With `output.path: results/run/cam_imu.json`:
+
+| File | Contains | Use for |
+|---|---|---|
+| `cam_imu.json` | A compact summary in practical units (mm, ms) | Read, compare, grade with `mvis verdict` |
+| `cam_imu_calib.yaml` | The full calibration in SI units, with each sensor's topic | **Deploy**, and the input of `mvis apply-calib` |
+| `cam_imu_camchain-imucam.yaml` | Kalibr camchain-imucam | Tools that read Kalibr files |
+| `cam_imu_report.html` | The report | Read it first |
+| `cam_imu_views.json` | The report's 3D scene and rig views, without camera frames | Rebuild the 3D views elsewhere, for example on openmvis.com |
+| `cam_imu_board_shape.yaml` | The estimated board shape, with `estimate.board_points: true` | `board.heights_file` of a later run |
+| `cam_imu_sensor_clock.json` | Per-frame stamp maps, with `retime_sensor_clock` | `camera_input.cameras[i].retime_map` of a later run |
+
+### Fields of `cam_imu.json`
+
+| Field | Meaning |
+|---|---|
+| `ok` | The solve finished and passed its own gates. Not proof of a good fit |
+| `reproj_rms_px`, `reproj_median_px`, `reproj_p95_px` | Reprojection error over all cameras (px) |
+| `solve_s` | Solve time (s) |
+| `diagnostics` | `iterations`, `max_iterations`, `cam_chi2_dof`, `imu_chi2_dof`, `n_states` |
+| `cams[]` | Per camera: `td_ms`, `reproj`, `reproj_median`, `reproj_p95` (px), `intr`, `p_CinI_mm` (camera position in the base IMU frame), `rotvec` (log(R) of `T_CtoI`, rad), `p_CtoC0_mm` (position relative to camera 0), `corner_accounting` |
+| `imu_model` | `kalibr`, `rpng` or `calyx` |
+| `Dw_diag`, `Da_diag` | Diagonals of the base IMU's gyroscope and accelerometer matrices |
+| `Dw_scale`, `Dw_shear`, `gyro_misalign_rotvec` | `calyx` only: `Dw` split into a rotation (log(R), rad) and an upper-triangular part with the scales on its diagonal |
+| `t_ga_ms`, `t_ga_sigma_ms` | Base IMU gyro-to-accelerometer time offset and its 1σ (ms) |
+| `imus[]` | Per auxiliary IMU: `td_ms`, `t_ga_ms`, `chi2_dof`, `p_IsinI_mm` (position in the base IMU frame), `rotvec`, `Dw_diag`, `Da_diag` |
+| `board` | Board pose against gravity: `T_BinW`, `g_inB`, `normal_tilt_deg`, `g_inplane_deg`; `shape` with `estimate.board_points: true` |
+
+`td` convention: an image stamped `t` matches the IMU at `t + td`.
+
+### Fields of `_calib.yaml`
+
+| Field | Meaning |
+|---|---|
+| `cameras[]` | As in the camera-only file, plus `td` (s), `T_cam_imu` (4×4, IMU to camera), `reproj_rms_px`, `p_CtoC0_m`, `rostopic` |
+| `imus[]` | First the base IMU (`role: base`), then each auxiliary IMU (`role: aux`) |
+| `imus[].b_g`, `imus[].b_a` | Gyroscope (rad/s) and accelerometer (m/s²) bias |
+| `imus[].Dw`, `imus[].Da` | 3×3 gyroscope and accelerometer matrices, in the convention of `model` |
+| `imus[].imu_intr_xi` | Every IMU intrinsic in one vector, including `Tg` and the internal rotation; the form `apply-calib` reads |
+| `imus[].R_wtoI`, `imus[].U_w` | Base IMU, `calyx`: rotation and upper-triangular factor of `Dw` |
+| `imus[].t_ga`, `imus[].t_ga_sigma` | Gyro-to-accelerometer time offset and its 1σ (s), when estimated |
+| `imus[].td`, `imus[].p_IsinI_m` | Auxiliary IMU: time offset (s) and position in the base IMU frame (m) |
+| `imus[].gyro_only` | Present and `true` when an auxiliary IMU was calibrated from its gyroscope alone; its lever, `Da` and accelerometer bias were held fixed |
+| `imus[].topic` | Source topic; `apply-calib` uses it to map topics to sensors |
+
+:::caution[IMU intrinsics depend on the convention]
+`Dw` and `Da` compare only between calibrations with the same `imu.model`.
+Check the model before you compare numbers. See [IMU model](/concepts/imu-model/).
 :::
 
-### Batch layout
+### Several recordings
 
-With `input.bags`, each sequence gets its own discoverable result:
+With `input.bags`, each recording gets its own folder next to `output.path`:
 
-```
-<output_dir>/
-  bag00/cam_imu.json
+```text
+results/sweep/
   bag01/cam_imu.json
   bag02/cam_imu.json
+  bag03/cam_imu.json
 ```
 
-The repeatability study reads this layout.
+`<NN>` is the last number in the bag file name (for a EuRoC `mav0` folder, the first number of its parent folder).
 
-## HTML report
+## Corner accounting
 
-We write one self-contained file per run. It has no external assets, so it can be emailed.
-It uses print-friendly CSS.
+Every result has a `corner_accounting` block per camera.
+It says what happened to each detected corner, so a fit cannot look better by silently dropping corners.
+Every corner lands in exactly one category:
+`detected = used + past_fold + other_invalid + outliers + no_pose_corners + not_in_solve`.
 
-Contents:
+| Field | Meaning |
+|---|---|
+| `detected` | Every corner given to the solve |
+| `used` | Had a factor in the final solve and projects at the final fit |
+| `past_fold` | Fails to project at the final fit, at or past a Kannala–Brandt model's fold |
+| `other_invalid` | Fails to project for another reason, for example behind the camera under `equidistant` |
+| `outliers` | Removed by the outlier filter; still projects |
+| `no_pose_frames`, `no_pose_corners` | Frames, and their corners, that reached no factor (no pose, too few points) |
+| `not_in_solve` | Never reached the final solve: thinned by rate or `corner_subsample`, or dropped by a gate |
+| `past_fold_pass1` | `past_fold` at the first pass's fit, before the outlier rerun. Above zero also raises the alarm |
+| `n_corners` | `used + past_fold + other_invalid` |
+| `max_theta_deg`, `max_theta_used_deg` | Largest angle from the optical axis, of all corners and of the used ones |
+| `fold_deg`, `fold_level` | `kb4`: angle of the fold. `fold_level` is `alarm` when corners lie past the fold, `warn` when the fold lies inside the image, else `none` |
 
-- **Navigation:** navigable TOC (table of contents) and summary stat cards
-- **Intrinsics and distortion:** tables
-- **Extrinsics:** with an inline 3D plot
-- **Temporal calibration:** time offset and readout together
-- **Reprojection analysis:**
-  - per-frame robust median and P95 (95th percentile)
-  - per-tag
-  - error-vector histograms
-  - dual-panel scatter
-  - corner heatmaps
-- **Calibration-data quality:**
-  - motion-excitation metrics with grades
-  - rotation-axis spread
-  - angular-velocity timeline
-  - feature-coverage heatmap
-- **Detection statistics**
-- **Pipeline timing**
-- **Appendices:** collapsible
+## HTML reports
 
-To rebuild reports without recalibrating, run this. It uses the saved YAML plus the detection cache:
+Every run writes one self-contained HTML file. It has no external files, so you can mail it.
+It prints cleanly and has a dark mode.
+
+The camera-only report has:
+
+- **Summary:** stat cards and a table of contents
+- **Intrinsics and distortion:** tables per camera
+- **Extrinsics:** a table and a 3D plot
+- **Temporal calibration:** time offsets and readout
+- **Reprojection:** per-frame median and P95, per tag, error-vector histograms, corner heatmaps
+- **Data quality:** motion-excitation grades, rotation-axis spread, angular-velocity timeline, image coverage
+- **Detection statistics, pipeline timing** and collapsible appendices
+
+The camera–IMU report adds:
+
+- **Summary:** status, reprojection RMS, χ²/dof, with grade badges
+- **3D views:** the sensor rig (each camera at its `T_CtoI`, each auxiliary IMU, levers in mm)
+  and the recovered trajectory with the board
+- **Cameras, base IMU, auxiliary IMUs:** every estimate, with its 1σ where the solve gives one
+- **Against reference:** lever, rotation and baseline differences, when the config has a `reference:` block
+
+The reprojection and χ²/dof badges use the same thresholds as `mvis verdict`. See [Evaluation & metrics](/reference/evaluation/).
+
+To rebuild a camera-only report from a finished run folder without solving again:
 
 ```bash
-python -m mvis.analysis.regenerate_html
+python -m mvis.analysis.regenerate_html results/run --config t265/cam.yaml
 ```
-
-## Kalibr interop
-
-`mvis.io.kalibr` is the one surface for Kalibr files:
-
-| Function | Direction | Handles |
-|---|---|---|
-| `read_camchain` | in | Intrinsics + distortion across pinhole / ds / eucm / fov |
-| `read_camchain_imucam` | in | Also each camera's `T_cam_imu` and stereo `T_cn_cnm1` |
-| `write_camchain_imucam` | out | Exports a cam-IMU result as a round-trippable camchain-imucam |
-
-With these, a Kalibr calibration becomes an MVIS starting point.
-A MVIS result can also go back into a Kalibr-expecting pipeline.
-
-## Ground-truth comparison
-
-Per-dataset ground-truth YAMLs live under `examples/regression/gt/`.
-Where one exists, the dashboard annotates each parameter with its deviation.
-For example: `Δ +0.27% GT=190.97`, colour-coded by accuracy band.
 
 ## Corrected bags
 
-[`mvis apply-calib`](/guides/roundtrip/#export-a-corrected-dataset) writes a corrected ROS1 bag.
-It also writes a **provenance sidecar**: a file recording which calibration was applied and what it changed.
-The bag is ordinary. Anything that read the original reads the corrected one.
+[`mvis apply-calib`](/reference/cli/#apply-calib) writes an ordinary ROS1 bag.
+Anything that read the raw bag reads the corrected one.
+Next to it, `<bag>.recalib.yaml` records:
+
+- the source bag and the calibration file, with its SHA-256
+- the base IMU topic and the timeline (`base_imu_clock`, or the original stamps with `--no-td`)
+- the `td` convention: `t_on_base = t_sensor + td`
+- which corrections ran: `remove_bias`, `undistort`, `imu_intrinsics`, `td`, `t_ga`
+- which topics were corrected and which were copied unchanged
+
+## Kalibr files
+
+`mvis.io.kalibr` reads and writes Kalibr files:
+
+| Function | Direction | Does |
+|---|---|---|
+| `read_camchain` | in | A Kalibr camchain → per-camera intrinsics, distortion, resolution |
+| `read_camchain_imucam` | in | Also each camera's `T_cam_imu` and the stereo `T_cn_cnm1` |
+| `write_camchain_imucam` | out | A camera–IMU result → a camchain-imucam dict |
+| `AprilTagBoard.from_kalibr_yaml` | in | A Kalibr AprilGrid target file (in `mvis.detection.apriltag_board`) |
+
+So a Kalibr calibration can be an MVIS start (`camera_input.path` takes a camchain),
+and an MVIS result can go to tools that expect Kalibr.
+Notes on the exported camchain-imucam:
+
+- **`kb4`:** written as Kalibr `pinhole` + `equidistant` with the same coefficients.
+  Exact for points in front of the camera; MVIS warns when the fit used corners past 90°.
+- **Readout:** written as Kalibr's `line_delay`, the readout divided by the image rows.
+- **`rostopic`:** written as `/camN/image_raw`; set your own topics before you use the file with Kalibr.
+- **Skipped export:** when a camera cannot be expressed in Kalibr's form (for example `ucm` with α outside [0, 1)),
+  the camchain is not written and MVIS logs a warning. The MVIS files still hold the full result.

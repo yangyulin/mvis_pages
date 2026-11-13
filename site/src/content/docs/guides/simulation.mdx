@@ -4,85 +4,89 @@ description: Re-solve a simulated copy of your rig, where the truth is known, an
 pageType: guide
 ---
 
-Use this page to test the solver on a copy of your rig where the truth is known.
-You need the cam-IMU config and bag from
-[step 4](/guides/camera-imu-calibration/). You get the error of each parameter
-against the truth.
+Step 7 of the walkthrough. Here you test the solver on a simulated copy of your recording, where the truth is
+known.
+
+- **You need:** the camera–IMU config and bag from [step 4](/guides/camera-imu-calibration/), and MVIS
+  installed from source or from the package.
+- **You get:** the error of each calibration parameter against the truth.
+- **Check:** the noise-free errors are near zero (section 2).
 
 A **digital twin** is a simulated copy of your recording:
 
-- **The truth** is your real solve, moved off by a small seeded perturbation:
-  calibration, board pose and shape, biases and trajectory. The perturbation
-  makes the solve recover values it was not given. It also keeps your real
-  calibration out of a saved twin. `perturb_seed=None` in `capture` keeps the
-  real solve as it is.
-- **The timing** is real: MVIS keeps the real frame times, the corner ids seen
-  in each frame and the IMU stamps.
-- **The data** is new: MVIS regenerates the corners and the IMU from the truth,
-  with rolling shutter and t_ga (the time offset between gyroscope and
-  accelerometer).
+- **The truth** is your real solve: calibration, board pose and shape, biases and trajectory. A small
+  seeded perturbation then moves the camera intrinsics, the camera and aux-IMU extrinsics, each `td` and
+  each `t_ga`, by up to 1 % focal, 4 px principal point, 5 % of each distortion coefficient, 10 mrad per
+  rotation axis, 5 mm per lever axis, 1 ms `td` and 0.5 ms `t_ga`. Readout, IMU intrinsics, biases,
+  gravity, board and trajectory stay as solved. The perturbation makes the solve recover values it was not
+  given, and keeps your real calibration out of a twin you save or share. `perturb_seed=None` in `capture` keeps the real
+  solve as it is.
+- **The timing** is real: MVIS keeps the real frame times, the corner ids seen in each frame and the IMU
+  stamps.
+- **The data** is new: MVIS regenerates the corners and the IMU readings from the truth, with rolling shutter
+  and t_ga (the time offset between the gyroscope and the accelerometer).
 - **The solve** is the real pipeline, run again on the new data.
 
-So any gap between the result and the truth comes from the solver, not from the
-recording.
+So any gap between the result and the truth comes from the solver, not from the recording.
 
 ## 1. Build and solve a twin
 
-The twin lives in the Python module `mvis.simulation.twin`.
+The twin is the Python module `mvis.simulation.twin`.
 
 ```python title="twin.py"
 from mvis.simulation import twin
 
-# Runs the real solve (it needs the bag) and takes it as the truth.
+# Runs the real solve once (it needs the bag) and takes it as the truth.
 # noise_from_residuals sets the noise to match the real residuals.
 tw = twin.capture("virig_4imus_4cams_cam_imu.yaml", "virig4",
                   noise_from_residuals=True)
 
 report = twin.solve(tw, seed=0)              # with noise
-clean = twin.solve(tw, noise=False)          # noise-free
+clean = twin.solve(tw, noise=False)          # without noise
 
-tw.save("virig4_twin.npz")                   # keep it; no images inside
+tw.save("virig4_twin.npz")                   # keep it; it holds no images
 tw = twin.Twin.load("virig4_twin.npz")
 ```
 
-- **`capture`** runs your cam-IMU config once, on the real bag.
+- **`capture`** runs your camera–IMU config once on the real bag. Its outputs go to `results/twin_capture`
+  (set another folder with `work_dir=`).
+- **`noise_from_residuals=True`** measures the corner noise from the real solve. It runs one extra solve of
+  the twin to scale the IMU noise, so the twin's IMU fit matches the real one.
 - **`solve`** simulates, solves and returns the errors (estimate minus truth).
 - **`seed`** picks the noise draw. Run a few seeds, not one.
-- **A saved twin** needs no bag. Solve it again after any code change.
+- **A saved twin** needs no bag. Solve it again after any change to MVIS or to the solve settings.
 
 :::caution[What the twin does not test]
-The simulated noise is Gaussian. There are no lens or timing model errors. So
-the twin checks the estimator, not the recording.
+The simulated noise is Gaussian, and the twin has no lens or timing model errors. So it checks the
+estimator, not the recording.
 :::
 
 ## 2. Read the errors
 
 Each solve returns, per sensor:
 
-- **Cameras:** lever arm (mm), rotation as a log(R) vector (mrad), td (the
-  camera–IMU time offset, ms), readout (ms), focal length (px).
-- **Base IMU:** t_ga (ms), gyro and accelerometer scale (%).
-- **Each auxiliary IMU:** lever, rotation, td, t_ga and scales.
+- **Cameras:** lever arm (mm), rotation as a log(R) vector (mrad), td (the camera–IMU time offset, ms),
+  readout (ms), focal length (px).
+- **Base IMU:** t_ga (ms), gyroscope and accelerometer scale (%).
+- **Each aux IMU:** lever, rotation, td, t_ga and scales.
 - **Board:** rms height error (mm), when the board shape is estimated.
 
-Read the two runs side by side:
+Read the two kinds of run side by side:
 
-- **Noise-free error** should be near zero. If not, the solver does not recover
-  the truth, even from perfect data. That is a model or observability problem.
-- **Seed error** (with noise) shows what your data can support. Large seed error
-  with small noise-free error means the data limits the result, not the solver.
-- **The IMU noise is a rough match.** It is scaled from the solver's IMU
-  chi2, which reads low. So seed errors of IMU-driven parameters may be
-  optimistic.
+- **The noise-free error** should be near zero. If it is not, the solver does not recover the truth even
+  from perfect data. That is a model or observability problem.
+- **The error with noise** shows what your data can support. Large errors with noise and small noise-free
+  errors mean the data limits the result, not the solver.
 
 ## 3. Watch the twin of the full rig
 
-We ran the step 4 config (all 4 cameras, all 4 IMUs, bag 01) and built its twin.
-Each video shows the same 80 s of motion:
+We ran the step-4 config (all 4 cameras, all 4 IMUs, bag 01) and simulated the same 80 s from its result.
+Each video shows:
 
 - **Left:** the IMU trajectory and the board, with each camera's pose.
 - **Right:** each camera's corners, observed (circles) and reprojected (dots), with the RMS for that frame.
-- **Bottom:** position (m) and orientation as log(R) from the start (rad), with a cursor at the current time.
+- **Bottom:** position (m) and orientation as log(R) from the start (rad), with a cursor at the current
+  time.
 
 <div class="twin-videos">
   <figure>
@@ -102,44 +106,42 @@ Each video shows the same 80 s of motion:
   .twin-videos figcaption { font-size: 0.85rem; color: var(--sl-color-gray-2); margin-top: 0.3rem; }
 `}</style>
 
-This video twin is built straight from the solve, with fixed noise. It differs from the
-`twin` module of section 1:
+This video twin is simpler than the `twin` module of section 1:
 
-- **Truth:** the real solve as it is (no perturbation): trajectory, board, every camera and IMU.
+- **Truth:** the real solve as it is, with no perturbation: trajectory, board, every camera and IMU.
 - **Cameras:** all four at 30 Hz, each seeing every tag in its view, with 0.5 px corner noise.
-- **IMUs:** 200 Hz, with a fixed noise model (gyro 1.7e-4 rad/s/√Hz, accel 3e-3 m/s²/√Hz).
+- **IMUs:** 200 Hz, with a fixed noise model (gyroscope 1.7e-4 rad/s/√Hz, accelerometer 3e-3 m/s²/√Hz).
 
-So the twin's corners are cleaner than the real ones: on real data the per-frame RMS jumps when the
-board is blurred or far away.
+So its corners are cleaner than the real ones. On real data the per-frame RMS jumps when the board is
+blurred or far away.
 
-**Solved against its truth** (one noise draw, all 4 cameras and all 4 IMUs, reprojection 0.71 px):
+**Solved against its truth** (one noise draw, all 4 cameras and all 4 IMUs, reprojection RMS 0.71 px):
 
 | Sensor | Lever error | Rotation error | Readout error |
 |---|---|---|---|
-| T265-1 | 0.13 mm | 0.17 mrad | — |
-| T265-2 | 0.14 mm | 0.14 mrad | — |
+| T265 left | 0.13 mm | 0.17 mrad | — |
+| T265 right | 0.14 mm | 0.14 mrad | — |
 | ELP-L | 0.16 mm | 0.12 mrad | 0.05 ms |
 | ELP-R | 0.14 mm | 0.16 mrad | 0.04 ms |
 | GX3-25 (to the base IMU) | 0.18 mm | 0.54 mrad | — |
 | GX3-35 (to the base IMU) | 0.24 mm | 0.23 mrad | — |
 | T265 IMU (to the base IMU) | 0.18 mm | 0.45 mrad | — |
 
-Every lever lands within 0.25 mm and every rotation within 0.6 mrad of the truth. The solve converges
-on the full rig.
+Every lever lands within 0.25 mm and every rotation within 0.6 mrad of the truth. The solve converges on the
+full rig.
 
-## 4. Running example: VI-Rig ELP pair
+## 4. Twin of the ELP pair
 
-We built a twin of the ELP-pair cam-IMU row on
-[virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/) bag 01:
+We built a `twin` module twin of the ELP-pair camera–IMU run on
+[virig-4imus-4cams](/datasets/virig-4imus-4cams/) bag 01:
 
 - **Cameras:** ELP left and right, rolling shutter.
-- **IMUs:** T265 IMU as the base, Xsens as the auxiliary IMU.
-- **Settings:** the same row as T8 in the
-  [results](/benchmark/results/virig-4imus-4cams/): camera intrinsics free,
-  t_ga on, board shape on.
+- **IMUs:** the T265 IMU as base, the Xsens as aux IMU.
+- **Settings:** as in the "ELP RS stereo + two IMUs" run on the
+  [results page](/benchmark/results/virig-4imus-4cams/): camera intrinsics free, t_ga on, board shape on.
 
-Errors against the truth (estimate minus truth). Lever and rotation are the length of the 3D
-error; a scale is the largest of its three axis errors.
+Errors against the truth (estimate minus truth). For lever and rotation the table gives the length of the 3D
+error; for a scale, the largest of its three axis errors.
 
 | Parameter | Noise-free | With noise, RMS over seeds 0–2 |
 |---|---|---|
@@ -149,26 +151,25 @@ error; a scale is the largest of its three axis errors.
 | Camera readout | 0.003 ms | 0.017 ms |
 | Camera focal length | 0.009 px | 0.096 px |
 | Base t_ga | 0.015 ms | 0.053 ms |
-| Base gyro scale | 0.011 % | 0.108 % |
-| Base accel scale | 0.013 % | 0.033 % |
+| Base gyroscope scale | 0.011 % | 0.108 % |
+| Base accelerometer scale | 0.013 % | 0.033 % |
 | Board height rms | 0.23 mm | 0.23 mm |
 | Aux lever | 0.164 mm | 0.20 mm |
 | Aux rotation | 0.245 mrad | 0.58 mrad |
 | Aux td | 0.007 ms | 0.036 ms |
 
-Camera rows are ELP left; ELP right is close. What it shows:
+The camera rows are ELP left; ELP right is close. What it shows:
 
-- **The solver converges to the truth.** Without noise every error is a fraction of a mm, mrad or
-  ms, and scales land within 0.02 %. This is the check that matters.
-- **Noise sets the limit, and it matches real data.** The twin's IMU noise is tuned so its IMU fit
-  matches the real one. With that noise, the gyro scale lands within 0.11 %, t_ga within 0.05 ms
-  and the ELP readout within 0.02 ms. That is no larger than the real spread over the 15
-  recordings, which also varies the motion: T265 gyro scale 0.03–0.13 % per axis, t_ga 0.13 ms,
-  ELP readout 0.12 ms ([results](/benchmark/results/virig-4imus-4cams/), family T8).
-- **The board height** keeps about 0.2 mm error even without noise.
+- **The solver converges to the truth.** Without noise every error is a fraction of a mm, mrad or ms, and the
+  scales land within 0.02 %. This is the check that matters.
+- **Noise sets the limit, and it matches real data.** With noise, the gyroscope scale lands within 0.11 %,
+  t_ga within 0.05 ms and the ELP readout within 0.02 ms. That is no larger than the real spread over the 15
+  recordings, which also vary the motion: T265 gyroscope scale sd 0.03–0.13 % per axis, t_ga sd 0.13 ms, ELP
+  readout sd 0.12 ms ([results page](/benchmark/results/virig-4imus-4cams/), "ELP RS stereo + two IMUs").
+- **The board height** keeps about 0.2 mm of error even without noise.
 
-We keep these numbers as a reference. A new MVIS version fails the check if an
-error grows past the reference by more than:
+**A check for every MVIS change.** We keep these errors as a reference and re-run the twin for new MVIS
+versions. A version fails if a solve fails, takes no step, or an error grows past the reference by more than:
 
 | Quantity | Allowed growth (noise-free) |
 |---|---|
@@ -176,47 +177,58 @@ error grows past the reference by more than:
 | Rotation | 0.2 mrad |
 | td, readout | 0.05 ms |
 | t_ga | 0.1 ms |
-| Gyro scale | 0.01 % |
-| Accel scale | 0.02 % |
+| Gyroscope scale | 0.01 % |
+| Accelerometer scale | 0.02 % |
 | Focal length | 0.2 px |
 | Board height rms | 0.1 mm |
 
-Seed errors may grow by twice these amounts, as three seeds are a rough sample.
-A solve that fails or takes no step also fails the check. Smaller errors never
+Errors with noise may grow by twice these amounts, as three seeds are a rough sample. Smaller errors never
 fail.
 
 ## 5. Twin of the motion
 
-We also used twins to choose the recording motion. A simulated Looper Insight 9
-ran each motion on 3 noise seeds plus a noise-free run. See
-[how we judged it](/guides/calibration-motion/#how-we-judged-it).
+We also used twins to choose the recording motion of step 2. A simulated Looper Insight 9 ran each motion on
+3 noise seeds and once without noise. See [how we judged it](/guides/calibration-motion/#how-we-judged-it).
 
 ## Without ground truth
 
-On real data there is no truth. We have two substitutes, strongest first:
+On real data there is no truth. Two checks stand in for it, strongest first:
 
-1. **[Round-trip](/guides/roundtrip/)**: `mvis roundtrip` applies the
-   calibration to its own bag and recalibrates. PASS requires IMU intrinsics to
-   collapse *and* geometry to hold.
-2. **Repeatability**: run a
-   [batch sweep](/guides/camera-imu-calibration/#batch-a-whole-dataset-family-from-one-config)
-   across sequences of the same rig. Parameters that move between sequences
-   were not constrained by the motion in them.
+1. **[Round trip](/guides/roundtrip/):** `mvis roundtrip` applies the calibration to its own bag and
+   calibrates again. PASS needs the IMU intrinsics to collapse *and* the geometry to hold.
+2. **Repeatability:** calibrate several recordings of the same rig with
+   [batch mode](/guides/camera-imu-calibration/#batch-many-recordings-from-one-config). A parameter
+   that moves between recordings was not pinned down by their motion.
 
-## Motions you have not recorded
+## Simulate without a recording
 
-The twin replays a motion you recorded. To try a new motion, MVIS also has
-`mvis.simulation.scenario`:
+To try a rig or a motion you have not recorded, start from a simulator example. Each one holds a real motion
+and a full rig setup (cameras, IMUs, board), with a perturbed truth like a twin:
 
-- It bundles a trajectory, a true calibration and a board placed in the world.
-- It generates camera corners, a base IMU and an optional auxiliary IMU, with
-  full truth.
-- One trajectory ships with the package (`sine_3d`).
+```python title="sim.py"
+from mvis.simulation.examples import load_example, simulate
+from mvis.calibration.pipeline_cam_imu import run_cam_imu_calibration_multi
 
-This is a lower-level tool than the twin. For the theory of weak motions, see
-[Degeneracy](/concepts/degeneracy/).
+ex = load_example("twin_gs")          # ships with the package
+data = simulate(ex, seed=0)           # cams, t_imu, w_m, a_m, aux_imus
+result = run_cam_imu_calibration_multi(
+    data["cams"], ex.board_points_flat, data["t_imu"], data["w_m"], data["a_m"],
+    aux_imus=data["aux_imus"] or None)
+```
+
+- **In the package:** `twin_gs`, a global-shutter stereo twin with one IMU.
+- **In a source checkout** (`data/sim_examples/`): more examples, among them `virig_4imus_3cams` (our VI-Rig),
+  `elp_t265`, `tum_vi_raw`, `twin_rs` (a rolling-shutter twin), `guide06c_60` (the AprilGrid guide motion
+  of step 2) and `guide60b` (an earlier chessboard motion). `mvis.simulation.examples.available()` lists
+  what your install has.
+- **Licences:** `twin_gs` and `twin_rs` are GPL-3.0-only, like the code. The VI-Rig examples
+  (`virig_4imus_3cams`, `elp_t265`) are CC BY-NC 4.0 and the TUM-VI one CC BY 4.0. Each example's
+  `setup.yaml` names its licence; check it before you reuse a guide motion.
+- **Lower level:** `mvis.simulation.scenario` builds a dataset from a trajectory, a true calibration and a
+  board placed in the world.
+
+For the theory of weak motions, see [Degeneracy](/concepts/degeneracy/).
 
 ## Next
 
-[Step 8: round-trip validation](/guides/roundtrip/) checks the calibration on
-real data.
+[Step 8: round-trip validation](/guides/roundtrip/) checks the calibration on real data.

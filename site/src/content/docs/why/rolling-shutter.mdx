@@ -5,45 +5,48 @@ pageType: example
 wide: true
 ---
 
-Use this page to see what rolling shutter does to a real calibration. You need no setup.
-Data: our runs on the VI-Rig dataset [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/).
+This page shows what rolling shutter does to a real calibration. You need no setup.
+Data: our runs on the VI-Rig dataset [virig-4imus-4cams](/datasets/virig-4imus-4cams/).
 
 **The answer first:**
 
 - **The ELP is rolling shutter:** it reads its rows one after another, over about 16.6 ms.
 - **Calling it global costs fit:** the median reprojection error grows by about 20–25 %.
-- **$t_d$ hides the error:** the camera time offset $t_d$ moves by about half the readout to absorb it.
+- **$t_d$ hides the error:** the camera–IMU time offset $t_d$ moves by about half the readout to absorb it.
 - **No warning:** the solve still converges, and the shifted $t_d$ looks like a normal time offset.
 
 How to turn it on: [Rolling-shutter calibration](/guides/rolling-shutter/).
 
 ## The setup
 
-- **Readout time:** the time $t_r$ a camera takes to read all its rows.
-- **Reprojection error:** the distance between a detected board corner and where the calibration predicts it,
-  in pixels.
-- **Cameras:** the rig has two ELP cameras, ELP-L and ELP-R, 640×480 at 25 Hz, rolling shutter.
-- **Solve:** MVIS solves the readout with everything else in the camera–IMU stage.
+- **Readout:** the time $t_r$ a camera takes to read all its rows.
+- **Reprojection error:** the distance in pixels between a detected board corner and where the calibration
+  predicts it.
+- **Cameras:** two ELP cameras, ELP-L and ELP-R, 640×480 at 25 Hz as recorded (about 20–22 Hz after restamping), rolling shutter.
+- **Solve:** MVIS solves the readout with the other camera terms, in the camera-only step and again in the
+  camera–IMU step.
 
 ## 1. The ELP reads its rows over about 16.6 ms
 
 - **Example run, recording 01:** readout 16.68 ms for ELP-L and 16.73 ms for ELP-R. See the
   [worked example](/benchmark/examples/virig-4imus-4cams/).
-- **All 15 recordings, median:** with ELP RS stereo and two IMUs, ELP-L reads 16.618 ms (sd 0.122) and ELP-R
+- **All 15 recordings, median:** with ELP stereo and two IMUs ([T8](/benchmark/results/virig-4imus-4cams/#T8)), ELP-L reads 16.618 ms (sd 0.122) and ELP-R
   16.594 ms (sd 0.111).
-- **Left and right agree:** to within 0.05 ms.
-- **What it means:** within one image, the top and bottom rows are taken about 16.6 ms apart. If the rig
-  moves, the rows see the board from slightly different poses.
+- **Left and right agree:** within 0.05 ms.
+- **What it means:** the top and bottom rows of one image are taken about 16.6 ms apart. If the rig moves, they
+  see the board from slightly different poses.
 
 ## 2. Called global, the fit gets worse and the time offset moves
 
 We ran the same camera–IMU solve twice: once with rolling shutter, once with the ELP called global shutter.
-Setup: ELP pair, T265 IMU as base, Xsens as the second IMU, recording 01.
+Setup: ELP pair, T265 IMU as base IMU, Xsens as aux IMU, recording 01.
 
 :::caution[Older code]
-This A/B test ran on October 2026 code. That is before the ELP stamp correction,
-[board-shape estimation](/why/board-shape/) and `vision_pose: imu`. So the absolute pixel values, about 1 px,
-are much worse than today's 0.16–0.24 px on the ELP. Read the change between the two columns, not the values.
+This test ran on October 2026 code, before three later changes: the ELP stamp correction (the image stamps moved
+onto the camera's own frame clock; see [Recordings](/datasets/virig-4imus-4cams/#recordings)),
+[board-shape estimation](/why/board-shape/) and `vision_pose: imu`. Its absolute errors, about 1 px, are much
+worse than the 0.16–0.18 px median on the ELP in the results (batch 2026-11-10a). Read the change between the two
+columns, not the values.
 :::
 
 | Recording | Median reprojection, RS (px) | Median reprojection, called global (px) | ELP-L $t_d$ shift (ms) | Readout in the RS run (ms) |
@@ -51,33 +54,33 @@ are much worse than today's 0.16–0.24 px on the ELP. Read the change between t
 | 01 | 1.043 | 1.303 | +9.5 | 16.2 |
 
 - **Fit:** the median error grows by 0.26 px.
-- **$t_d$ moves by about half the readout:** a global-shutter model stamps the whole image at one time. The
-  solver then moves $t_d$ so that this time sits near the middle row.
-- **The IMU barely notices:** the base gyro scale moved by 0.5 % or less. A wrong shutter model mainly
-  corrupts the camera's timing, not the IMU.
-- **The real risk:** the shifted $t_d$ looks like a normal time offset. But it is right only for the middle
-  row. Rows at the top and bottom are off by up to half the readout, about 8 ms.
+- **$t_d$ moves by about half the readout:** a global-shutter model stamps the whole image at one time, so the
+  solver moves $t_d$ until that time sits near the middle row.
+- **The IMU barely notices:** the base gyro scale moved by 0.5 % or less. A wrong shutter model mainly corrupts
+  the camera timing.
+- **The real risk:** the shifted $t_d$ is right only for the middle row. The top and bottom rows are off by up to
+  half the readout, about 8 ms.
 
 ## 3. MVIS repeats the readout tighter than Kalibr
 
-The public results compare MVIS and Kalibr on all 15 recordings. See
+The results compare MVIS and Kalibr on all 15 recordings; see
 [VI-Rig: 4 IMUs + 4 cameras](/benchmark/results/virig-4imus-4cams/).
 
-**Camera only (ELP RS stereo + readout):**
+**Camera-only (ELP stereo + readout, [T2](/benchmark/results/virig-4imus-4cams/#T2)):**
 
 | Camera | MVIS readout (ms) | Kalibr readout (ms) |
 |---|---|---|
-| ELP-L | 14.600 (sd 0.409, n = 15) | 16.354 (sd 2.00, n = 15) |
-| ELP-R | 14.598 (sd 0.408, n = 15) | 17.369 (sd 1.42, n = 13) |
+| ELP-L | 14.604 (sd 0.404, n = 15) | 16.354 (sd 2.00, n = 15) |
+| ELP-R | 14.601 (sd 0.404, n = 15) | 17.369 (sd 1.42, n = 13) |
 
-- **MVIS repeats 3–5× tighter:** across recordings, compared with Kalibr's rolling-shutter model.
+- **MVIS repeats 3–5× tighter** across recordings than Kalibr's rolling-shutter model.
 - **One camera at a time:** Kalibr's rolling-shutter model has no ELP stereo baseline.
-- **Lens models differ:** MVIS uses the equidistant model on the ELP, Kalibr radtan. So we compare only the
-  readout here.
-- **Kalibr was not re-run:** after the ELP stamp correction.
+- **Lens models differ:** MVIS uses the equidistant model on the ELP, Kalibr radtan, so only the readout is
+  compared.
+- **Kalibr was not re-run** after the ELP stamp correction.
 - **With the IMU:** the MVIS readout spread drops to about 0.1 ms (section 1).
 
-**Camera–IMU, mixed rig (T265 fisheye 1 + ELP-L + two IMUs):**
+**Camera–IMU, mixed rig (T265 fisheye 1 + ELP-L + two IMUs, [T7](/benchmark/results/virig-4imus-4cams/#T7)):**
 
 | Camera | MVIS median reprojection (px) | Kalibr median reprojection (px) |
 |---|---|---|
@@ -87,42 +90,41 @@ The public results compare MVIS and Kalibr on all 15 recordings. See
 - **Kalibr's camera–IMU solver is global shutter only:** it takes ELP-L as global, with readout fixed at 0.
 - **Not a clean on/off test:** MVIS uses two corners per tag, non-base cameras at 4 Hz or lower and an
   [estimated board shape](/why/board-shape/). Kalibr uses none of these.
-- **Part of the gap is settings:** the gap on the global-shutter T265 suggests part of it comes from those
-  settings.
+- **Part of the gap is settings:** the gap on the global-shutter T265 suggests so.
 
 **Conclusion:**
 
 - **Model the shutter:** the ELP is rolling shutter, and calling it global makes the fit worse.
 - **The error goes into $t_d$:** it moves by about half the readout, with no warning.
-- **MVIS repeats the readout:** it is tighter than Kalibr across recordings, and tighter still with the IMU.
+- **MVIS repeats the readout:** tighter than Kalibr across recordings, and tighter still with the IMU.
 
 ## Limits
 
 <div class="not-content rp-honest">
   <ul>
-    <li><b>Camera only and camera–IMU disagree:</b> MVIS gets 14.6 ms from camera only and 16.6 ms with the
-      IMU, about 2 ms apart.</li>
-    <li><b>Readout needs help to be seen:</b> it needs a high enough frame rate or IMU support. On a low-rate
-      camera with no IMU, the readout can follow the solver's starting value, not the data.</li>
+    <li><b>Camera-only and camera–IMU disagree:</b> MVIS gets 14.6 ms camera-only and 16.6 ms with the IMU,
+      about 2 ms apart.</li>
+    <li><b>Readout needs help to be seen:</b> a high enough frame rate or IMU support. On a low-rate camera with
+      no IMU, the readout can follow the solver's starting value, not the data.</li>
     <li><b>Check repeatability, not one run:</b> calibrate several recordings and compare the readout. A value
       that moves a lot between recordings is not well observed.</li>
     <li><b>A round trip cannot test it:</b> <code>mvis apply-calib</code> corrects frame stamps only. It does
       not unwarp image rows, so a <a href="/guides/roundtrip/">round-trip validation</a> says nothing about the
       readout.</li>
-    <li><b>Older A/B code:</b> the on/off test in section 2 is one recording on October 2026 code.</li>
+    <li><b>Older on/off code:</b> section 2 is one recording on October 2026 code.</li>
   </ul>
 </div>
 
 ## Data
 
-- **Recordings:** [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/), all 15 recordings. Licence
-  CC BY-NC 4.0, gated; commercial use by request. Please cite the VI-Rig dataset and MVIS.
+- **Recordings:** [virig-4imus-4cams](/datasets/virig-4imus-4cams/), all 15 recordings. Licence CC BY-NC 4.0,
+  gated; commercial use on request. Please cite the VI-Rig dataset and MVIS.
 - **Section 1:** the [worked example](/benchmark/examples/virig-4imus-4cams/) and the
-  [results page](/benchmark/results/virig-4imus-4cams/).
-- **Section 2:** a diagnostic A/B run on October 2026 code, before the ELP stamp correction, board-shape
+  [results page](/benchmark/results/virig-4imus-4cams/), batch 2026-11-10a.
+- **Section 2:** a diagnostic on/off run on October 2026 code, before the ELP stamp correction, board-shape
   estimation and `vision_pose: imu`.
-- **Section 3:** the [results page](/benchmark/results/virig-4imus-4cams/). Kalibr was not re-run after the
-  ELP stamp correction.
+- **Section 3:** the [results page](/benchmark/results/virig-4imus-4cams/), batch 2026-11-10a. Kalibr was not
+  re-run after the ELP stamp correction.
 
 ## Related
 

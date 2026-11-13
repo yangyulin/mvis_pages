@@ -7,109 +7,104 @@ wide: true
 
 import CalibMotionPlayer from '../../../components/CalibMotionPlayer.astro';
 
-Use this page to record a take the solver can use. You need the board from
-[step 1](/guides/board-setup/). You get one bag per take.
+Step 2 of the walkthrough. Here you record takes the solver can use.
 
-- **Takes from step 1:** the board, set up and measured.
-- **Hands on to step 3:** the bags, for [camera-only calibration](/guides/camera-calibration/).
+- **You need:** the board from <span id="boards-we-used" class="cm-anchor"></span>[step 1](/guides/board-setup/),
+  set up and measured.
+- **You get:** one bag (recording file) per take. [Step 3](/guides/camera-calibration/) calibrates the cameras
+  from it.
+- **Check:** each take passes the rules in section 1, and the solve in steps 3 and 4 converges.
 
-A calibration can only find what the motion shows it. Our 60 s motion below excites every axis. It also
-sweeps the board across the whole image.
+A calibration can only find what the motion shows it. The 60 s motion below turns the rig about every axis
+and sweeps the board across the whole image.
 
-We built it from a real hand-held recording with our Looper Insight 9. We checked it with a **noisy
-digital twin**: a simulated copy of the rig that we record, solve and compare with the truth. A motion is
-good if the twin still converges on every calibration parameter. Converges means the solve settles on a
-value.
-
-<span id="boards-we-used" class="cm-anchor"></span>The board setup moved to [step 1: set up the calibration board](/guides/board-setup/).
+We built it from a real hand-held recording with our
+[Looper Insight 9](/devices/looper-insight9/). Then we checked it on a **digital twin**: a simulated copy of
+that rig, with realistic noise, which we record, solve and compare with the known truth. A motion is good if
+the twin still converges on every calibration parameter, that is, the solve settles on the true value within
+its uncertainty.
 
 ## 1. What a good take has
 
 - **About 60 s long.** 50 s also works.
-- **Fill the frame.** Cover the image out to its corners. Distortion is only pinned down where the board
-  was seen.
+- **Fill the frame.** Cover the image out to its corners. The lens distortion is only pinned down where the
+  board was seen.
 - **Vary distance and angle.** Move in and out, and turn the rig about every axis.
-- **Avoid motion blur.** Use enough light for a short exposure (about 2 ms).
-- **Rest at both ends.** Hold still for about 3 s at the start and the end.
+- **No motion blur.** Use enough light for a short exposure (about 2 ms).
+- **Rest at both ends.** Hold still for about 3 s at the start and at the end.
 
 ## <span id="the-motion" class="cm-anchor"></span><span id="chessboard-version" class="cm-anchor"></span>2. Watch and practise the motion
 
 <CalibMotionPlayer />
 
-Pick the chip for your board. Then follow the **Now** panel. It:
+Pick the chip for your board, then follow the **Now** panel. It names the move, says what to do, counts down
+and shows what comes next. The camera card on the right shows what the camera sees, and which parts of the
+image are still empty.
 
-- names the move;
-- says what to do;
-- counts down;
-- shows what comes next.
-
-The camera card on the right shows what the camera sees. It also shows which parts of the image are still
-empty.
-
-**Chessboard motion:** the same four moves, built from our chessboard example. It swings less, comes in
-only to 0.28 m and turns only a little in the loop, so the whole board stays in view. The rules are otherwise
-the same, and it also passes the twin.
+**Chessboard motion:** the same four moves, built from our chessboard example. It swings less, comes in only
+to 0.28 m and turns only a little in the loop, so the whole board stays in view. It also passes the twin.
 
 ## <span id="step-by-step" class="cm-anchor"></span>3. Step by step
 
-Do four moves in order, with a short rest at each end. Blend each move into the next. Keep a comfortable
-hand pace: about 0.4 m/s and 1.9 rad/s at most.
+Do the moves in order and blend each into the next. Keep a comfortable hand pace: at most about 0.4 m/s and
+1.9 rad/s.
 
 | # | Move | Time | What to do |
 |---|---|---|---|
-| 0 | Rest | 0–3 s | Hold still in front of the board, count 3. |
-| 1 | Left–right + turn left-right | 3–20 s | Swing left and right around the board, 2 times. At each end, turn the camera a little past facing the board, so the board slides to the left or right edge of the picture. Turn round sharply. |
-| 2 | Up–down + tilt up-down | 20–32 s | Move up and down, 2 times. Tilt the camera a little past the board, so the board reaches the top or bottom edge of the picture. |
-| 3 | Back–forth + twist | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times. Twist the camera about its view axis like a steering wheel, one way coming in and the other going out. Hold the board off-centre so the twist carries it into the corners. |
+| 0 | Rest | 0–3 s | Hold still in front of the board and count to 3. |
+| 1 | Left–right + turn | 3–20 s | Swing left and right round the board, 2 times. At each end, turn the camera a little past facing the board, so the board slides to the left or right edge of the picture. Turn round sharply. |
+| 2 | Up–down + tilt | 20–32 s | Move up and down, 2 times. Tilt the camera a little past the board, so the board reaches the top or bottom edge of the picture. |
+| 3 | In–out + twist | 32–47 s | Move in to 0.22 m and out to 0.52 m, 3 times. Twist the camera about its view axis like a steering wheel: one way coming in, the other way going out. Hold the board off-centre, so the twist carries it into the corners. |
 | 4 | Loop + twist | 47–57 s | Move round a loop parallel to the board, about 43 cm across, 2 times. Turn the camera a little against the loop and twist it a little, once per loop, so the board runs into every corner. |
-| 5 | Rest | 57–60 s | Hold still, count 3. |
+| 5 | Rest | 57–60 s | Hold still and count to 3. |
 
 - **Vary the speed** on every sweep: push through the middle, brake into the ends.
 - **Keep most of the board in view.** An AprilGrid may run partly off the edge; a chessboard may not.
-- **Don't add shake.** The natural wobble of a hand is all the motion needs.
+- **Do not add shake.** The natural wobble of a hand is all the motion needs.
 
 ## 4. The running example's recordings
 
-The Guides use the VI-Rig 4 IMUs + 4 cameras dataset as the running example. It has 15 takes, one bag each:
-`4imus_4cams_01.bag` to `4imus_4cams_15.bag`.
-
-Each bag holds these topics:
+The VI-Rig 4 IMUs + 4 cameras set has 15 takes, `4imus_4cams_01.bag` to `4imus_4cams_15.bag`. Each bag holds
+these topics:
 
 | Sensor | Topic | Rate | Notes |
 |---|---|---|---|
-| RealSense T265 left | `/t265/fisheye1/image_raw` | 30 Hz | 848×800, global shutter |
-| RealSense T265 right | `/t265/fisheye2/image_raw` | 30 Hz | 848×800, global shutter |
-| ELP left | `/elp/split_sync_image_node/left/image_raw` | 25 Hz | 640×480, rolling shutter |
-| ELP right | `/elp/split_sync_image_node/right/image_raw` | 25 Hz | 640×480, rolling shutter |
-| Xsens MTI-100 | `/imu/data` | 400 Hz | IMU |
+| RealSense T265 left | `/t265/fisheye1/image_raw` | 30 Hz | 848 × 800, global shutter |
+| RealSense T265 right | `/t265/fisheye2/image_raw` | 30 Hz | 848 × 800, global shutter |
+| ELP left | `/elp/split_sync_image_node/left/image_raw` | about 20–22 Hz | 640 × 480, rolling shutter; 25 Hz as captured |
+| ELP right | `/elp/split_sync_image_node/right/image_raw` | about 20–22 Hz | 640 × 480, rolling shutter; 25 Hz as captured |
+| Xsens MTi-100 | `/imu/data` | 400 Hz | IMU |
 | MicroStrain GX3-25 | `/gx3_25/data` | 500 Hz | IMU |
 | MicroStrain GX3-35 | `/gx3_35/imu/data` | 100 Hz | IMU |
 | RealSense T265 IMU | `/t265/imu` | 200 Hz | IMU |
 
-- **Download** the bags from the Hub:
-  [`calibench-vi/datasets` → `virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams).
-  Access is gated; the licence is CC BY-NC 4.0.
+- **Download:** [`calibench-vi/datasets` → `virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams)
+  on the Hub. Access is gated. The licence is CC BY-NC 4.0; for commercial use, ask us.
+- **Which file:** use `4imus_4cams_NN.bag`. In it, the ELP image stamps sit on the camera's own clock. The
+  `4imus_4cams_NN_raw.bag` next to it is the recording as captured, with the ELP driver's stamps. Moving
+  the stamps drops the ELP frames that cannot be matched to the camera clock, so the ELP rate in
+  `4imus_4cams_NN.bag` is about 20–22 Hz.
 - **Board config:** the AprilGrid target file `april.yaml` sits next to the bags.
-- **Full details:** see the [dataset page](/reference/datasets/virig-4imus-4cams/).
+- **More:** the [dataset page](/datasets/virig-4imus-4cams/).
 
 :::caution[Bag 09 starts one frame early]
-In `4imus_4cams_09.bag` the second T265 fisheye starts one frame before the first. MVIS and Basalt pair
+In `4imus_4cams_09.bag` the right T265 fisheye starts one frame before the left one. MVIS and Basalt pair
 frames by the nearest stamp, so they handle it. Kalibr reads each camera on its own, so its pairs come out
-one frame off. It needs a trimmed copy of the bag.
+one frame off. Give Kalibr a trimmed copy of the bag.
 :::
 
 ## 5. Record and check
 
-1. Record the 60 s motion with your rig. 50 s also works: drop one in-out and one loop.
-2. Solve the cameras with the board block from [step 1](/guides/board-setup/):
+1. Record the 60 s motion with your rig. For 50 s, drop one in–out and one loop.
+2. Calibrate the cameras with the board block from step 1:
    [step 3: camera-only calibration](/guides/camera-calibration/).
-3. Solve cameras and IMUs together and read the result:
+3. Calibrate cameras and IMUs together and read the result:
    [step 4: camera–IMU calibration](/guides/camera-imu-calibration/#5-read-the-result).
 
 ## Real examples
 
-Here are two hand-held recordings of our Looper Insight 9, solved with MVIS. Both pass the twin. The cards
-show the corners MVIS detected in each of the three cameras. They are drawn without the camera images.
+Two hand-held recordings of our Looper Insight 9, solved with MVIS. Both pass the twin. The cards show the
+corners MVIS detected in each of the three cameras, drawn without the camera images.
 
 <CalibMotionPlayer mode="real" />
 
@@ -117,51 +112,49 @@ Both move faster than the guide motion. At a comfortable pace, follow the 60 s g
 
 ## Motions that fail
 
-Avoid these motions. Each leaves some parameters loose: the solve cannot pin them down.
+Each of these leaves some parameters loose: the solve cannot pin them down.
 
 - **Fast shaking from one spot, face-on:** the lens distortion stays loose.
-- **One slow axis at a time, never tilted:** lever arm (the camera–IMU position offset), time offsets and IMU scales
-  stay loose.
-- **A missing rotation** (no tilt, no twist, or only turning left-right): the matching gyro and accelerometer scales,
-  or the whole camera–IMU rotation, cannot be found.
-- **The board always centred:** the image edges are never seen, so the distortion stays loose.
+- **One slow axis at a time, never tilted:** the lever arm (where the camera sits relative to the IMU), the
+  time offsets and the IMU scales stay loose.
+- **A missing rotation** (no tilt, no twist, or only turning left–right): the matching gyroscope and
+  accelerometer scales, or the whole camera–IMU rotation, cannot be found.
+- **The board always in the centre:** the image edges are never seen, so the distortion stays loose.
 
 ## How we judged it
 
-The twin is a simulated Looper Insight 9 in front of the board. It has realistic corner and IMU noise,
-motion blur and dropped detections.
+The twin is a simulated Looper Insight 9 in front of the board, with realistic corner and IMU noise, motion
+blur and dropped detections.
 
-Each motion is solved on 3 noise seeds plus a noise-free run. In each solve t_ga (the time offset between the
-gyroscope and the accelerometer) is estimated. The camera intrinsics (focal length, image centre and lens distortion) are free.
+We solved each motion on 3 noise draws and once without noise. Each solve estimated t_ga (the time offset
+between the gyroscope and the accelerometer) and left the camera intrinsics (focal length, image centre and
+lens distortion) free.
 
 A motion is **good** if, on all 22 parameters:
 
 - every solve converges;
-- the error stays within its uncertainty;
-- the uncertainty is at most 3× that of a well-excited 80 s reference motion.
+- every error stays within its uncertainty;
+- every uncertainty is at most 3 × that of a well-excited 80 s reference motion.
 
-The 22 parameters are the camera–IMU rotation, lever arm, td (the camera–IMU time offset), t_ga, gyro and
-accelerometer scales, and the camera intrinsics.
+The 22 parameters are the camera–IMU rotation and lever arm, td (the camera–IMU time offset), t_ga, the
+gyroscope and accelerometer scales, and the camera intrinsics.
 
-To run the same check on your own calibration, see [step 7: digital-twin check](/guides/simulation/).
+To run the same kind of check on your own calibration, see [step 7: digital-twin check](/guides/simulation/).
 
 ## Replay it yourself
 
 Run our motions through your own simulator and calibration tool with the
 [replay pack](/downloads/calib-motion-replay.zip) (zip, 3.2 MB). It holds:
 
-- **the four motions** at 200 Hz (IMU pose, ideal gyro and accelerometer);
-- **the two twin rigs** (camera, IMU, truth, noise and detection rules);
-- **our twin results** with the pass rule.
+- **the four motions** at 200 Hz: IMU pose, ideal gyroscope and accelerometer;
+- **the two twin rigs:** camera, IMU, truth, noise and detection rules;
+- **our twin results**, with the pass rule.
 
-Its README gives the frames, units and replay steps. The twin itself ran on MVIS
-([github.com/openmvis/openmvis](https://github.com/openmvis/openmvis)).
+Its README gives the frames, units and replay steps. The files are plain CSV, YAML and JSON, so you do not
+need MVIS to use them. We ran the twin with the MVIS simulator (`mvis.simulation`).
 
-**Licence:**
-
-- **CC BY 4.0:** the guide motions, rigs and their results.
-- **CC BY-NC 4.0:** the two real-example trajectories and their results. The trajectories come from our
-  Looper Insight 9 recordings.
+**Licence:** the pack's README names the licence of each file. The two real-example trajectories and their
+results come from our Looper Insight 9 recordings and are CC BY-NC 4.0.
 
 ## Next
 

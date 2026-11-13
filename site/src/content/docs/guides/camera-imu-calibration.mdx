@@ -4,11 +4,13 @@ description: Solve the cameras and IMUs of a rig in one graph, with IMU intrinsi
 pageType: guide
 ---
 
-Use this page to solve cameras and IMUs in one graph. You need the bag from
-step 2 and the camera YAML from step 3. You get `cam_imu.json`.
+Use this page to solve cameras and IMUs in one graph. You need the recording
+from [step 2](/guides/calibration-motion/) and the camera YAML from
+[step 3](/guides/camera-calibration/). You get `cam_imu.json` and a calibration
+YAML.
 
-The running example is our VI-Rig with 4 IMUs and 4 cameras
-([dataset page](/reference/datasets/virig-4imus-4cams/)):
+The running example is recording 01 of our VI-Rig with 4 IMUs and 4 cameras
+([dataset page](/datasets/virig-4imus-4cams/)):
 
 - **Cameras:** a T265 fisheye pair (global shutter) and an ELP stereo pair (rolling shutter).
 - **IMUs:** Xsens MTi-100, MicroStrain GX3-25 and GX3-35, and the T265 IMU.
@@ -18,8 +20,8 @@ The solve estimates, all at once:
 - **Extrinsics:** where each camera and IMU sits relative to the base IMU (lever arm and rotation).
 - **Time offset `td`:** the clock delay of each camera and each extra IMU to the base IMU.
 - **IMU intrinsics:** scale and misalignment of each gyroscope (`Dw`) and accelerometer (`Da`).
-- **`t_ga`:** the delay between an IMU's own gyroscope and accelerometer.
-- **Camera intrinsics:** refined from the step 3 prior, not pinned.
+- **`t_ga`:** the delay between an IMU's own gyroscope and accelerometer samples.
+- **Camera intrinsics:** refined from the step 3 result, not held fixed.
 - **Biases** of every gyroscope and accelerometer.
 
 ## 1. Point at the camera prior
@@ -32,16 +34,21 @@ camera_input:
   path: camera_prior.yaml
 ```
 
-- **What it gives:** the starting intrinsics of each camera.
+- **What it gives:** the starting intrinsics of each camera (the prior).
 - **One file, in `cam_topics` order:** join the T265 and ELP results of step 3.
   MVIS sorts the cameras by `id` and matches them to `cam_topics` by order. So
   here the T265 fisheyes are `id` 0 and 1, the ELP left and right 2 and 3.
-- **What happens next:** the cam-IMU solve refines the intrinsics (`estimate.camera.intrinsics: true`). It solves the extrinsics and time offsets itself.
+- **Our example's prior:** [camera_prior.yaml](/media/guides/virig-4imus-4cams/camera_prior.yaml).
+  It joins earlier camera-only results and uses `equidistant` for the T265,
+  which gives the same result as `kb4` on this lens
+  ([step 3](/guides/camera-calibration/#3-choose-a-fisheye-model-for-the-t265)).
+  So the report lists the T265 cameras as `equidistant`.
+- **What happens next:** the cam-IMU solve refines the intrinsics (`estimate.camera.intrinsics: true`). It solves the extrinsics and time offsets itself; the prior's extrinsics are not used.
 
 ## 2. Write the config
 
 This is the config of the [VI-Rig 4 IMUs + 4 cameras example](/benchmark/examples/virig-4imus-4cams/),
-bag 01. The highlighted lines matter for this step.
+recording 01. The highlighted lines matter for this step.
 
 ```yaml title="virig_4imus_4cams_cam_imu.yaml" {2-3,9-15,23,25,35-42,44,46,48-49,51-54}
 input:
@@ -105,23 +112,23 @@ output:
 What the highlighted lines do:
 
 - **`input`:** a ROS1 bag. The first `imu_topics` entry (`/imu/data`, the Xsens) is the **base IMU**. Every other sensor is solved relative to it.
-- **`window_mode: motion`:** MVIS picks the `segment_length` seconds (here 80 s) with the most IMU motion.
-- **`board.heights_file` + `estimate.board_points: true`:** we solve the board shape too. Our board is not flat on this VI-Rig mount; a flat solve shifts gyro scale and the lever ([why](/why/board-shape/)).
-- **`solve.corner_subsample: two_anti`:** uses two opposite corners of each tag (top-left and bottom-right). Our config sets it. The cam-IMU default is `all` (every corner).
+- **`window_mode: motion`:** MVIS uses the `segment_length` seconds (here 80 s) with the most IMU motion.
+- **`board.heights_file` + `estimate.board_points: true`:** solve the board shape too, starting from a measured shape. [`board_shape_4imus_4cams.yaml`](https://github.com/openmvis/openmvis/blob/main/examples/regression/mvis_elp/board_shape_4imus_4cams.yaml) ships with MVIS in `examples/regression/mvis_elp/`. Our board is not flat; a flat solve shifts the gyro scale and the lever arm ([why](/why/board-shape/)).
+- **`solve.corner_subsample: two_anti`:** use two opposite corners of each tag (top-left and bottom-right). Our config sets it for speed. The cam-IMU default is `all` (every corner).
 - **`solve.estimate_t_ga: true`, `sigma_t_ga: 0.01`:** solve `t_ga` for each IMU. Keep this on.
-- **`solve.vision_pose: imu`:** carries each corner's pose to its capture time through the raw base-IMU samples. It is the default.
-- **`sigma_g`, `sigma_a`, `sigma_bg`, `sigma_ba`:** IMU noise and bias random walk.
+- **`solve.vision_pose: imu`:** moves the pose to each corner's capture time with the raw base-IMU samples. It is the default.
+- **`sigma_g`, `sigma_a`, `sigma_bg`, `sigma_ba`:** gyro and accel noise, and their bias random walk.
 - **`estimate.camera`:** intrinsics free, `td` and extrinsics solved.
 - **`estimate.imu`:** IMU intrinsics `dw_da` with the `calyx` model (see section 3), plus extrinsics and `td` of the extra IMUs.
 
 The other lines belong to later steps:
 
-- **`camera_input.cameras`:** the three cameras after the first go into the graph at 4 Hz (`factor_hz`), which keeps the solve small.
-- **ELP readout lines** (`estimate_readout`, `tr`): step 5, [Rolling-shutter calibration](/guides/rolling-shutter/).
+- **`camera_input.cameras`:** one entry per camera, in `cam_topics` order. The three cameras after the first enter the graph at 4 frames per second (`factor_hz`), which keeps the solve small. The first camera keeps the cam-IMU default of 10 Hz.
+- **ELP readout lines** (`estimate_readout`, `tr`): `estimate.camera.tr: false` is the rig-wide default and holds the readout fixed. The per-camera `estimate_readout: true` on the two ELP entries overrides it, so the run solves the ELP readout and keeps the T265 (global shutter) at zero. Details in step 5, [Rolling-shutter calibration](/guides/rolling-shutter/).
 - **The three extra IMUs:** step 6, [Multi-IMU spatial-temporal calibration](/guides/multi-sensor-rigs/).
 
 For your own rig, change the topics, the board and the prior path. Keep the
-rest as a start.
+rest as a starting point.
 
 ## 3. Turn on IMU intrinsics
 
@@ -154,40 +161,79 @@ What the terms mean: [IMU model](/concepts/imu-model/). Why it pays off:
 mvis cam-imu -c virig_4imus_4cams_cam_imu.yaml
 ```
 
-- **Other bag:** `--bag <file>` overrides the config's source with that ROS1 bag.
-- **Time:** about 12 min on one desktop (solve 700.5 s, MVIS main, 2026-11-10).
-- **Output:** `cam_imu.json`, a calibration YAML and a report beside the config.
+- **Other bag:** `--bag <file>` replaces the config's source with that ROS1 bag.
+- **Time:** 22 min in our run (MVIS 0.1.0, 2026-11-12), on 16 CPU cores with
+  one thread for the linear-algebra libraries, on a machine under heavy load.
+  Expect less on your machine. About 12 min of that is AprilTag detection on
+  the four cameras; the solve stages take about 11 min, of which the 6
+  iterations take about 7 min (`solve_s` in the report's Timing section).
+- **Output:** in the folder of `output.path`:
+  - `cam_imu.json`: a summary of the solve.
+  - `cam_imu_calib.yaml`: the full calibration, the file to deploy.
+  - `cam_imu_camchain-imucam.yaml`: the same rig in Kalibr's camchain format.
+  - `cam_imu_board_shape.yaml`: the solved board shape (when `estimate.board_points` is on).
+  - `cam_imu_report.html`: the report.
+  - `cam_imu_views.json`: the data of the report's 3D views.
 
 ## 5. Read the result
 
-Bag 01 gives these values. The full table and a 3D view of the rig are on the
-[example page](/benchmark/examples/virig-4imus-4cams/#solved-rig).
+Recording 01 gives the values below. The full table and a 3D view of the rig
+are on the [example page](/benchmark/examples/virig-4imus-4cams/#solved-rig).
 
 **The report.** Every run writes `cam_imu_report.html` next to `cam_imu.json`.
-This is the report of the bag 01 run, unchanged except for local folder names:
+It has these sections:
 
-<iframe class="mvis-report" src="/media/guides/virig-4imus-4cams/cam_imu_report.html" title="MVIS cam-IMU report, VI-Rig 4 IMUs + 4 cams, bag 01" loading="lazy" style="width:100%;height:80vh;border:1px solid var(--sl-color-gray-5);border-radius:0.4rem"></iframe>
+- **Summary:** status, reprojection median and P95, χ²/dof of the camera and
+  IMU terms with a grade each, and the base IMU's `t_ga`. χ²/dof near 1 means
+  the residuals match the noise you set; well below 1 (0.13 here) means the
+  noise settings are conservative.
+- **3D Geometry:** the solved rig path around the board as a player, and the
+  rig to scale.
+- **Cameras:** per camera, intrinsics, distortion, lever arm and rotation
+  (log(R), rad) with their σ, `td`, readout time, and the corner accounting
+  (corners used, past the lens fold, dropped as outliers).
+- **Board Shape:** the solved corner heights as a table and a map, with the
+  median σ of a height. Shown because `estimate.board_points` is on.
+- **Reprojection Analysis:** error by frame, by tag and over the board, per
+  camera.
+- **Motion & Excitation:** the angular velocity of the solved path, which shows
+  how well the motion constrains the lever arms and `td`.
+- **Base IMU, Aux IMUs, IMU Residuals:** biases and their drift, `Dw`, `Da`,
+  `Tg` and `t_ga` of each IMU; each extra IMU's pose and `td` relative to the
+  base IMU. The block is titled "IMU intrinsics (full)" whatever level you
+  solve; with `dw_da`, as here, `Tg` stays at zero.
+- **Timing, Result files, Configuration:** where the time went, the files the
+  run wrote, and the config it read.
 
-[Open the report full screen](/media/guides/virig-4imus-4cams/cam_imu_report.html) (HTML, 11.6 MB).
+This is the report of the recording 01 run, unchanged except that local folder
+names are cut down to file names:
+
+<iframe class="mvis-report" src="/media/guides/virig-4imus-4cams/cam_imu_report.html" title="MVIS cam-IMU report, VI-Rig 4 IMUs + 4 cams, recording 01" loading="lazy" style="width:100%;height:80vh;border:1px solid var(--sl-color-gray-5);border-radius:0.4rem"></iframe>
+
+[Open the report full screen](/media/guides/virig-4imus-4cams/cam_imu_report.html) (HTML, 12.8 MB).
 
 **Fit and geometry:**
 
-| Value | Bag 01 |
+| Value | Recording 01 |
 |---|---|
-| Reprojection median, all cameras | 0.25 px (rms 0.52, p95 0.681) |
+| Reprojection median, all cameras | 0.25 px (rms 0.52, p95 0.68) |
 | cam0–cam1 baseline (T265 pair) | 63.7 mm |
 | cam0 `td` | −5.41 ms |
 | cam0 lever arm | 130.8 mm |
+| Board shape | 9.0 mm peak to peak, 2.2 mm RMS (72 of 144 corners seen) |
 
-Reprojection shows how well the model fits the corners. It does not show how
-accurate the model is.
+- **cam0:** T265 fisheye 1. cam1 is T265 fisheye 2, cam2 and cam3 are ELP left and right.
+- **72 of 144 corners:** with `two_anti`, only two corners of each tag enter
+  the solve. The other heights stay at the measured shape from `heights_file`.
+- **Reprojection** shows how well the model fits the corners. It does not show
+  how accurate the model is.
 
 **Base IMU (Xsens) intrinsics**, diagonal terms:
 
 | | x | y | z |
 |---|---|---|---|
-| `Dw` (gyro) | 0.99813 | 0.99768 | 1.0009 |
-| `Da` (accel) | 0.99994 | 0.99642 | 1.00125 |
+| `Dw` (gyro) | 0.99813 | 0.99768 | 1.00090 |
+| `Da` (accel) | 0.99994 | 0.99642 | 1.00124 |
 
 **`t_ga` per IMU:**
 
@@ -201,33 +247,40 @@ accurate the model is.
 - **Rotations** are in `cam_imu.json` as log(R) rotation vectors in rad.
 - **The T265 IMU** has by far the largest `t_ga`. The other three stay under 1 ms.
 
-**Over 15 bags** ([Dataset eval](/benchmark/results/virig-4imus-4cams/), family
-T8: ELP pair, T265 IMU as base, Xsens as extra IMU, Kalibr IMU model):
+**Over 15 recordings** ([results page](/benchmark/results/virig-4imus-4cams/),
+the "ELP RS stereo + two IMUs (IMUs only)" rows). These runs use a different
+setup: the ELP pair only, the T265 IMU as base IMU, the Xsens as extra IMU, and
+the Kalibr IMU model. So they are not the same quantities as the tables above;
+the Xsens `t_ga`, for example, is −0.47 ms there against −0.82 ms here. sd is
+the standard deviation over the 15 recordings.
 
 | IMU | `Da` diagonal x / y / z, median | `t_ga` ms, median |
 |---|---|---|
-| T265 IMU | 1.01989 / 1.01905 / 1.01668 | −6.698 (sd 0.135) |
+| T265 IMU | 1.01989 / 1.01905 / 1.01668 | −6.697 (sd 0.135) |
 | Xsens | 0.99997 / 0.99932 / 1.00093 | −0.466 (sd 0.237) |
 
-The T265 `Da` diagonal sits 1.7 to 2.0 % above 1 on every axis. The Xsens stays
-within 0.1 % of 1. One run says little; the spread over many bags says more.
+- **T265:** the `Da` diagonal sits 1.7 to 2.0 % above 1 on every axis.
+- **Xsens:** stays within 0.1 % of 1.
+- **Why this table:** one run says little; the spread over many recordings
+  shows how repeatable a value is.
 
 ## 6. Leave `state_hz` alone
 
-`solve.state_hz` sets the rate of the pose, velocity and bias states. It
-**defaults to 30 Hz**; our config does not set it. A study across MIC, TUM-VI
-raw and T265 found:
+`solve.state_hz` sets how many pose, velocity and bias states per second the
+solve keeps. It **defaults to 30 Hz**; our config does not set it. In our tests
+on several rigs:
 
-| Case | Effect of `state_hz` |
-|---|---|
-| **Dynamic-motion rigs** | Reprojection error, lever arm and `td` all **alias at low rates** (fast motion is undersampled) and level off around 30 Hz |
-| **Gentle calibration sequences** | Flat: the rate does not matter |
-| **Stereo baseline, IMU intrinsics and biases** | **Rate-invariant** either way |
+- **Fast motion:** at low rates the states undersample the motion. The
+  reprojection error, lever arm and `td` drift, and settle around 30 Hz.
+- **Slow, smooth motion:** the rate does not matter.
+- **Not affected either way:** stereo baseline, IMU intrinsics and biases.
 
-- **Leave it at 30** unless you are on a gentle sequence and want the speed.
-- **Suspect it first** if `td` or the lever arm look wrong on a dynamic rig.
+So:
 
-## Batch: a whole dataset family from one config
+- **Leave it at 30** unless your motion is slow and you want the speed.
+- **Check it first** if `td` or the lever arm look wrong on a fast-moving rig.
+
+## Batch: many recordings from one config
 
 To calibrate many recordings at once, list them under `input.bags` instead of a
 single `path`:
@@ -241,12 +294,12 @@ input:
     - 4imus_4cams_03.bag
 ```
 
-- **Output:** each bag gets its own `bag<NN>/cam_imu.json` in the folder of `output.path` (`results/sweep` when it has none). `<NN>` is the bag's trailing number (`4imus_4cams_01.bag` gives `bag01`).
-- **Formats:** ROS1 bags and EuRoC `mav0` folders both work. Each inherits the config's format.
+- **Output:** each bag gets its own `bag<NN>/` folder in the folder of `output.path` (`results/sweep` when it has none). `<NN>` is the bag's trailing number (`4imus_4cams_01.bag` gives `bag01`).
+- **Formats:** ROS1 bags, ROS2 bags and EuRoC `mav0` folders all work. Each inherits the config's format (`input.format`: `ros1`, `ros2` or `euroc`).
 - **Use:** a repeatability sweep over many recordings.
 
-The spread of extrinsics and intrinsics *across* recordings is a far better
-accuracy signal than any single run's residual.
+The spread of extrinsics and intrinsics across recordings tells you far more
+about accuracy than any single run's residual.
 
 ## Awkward IMUs
 
@@ -275,14 +328,14 @@ solve:
   estimate_t_ga: true
 ```
 
-Both options target the same failure. A driver that interpolates the
-accelerometer to the gyro rate adds a timing offset. Without `t_ga`, that offset
-leaks into `td`.
+Both options target the same failure. A driver that resamples the
+accelerometer to the gyro rate adds a timing offset. Without `t_ga`, that
+offset leaks into `td`.
 
 The T265 is the clearest case:
 
 - **IMU:** Bosch BMI055, 62.5 Hz accel interpolated to 200 Hz.
-- **Measured:** `t_ga` −6.74 ms on bag 01, −6.698 ms median over 15 bags (above).
+- **Measured:** `t_ga` −6.74 ms on recording 01 with the Xsens as base, and −6.697 ms median over 15 recordings with the T265 IMU as base and the Kalibr IMU model (above).
 - **Not a pure shift:** the delay changes with the motion, so one `t_ga` is a compromise.
 
 Details in [IMU model](/concepts/imu-model/). Why it matters, with real numbers:

@@ -1,0 +1,145 @@
+---
+sidebar:
+  order: 3
+  label: VI-Rig — 4 IMUs + 4 cams
+title: VI-Rig — 4 IMUs + 4 cameras
+description: Our VI-Rig with a RealSense T265 fisheye pair (global shutter), an ELP stereo pair (rolling shutter) and four IMUs; 15 AprilGrid recordings on Hugging Face (CC BY-NC 4.0, gated).
+pageType: reference
+wide: true
+---
+
+Two global-shutter and two rolling-shutter cameras with four IMUs on one frame, recorded in front of an AprilGrid.
+The [guides](/guides/camera-calibration/) use this set as their running example, because it has every hard case in one rig: fisheye lenses,
+rolling shutter, several cameras and several IMUs.
+
+- **Hub folder:** [`calibench-vi/datasets` → `virig-4imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams)
+- **Licence:** CC BY-NC 4.0, gated; commercial use on request. See
+  [Licence and access](/datasets/#licence-and-access).
+- **Results:** [benchmark results](/benchmark/results/virig-4imus-4cams/) ·
+  [worked example](/benchmark/examples/virig-4imus-4cams/)
+
+![MVIS solving a VI-Rig 4-camera recording: the board corners, the camera path and the camera frames](/media/hero/hero_virig4_960.jpg)
+
+## The rig
+
+The same frame as in [4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/), with an ELP stereo module in place of the
+Blackfly. Rates are measured from the bags.
+
+| Sensor | Type | Shutter | Rate | Image size | ROS topic |
+|---|---|---|---|---|---|
+| RealSense T265, left | camera, fisheye (about 163°) | global | 30 Hz | 848×800 | `/t265/fisheye1/image_raw` |
+| RealSense T265, right | camera, fisheye (about 163°) | global | 30 Hz | 848×800 | `/t265/fisheye2/image_raw` |
+| ELP stereo, left | camera, standard lens | rolling | 25 Hz as recorded, about 20–22 Hz after restamping | 640×480 | `/elp/split_sync_image_node/left/image_raw` |
+| ELP stereo, right | camera, standard lens | rolling | 25 Hz as recorded, about 20–22 Hz after restamping | 640×480 | `/elp/split_sync_image_node/right/image_raw` |
+| Xsens MTi-100 | IMU | – | 400 Hz | – | `/imu/data` |
+| MicroStrain 3DM-GX3-25 | IMU | – | 500 Hz | – | `/gx3_25/data` |
+| MicroStrain 3DM-GX3-35 | IMU | – | 100 Hz | – | `/gx3_35/imu/data` |
+| RealSense T265 IMU (BMI055) | IMU | – | 200 Hz | – | `/t265/imu` |
+
+- **Board:** AprilGrid, 6×6 tags of family t36h11, tag size 88 mm, spacing 0.3 of the tag size. The target file
+  [`april.yaml`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/virig-4imus-4cams/april.yaml)
+  is in the folder.
+- **Board shape:** the printed board is not flat (about 2.4 mm rms). Our runs estimate its shape; see
+  [Why calibrate the board shape](/why/board-shape/).
+- **More on the T265:** [device page](/devices/intel-t265/).
+
+## Recordings
+
+- **Count:** 15 ROS1 bags, `4imus_4cams_01.bag` to `4imus_4cams_15.bag`.
+- **Length:** 131 to 152 s each, 35 minutes in total.
+- **Size:** 7.1 to 8.3 GB each, 113 GB in total.
+
+The ELP stamps in the bags as recorded are the times the computer received each frame, not when the camera took
+it. Both ELP cameras run on one shared frame clock (about 29.6 Hz), and the driver delivers about 25 of those frames
+per second. So each recording comes in two versions:
+
+- **`4imus_4cams_NN.bag` (restamped, for board calibration):** each ELP frame is moved onto the camera's own frame
+  clock, the same for both ELP cameras. The fit uses the board detections, so the tool removes the frames it
+  cannot place: fit outliers, frames with no board detection and frames outside the solved window. About 20 to 22 frames
+  per second are left. A `.sensor_clock_provenance.yaml` beside each bag records the fit and the frames removed.
+  Our benchmark runs use these bags.
+- **`4imus_4cams_NN_raw.bag` (as recorded):** every frame, with the original ELP stamps. Use it for anything other
+  than board calibration.
+
+## Download
+
+Accept the terms on the [Hub page](https://huggingface.co/datasets/calibench-vi/datasets) and set
+`HF_TOKEN` to a read token from your Hugging Face settings (or run `hf auth login` once,
+after `pip install huggingface_hub`). Then either:
+
+```bash
+# with MVIS: checks size and SHA-256, saves to $MVIS_DATASETS/mvis_4imus_4cams/
+mvis datasets list --dataset mvis_4imus_4cams
+mvis datasets download --select mvis_4imus_4cams/bag_01   # one recording, 8.1 GB
+mvis datasets download --dataset mvis_4imus_4cams         # all 15, 113 GB
+```
+
+```bash
+# with the Hugging Face CLI: the 15 restamped recordings, their provenance files and the board file
+hf download calibench-vi/datasets --repo-type dataset \
+  --include "virig-4imus-4cams/4imus_4cams_??.bag*" "virig-4imus-4cams/april.yaml" \
+  --local-dir ./calibench
+```
+
+`mvis datasets` fetches the restamped bags only. Add `"virig-4imus-4cams/*_raw.bag"` to the `hf` command for the
+raw ones.
+
+## Results
+
+We ran MVIS and Kalibr on every recording, and Basalt on the camera-only runs (batch 2026-11-10a). The
+[results page](/benchmark/results/virig-4imus-4cams/) shows every value and its spread.
+
+| Run | Recordings solved |
+|---|---|
+| Camera only, T265 pair | MVIS 15 of 15 · Kalibr 15 of 15 · Basalt 15 of 15 |
+| Camera only, ELP pair with readout time | MVIS 15 of 15 · Kalibr 15 of 15 on ELP left, 13 of 15 on ELP right, one camera at a time · Basalt 15 of 15 as global shutter, no readout time (shown only) |
+| Camera + IMU, T265 left + ELP left, T265 IMU + Xsens | MVIS 15 of 15 · Kalibr 14 of 15 · Basalt not run (one IMU per run, no rolling-shutter model) |
+| Camera + IMU, ELP pair, T265 IMU + Xsens | MVIS 15 of 15 · Kalibr 3 of 15, from earlier runs · Basalt not run (no rolling-shutter model) |
+
+A few MVIS values. Each is the median over the 15 recordings, ± the standard deviation between recordings. This
+shows how well MVIS repeats, not that it is right.
+
+- **T265 stereo baseline (camera only):** 63.667 ± 0.036 mm
+- **ELP stereo baseline (camera + IMU, ELP pair):** 59.21 ± 0.08 mm
+- **ELP readout time (camera + IMU, ELP pair):** 16.6 ± 0.1 ms. The readout time is how long the camera takes to
+  read the image from the first row to the last. The camera-only runs give 14.6 ± 0.4 ms; the
+  [results page](/benchmark/results/virig-4imus-4cams/) shows both.
+- **Reprojection error, median (camera + IMU, ELP pair):** 0.16 px (left), 0.18 px (right)
+
+The [worked example](/benchmark/examples/virig-4imus-4cams/) shows one full run with its config.
+
+How we ran Kalibr on the rolling-shutter ELP cameras (stock Kalibr, Docker image `kalibr:noetic`):
+
+- **Camera only:** `kalibr_calibrate_rs_cameras`, one ELP camera at a time, so it gives no ELP stereo baseline.
+  These runs predate the ELP restamping.
+- **Camera + IMU:** Kalibr's camera + IMU solver is global-shutter only, so its runs treat ELP left as a
+  global-shutter camera with readout time 0.
+
+See [Methodology](/benchmark/methodology/) for how the tools are compared.
+
+### Sensor order in the results files
+
+The reference results in [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results) hold one
+file per tool, batch and run (for example `MVIS/2026-11-10a/T8.json`) and the configs behind them in
+`configs/<run>/`. Each run names its own sensors; Kalibr and MVIS use the same order. The base IMU is the one the
+other sensors are referred to. The GX3-25 and GX3-35 are in the bags but in none of these runs.
+
+| Run (folder) | Cameras | IMUs |
+|---|---|---|
+| Camera only, T265 pair (`T1`) | cam0 T265 left, cam1 T265 right | – |
+| Camera only, ELP pair (`T2`) | MVIS: cam0 ELP left, cam1 ELP right. Kalibr: one ELP camera per run | – |
+| Camera + IMU, T265 left + ELP left (`T7`) | cam0 T265 left, cam1 ELP left | imu0 / base: T265 IMU, imu1 / aux: Xsens MTi-100 |
+| Camera + IMU, ELP pair (`T8`) | MVIS: cam0 ELP left, cam1 ELP right. Kalibr (earlier runs of recordings 1–3): cam0 T265 left | imu0 / base: T265 IMU, imu1 / aux: Xsens MTi-100 |
+
+## Run it yourself
+
+- **Start here:** the [worked example](/benchmark/examples/virig-4imus-4cams/) has the camera + IMU config we ran.
+- **Step by step:** the guides walk through this set, from
+  [Camera-only calibration](/guides/camera-calibration/) and [Rolling shutter](/guides/rolling-shutter/) to
+  [Camera–IMU calibration](/guides/camera-imu-calibration/) and [Multi-IMU calibration](/guides/multi-sensor-rigs/).
+- **Why it matters:** [rolling shutter](/why/rolling-shutter/), [several cameras](/why/multi-camera/) and
+  [several IMUs](/why/multi-imu/) are each shown on this set.
+
+## Cite
+
+Please cite Calibench and the MVIS paper. The BibTeX is on the [overview page](/datasets/#citation).

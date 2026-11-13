@@ -1,0 +1,122 @@
+---
+sidebar:
+  order: 1
+  label: VI-Rig — 4 IMUs + 3 cams
+title: VI-Rig — 4 IMUs + 3 cameras
+description: Our VI-Rig with a FLIR Blackfly, a RealSense T265 fisheye pair and four IMUs; 10 AprilGrid recordings on Hugging Face (CC BY-NC 4.0, gated).
+pageType: reference
+wide: true
+---
+
+import { Image } from 'astro:assets';
+import viRig from '../../../assets/vi_rig.jpg';
+
+Three global-shutter cameras and four IMUs on one frame, recorded in front of an AprilGrid. The
+[Quickstart](/getting-started/quickstart/) uses this set.
+
+- **Hub folder:** [`calibench-vi/datasets` → `virig-4imus-3cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams)
+- **Licence:** CC BY-NC 4.0, gated; commercial use on request. See
+  [Licence and access](/datasets/#licence-and-access).
+- **Results:** [benchmark results](/benchmark/results/virig-4imus-3cams/) ·
+  [worked example](/benchmark/examples/virig-4imus-3cams/)
+
+<Image src={viRig} alt="The VI-Rig: the Blackfly camera at top right, the T265 at bottom right and the IMUs on the plate" width="420" />
+
+## The rig
+
+Rates are measured from the bags. Shutter: every camera here is global shutter.
+
+| Sensor | Type | Rate | Image size | ROS topic |
+|---|---|---|---|---|
+| FLIR Blackfly S BFS-U3-16S2M | camera, standard lens | 30 Hz | 720×540 (2×2 binned) | `/blackfly/image_raw` |
+| RealSense T265, left | camera, fisheye (about 163°) | 30 Hz | 848×800 | `/t265/fisheye1/image_raw` |
+| RealSense T265, right | camera, fisheye (about 163°) | 30 Hz | 848×800 | `/t265/fisheye2/image_raw` |
+| Xsens MTi-100 | IMU | 400 Hz | – | `/imu/data` |
+| MicroStrain 3DM-GX3-25 | IMU | 500 Hz | – | `/gx3_25/data` |
+| MicroStrain 3DM-GX3-35 | IMU | 100 Hz | – | `/gx3_35/imu/data` |
+| RealSense T265 IMU (BMI055) | IMU | 200 Hz | – | `/t265/imu` |
+
+- **Board:** AprilGrid, 6×6 tags of family t36h11, tag size 88 mm, spacing 0.3 of the tag size. The target file
+  [`april.yaml`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/virig-4imus-3cams/april.yaml)
+  is in the folder.
+- **Board shape:** the printed board is not flat (about 2.4 mm rms). Our runs estimate its shape; see
+  [Why calibrate the board shape](/why/board-shape/).
+- **Drivers:** we recorded with these [ROS drivers](https://github.com/yangyulin/multi_sensor_drivers).
+- **More on the T265:** [device page](/devices/intel-t265/).
+
+## Recordings
+
+- **Count:** 10 ROS1 bags, `virig_4imus_3cams_april_01.bag` to `virig_4imus_3cams_april_10.bag`.
+- **Length:** 131 to 161 s each, 24 minutes in total.
+- **Size:** 6.9 to 8.5 GB each, 76 GB in total.
+
+### Time-offset sweep
+
+The folder also holds [`tga-sweep/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams/tga-sweep):
+11 versions of recording 01, cut to a shorter window, with the T265 accelerometer delayed by a known amount (−50 to +50 ms). They test whether
+a tool can find the delay between gyroscope and accelerometer ($t_{ga}$). Each copy is 3.3 GB. A README, the MVIS
+calibration used for the correction and a `provenance.json` are beside them. See
+[Why calibrate t_ga](/why/tga/).
+
+## Download
+
+Accept the terms on the [Hub page](https://huggingface.co/datasets/calibench-vi/datasets) and set
+`HF_TOKEN` to a read token from your Hugging Face settings (or run `hf auth login` once,
+after `pip install huggingface_hub`). Then either:
+
+```bash
+# with MVIS: checks size and SHA-256, saves to $MVIS_DATASETS/mvis_4imus_3cams/
+mvis datasets list --dataset mvis_4imus_3cams
+mvis datasets download --select mvis_4imus_3cams/april_01   # one recording, 6.9 GB
+mvis datasets download --dataset mvis_4imus_3cams           # all 10, 76 GB
+```
+
+```bash
+# with the Hugging Face CLI: the 10 recordings and the board file, without the sweep
+hf download calibench-vi/datasets --repo-type dataset \
+  --include "virig-4imus-3cams/virig_*.bag" "virig-4imus-3cams/april.yaml" \
+  --local-dir ./calibench
+```
+
+## Results
+
+We ran MVIS and Kalibr on every recording, and Basalt on the camera-only runs (batch 2026-11-10a). The
+[results page](/benchmark/results/virig-4imus-3cams/) shows every value and its spread.
+
+| Run | Recordings solved |
+|---|---|
+| Camera only. Kalibr: the 3 cameras together. MVIS and Basalt: the Blackfly alone and the T265 pair, so no baseline to the Blackfly | MVIS 10 of 10 · Kalibr 10 of 10 · Basalt 10 of 10 |
+| Camera + IMU, 3 cameras + 4 IMUs | MVIS 10 of 10 · Kalibr 10 of 10 · Basalt not run (one IMU per run) |
+
+A few MVIS values from the camera + IMU runs. Each is the median over the 10 recordings, ± the standard deviation
+between recordings. This shows how well MVIS repeats, not that it is right.
+
+- **Blackfly focal length $f_x$:** 448.30 ± 0.61 px
+- **Lever arm of the GX3-25 from the Xsens:** 131.31 ± 0.20 mm
+- **Time offset of the T265 IMU to the Xsens:** 2.83 ± 0.21 ms
+- **Reprojection error, median:** 0.35 px (Blackfly), 0.23 and 0.24 px (T265 pair)
+
+The [worked example](/benchmark/examples/virig-4imus-3cams/) shows one full run with its config.
+
+### Sensor order in the results files
+
+The reference results in [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results) hold one
+file per tool, batch and run (for example `MVIS/2026-11-10a/T6.json`) and the configs behind them in `configs/T6/`
+(camera + IMU) and `configs/T6c/` (camera only). Kalibr and MVIS name the sensors in the same order. The base IMU is
+the one the other sensors are referred to.
+
+| Sensor | Blackfly | T265 left | T265 right | Xsens MTi-100 | GX3-25 | GX3-35 | T265 IMU |
+|---|---|---|---|---|---|---|---|
+| Kalibr | cam0 | cam1 | cam2 | imu0 | imu1 | imu2 | imu3 |
+| MVIS | cam0 | cam1 | cam2 | base IMU | aux IMU 1 | aux IMU 2 | aux IMU 3 |
+
+## Run it yourself
+
+- **Start here:** the [worked example](/benchmark/examples/virig-4imus-3cams/) has the camera + IMU config we ran.
+- **Steps:** a camera-only run first (`mvis cam -c <config>`), then camera + IMU (`mvis cam-imu -c <config>`). See
+  [Camera-only calibration](/guides/camera-calibration/) and
+  [Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+## Cite
+
+Please cite Calibench and the MVIS paper. The BibTeX is on the [overview page](/datasets/#citation).

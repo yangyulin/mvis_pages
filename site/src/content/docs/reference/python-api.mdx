@@ -1,85 +1,195 @@
 ---
 title: Python API
-description: MVIS's package layout and the modules worth importing directly.
+description: MVIS's package layout and the functions worth importing directly.
 pageType: reference
 wide: true
 ---
 
-Use this page to find which MVIS module to import for each stage.
+Use this page to find which MVIS module to import for each job.
+MVIS is a Python library: the `mvis` command is a thin layer over the functions below.
+The package is `pymvis`; you import it as `mvis`.
 
-- **Every stage is importable:** MVIS is a Python library.
-- **The CLI is one entry point:** the command-line interface is not the only way in.
+```python
+import mvis
+print(mvis.__version__)   # 0.1.0
+```
 
-:::note[Not auto-generated yet]
-This page is a hand-written map of the package. It is not generated API
-documentation. Choosing a docstring-extraction toolchain is open question **O4**
-on the [roadmap](/about/roadmap/). Until then the source is authoritative.
+:::note[A map, not generated docs]
+We wrote this page by hand from the MVIS 0.1.0 source.
+The docstrings in the [repository](https://github.com/openmvis/openmvis) hold the full signatures.
+MVIS 0.x releases may change the Python API and the config schema; the
+[changelog](/about/changelog/) lists what changed.
 :::
 
 ## Package layout
 
 | Module | Contents |
 |---|---|
-| `mvis.core` | Types — `Observation`, `CameraParams`, `CalibrationResult` — plus config dataclasses |
-| `mvis.camera` | One `CameraModel` per distortion model; projection, Jacobians, unprojection in one place |
-| `mvis.detection` | Detection — chessboard, AprilGrid, ArUco — `board_factory`, `detectors`, `corner_subsample` |
-| `mvis.io` | `DataLoader`, streaming `DetectionPipeline`, data sources, detection cache, frame selector, output writers |
-| `mvis.calibration` | Initialiser (OpenCV PnP), Optimizer (the unified factor), Pipeline, `outlier_rejection`, `camera_projection`, `custom_projections` |
-| `mvis.analysis` | HTML report, plotting, Rerun 3D visualisation, motion analysis |
-| `mvis.imu` | IMU intrinsic models (`kalibr`, `rpng`, `calyx` conventions) and the measurement model |
-| `mvis.simulation` | Synthetic camera–IMU data with known ground truth ([Simulation](/guides/simulation/)) |
-| `mvis.datasets` | Dataset catalog, download and conversion behind `mvis datasets` |
-| `mvis.doctor` | `mvis inspect`, `check` and `verdict` |
-| `mvis.recalib` | `apply-calib` — corrected-dataset export |
-| `mvis.cli` | Command-line interface |
+| `mvis.core` | Result types (`Observation`, `CameraParams`, `CalibrationResult`), the config dataclasses, timing |
+| `mvis.camera` | One `CameraModel` class per camera model: projection, Jacobians and unprojection in one place |
+| `mvis.detection` | Boards (chessboard, AprilGrid, ArUco), detectors, frame quality, corner subsampling |
+| `mvis.io` | Data sources, the streaming detection pipeline, image decoding, the camera–IMU loader, output writers, Kalibr and Basalt files |
+| `mvis.imu` | IMU intrinsic models (`kalibr`, `rpng`, `calyx`), resampling, Allan-variance analysis |
+| `mvis.calibration` | First guess, factor graph, camera-only and camera–IMU pipelines, outlier rejection |
+| `mvis.simulation` | Synthetic camera–IMU data, digital twins, simulator examples |
+| `mvis.recalib` | `apply-calib` and `roundtrip` |
+| `mvis.datasets` | The dataset catalog behind `mvis datasets` |
+| `mvis.doctor` | `mvis check` and `mvis inspect` |
+| `mvis.mvisdb` | The [capture database](/reference/database/) |
+| `mvis.analysis` | HTML reports, plots, the Rerun 3D view, motion analysis, `verdict` |
+| `mvis.cli` | The `mvis` command |
 
-Terms in the table:
+Terms:
 
-- **Jacobians:** the derivatives of the projection.
+- **Jacobian:** the derivatives of a projection with respect to its inputs; the solver needs them.
 - **Unprojection:** the reverse of projection, from a pixel back to a viewing ray.
-- **OpenCV PnP:** OpenCV's pose-from-known-points solve, used for the first guess.
+- **First guess:** OpenCV's pose-from-known-points solve (PnP) and a focal-length estimate, before the joint solve.
 
-## Kalibr interop
+## Load and check a config
 
-Use `mvis.io.kalibr` for all Kalibr files. It is the one surface for them.
+```python
+from mvis.core.config import CamRunConfig, CamImuRunConfig, CalibrationConfig
+from mvis.core.config_validator import validate_config
+
+cam_cfg = CamRunConfig.from_yaml("t265/cam.yaml")        # camera-only, flat or sectioned
+imu_cfg = CamImuRunConfig.from_yaml("cam_imu.yaml")      # camera–IMU
+problems = validate_config(CalibrationConfig.from_yaml("t265/cam.yaml"))   # list of strings
+```
+
+The fields are those on [Configuration](/reference/configuration/).
+`from_yaml` expands `${MVIS_DATASETS}` and `~`, and warns on unknown keys.
+
+## Run a calibration
 
 | Function | Does |
 |---|---|
-| `read_camchain` | Intrinsics + distortion across pinhole / ds / eucm / fov |
-| `read_camchain_imucam` | Also recovers each camera's `T_cam_imu` and the stereo `T_cn_cnm1` |
-| `write_camchain_imucam` | Exports a cam-IMU result as a round-trippable camchain-imucam |
-| `apriltag_board.from_kalibr_yaml` | Loads an AprilGrid target definition |
+| `mvis.calibration.cam_run.run_cam(config_path, output=None, *, result_file=None, ...)` | Camera-only run, as `mvis cam`; the other keyword arguments mirror its options. Returns `0` on success, `1` when the solve failed; raises `SystemExit(3)` on an internal consistency failure |
+| `mvis.cli.main.calibrate_cam_imu(config)` | Camera–IMU run from a `CamImuRunConfig`, as `mvis cam-imu`. Writes every output file and returns the summary dict (the `cam_imu.json` content) |
+| `mvis.cli.main.calibrate_cam_imu_batch(config, out_dir)` | One `calibrate_cam_imu` per entry of `input.bags`; returns `{bag<NN>: summary}` |
+| `mvis.calibration.pipeline_cam_imu.run_cam_imu_calibration_multi(cams, board_points, t_imu, w_m, a_m, *, aux_imus=None, config=None)` | The camera–IMU solve on arrays already in memory, without files. The simulator examples use it |
 
-A camchain is Kalibr's YAML file of camera parameters. `T_cam_imu` is the
-IMU-to-camera transform. `T_cn_cnm1` is the transform from the previous camera
-to this one.
+```python
+from mvis.core.config import CamImuRunConfig
+from mvis.cli.main import calibrate_cam_imu
 
-This module is the practical path for comparing against Kalibr or migrating from it.
-
-## Regenerating reports
-
-This command rebuilds HTML reports without re-running the calibration:
-
-```bash
-python -m mvis.analysis.regenerate_html
+summary = calibrate_cam_imu(CamImuRunConfig.from_yaml("cam_imu.yaml"))
+print(summary["ok"], summary["cams"][0]["p_CinI_mm"], summary.get("t_ga_ms"))
 ```
 
-- **Inputs:** saved YAML plus the detection cache
-- **When to use it:** only the report template changed
+## Grade and inspect
+
+| Function | Does |
+|---|---|
+| `mvis.analysis.verdict.assess(path, reference=None)` | Grade a result file, as `mvis verdict`. Returns a `Verdict` with `grade` and `checks`; `.to_dict()` for JSON |
+| `mvis.doctor.inspect.inspect(path)` | Summarise a recording, as `mvis inspect`. Returns a report with `status`, streams and findings |
+| `mvis.doctor.check_config.check_env(needs=None, smoke=False)` | Installation checks, as `mvis check --env`; a list of findings |
+| `mvis.doctor.check_config.check_config(path)` | Config lint, as `mvis check -c`; a list of findings |
+
+Each finding has a stable `id`, a `subject`, a `status` (`pass`, `warn`, `fail`) and a `message`.
+
+## Correct a bag and round-trip
+
+| Function | Does |
+|---|---|
+| `mvis.recalib.load_rig_calib(path)` | Read a camera–IMU `_calib.yaml` for `apply_calibration` |
+| `mvis.recalib.sensor_map.resolve_mapping(rig, map_path, cfg)` | Topic-to-sensor mapping: a `--map` file, the config's `mapping:`, or derived from the topics in the calibration |
+| `mvis.recalib.apply.apply_calibration(in_bag, out_bag, rig, mapping, base_imu_topic, *, remove_bias=True, undistort=False, imu_intrinsics=True, td=True, t_ga=True, strict=False)` | Write the corrected bag and its `.recalib.yaml`, as `mvis apply-calib`. Returns message counts and output paths |
+| `mvis.recalib.roundtrip.run_roundtrip(config_path, *, out=None, keep_corrected=False, keep_bias=False, bag_override=None)` | The whole round trip, as `mvis roundtrip`. Returns `{ok, checks}` |
+| `mvis.recalib.roundtrip.roundtrip_report(forward, recal)` | Compare two `cam_imu.json` dicts with the round-trip tolerances |
+
+## Kalibr files
+
+`mvis.io.kalibr` is the one place for Kalibr files.
+
+| Function | Does |
+|---|---|
+| `read_camchain(doc)` | A Kalibr camchain dict → per-camera intrinsics, distortion, resolution |
+| `read_camchain_imucam(doc)` | Also each camera's `T_cam_imu` and the stereo `T_cn_cnm1` |
+| `write_camchain_imucam(result)` | A camera–IMU result → a camchain-imucam dict, ready for `yaml.safe_dump` |
+| `parse_results(path)`, `camera_only(dir)`, `camera_imu(dir)` | Read the output files of a finished Kalibr run |
+
+A camchain is Kalibr's YAML file of camera parameters.
+`T_cam_imu` maps points from the IMU frame into the camera frame.
+`T_cn_cnm1` maps points from the previous camera into this one.
+
+Kalibr AprilGrid target files load with
+`mvis.detection.apriltag_board.AprilTagBoard.from_kalibr_yaml(path)`.
+Any `board:` config block builds a board with `mvis.detection.board_factory.create_board(BoardConfig)`.
+
+## Camera and IMU models
+
+```python
+import numpy as np
+from mvis.camera import create_camera_model
+from mvis.imu import create_imu_model, KalibrImu, RpngImu, CalyxImu
+
+cam = create_camera_model("kb4", fx=286.7, fy=286.7, cx=415.0, cy=404.5,
+                          distortion_coeffs=np.array([-0.005, 0.036, -0.035, 0.006]))
+```
+
+- **`mvis.camera`:** `PinholeRadtan`, `PinholeEquidistant`, `KannalaBrandt4`, `FOVModel`,
+  `DoubleSphere`, `EUCM`, `UCM`, `OmniRadtan`. Each projects, unprojects and gives Jacobians.
+- **`mvis.imu`:** the three IMU intrinsic models and their correction matrices
+  (`dw_matrix`, `da_matrix`, `tg_matrix`). See [IMU model](/concepts/imu-model/).
+
+## Simulation
+
+Simulator examples: a real recorded motion with a full rig setup, ready to simulate.
+
+```python
+from mvis.simulation.examples import available, load_example, simulate
+from mvis.calibration.pipeline_cam_imu import run_cam_imu_calibration_multi
+
+print(available())                     # example names
+ex = load_example("twin_gs")
+data = simulate(ex, seed=0)            # cams, t_imu, w_m, a_m, aux_imus
+result = run_cam_imu_calibration_multi(data["cams"], ex.board_points_flat, data["t_imu"],
+                                       data["w_m"], data["a_m"],
+                                       aux_imus=data["aux_imus"] or None)
+```
+
+The installed package ships `twin_gs`. A source checkout also has the others under `data/sim_examples/`,
+led by `virig_4imus_3cams`.
+Their true values are real solves moved by a fixed, seeded perturbation, so no real device calibration ships.
+
+Digital twins of whole recordings are in `mvis.simulation.twin`:
+`capture(config_path, name)` builds a twin from a config and its recording,
+`Twin.load(path)` reads a saved one, and `solve(twin)` simulates, runs the real solver
+and returns the errors against the truth.
+See [Digital-twin check](/guides/simulation/).
+
+## Datasets and the capture database
+
+```python
+from mvis.datasets import DatasetCatalog
+cat = DatasetCatalog.load()
+ds = cat.get("mvis_4imus_3cams")
+print(ds.license, [s.sequence for s in ds.sequences()])
+
+from mvis.mvisdb.manager import DatabaseManager
+db = DatabaseManager()
+print(db.runs("results/run/detections.mvisdb"))           # the runs stored in one capture
+capture = db.load("results/run/detections.mvisdb", run_id=1)  # an MVISDatabase with that run folded in
+```
+
+See [Capture database](/reference/database/).
+
+## Reports
+
+```python
+from mvis.analysis.cam_imu_report import write_cam_imu_report
+write_cam_imu_report(result, html_path="report.html", text_path="report.txt",
+                     reference=ref, board=board)
+```
+
+`board` and `reference` are optional; without `board` the report has no board in the 3D scene.
+To rebuild a camera-only report from a finished run folder:
+`python -m mvis.analysis.regenerate_html <run folder> --config <config>`.
 
 ## Why the models live in one place
 
-A report cannot disagree with the fit it describes. Reported residuals are
-computed by the same code the solver minimised.
+A report cannot disagree with the fit it describes:
+it computes residuals with the same code the solver minimised.
 
-This is a deliberate constraint:
-
-- **`camera/CameraModel`** holds each model's projection, Jacobian, and unprojection together.
-- **`calibration/camera_projection.py`** is shared by the optimiser *and* the HTML report.
-
-## Stability
-
-There is no API-stability guarantee yet.
-
-- **Stable surface:** the CLI and the config schema
-- **Subject to change:** direct imports, until this page is generated from the source
+- **`mvis.camera`** holds each model's projection, Jacobian and unprojection together.
+- **`mvis.calibration.factors.camera_projection`** is shared by the solver *and* the HTML report.

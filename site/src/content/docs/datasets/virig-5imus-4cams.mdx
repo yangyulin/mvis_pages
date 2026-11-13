@@ -1,0 +1,108 @@
+---
+sidebar:
+  order: 4
+  label: VI-Rig — 5 IMUs + 4 cams
+title: VI-Rig — 5 IMUs + 4 cameras
+description: Our VI-Rig with two RealSense T265 units (two global-shutter fisheye pairs) and five IMUs; 7 AprilGrid recordings and MVIS results on Hugging Face (CC BY-NC 4.0, gated).
+pageType: reference
+wide: true
+---
+
+Two RealSense T265 units and five IMUs on one frame, recorded in front of an AprilGrid. The two units are not
+synced to each other, so the only link between their clocks is the motion that every sensor sees. This makes it
+a test of time offsets across many sensors.
+
+- **Hub folder:** [`calibench-vi/datasets` → `virig-5imus-4cams`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams)
+- **Licence:** CC BY-NC 4.0, gated; commercial use on request. See
+  [Licence and access](/datasets/#licence-and-access).
+- **Results:** [results page](/benchmark/results/virig-5imus-4cams/) ·
+  [worked example](/benchmark/examples/virig-5imus-4cams/)
+
+![MVIS solving a VI-Rig 5-IMU recording: the board corners, the rig path and the four camera frames](/media/hero/hero_virig5_960.jpg)
+
+## The rig
+
+Rates are measured from the bags. Every camera is a global-shutter fisheye.
+
+| Sensor | Type | Rate | Image size | ROS topic |
+|---|---|---|---|---|
+| T265 unit A, left | camera, fisheye (about 163°) | 30 Hz | 848×800 | `/t265_01/fisheye1/image_raw` |
+| T265 unit A, right | camera, fisheye (about 163°) | 30 Hz | 848×800 | `/t265_01/fisheye2/image_raw` |
+| T265 unit B, left | camera, fisheye (about 163°) | 30 Hz | 848×800 | `/t265_03/fisheye1/image_raw` |
+| T265 unit B, right | camera, fisheye (about 163°) | 30 Hz | 848×800 | `/t265_03/fisheye2/image_raw` |
+| Xsens MTi | IMU | 400 Hz | – | `/mti/sensor/imu_raw` |
+| MicroStrain 3DM-GX3-25 | IMU | 500 Hz | – | `/gx3_25/data` |
+| MicroStrain 3DM-GX3-35 | IMU | 100 Hz | – | `/gx3_35/imu/data` |
+| T265 unit A IMU (BMI055) | IMU | 200 Hz | – | `/t265_01/imu` |
+| T265 unit B IMU (BMI055) | IMU | 200 Hz | – | `/t265_03/imu` |
+
+- **Sync:** the two cameras inside one T265 are hardware-synced. The two units are not synced to each other.
+- **Board:** the same AprilGrid as the other VI-Rig sets (6×6 tags of family t36h11, tag size 88 mm). The target
+  file [`april.yaml`](https://huggingface.co/datasets/calibench-vi/datasets/blob/main/virig-5imus-4cams/april.yaml)
+  is in the folder.
+- **Board shape:** the printed board is not flat. Our camera + IMU runs estimate its shape; see
+  [Why calibrate the board shape](/why/board-shape/).
+- **More on the T265:** [device page](/devices/intel-t265/).
+
+## Recordings
+
+- **Count:** 7 ROS1 bags, `5imus_4cams_01.bag` to `5imus_4cams_07.bag`.
+- **Length:** 41 to 64 s each, about 6 minutes in total.
+- **Size:** 3.3 to 5.2 GB each, 28 GB in total.
+
+## Download
+
+Accept the terms on the [Hub page](https://huggingface.co/datasets/calibench-vi/datasets) and set
+`HF_TOKEN` to a read token from your Hugging Face settings (or run `hf auth login` once,
+after `pip install huggingface_hub`). Then either:
+
+```bash
+# with MVIS: checks size and SHA-256, saves to $MVIS_DATASETS/vi_sensor_rigs_5imus/
+mvis datasets list --dataset vi_sensor_rigs_5imus
+mvis datasets download --select vi_sensor_rigs_5imus/bag_01   # one recording, 5.2 GB
+mvis datasets download --dataset vi_sensor_rigs_5imus         # all 7, 28 GB
+```
+
+```bash
+# with the Hugging Face CLI: recordings, board file and our results
+hf download calibench-vi/datasets --repo-type dataset \
+  --include "virig-5imus-4cams/*" --local-dir ./calibench
+```
+
+## Results
+
+This set has a separate study (2026-11-02), outside the leaderboard batch. We ran MVIS only; Kalibr and Basalt
+were not run on it, so nothing is compared.
+
+| Run | Recordings solved |
+|---|---|
+| Camera only, one T265 pair per run | MVIS 7 of 7 (each pair) |
+| Camera + IMU, 4 cameras + 5 IMUs in one run | MVIS 7 of 7 |
+
+- **How we ran it:** each camera-only run holds one T265 pair, with no time offset, because the two units share
+  no clock. The camera + IMU runs hold all four cameras and all five IMUs, with the Xsens as base IMU. Their
+  camera intrinsics start from the median of the 7 camera-only runs.
+- **Results files on the Hub:** the folder
+  [`results/2026-11-02/`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams/results/2026-11-02)
+  holds the run configs, the camera-only calibrations, the camera intrinsics prior and, per recording, the camera +
+  IMU result (`cam_imu.json`, the calibration YAML, a Kalibr-style camchain and the estimated board shape). It has
+  numbers only, no images.
+
+A few MVIS values from the camera + IMU runs. Each is the median over the 7 recordings, ± the standard deviation
+between recordings. This shows how well MVIS repeats, not that it is right.
+
+- **Gyro-to-accelerometer delay $t_{ga}$ of the T265 IMUs:** −6.59 ± 0.08 ms (unit A), −6.65 ± 0.10 ms (unit B).
+  The other three IMUs stay within 0.6 ms of zero. The T265 delay depends on how fast the rig moves, so read it as
+  a compromise value; see [Why calibrate t_ga](/why/tga/).
+- **T265 unit A stereo baseline:** 63.66 ± 0.12 mm
+- **Reprojection error, median:** 0.21 to 0.23 px over the four cameras
+
+## Run it yourself
+
+- **Start here:** the [worked example](/benchmark/examples/virig-5imus-4cams/) has the camera + IMU config we ran.
+- **Steps:** see [Multi-IMU calibration](/guides/multi-sensor-rigs/) and
+  [Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+## Cite
+
+This set has no paper yet. Please cite Calibench; the BibTeX is on the [overview page](/datasets/#citation).

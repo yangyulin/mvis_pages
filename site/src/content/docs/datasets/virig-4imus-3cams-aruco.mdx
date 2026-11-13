@@ -1,0 +1,69 @@
+---
+sidebar:
+  order: 2
+  label: VI-Rig — 4 IMUs + 3 cams, ArUco
+title: VI-Rig — 4 IMUs + 3 cameras, ArUco tags
+description: The 3-camera, 4-IMU VI-Rig recorded in front of ArUco tags instead of an AprilGrid; 17 recordings on Hugging Face (CC BY-NC 4.0, gated).
+pageType: reference
+wide: true
+---
+
+The same rig as [4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/), recorded in front of printed ArUco tags
+instead of one AprilGrid. ArUco tags are square marker codes, like AprilTags, from another family. The tags are
+printed on several boards set at different angles, so their corners spread in 3D rather than lying on one plane.
+
+- **Hub folder:** [`calibench-vi/datasets` → `virig-4imus-3cams-aruco`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams-aruco)
+- **Licence:** CC BY-NC 4.0, gated; commercial use on request. See
+  [Licence and access](/datasets/#licence-and-access).
+- **Results:** none published. This set is not part of the benchmark.
+
+## What it is for
+
+- **Feature mode:** the tag corners serve as image features whose 3D positions are not given. The calibration
+  estimates those positions together with the sensor parameters, as a visual-inertial system does in the field.
+  No board layout is used.
+- **In MVIS:** the MVIS dataset catalog lists this set for camera + IMU calibration in feature mode only.
+  `mvis cam-imu` 0.1.0 has no feature mode. One-off study scripts in `examples/experiments/` of the
+  [repository](https://github.com/openmvis/openmvis) used it (`run_board_vs_feature.py`,
+  `run_feature_ablation_aruco.py`); they are kept to reproduce those studies and are not supported.
+
+## The rig
+
+The cameras are the same as in [4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/#the-rig): a FLIR Blackfly and a
+RealSense T265 fisheye pair, all global shutter, at 30 Hz. The IMUs differ between two groups of recordings (rates
+measured from the bags):
+
+| Recordings | IMUs and topics |
+|---|---|
+| 01–10 | all four: Xsens MTi-100 400 Hz `/imu/data`, GX3-25 500 Hz `/gx3_25/data`, GX3-35 100 Hz `/gx3_35/imu/data`, T265 IMU 200 Hz `/t265/imu` |
+| 11–17 | three: Xsens MTi-100 400 Hz `/imu/data`, GX3-25 500 Hz `/gx3_25/data`, and the T265 gyroscope (200 Hz, `/t265/gyro/sample`) and accelerometer (about 63 Hz, `/t265/accel/sample`) on separate topics. No GX3-35. |
+
+## Recordings
+
+- **Count:** 17 ROS1 bags, `virig_4imus_3cams_aurco_01.bag` to `virig_4imus_3cams_aurco_17.bag`. The file names
+  spell "aurco"; we kept them as recorded.
+- **Length:** 102 to 139 s each, 37 minutes in total.
+- **Size:** 5.4 to 7.3 GB each, 117 GB in total.
+
+## Download
+
+Accept the terms on the [Hub page](https://huggingface.co/datasets/calibench-vi/datasets) and set
+`HF_TOKEN` to a read token from your Hugging Face settings (or run `hf auth login` once,
+after `pip install huggingface_hub`). Then either:
+
+```bash
+# with MVIS: checks size and SHA-256, saves to $MVIS_DATASETS/mvis_4imus_3cams/data_arucotags/
+mvis datasets list --dataset mvis_4imus_3cams_aruco
+mvis datasets download --select mvis_4imus_3cams_aruco/aruco_01   # one recording, 6.6 GB
+mvis datasets download --dataset mvis_4imus_3cams_aruco           # all 17, 117 GB
+```
+
+```bash
+# with the Hugging Face CLI
+hf download calibench-vi/datasets --repo-type dataset \
+  --include "virig-4imus-3cams-aruco/*" --local-dir ./calibench
+```
+
+## Cite
+
+Please cite Calibench and the MVIS paper. The BibTeX is on the [overview page](/datasets/#citation).

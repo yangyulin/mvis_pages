@@ -1,69 +1,47 @@
 ---
 title: Roadmap
-description: What is planned for MVIS, the datasets, and the benchmark.
+description: What we plan after MVIS 0.1.0, and what we do not plan.
 pageType: reference
 wide: true
 ---
 
-Use this page to see what we plan next for MVIS, the datasets, the benchmark and this site.
-
-- **Intentions,** not commitments with dates
-- **Each table** lists an item and its status
-- **Not planned** lists what we will not do, and why
-
-## Documentation
-
-| Item | Status |
-|---|---|
-| Theory pages — full derivations and Jacobians | in progress; ported from `camera/CameraModel`, the unified factor, and the ACI / `t_ga` derivation (`t_ga` = time offset between the gyroscope and accelerometer channels) |
-| **Generated** CLI reference | planned — [CLI](/reference/cli/) is hand-written and can drift |
-| **Generated** configuration reference | planned — [Configuration](/reference/configuration/) is hand-written and can drift |
-| Generated Python API from docstrings | undecided (**O4**) — [Python API](/reference/python-api/) is a hand-written map today |
-| Simulation guide — authored trajectories | in progress; today's simulation is digital-twin only |
+Use this page to see what we plan after MVIS 0.1.0. These are intentions, not
+commitments with dates. What shipped is on the [Changelog](/about/changelog/).
 
 ## Toolbox
 
 | Item | Status |
 |---|---|
-| Continuous-time refinement | planned — see [Continuous-time refinement](/concepts/continuous-time/) |
-| Authored-trajectory synthetic generator | planned — would let us study degeneracy (when the motion leaves some parameters undetermined) without recording restricted motion |
-| API stability guarantee | not yet — the CLI and config schema are the stable surface |
-| `omni_radtan` out of experimental | in progress — already validated on TUM-VI camera–IMU |
+| `pip install pymvis` from PyPI | with the v0.1.0 release; until then, install from source ([Installation](/getting-started/installation/)) |
+| Public code repository | done: [github.com/openmvis/openmvis](https://github.com/openmvis/openmvis), GPL-3.0-only with a commercial licence ([License](/about/license/)) |
+| `omni_radtan` | experimental in 0.1.0 |
+| Stable config schema | not before 1.0: 0.x releases may change it |
+| Windows, Python 3.13 | blocked upstream: GTSAM has no Windows wheels, and the NumPy 1.x that GTSAM 4.2 needs has no 3.13 wheel |
 
-## Datasets
+## Documentation
 
-| Item | Status |
-|---|---|
-| Additional example datasets | open — [TUM VI](/benchmark/examples/tum-vi/), [Monado](/benchmark/examples/monado/), and [Looper Insight 9](/benchmark/examples/looper-insight9/) are complete |
-| TUM VIE | needs data — not acquired, no runs; the natural successor to TUM VI |
-| Dataset hosting on Hugging Face with Zenodo DOIs | in progress |
-| Contributed datasets | open — [Submit a dataset](/contribute/submit-dataset/) |
+The [CLI](/reference/cli/), [Configuration](/reference/configuration/) and
+[Python API](/reference/python-api/) pages were checked against MVIS 0.1.0.
+When they differ from the code, `mvis <command> --help` and `mvis check` are
+authoritative.
 
-## Benchmark
-
-| Item | Status |
-|---|---|
-| Submission CI validation | in progress |
-| Maintainer re-run / verified badge | planned — [Governance](/contribute/governance/) |
-| Versioned, citable leaderboard snapshots | planned |
-| Annual calibration challenge | under consideration |
-
-## Site
+## Benchmark and datasets
 
 | Item | Status |
 |---|---|
-| Public toolbox repo | done — [`openmvis/openmvis`](https://github.com/openmvis/openmvis), GPL-3.0-only with a commercial licence, see [License](/about/license/) |
-| Real logo replacing the placeholder | planned |
-| Versioned documentation per release | undecided — single "latest" today |
-| Release tags and dated changelog entries | started — 0.1.0 will be the first tag, see [Changelog](/about/changelog/) |
+| New results submission process | being set up; see [Submit results](/contribute/submit-results/) |
+| Verified results (a maintainer re-runs a submission) | planned |
+| Contributed datasets | open; see [Submit a dataset](/contribute/submit-dataset/) |
 
 ## Not planned
 
-- **Replacing Kalibr for single-IMU rigs.** Kalibr is mature and widely validated.
-  MVIS exists for the multi-IMU, multi-model, no-ROS case. See
+- **Replacing Kalibr for single-IMU rigs.** Kalibr is mature and widely used.
+  MVIS adds what Kalibr does not cover, such as rolling-shutter readout on
+  several cameras, camera–camera time offsets, the gyro–accel offset `t_ga` and
+  the board shape. See
   [Comparison](/getting-started/comparison/).
-- **A composite leaderboard score.** How to weight parameters against each other is
-  the reader's judgement, not the benchmark's. See
+- **A single combined score on the leaderboard.** How to weigh one parameter
+  against another is the reader's call, not the benchmark's. See
   [Methodology](/benchmark/methodology/).
 
 **Missing something you need?** Open an issue on

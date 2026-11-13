@@ -16,7 +16,7 @@
   "credit": "Photo: OpenMVIS"
  },
  "links": {
-  "dataset": "/reference/datasets/virig-4imus-3cams/",
+  "dataset": "/datasets/virig-4imus-3cams/",
   "hub": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams"
  },
  "study": false,

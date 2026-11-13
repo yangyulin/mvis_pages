@@ -26,7 +26,7 @@ datasets:
     chips: ["3 global-shutter cameras", "4 IMUs, 100–500 Hz"]
     image: {src: /media/hero/vi_rig.jpg, alt: "The VI-Rig: a Blackfly camera, a RealSense T265 and four IMUs on one plate", credit: "Photo: OpenMVIS"}
     links:
-      dataset: /reference/datasets/virig-4imus-3cams/
+      dataset: /datasets/virig-4imus-3cams/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-3cams
     families:
       - {id: T6, shutter: global}
@@ -50,7 +50,7 @@ datasets:
     chips: ["2 global-shutter + 2 rolling-shutter cameras"]
     image: {src: /media/hero/hero_virig4_960.jpg, alt: "MVIS solving a VI-Rig 4-camera recording: board, camera path and one T265 fisheye frame", credit: "MVIS solve view, from the homepage"}
     links:
-      dataset: /reference/datasets/virig-4imus-4cams/
+      dataset: /datasets/virig-4imus-4cams/
       sensor: /devices/intel-t265/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams
     families:
@@ -82,7 +82,7 @@ datasets:
     intro: "Our rig with two RealSense T265 units (two global-shutter fisheye pairs) and five IMUs: an Xsens MTi as base, a GX3-25, a GX3-35 and the two T265 IMUs. A one-off MVIS study of 7 recordings, not part of the leaderboard batch or the regression suite. Kalibr and Basalt were not run on it."
     chips: ["4 global-shutter fisheye cameras", "5 IMUs, 100–500 Hz", "7 recordings", "MVIS only"]
     links:
-      dataset: /reference/datasets/
+      dataset: /datasets/virig-5imus-4cams/
       sensor: /devices/intel-t265/
       hub: https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-5imus-4cams
       example: /benchmark/examples/virig-5imus-4cams/

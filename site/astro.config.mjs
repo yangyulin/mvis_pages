@@ -49,14 +49,14 @@ export default defineConfig({
     '/calibration/procedures': '/guides/camera-imu-calibration/',
     '/calibration/results': '/reference/result-formats/',
     '/datasets/sensors': '/getting-started/requirements/',
-    '/datasets/mvis-data': '/reference/datasets/',
+    '/datasets/mvis-data': '/datasets/',
     '/datasets/analysis': '/reference/evaluation/',
-    '/datasets/4imus-3cams': '/reference/datasets/virig-4imus-3cams/',
-    '/datasets/4imus-4cams': '/reference/datasets/virig-4imus-4cams/',
+    '/datasets/4imus-3cams': '/datasets/virig-4imus-3cams/',
+    '/datasets/4imus-4cams': '/datasets/virig-4imus-4cams/',
 
     // --- Examples reshaped to Monado / Looper / TUM VI (2026-08-05) ---
-    '/examples/in-house-4imus-3cams': '/reference/datasets/virig-4imus-3cams/',
-    '/examples/in-house-4imus-4cams': '/reference/datasets/virig-4imus-4cams/',
+    '/examples/in-house-4imus-3cams': '/datasets/virig-4imus-3cams/',
+    '/examples/in-house-4imus-4cams': '/datasets/virig-4imus-4cams/',
     '/examples/monado-msd': '/benchmark/examples/monado/',
     '/examples/tum-vie': '/benchmark/examples/',
     '/math/calib-graph': '/concepts/calibration-graph/',
@@ -173,6 +173,12 @@ export default defineConfig({
           items: [{ label: 'Overview', link: '/devices/' }, ...sensorGroups],
         },
         {
+          // Own section since 2026-11-12; pages order by frontmatter sidebar.order.
+          label: 'Datasets',
+          collapsed: true,
+          autogenerate: { directory: 'datasets' },
+        },
+        {
           label: 'Concepts',
           collapsed: true,
           items: [
@@ -184,10 +190,13 @@ export default defineConfig({
               collapsed: true,
               items: [
                 { label: 'Overview', link: '/concepts/camera-imu-math/' },
+                { label: 'Base IMU factor', link: '/concepts/camera-imu-math/base-imu/' },
+                { label: 'Auxiliary IMU factor', link: '/concepts/camera-imu-math/aux-imu/' },
               ],
             },
             { label: 'Calibration graph', link: '/concepts/calibration-graph/' },
-            { label: 'Continuous-time refinement', link: '/concepts/continuous-time/' },
+            { label: 'Observability', link: '/concepts/observability/' },
+            { label: 'Degeneracy', link: '/concepts/degeneracy/' },
           ],
         },
         {
@@ -200,15 +209,6 @@ export default defineConfig({
             { label: 'Capture database', link: '/reference/database/' },
             { label: 'Evaluation & metrics', link: '/reference/evaluation/' },
             { label: 'Python API', link: '/reference/python-api/' },
-            {
-              label: 'Datasets',
-              collapsed: true,
-              items: [
-                { label: 'Overview', link: '/reference/datasets/' },
-                { label: 'VI-Rig — 4 IMUs + 3 cams', link: '/reference/datasets/virig-4imus-3cams/' },
-                { label: 'VI-Rig — 4 IMUs + 4 cams', link: '/reference/datasets/virig-4imus-4cams/' },
-              ],
-            },
           ],
         },
         {

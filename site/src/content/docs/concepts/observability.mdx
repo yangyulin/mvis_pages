@@ -1,23 +1,186 @@
 ---
 title: Observability
-description: Observability analysis for the multi-visual-inertial calibration system.
+description: Which calibration values each kind of motion makes measurable, with the short math reason for each, and the four directions no motion can fix.
 pageType: concept
 ---
 
-Use this page to learn which calibration parameters the data can pin down.
-This page is not written yet.
+Use this page to see which motion makes which calibration value measurable, and
+why.
 
-## Observability Analysis
+A value is **observable** when the measurements change if the value changes. If
+they do not, the data cannot tell a right value from a wrong one, however long
+you record. The solver then returns roughly its start value, with a wide 1σ.
 
-Coming soon. We will add an observability analysis of the MVIS calibration
-state (the set of parameters MVIS estimates). A parameter is observable when
-the measurements are enough to estimate it.
+Whether a calibration value is observable depends on the motion. The MVIS paper
+analyses this for the full multi-camera, multi-IMU state, and the earlier
+papers below give the degenerate motions for the time offset, extrinsics and IMU
+intrinsics:
 
-The analysis will cover:
+- Y. Yang, P. Geneva, G. Huang,
+  [Multi-visual-inertial system: Analysis, calibration, and estimation](https://doi.org/10.1177/02783649241245726),
+  The International Journal of Robotics Research 43(13), pp. 1995–2026, 2024.
+- Y. Yang, P. Geneva, K. Eckenhoff, G. Huang,
+  [Degenerate motion analysis for aided INS with online spatial and temporal sensor calibration](https://doi.org/10.1109/LRA.2019.2893803),
+  IEEE Robotics and Automation Letters 4(2), pp. 2070–2077, 2019.
+- Y. Yang, P. Geneva, X. Zuo, G. Huang,
+  [Online IMU intrinsic calibration: Is it necessary?](https://doi.org/10.15607/RSS.2020.XVI.026),
+  Robotics: Science and Systems XVI, 2020.
 
-- **Unobservable directions:** yaw and global position, which the data cannot fix.
-- **Conditions for observability:** when each of these parameters becomes observable:
-  - intrinsic
-  - extrinsic
-  - time-offset
-  - rolling-shutter
+This page gives the short reason for each value. Symbols follow
+[Notation & glossary](/concepts/notation/); the factors are on
+[Camera–IMU calibration math](/concepts/camera-imu-math/).
+
+## Never observable: four directions
+
+The measurements are relative: the cameras see the board, the IMUs feel motion
+and gravity. Moving the whole scene (board and trajectory) or turning it about
+gravity changes nothing they measure. So four directions are never observable:
+
+- **global position** (3);
+- **rotation about gravity** (1).
+
+MVIS holds them with a prior on the first state's position and its rotation
+about gravity. The tilt (the direction of gravity in the IMU frame) stays free:
+the accelerometer sees gravity, so it is observable. Metric
+scale is observable too: the board has a known size, and the accelerometer
+measures in m/s².
+
+## What each value needs
+
+| Value | Needs | Short reason |
+|---|---|---|
+| Camera intrinsics $\mathbf{f}_i$, $\mathbf{d}_i$ | the board seen at many distances, angles and across the whole image | from the board alone |
+| Extrinsic rotation ${}^{I}_{C_i}\mathbf{R}$ | rotation about at least 2 axes | camera and gyro see the same angular velocity, rotated |
+| Lever arm ${}^{I}\mathbf{p}_{C_i}$ | rotation about at least 2 axes, with changing angular velocity | it shows up only through rotation |
+| Time offset $t_{d,i}$ | angular velocity that changes, and some translation | a time shift moves a pose by its velocity |
+| Readout $t_{r,i}$ | fast rotation about the camera's x or y axis, board spread over many rows | each row is shifted by its own share of the readout |
+| Gyro scale and misalignment $\mathbf{D}_w$ | rotation about every axis, at varied rates | each column multiplies one axis of the angular velocity |
+| Accel scale and misalignment $\mathbf{D}_a$, bias $\mathbf{b}_a$ | gravity along every axis (tilts), plus linear acceleration changes | each column multiplies one axis of the specific force |
+| G-sensitivity $\mathbf{T}_g$ | strong linear acceleration while rotating on all axes | the gyro error must vary with acceleration, apart from rotation |
+| `t_ga` | quickly changing acceleration (brisk reversals) | it enters only through the rate of change of acceleration |
+| Auxiliary IMU rotation and $t_{d,j}$ | rotation about at least 2 axes | the two gyros see the same angular velocity |
+| Auxiliary IMU lever arm | rotation about at least 2 axes, with changing angular velocity | centripetal and tangential acceleration |
+
+The motion in [step 2: record the dataset](/guides/calibration-motion/) is built
+to cover every row of this table.
+
+## The reasons, in equations
+
+### Extrinsic rotation: two directions needed
+
+The camera's angular velocity (from its board poses) and the gyro's are the same
+vector in two frames:
+
+$$
+{}^{I}\boldsymbol\omega(t) = {}^{I}_{C_i}\mathbf{R}\;{}^{C_i}\boldsymbol\omega(t) \quad\text{(after time alignment)}
+$$
+
+A rotation is fixed by two non-parallel vector pairs. If every
+${}^{C_i}\boldsymbol\omega$ is parallel to one axis, any rotation about that axis
+fits equally well. The start-value step of MVIS records the singular values of
+the camera–gyro angular-velocity cross-covariance for this reason: one large and
+two tiny ones mean one-axis rotation.
+
+### Lever arm: only rotation shows it
+
+The camera sits at ${}^{G}\mathbf{p}_{C} = {}^{G}\mathbf{p}_{I} + {}^{G}_{I}\mathbf{R}\,{}^{I}\mathbf{p}_{C}$.
+Differentiate twice and compare with what the accelerometer measures:
+
+$$
+{}^{G}\ddot{\mathbf{p}}_{C} = {}^{G}\ddot{\mathbf{p}}_{I} +
+{}^{G}_{I}\mathbf{R}\Big(\big[{}^{I}\dot{\boldsymbol\omega}\big]_\times + \big[{}^{I}\boldsymbol\omega\big]_\times^2\Big)\,{}^{I}\mathbf{p}_{C}
+$$
+
+- **No rotation:** both terms vanish and ${}^{I}\mathbf{p}_{C}$ is a constant
+  offset the board pose absorbs.
+- **Rotation about one axis $\mathbf{k}$:** a component of ${}^{I}\mathbf{p}_{C}$
+  along $\mathbf{k}$ gives $\mathbf{k}\times\mathbf{p} = 0$, so that component
+  stays unobservable.
+
+The same holds for the lever arm of an auxiliary IMU.
+
+### Time offset: a shift is seen through velocity
+
+A time offset error $\delta t$ moves the pose used for a frame to a slightly
+different time:
+
+$$
+{}^{G}_{I}\mathbf{T}(t + \delta t) \approx {}^{G}_{I}\mathbf{T}(t)\;\mathrm{Exp}\!\left(\begin{bmatrix}{}^{I}\boldsymbol\omega\\ {}^{I}\mathbf{v}\end{bmatrix}\delta t\right)
+$$
+
+- **At rest** the shift changes nothing.
+- **At constant angular and linear velocity** the shift is a constant relative
+  transform. The extrinsic absorbs it, and $t_{d,i}$ and the extrinsic cannot be
+  told apart.
+- **When the velocity changes** the shift varies over the recording and no
+  constant transform can explain it. That is the signal.
+
+### Readout: a shift per row
+
+On a rolling-shutter camera, a corner on row $v_m$ is captured at
+$t_C + t_{d,i} + (v_m/H)\,t_{r,i}$. The readout is a time offset that grows from
+the top row to the bottom row. It needs motion that moves the rows differently:
+rotation about the camera's x or y axis, which sweeps the image vertically or
+horizontally. Rotation about the optical axis gives little signal, and so does a
+board that covers only a few rows: then $t_{r,i}$ cannot be told from $t_{d,i}$.
+See [Why calibrate rolling shutter](/why/rolling-shutter/).
+
+### IMU scale and misalignment: every axis excited
+
+The corrected readings are
+${}^{I}\boldsymbol\omega = {}^{I}_{w}\mathbf{R}\,\mathbf{D}_w(\boldsymbol\omega_m - \mathbf{b}_g - \mathbf{T}_g\,{}^{I}\mathbf{a})$
+and ${}^{I}\mathbf{a} = {}^{I}_{a}\mathbf{R}\,\mathbf{D}_a(\mathbf{a}_m - \mathbf{b}_a)$
+([Base IMU factor](/concepts/camera-imu-math/base-imu/#corrected-readings)).
+Column $n$ of $\mathbf{D}_w$ multiplies only axis $n$ of the reading. If that axis
+never turns, the column has nothing to scale.
+
+The accelerometer measures specific force, ${}^{I}\mathbf{a} = {}^{I}_{G}\mathbf{R}\,({}^{G}\ddot{\mathbf{p}}_I - {}^{G}\mathbf{g})$.
+Gravity is about 9.8 m/s², far larger than hand-held acceleration. So tilting the
+rig until each axis has pointed along gravity is what excites $\mathbf{D}_a$. A
+rig held at one tilt sees one fixed gravity vector: then the scale and the bias
+along it trade off against each other.
+
+### G-sensitivity: acceleration must vary apart from rotation
+
+$\mathbf{T}_g\,{}^{I}\mathbf{a}$ adds to the gyro reading. With mostly gravity in
+${}^{I}\mathbf{a}$, its effect looks like a gyro bias that changes with tilt, which
+the biases and $\mathbf{D}_w$ can also explain. It separates only with strong
+linear acceleration on all axes. Hand-held motion rarely gives that, so it stays
+pinned by default.
+
+### `t_ga`: seen through the change in acceleration
+
+The accelerometer reading that belongs to gyro time $t$ is the one stamped
+$t + t_{ga}$. To first order:
+
+$$
+\mathbf{a}_m(t + t_{ga}) \approx \mathbf{a}_m(t) + t_{ga}\,\dot{\mathbf{a}}_m(t)
+$$
+
+The offset is visible only through $\dot{\mathbf{a}}_m$, the rate of change of
+the specific force. Smooth, steady motion leaves it loose; brisk reversals make it
+sharp. The response of some IMUs also depends on the frequency of the motion, so
+one value can be a compromise: see [Why calibrate t_ga](/why/tga/).
+
+## How much signal is enough
+
+Observable is not yes or no in practice. A value can be observable in theory and
+still weak on a given recording: the 1σ then comes out wide, and the value moves
+from one recording to the next. Two ways to check:
+
+- **Read the 1σ** next to each value in the result. Compare it across recordings.
+- **Run the digital twin** of your own rig and motion: MVIS simulates the
+  recording with known truth and solves it ([step 7](/guides/simulation/)).
+
+What happens when a motion is missing, and how MVIS reports it:
+[Degeneracy](/concepts/degeneracy/).
+
+## What this means for your recording
+
+- **Rotate about all three axes**, at varied speed, with the board in view.
+- **Tilt the rig through many orientations**, so gravity falls along every axis.
+- **Change direction briskly** a few times. Avoid long stretches of steady motion.
+- **Sweep the board across all image rows**, more so for a rolling-shutter camera.
+- **Hold still for about 3 s at both ends.** The rests give the motion a clean
+  start and end; the start-value step can compare a still start with its
+  gyro-bias estimate.

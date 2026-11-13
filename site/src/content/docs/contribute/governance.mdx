@@ -1,99 +1,115 @@
 ---
 title: Governance
-description: Who maintains OpenMVIS, how submissions are reviewed, and the rules contributors are held to.
+description: Who maintains MVIS and this site, how contributions are reviewed, the licence terms for pull requests, and how to report a problem.
 pageType: reference
 ---
 
-Use this page to know what to expect before you spend effort on a
-contribution. It covers:
+Use this page to know what to expect before you put effort into a contribution.
 
-- **Maintainers:** who runs the project
-- **Review:** how each kind of submission is checked
-- **Rules:** documentation, conduct, credit and licence
+## Repositories
+
+| Repository | Holds | Where to contribute |
+|---|---|---|
+| [`openmvis/openmvis`](https://github.com/openmvis/openmvis) | the MVIS toolbox (code, tests, docs) | issues and pull requests |
+| [`openmvis/mvis_pages`](https://github.com/openmvis/mvis_pages) | this site | issues and pull requests; dataset offers |
+| [`openmvis/calibench-submissions`](https://github.com/openmvis/calibench-submissions) | leaderboard submissions | issues while submissions are paused; see [Submit results](/contribute/submit-results/) |
+| [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets) and [`calibench-vi/community`](https://huggingface.co/datasets/calibench-vi/community) on Hugging Face | the recordings | see [Submit a dataset](/contribute/submit-dataset/) |
+| [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results) on Hugging Face | the leaderboard records | written by us only |
 
 ## Maintainers
 
-The [Robot Perception and Navigation Group
-(RPNG)](https://sites.udel.edu/robot/) at the University of Delaware maintains
-OpenMVIS. [Contributors](/about/contributors/) lists the current maintainers.
+- **Who:** the maintainers are listed on [Contributors](/about/contributors/).
+- **What they do:** review and merge pull requests, run the benchmark, host the
+  datasets and make releases.
+- **Releases:** only maintainers can create release tags. A tag builds the
+  package and publishes it to PyPI after a maintainer approves it.
+- **Support:** MVIS is research code, maintained on a best-effort basis.
 
-## Review process
+## How contributions are reviewed
 
-Each kind of submission is reviewed for different things:
+| Contribution | What we check |
+|---|---|
+| Code | correct behaviour, a test that fails before and passes after, the CI tiers pass, no unintended change in benchmark results |
+| Documentation | the facts are right and the page stays its type (see below) |
+| Dataset | format, dataset card, licence, no private content (see [Submit a dataset](/contribute/submit-dataset/)) |
+| Results | the configs, outputs and provenance needed to reproduce them (see [Submit results](/contribute/submit-results/)) |
 
-| Submission | Reviewed for | Turnaround |
-|---|---|---|
-| Leaderboard result | Schema validity, plausible values, complete provenance | *to be set* |
-| Dataset | Format, dataset card, licence, usability | *to be set* |
-| Documentation | Accuracy, page-type fit (see below) | *to be set* |
-| Code | Correctness, tests, no regression | *to be set* |
+CI (the checks that run automatically on GitHub) tests what it can. A maintainer
+reviews the rest.
 
-CI (continuous integration, the checks that run automatically) validates what it
-can:
-schema, bounds and build. A maintainer reviews what it cannot.
+For code, read [CONTRIBUTING.md](https://github.com/openmvis/openmvis/blob/main/CONTRIBUTING.md)
+first. In short:
 
-## Verified results
+- **One topic per pull request,** with a test that fails before the change and
+  passes after it.
+- **Keep CI green:** `scripts/test.sh unit` and `scripts/test.sh solver`. Run
+  `scripts/test.sh full` before you ask for a merge. See
+  [Regression testing](/contribute/regression-testing/).
+- **Licence header:** new source files start with the same licence header as the
+  files in `src/`. A test checks it.
+- **Bug reports:** include the config YAML, the full log, `mvis --version`, your
+  operating system and Python version, and a link to the data if you can share it.
 
-Each result on the [leaderboard](/benchmark/results/) is one of two kinds:
+## Page types on this site
 
-| Kind | Meaning | Badge |
-|---|---|---|
-| **Reported** | A result as submitted | No |
-| **Verified** | A maintainer has re-run it from the submitter's configuration and data | Yes |
-
-We verify where possible, but do not require it. Verification depends on the
-data being available and the run being tractable.
-
-We keep the difference visible on purpose. If reported and reproduced numbers
-cannot be told apart, nobody should trust the leaderboard.
-
-## Documentation rule
-
-Each page on this site declares a `pageType` and is held to it:
+Each page declares a `pageType` in its frontmatter and keeps to it:
 
 | Type | Contains | Does not contain |
 |---|---|---|
-| `tutorial` | One ordered happy path | Alternatives, options, theory |
-| `guide` | Task-oriented steps | Derivations — link to a concept |
-| `concept` | Explanation, maths, figures | Commands — link to a guide |
-| `reference` | Exhaustive, anchor-per-entry | Narrative |
-| `example` | A real run with validation | Concepts introduced for the first time |
+| `tutorial` | one ordered path from start to result | alternatives, options, theory |
+| `guide` | the steps for one task | derivations (link to a concept page) |
+| `concept` | explanation, maths, figures | commands (link to a guide) |
+| `reference` | complete lists, one anchor per entry | narrative |
+| `example` | a real run, with its checks | concepts introduced for the first time |
 
-When a page drifts, split it; do not blend the two types:
+When a page drifts, split it instead of mixing the two types:
 
 - **A guide that starts explaining** means a concept page is missing.
-- **A concept page that starts instructing** means a guide is missing.
+- **A concept page that starts giving commands** means a guide is missing.
 
-Documentation pull requests are reviewed against this rule.
+We review documentation pull requests against this table.
+
+## Licence of contributions
+
+- **Code:** MVIS is GPL-3.0-only, with a separate commercial licence for
+  closed-source products. See [License](/about/license/).
+- **Contributor terms:** by opening a pull request on `openmvis/openmvis` you
+  confirm that you wrote the contribution or have the right to submit it. You
+  also grant the MVIS copyright holder named in CONTRIBUTING.md a perpetual,
+  worldwide, royalty-free, irrevocable licence to use, modify, sublicense and
+  relicense it, including under commercial licences, in addition to GPL-3.0.
+  You keep the copyright to your contribution.
+  The full text is in
+  [CONTRIBUTING.md](https://github.com/openmvis/openmvis/blob/main/CONTRIBUTING.md).
+  This keeps MVIS dual-licensed.
+- **Datasets** keep the licence agreed when we host them (see
+  [Submit a dataset](/contribute/submit-dataset/)).
+- **Results records** are published under CC BY 4.0.
 
 ## Conduct
 
-Be civil and assume good faith. We do not tolerate:
+Be civil and assume good faith. We do not accept:
 
 - harassment
 - personal attacks
-- deliberate bad-faith submissions
+- submissions made in bad faith
 
-Maintainers may reject submissions and restrict participation. Report problems
-to the maintainer contacts on [Contributors](/about/contributors/).
+Maintainers may close issues, reject contributions and restrict participation
+when these rules are broken. Report a problem to contact@openmvis.com.
+
+## Security problems
+
+Do not open a public issue for a security problem. Email contact@openmvis.com
+with the affected version (`mvis --version`), the steps to reproduce and, if you
+have one, a fix. We acknowledge reports within a week. The full policy is in
+[SECURITY.md](https://github.com/openmvis/openmvis/blob/main/SECURITY.md).
 
 ## Credit
 
-- **Leaderboard entries** are attributed to their submitter.
-- **Datasets** get a DOI, a citation, and named credit.
-- **Substantial contributions** to a dataset or benchmark release are
-  recognised with co-authorship on the corresponding paper.
-
-## Licence
-
-The toolbox and the site are open source — see [License](/about/license/).
-Contributions are accepted under the same licence.
-
-:::note[This document is provisional]
-The principles above are settled; the procedural detail is not. Still being
-finalised:
-
-- review turnaround
-- a formal code of conduct
-- the maintainer list
-:::
+- **Code contributors** are listed in the `AUTHORS` file of `openmvis/openmvis`.
+- **Datasets** we host get:
+  - a citation entry in the dataset card
+  - a named entry on [Contributors](/about/contributors/)
+  - where we calibrate it, a page for the rig in the [Device wiki](/devices/)
+    with the results
+- **Security reports** are credited in the changelog unless you ask us not to.

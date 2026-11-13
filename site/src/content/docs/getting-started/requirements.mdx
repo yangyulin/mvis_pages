@@ -1,116 +1,87 @@
 ---
 title: Requirements
-description: What MVIS needs to run, what it calibrates, and which inputs and boards it accepts.
+description: The system, Python packages, input formats and boards MVIS needs, and what a calibration recording must contain.
 pageType: reference
 wide: true
 ---
 
-import { Image } from 'astro:assets';
-import viRig from '../../../assets/vi_rig.jpg';
+Use this page to check that your machine and your recording fit MVIS before you
+install it. The install itself is on [Installation](/getting-started/installation/).
 
-Use this page to check what MVIS needs before you install it. It also lists
-what MVIS calibrates and which inputs and boards it reads.
+## System
 
-- **Pure Python:** runs on Linux and macOS (x86-64 / arm64), Python 3.11 or 3.12
-- **Install:** `pip install` of the `pymvis` package; nothing to compile, no ROS dependency
-- **Build steps:** see [Installation](/getting-started/installation/)
+- **Operating system:** Linux or macOS, on x86-64 or arm64.
+- **Python:** 3.11 or 3.12.
+- **Not supported:** Windows and Python 3.13. GTSAM publishes no Windows
+  wheels and no wheels below Python 3.11. NumPy 1.x, which GTSAM needs, has no
+  Python 3.13 wheel.
+- **Nothing to compile:** every dependency installs from a pip wheel.
 
-## Dependencies
+## Python dependencies
 
-| Dependency | Required | Notes |
+`pip` installs these with MVIS. The bounds are the ones in `pyproject.toml`.
+
+| Package | Version | Used for |
 |---|---|---|
-| Python 3.11 or 3.12 | yes | No 3.13 yet: the NumPy 1.x pin below has no wheel for it |
-| [GTSAM](https://github.com/borglab/gtsam) 4.2 | yes | Factor-graph optimisation, native SO(3)/SE(3) |
-| NumPy **< 2** | yes | GTSAM 4.2 from pip is built against the NumPy 1.x ABI |
-| OpenCV | yes | Detection and PnP initialisation |
-| [`aprilgrid`](https://pypi.org/project/aprilgrid/) | for AprilGrid | extra `[apriltag]` |
-| `opencv-contrib` | for ArUco | extra `[aruco]` |
-| [`rosbags`](https://pypi.org/project/rosbags/) | to read bags | extra `[ros1]`; pure Python — **no ROS installation** |
-| `mcap` | for MCAP episodes | extra `[mcap]` |
-| `rerun-sdk` | 3D viewer | extra `[viz]` |
-| `pytest` | dev | extra `[dev]` |
+| [GTSAM](https://github.com/borglab/gtsam) | ≥ 4.2, < 4.3 | Factor-graph solver, with SO(3)/SE(3) rotations and poses as native types |
+| NumPy | ≥ 1.20, **< 2** | Arrays. GTSAM 4.2 is built for NumPy 1.x; NumPy 2 crashes it |
+| OpenCV (`opencv-python`) | ≥ 4.5, < 4.12 | Board detection and initial poses. OpenCV 4.12 and later need NumPy 2 |
+| SciPy | ≥ 1.7 | Numerics |
+| PyYAML | ≥ 6.0 | Config and result files |
+| Matplotlib, Plotly | ≥ 3.5, ≥ 5.0 | Figures in the HTML reports |
+| tqdm | ≥ 4.60 | Progress bars |
 
-## What can be calibrated
-
-Intrinsics are a sensor's own parameters, such as lens distortion. Extrinsics
-are where one sensor sits relative to another. RS means rolling shutter: the
-camera reads its rows one after another.
-
-| Quantity | Scope | Notes |
-|---|---|---|
-| Camera intrinsics + distortion | per camera | Eight models, mixable across a rig |
-| Camera extrinsics | per camera | Against `reference_camera` |
-| Camera–camera time offsets | pairwise | `optimize_time_offset` |
-| Rolling-shutter readout | per RS camera | Solved jointly, not corrected after |
-| Board poses | per frame | Written to `*_full.yaml` for replay |
-| Camera–IMU extrinsics `T_CtoI` | per camera | — |
-| Camera–IMU time offset `td` | per camera | — |
-| IMU intrinsics `Dw` / `Da` / `Tg` | per IMU | Three conventions |
-| IMU biases `b_g` / `b_a` | per IMU | — |
-| Gyro↔accel offset `t_ga` | base IMU | `solve.estimate_t_ga` |
-
-## Camera models
-
-MVIS has eight camera models. Details are in
-[Camera model](/concepts/camera-model/).
-
-- `radtan`
-- `kb4`: fisheye; also called `fisheye` or `kannala_brandt`
-- `equidistant`: the same pixels as `kb4` when every corner is under 90°
-- `fov`
-- `double_sphere`
-- `eucm`
-- `ucm`
-- `omni_radtan` (experimental)
-
-## IMU-intrinsics conventions
-
-Pick one of three conventions. It is a convention only; it does not make the
-calibration better. See [IMU model](/concepts/imu-model/).
-
-- `kalibr`
-- `rpng`
-- `calyx`
+Board detectors and bag readers are optional extras. They are listed on
+[Installation](/getting-started/installation/#2-pick-the-extras).
 
 ## Input formats
 
-Memory stays bounded, whatever the dataset size. Detection streams the input,
-one image at a time. Set `source_type` to one of these:
+Detection reads one image at a time, so memory does not grow with the size of
+the recording. Set `source_type` per camera:
 
-| `source_type` | Input |
-|---|---|
-| `images` | Folder sorted by filename (`.jpg .jpeg .png .bmp .tiff .tif`) |
-| `timestamped_images` | Folder + CSV of `filename,timestamp` |
-| `rosbag_topic` | ROS1 bag; several cameras from one file |
-| `ros2bag` | ROS2 SQLite bag directory |
-| `euroc` | EuRoC / ASL — TUM-VI, EuRoC MAV, Monado SLAM |
-| `video` | Video file |
+| `source_type` | Input | Extra needed |
+|---|---|---|
+| `images` | A folder of images, sorted by filename (`.jpg .jpeg .png .bmp .tiff .tif`) | — |
+| `timestamped_images` | A folder of images plus a CSV of `filename,timestamp` | — |
+| `euroc` | EuRoC / ASL folder, as in TUM-VI, EuRoC MAV and Monado SLAM | — |
+| `rosbag_topic` | ROS1 bag, several cameras from one file. `sensor_msgs/Image`, or `CompressedImage` in PNG or JPEG | `ros1` |
+| `ros2bag` | ROS2 bag: the folder with its `metadata.yaml`, or one `.db3` or `.mcap` file. Same image types as ROS1 | `ros1` |
+
+- **No ROS install:** the `ros1` extra installs `rosbags`, a pure-Python
+  reader for ROS1 and ROS2 bags.
+- **Camera–IMU runs** read a ROS1 bag, a ROS2 bag or a EuRoC `mav0` folder
+  (`input.format: ros1 | ros2 | euroc`).
+- **`mvis apply-calib` and `mvis roundtrip`** read and write ROS1 bags only.
+- **JPEG images** are lossy and can shift corners. MVIS warns once per topic.
+- **Video files** are not read. Extract the frames to a folder first.
 
 ## Calibration boards
 
-Set `board_type` and the required fields for your board.
+Set `board_type` and the fields for your board:
 
-| Board | `board_type` | Required fields |
-|---|---|---|
-| AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` |
-| Chessboard | `chessboard` | `rows`, `cols` (inner corners), `square_size` (m) |
-| ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` |
-
-Kalibr target YAML files also load directly.
-
-## Reference rig
-
-Our released MVIS datasets come from a VI-Rig we built ourselves. You do not
-need it. The shipped example configs assume it.
-
-<Image src={viRig} alt="VI-Rig with 4 IMUs and 5 cameras" width="320" />
-
-| Sensor | Rate (Hz) | Topic | Resolution |
+| Board | `board_type` | Required fields | Extra needed |
 |---|---|---|---|
-| MicroStrain GX3-25 | 500 | `/gx3_25/data` | — |
-| MicroStrain GX3-35 | 100 | `/gx3_35/imu/data` | — |
-| Xsens MTI-100 | 400 | `/imu/data` | — |
-| RealSense T265 IMU | 200 | `/t265/imu` | — |
-| FLIR BlackFly | 30 | `/blackfly/image_raw` | 720×540 |
-| RealSense T265 L / R | 30 | `/t265/fisheye{1,2}/image_raw` | 848×800 |
-| ELP L / R (rolling shutter) | 25 | `/elp/split_sync_image_node/{left,right}/image_raw` | 640×480 |
+| AprilGrid | `apriltag` | `rows`, `cols`, `tag_size` (m), `tag_spacing` (ratio), `tag_family` | `apriltag` |
+| Chessboard | `chessboard` | `rows`, `cols` (inner corners), `square_size` (m) | — |
+| ArUco | `aruco` | `rows`, `cols`, `marker_size`, `marker_separation`, `aruco_dict` | `aruco` |
+
+A Kalibr AprilGrid target YAML loads in Python with
+`mvis.detection.apriltag_board.AprilTagBoard.from_kalibr_yaml`; in a config,
+copy its values into `board:`.
+[Set up the board](/guides/board-setup/) covers printing and measuring it.
+
+## What the recording needs
+
+- **The board in view:** in every camera, filling the image from centre to
+  corners, near and far, at many tilts.
+- **Overlap between cameras:** for camera extrinsics, cameras must see the
+  board at the same time in part of the recording.
+- **Motion for the IMU:** rotation about all three axes and acceleration
+  along all three. Without it, the IMU intrinsics, lever arm and time offset
+  stay weakly pinned ([Degeneracy](/concepts/degeneracy/)).
+- **Timestamps:** every image and IMU sample needs a timestamp. MVIS solves
+  the offsets between clocks; it cannot recover missing stamps.
+
+[Record the dataset](/guides/calibration-motion/) gives the motion pattern step
+by step. The `mvis inspect` command reports what a recording holds before you
+solve.

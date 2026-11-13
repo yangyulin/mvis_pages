@@ -50,11 +50,12 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     <h1>OpenMVIS</h1>
     <p class="mh-sub">Open-source <em>multi-visual-inertial</em> <span class="mh-nw">system calibration</span></p>
     <div class="mh-actions">
-      <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
+      <a class="mh-btn mh-primary" href="/getting-started/overview/">Get started
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
       </a>
-      <a class="mh-btn mh-ghost" href="/benchmark/results/">Results</a>
+      <a class="mh-btn mh-ghost" href="/benchmark/results/">Leaderboard</a>
       <a class="mh-btn mh-ghost" href="/benchmark/examples/">Examples</a>
+      <a class="mh-btn mh-ghost" href="/devices/">Device wiki</a>
     </div>
   </div>
 
@@ -71,10 +72,10 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
   <ul class="mh-tiles" id="mhTiles" aria-label="Detections in each camera"></ul>
 
   <div class="mh-cta-phone">
-    <a class="mh-btn mh-primary" href="/getting-started/quickstart/">Get started
+    <a class="mh-btn mh-primary" href="/getting-started/overview/">Get started
       <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h9m-3.5-3.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
     </a>
-    <div class="mh-links"><a href="/benchmark/results/">Results</a><a href="/benchmark/examples/">Examples</a></div>
+    <div class="mh-links"><a href="/benchmark/results/">Leaderboard</a><a href="/benchmark/examples/">Examples</a><a href="/devices/">Device wiki</a></div>
   </div>
 
   <div class="mh-bar">
@@ -231,7 +232,7 @@ const cycleLabel = `Cycling through ${countWords[rigs.length] ?? rigs.length} re
     .mh .mh-sub { font-size: 20px; margin-top: 10px; }
     .mh-cta-phone { display: grid; gap: 4px; padding: 14px var(--mh-gutter) 0; }
     .mh-cta-phone .mh-primary { width: 100%; min-height: 48px; font-size: 16px; }
-    .mh-links { display: flex; justify-content: center; gap: 24px; }
+    .mh-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 20px; }
     .mh-links a { color: var(--mh-ink); text-decoration: none; font-size: 15px; font-weight: 500; min-height: 44px; display: inline-flex; align-items: center; }
     .mh-links a:hover { color: var(--mh-sky); }
     .mh-bar { padding: 10px var(--mh-gutter) 4px; border-top: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; }

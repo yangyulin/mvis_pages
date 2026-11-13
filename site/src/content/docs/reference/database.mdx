@@ -1,43 +1,74 @@
 ---
 title: The capture database
-description: The .mvisdb file behind every run — the one-container object model, the run overlay, and its on-disk SQL form.
+description: The .mvisdb file behind every run — what it holds, where it lives, and its tables.
 pageType: reference
 wide: true
 ---
 
-Use this page to understand the `.mvisdb` file behind every MVIS run. It covers
-the in-memory object model, the run overlay and the SQL form on disk.
+Use this page to understand the `.mvisdb` file behind every MVIS run:
+what it holds, where it lives and how to read it.
 
-Every MVIS run works out of a single SQLite file per capture: the `.mvisdb`.
-It has two parts:
+A `.mvisdb` file is one SQLite database per recording. It has two parts:
 
-- **Capture core:** sealed and content-hashed (tagged with a hash of its
-  contents). It holds everything expensive: board detections and full IMU
-  streams.
-- **Overlay:** one per `run_id`, written by each solve and disposable. It
-  records every decision and every estimate. Decisions are which frames,
-  boards and corners were used, and why the rest were excluded.
+- **Capture core:** the expensive data, board detections and the full IMU streams.
+  It is written once and then sealed with a hash of its contents.
+- **Run overlay:** one per run (`run_id`), written by each solve.
+  It records what the run used, why it left the rest out, and every estimate.
 
-What this gives us:
+What this gives you:
 
-- **Deleting a run** cascades its whole story away.
-- **The core** is never touched after sealing. So detection work is paid
-  once per recording.
+- **Detection runs once.** A second solve of the same frames with the same board reuses the sealed core, whatever its solve settings.
+- **Deleting a run** deletes its whole overlay and leaves the core alone.
+- **Every result can say why.** Each frame, board pose and corner the solve left out carries an
+  `exclude_reason` and the stage that excluded it.
 
-## Design view — the one container
+## Where it lives
 
-This is the in-memory object model the pipeline actually touches. There is one
-`MVISDatabase` per capture. One run's overlay is folded into it as inline flags.
+| Run | File |
+|---|---|
+| `mvis cam` | `detections.mvisdb` in the run folder (`-o`). Clearing the run folder keeps it |
+| `mvis cam-imu` | One file per recording in `input.cache_dir`. Without `cache_dir` there is no cache |
+
+The cache is keyed on the recording (source, topics or folders, time window) and the board
+definition, including the detector settings. Two runs that read different topics or windows of
+one bag never share an entry.
+
+:::caution[New detector code needs a fresh cache]
+The key does not include the MVIS version. If you update MVIS and want to compare detection,
+delete the cache first; otherwise the new version reuses the old detections.
+:::
+
+## Read it from Python
+
+```python
+from mvis.mvisdb.manager import DatabaseManager
+
+db = DatabaseManager()
+path = "results/run/detections.mvisdb"
+print(db.capture_info(path))           # name and hashes of the recording
+print(db.runs(path))                   # the runs stored, oldest first
+capture = db.load(path, run_id=db.latest_solved_run_id(path))
+print(len(capture.streams), "cameras,", len(capture.imus), "IMUs")
+```
+
+`load` returns one `MVISDatabase` with that run's overlay folded into the objects,
+so pipeline code never sees SQL.
+Any SQLite client can also open the file directly.
+
+## The object model
+
+This is the in-memory structure. There is one `MVISDatabase` per recording,
+with one run's overlay folded in as flags.
 
 How to read the diagram:
 
-- **Annotations** are on the right.
+- **Notes** are on the right.
 - <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> fields are computed, never stored.
-- **D-numbers** reference internal design decisions.
-- **PK** marks the primary key (the field that identifies each entry).
+- **PK** marks the primary key, the field that identifies each entry.
+- <span style="color:#b98a2e">Amber</span> field names are the run's flags and results, stored in the overlay.
 
 <div style="background:var(--sl-color-gray-6);border:1px solid var(--sl-color-gray-5);border-radius:10px;padding:18px 20px;overflow-x:auto">
-<pre style="margin:0;font-size:12.5px;line-height:1.72;background:none;border:none;padding:0"><span style="color:var(--sl-color-gray-3);opacity:.55"></span><span style="color:var(--sl-color-accent-high);font-weight:600">MVISDatabase</span>                            <span style="color:var(--sl-color-gray-3)">the one container (<span style="color:#b98a2e">D55</span>) — live run or loaded via capture.load(run_id) · flags <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">INLINE</span> (<span style="color:#b98a2e">D53</span>) · overlay tables = its on-disk form</span>
+<pre style="margin:0;font-size:12.5px;line-height:1.72;background:none;border:none;padding:0"><span style="color:var(--sl-color-gray-3);opacity:.55"></span><span style="color:var(--sl-color-accent-high);font-weight:600">MVISDatabase</span>                            <span style="color:var(--sl-color-gray-3)">one capture: a live run, or one read back with DatabaseManager().load(path, run_id)</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> streams: list[<span style="color:var(--sl-color-accent-high);font-weight:600">CameraStream</span>]              <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> camera_id — the number you wrote in the YAML</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>   <span style="color:var(--sl-color-gray-3)">├─ camera_id · topic · source_type · source_path</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>   <span style="color:var(--sl-color-gray-3)">├─ info: <span style="color:var(--sl-color-accent-high);font-weight:600">CameraInfo</span></span>
@@ -48,18 +79,16 @@ How to read the diagram:
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>       <span style="color:var(--sl-color-gray-3)">├─ frame_id · camera_id · timestamp</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#b98a2e">is_motion_still</span> · <span style="color:#b98a2e">is_selected_to_use</span></span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">is_valid_to_use</span> = OR over every group below</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       ├─</span> board_detections: list[<span style="color:var(--sl-color-accent-high);font-weight:600">BoardDetection</span>]   <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">ONE PER BOARD SEEN</span> · <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> (frame_id, board_id)</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ board_id</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> n_detections · n_tags · detect_status</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ pose_cam_to_board: <span style="color:var(--sl-color-accent-high);font-weight:600">PoseCamToBoard</span>&#123;T, source&#125; · <span style="color:#b98a2e">is_valid_to_use</span></span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>   <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">is_selected_to_use</span> = frame.selected AND own selection</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │   └─</span> detections: list[<span style="color:var(--sl-color-accent-high);font-weight:600">TagDetection</span>]       <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> (frame_id, board_id, point_id)</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">├─ point_id · uv · detector_emission_order</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> tag_id · corner_id · row = int(uv[1])</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#b98a2e">is_valid</span> · <span style="color:#b98a2e">is_selected</span> · <span style="color:#b98a2e">exclude_reason</span></span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       │</span>       <span style="color:var(--sl-color-gray-3)">└─ residual: <span style="color:var(--sl-color-accent-high);font-weight:600">Residual</span>&#123;<span style="color:#b98a2e">residual_px</span>, <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">residual_source</span>&#125;</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       ├─</span> tag_feature_detections                       <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">TODO</span></span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│       └─</span> free_feature_detections                      <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">TODO</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│       └─</span> board_detections: list[<span style="color:var(--sl-color-accent-high);font-weight:600">BoardDetection</span>]   <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">ONE PER BOARD SEEN</span> · <span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> (frame_id, board_id)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>   <span style="color:var(--sl-color-gray-3)">├─ board_id</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>   <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> n_detections · n_tags · detect_status</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>   <span style="color:var(--sl-color-gray-3)">├─ pose_cam_to_board: <span style="color:var(--sl-color-accent-high);font-weight:600">PoseCamToBoard</span>&#123;T, source&#125; · <span style="color:#b98a2e">is_valid_to_use</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>   <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">is_selected_to_use</span> = frame.selected AND own selection</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│           └─</span> detections: list[<span style="color:var(--sl-color-accent-high);font-weight:600">TagDetection</span>]       <span style="color:var(--sl-color-gray-3)"><span style="color:#b98a2e;font-weight:600;font-size:11px;letter-spacing:.03em">PK</span> (frame_id, board_id, point_id)</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>       <span style="color:var(--sl-color-gray-3)">├─ point_id · uv · detector_emission_order</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> tag_id · corner_id · row = int(uv[1])</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>       <span style="color:var(--sl-color-gray-3)">├─ <span style="color:#b98a2e">is_valid</span> · <span style="color:#b98a2e">is_selected</span> · <span style="color:#b98a2e">exclude_reason</span></span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│        </span>       <span style="color:var(--sl-color-gray-3)">└─ residual: <span style="color:var(--sl-color-accent-high);font-weight:600">Residual</span>&#123;<span style="color:#b98a2e">residual_px</span>, <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> <span style="color:#b98a2e">residual_source</span>&#125;</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> boards: dict[int, <span style="color:var(--sl-color-accent-high);font-weight:600">Board</span>]                 <span style="color:var(--sl-color-gray-3)"><span style="color:var(--sl-color-accent-high);font-weight:600">Board</span> = &#123;<span style="color:var(--sl-color-accent-high);font-weight:600">BoardInfo</span>, [<span style="color:var(--sl-color-accent-high);font-weight:600">BoardPt</span>]&#125;</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│   ├─</span> info: <span style="color:var(--sl-color-accent-high);font-weight:600">BoardInfo</span>   <span style="color:var(--sl-color-gray-3)">board_type · rows · cols · cell_size_m · gap_m · tag_family · start_id · corners_per_tag · config_hash</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│   │</span>                     <span style="color:var(--sl-color-gray-3)"><span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> is_kalibr_tag · num_tags · num_points</span>
@@ -71,39 +100,31 @@ How to read the diagram:
 <span style="color:var(--sl-color-gray-3);opacity:.55">│   └─</span> meas: <span style="color:var(--sl-color-accent-high);font-weight:600">ImuMeasurements</span>   <span style="color:var(--sl-color-gray-3)">t_gyro · gyro · t_accel · accel   <span style="color:#8b7ce0;font-style:italic">⟨derived⟩</span> synchronized</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> rig: <span style="color:var(--sl-color-accent-high);font-weight:600">Rig</span>   <span style="color:var(--sl-color-gray-3)">base_camera_id · base_imu_id · sync_kind · sync_tolerance_s</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>                <span style="color:var(--sl-color-gray-3)"><span style="color:#8b7ce0;font-style:italic">⟨derived, per run⟩</span> reference_stream = (imu, base_imu_id) if cam_imu else (cam, base_camera_id)</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> estimate_states: <span style="color:var(--sl-color-accent-high);font-weight:600">EstimateStates</span> | None   <span style="color:var(--sl-color-gray-3)">the estimate side of THIS run — a projection, zero new tables</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>reference_stream: (cam, base_camera_id) | (imu, base_imu_id)   <span style="color:var(--sl-color-gray-3)">keyed on run.calib_choice</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>state_hz                                     <span style="color:var(--sl-color-gray-3)">the reference stream&#x27;s knot rate</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">├─</span> estimate_states: <span style="color:var(--sl-color-accent-high);font-weight:600">EstimateStates</span> | None   <span style="color:var(--sl-color-gray-3)">this run's estimates, read from the run overlay</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>reference_stream: (cam, base_camera_id) | (imu, base_imu_id)   <span style="color:var(--sl-color-gray-3)">the stream the states follow: camera in camera-only runs, base IMU in camera–IMU runs</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>state_hz                                     <span style="color:var(--sl-color-gray-3)">rate of the states (Hz)</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>     <span style="color:var(--sl-color-gray-3)">base_state: <span style="color:var(--sl-color-accent-high);font-weight:600">CamOnly</span>&#123;t, T_cam_to_board (F,7)&#125; | <span style="color:var(--sl-color-accent-high);font-weight:600">CamImu</span>&#123;t, T_imu_to_world (K,7), v, b_g, b_a&#125;</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>sensor_states[]: <span style="color:var(--sl-color-accent-high);font-weight:600">SensorState</span>                 <span style="color:var(--sl-color-gray-3)">one per sensor — reference included (its factor_hz, relative = None)</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>        <span style="color:var(--sl-color-gray-3)">sensor · factor_hz · relative&#123;T_x_to_ref · td_x_to_ref_s · provenance&#125;</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">│</span>        <span style="color:var(--sl-color-gray-3)">· intrinsics: <span style="color:var(--sl-color-accent-high);font-weight:600">Camera</span>&#123;fxfycxcy · dist · model · readout · provenance&#125; | <span style="color:var(--sl-color-accent-high);font-weight:600">Imu</span>&#123;xi24 · model · provenance&#125;</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>boards[board_id]: T_board_to_world (7,)      <span style="color:var(--sl-color-gray-3)">one per board, from state_var — cam-IMU only</span>
-<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>world_frame                                  <span style="color:var(--sl-color-gray-3)">the yaw gauge; None in cam-only — the board IS the reference</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>boards[board_id]: T_board_to_world (7,)      <span style="color:var(--sl-color-gray-3)">one per board — camera–IMU only</span>
+<span style="color:var(--sl-color-gray-3);opacity:.55">│     </span>world_frame                                  <span style="color:var(--sl-color-gray-3)">the gravity-aligned world frame; none in camera-only runs, where the board is the reference</span>
 <span style="color:var(--sl-color-gray-3);opacity:.55">└─</span> run_id: int | None                        <span style="color:var(--sl-color-gray-3)">every run field above resolves against this</span></pre>
 </div>
 
 ## On-disk form
 
-The same container serializes to three SQL layers:
+The same structure is stored in four groups of tables:
 
-| Layer | Tables | Notes |
+| Group | Tables | Notes |
 |---|---|---|
-| **Sealed capture core** | `capture`, `camera`, `imu`/`imu_meas`, `board`/`board_pt`, `rig`, `stereo_pair`, and the observation hierarchy `frame` → `board_detection` → `detection` | Corner arrays are packed float64 blobs. Immutable once `capture.content_hash` is set. |
-| **Run overlay** (per `run_id`, `ON DELETE CASCADE`) | `run`; the *selection story*: `frame_status`, `board_detection_status`, `detection_status`; the results: `result_camera`, `result_imu`, `extrinsic` | The selection story is sparse: only rows that differ from selected/valid are written. `extrinsic` holds every cam↔cam, cam↔IMU and IMU↔IMU edge with `T`, `td` (time offset), and sigmas in one table. |
-| **Trajectory** (camera-IMU runs) | `estimate_meta`, `state_knot`/`state_var`, `frame_bracket`, `world_frame` | `state_knot`/`state_var`: the state timeline and typed variables. `frame_bracket`: which knots bracket each frame and at what interpolation factor. `world_frame`: the gravity-aligned convention. |
+| **Meta** | `schema_meta` | Schema version and when the file was created |
+| **Capture core** | `capture`, `camera`, `imu` / `imu_meas`, `board` / `board_pt`, `rig`, `stereo_pair`, and the observations `frame` → `board_detection` → `detection` | Corner and IMU arrays are packed float64 blobs. Sealed once `capture.content_hash` is set |
+| **Run overlay** (per `run_id`) | `run`; the selection: `frame_status`, `board_detection_status`, `detection_status`; the results: `result_camera`, `result_imu`, `extrinsic` | The selection tables store only rows that differ from "selected and valid". `extrinsic` holds every camera–camera, camera–IMU and IMU–IMU transform with its `T`, time offset and sigmas |
+| **Trajectory** (camera–IMU runs) | `estimate_meta`, `state_knot` / `state_var`, `frame_bracket`, `world_frame` | `state_knot` / `state_var`: the state timeline and its variables. `frame_bracket`: which two states bracket each frame, and where. `world_frame`: the gravity-aligned world |
 
-`ON DELETE CASCADE` means deleting a run also deletes all of its overlay rows.
+Every overlay table uses `ON DELETE CASCADE`: deleting a `run` row deletes all of its overlay rows.
 
-The status tables mirror the core hierarchy one-for-one. This makes two things
-cheap:
-
-- the write-through selection ledger
-- the consistency checks between the working set and the stored flags
-
-Loading folds one run's overlay back onto the objects above. So pipeline code
-never sees SQL.
-
-The selection story also powers the run audit. Every excluded frame, board
-pose and corner carries its `exclude_reason` and stage. So a calibration
-result can always answer "why was this observation not used?".
+The status tables mirror the core tables one for one.
+That keeps two things cheap: recording each selection decision as it is made,
+and checking the stored flags against the data the solve used.

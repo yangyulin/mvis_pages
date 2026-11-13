@@ -6,253 +6,350 @@ wide: true
 ---
 
 Use this page to look up every `mvis` subcommand and its flags.
-The `pymvis` package installs one entry point, `mvis`, with eleven subcommands.
+MVIS installs one command, `mvis`, with ten subcommands.
 
-Everything is config-driven:
-
-- **Flags** select *what* to run.
-- **The YAML** config file says *how*.
+- **Flags** choose *what* to run and where the output goes.
+- **The YAML config** says *how* to calibrate. Its keys are on
+  [Configuration](/reference/configuration/).
 
 ```bash
-mvis --help
+mvis --help          # list the subcommands
+mvis --version       # print the MVIS version
+mvis cam-imu --help  # flags of one subcommand
 ```
 
-| Subcommand | Purpose |
-|---|---|
-| [`calibrate`](#calibrate) | Run calibration |
-| [`cam`](#cam) | Camera-only calibration from a `CamRunConfig` YAML |
-| [`cam-imu`](#cam-imu) | Joint camera–IMU calibration |
-| [`apply-calib`](#apply-calib) | Apply a calibration to a raw bag → corrected bag |
-| [`roundtrip`](#roundtrip) | calibrate → apply-calib → recalibrate → PASS/FAIL report |
-| [`run`](#run) | Run calibration, dispatching on the config type |
-| [`inspect`](#inspect) | Inspect a dataset before writing a config |
-| [`check`](#check) | Lint the environment and/or a run config before solving |
-| [`verdict`](#verdict) | Grade a finished result GREEN / YELLOW / RED |
-| [`datasets`](#datasets) | List, download and verify the dataset catalog |
-| [`analyze`](#analyze) | Analyse calibration results |
-
-:::note[Hand-written, and therefore able to drift]
-Generating this page from the parsers is on the [roadmap](/about/roadmap/).
-Until then `mvis <subcommand> --help` is authoritative.
+:::note[Checked against MVIS 0.1.0]
+We wrote this page by hand and checked it against the `--help` output of MVIS 0.1.0.
+If the two disagree, `mvis <subcommand> --help` is right.
 :::
 
-## `calibrate`
+| Subcommand | What it does |
+|---|---|
+| [`run`](#run) | Calibrate from any config; the config's `mode:` picks camera-only or camera–IMU |
+| [`cam`](#cam) | Camera-only calibration |
+| [`cam-imu`](#cam-imu) | Joint camera–IMU calibration |
+| [`calibrate`](#calibrate) | Older camera-only path for flat configs |
+| [`apply-calib`](#apply-calib) | Apply a camera–IMU calibration to a raw ROS1 bag and write a corrected bag |
+| [`roundtrip`](#roundtrip) | Calibrate, apply, recalibrate and report PASS or FAIL |
+| [`check`](#check) | Check the installation and lint a config before a solve |
+| [`inspect`](#inspect) | Summarise a recording: format, streams, rates, overlap |
+| [`verdict`](#verdict) | Grade a finished result GREEN, YELLOW or RED |
+| [`datasets`](#datasets) | List, download and verify the benchmark datasets |
 
-Camera calibration from a config file.
+## A typical session
 
 ```bash
-mvis calibrate --config config.yaml
+mvis inspect recording.bag     # can MVIS read it, and which modes?
+mvis check -c config.yaml      # is the config valid, are the extras installed?
+mvis run -c config.yaml        # calibrate
+mvis verdict result.json       # grade the result
 ```
 
-| Flag | Description |
-|---|---|
-| `--config`, `-c` | Path to the calibration config YAML |
+## Exit codes
 
-Config schema: [Configuration](/reference/configuration/).
+| Subcommand | `0` | `1` | `2` |
+|---|---|---|---|
+| `check`, `inspect` | pass | warn | fail |
+| `verdict` | GREEN | YELLOW | RED |
+| `roundtrip` | PASS | FAIL | invalid config or arguments |
+| `datasets` | every file OK | a file is missing or fails its check | invalid arguments |
+| `cam`, `run` (`mode: cam`) | solved | the solve failed | invalid arguments |
+
+`cam` and `cam-imu` exit `3` when the stored result does not match the files they wrote.
+That is an internal consistency check; please report it as a bug.
+
+`cam-imu` prints its summary JSON whether or not the solve succeeded.
+Read `ok` in that JSON, or grade it with [`verdict`](#verdict).
+
+## `run`
+
+Calibrate from one config file.
+The top-level `mode:` key picks the pipeline:
+
+- **`mode: cam`** (the default when `mode:` is absent): runs [`cam`](#cam).
+- **`mode: cam-imu`:** runs [`cam-imu`](#cam-imu) and prints its summary JSON.
+
+```bash
+mvis run -c config.yaml
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | required | Run config YAML |
 
 ## `cam`
 
-Camera-only calibration driven by a `CamRunConfig` YAML.
-This is the run-oriented variant. The batch and regression harnesses use it.
+Camera-only calibration: intrinsics, distortion, extrinsics between cameras,
+camera–camera time offsets and rolling-shutter readout.
+It reads both config shapes, the flat one and the sectioned one
+(see [Camera-only config](/reference/configuration/#camera-only-config)).
 
 ```bash
-mvis cam --config example_cam_run.yaml
+mvis cam -c t265/cam.yaml
+mvis cam -c t265/cam.yaml -o results/run    # writes results/run/t265_cam_calib.yaml
 ```
 
-| Flag | Description |
-|---|---|
-| `--config`, `-c` | Path to the `CamRunConfig` YAML |
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | required | Camera-only config YAML |
+| `-o`, `--output` | `<output_file folder>/ablation` | Run folder for the report, log and detection cache. By default a folder named `ablation` next to `output_file` |
+
+The run folder is cleared before the solve, except its caches.
+MVIS clears only a folder it created; it refuses any other folder that already exists.
+The run folder holds `<name>_calib.yaml`, `<name>_full.yaml`, `<name>.html`,
+`<name>.log` and `detections.mvisdb`.
+`<name>` is `<config folder>_<config file name>`.
+The result is also written to the config's `output_file`.
+See [Result formats](/reference/result-formats/).
 
 ## `cam-imu`
 
 Joint camera–IMU calibration. It estimates:
 
-- **Extrinsics** `T_CtoI`: the pose of the camera relative to the IMU
-- **Time offset** `td` between the camera and IMU clocks
-- **Rolling-shutter readout:** the time the sensor takes to read out one image
-- **IMU intrinsics**
-- **Biases**
+- **Extrinsics:** `T_CtoI`, the pose of each camera in the base IMU frame.
+  The base IMU is the first entry of `input.imu_topics`.
+- **Time offset `td`:** between each camera clock and the base IMU clock.
+- **Rolling-shutter readout:** when `estimate.camera.tr` is on.
+- **Camera intrinsics:** when `estimate.camera.intrinsics` is on.
+- **IMU intrinsics:** gyro and accelerometer scale and misalignment (`Dw`, `Da`), optional `Tg`.
+- **Biases:** gyro and accelerometer.
+- **`t_ga`:** the base IMU's gyro-to-accelerometer time offset ([why](/why/tga/)).
+- **Auxiliary IMUs:** extrinsics, time offset and intrinsics of every further IMU.
 
 ```bash
-mvis cam-imu --config cam_imu.yaml
+mvis cam-imu -c cam_imu.yaml
+mvis cam-imu -c cam_imu.yaml --bag other_recording.bag
 ```
 
-| Flag | Description |
-|---|---|
-| `--config`, `-c` | Path to the cam-IMU config YAML |
-| `--bag` | Override the input bag from the config |
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | required | Camera–IMU config YAML |
+| `--bag` | from config | Use this ROS1 bag instead of the config's input. Sets `input.format: ros1` and `input.path` to the bag |
 
-You can calibrate a whole dataset family from one config.
-List several sequences under `input.bags`.
-Each is calibrated into its own discoverable `bag<NN>/cam_imu.json`.
+With `input.bags` the config calibrates many recordings in one call.
+Each one gets its own `bag<NN>/cam_imu.json` next to `output.path`.
+The command prints a JSON summary of the run.
 See [Camera–IMU calibration](/guides/camera-imu-calibration/).
+
+## `calibrate`
+
+The older camera-only path. It reads the flat config shape only and does not
+write the run folder, report or capture database that `mvis cam` writes.
+Use [`cam`](#cam) or [`run`](#run) for new work.
+
+```bash
+mvis calibrate -c config.yaml
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | required | Flat camera-only config YAML |
 
 ## `apply-calib`
 
-Apply a saved cam-IMU calibration back onto a raw ROS1 bag.
-The bag is re-recorded calibration-corrected.
+Apply a saved camera–IMU calibration to a raw ROS1 bag.
+It writes a corrected bag and a provenance file, `<output bag>.recalib.yaml`, that
+records the calibration, the topic mapping and which corrections ran.
+By default it applies every correction:
+
+1. **IMU intrinsics:** applies the inverse IMU model (`Dw`, `Da`, `Tg`) to every IMU.
+2. **Bias:** subtracts the calibrated static gyro and accelerometer bias.
+3. **`t_ga`:** re-samples the accelerometer at `t + t_ga`, when `t_ga` was calibrated.
+4. **`td`:** re-stamps every camera and auxiliary IMU message onto the base IMU clock, using the header stamp.
 
 ```bash
 mvis apply-calib -c recalib.yaml
 mvis apply-calib --calib cam_imu_calib.yaml --in raw.bag --out corrected.bag
+mvis apply-calib --calib cam_imu_calib.yaml --in raw.bag --no-td --keep-bias
 ```
 
-| Flag | Description |
-|---|---|
-| `-c`, `--config` | Config bundling `calib` / `input` / `output` |
-| `--calib` | Calibration result to apply |
-| `--in` | Raw input bag |
-| `--out` | Output bag; defaults to `<bag>.corrected.bag` |
-| `--map` | Explicit topic→sensor map. Rarely needed — the calib records each sensor's source topic, so the mapping is auto-derived |
-| `--keep-bias` | Do not remove the static bias |
-| `--undistort` | Also undistort images |
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | — | Config YAML with `calib`, `input`, `output` and the switches below. Flags override it |
+| `--calib` | config `calib` | Calibration to apply: the `_calib.yaml` that `mvis cam-imu` writes |
+| `--in` | config `input` | Raw input ROS1 bag |
+| `--out` | `<input>.corrected.bag` | Output bag. An existing bag is not overwritten |
+| `--map` | derived | YAML `{base_imu_topic, mapping: {topic: sensor}}`. Rarely needed: the calibration stores each sensor's topic |
+| `--keep-bias` | off | Keep the static IMU biases (config `remove_bias: false`) |
+| `--no-imu-intrinsics` | off | Skip the inverse IMU model; remove only the bias (config `imu_intrinsics: false`) |
+| `--no-t-ga` | off | Skip the accelerometer `t_ga` re-sampling (config `t_ga: false`) |
+| `--no-td` | off | Keep the original header and record stamps (config `td: false`) |
+| `--undistort` | off | Also undistort mono8 images (config `undistort: true`) |
+| `--strict` | off | Stop with an error instead of passing data through (config `strict: true`). See below |
 
-What it corrects and why: [Corrected-dataset
-export](/guides/roundtrip/#export-a-corrected-dataset).
+`--strict` rejects:
+
+- mapped topics that are missing or empty
+- messages of the wrong type
+- images it cannot undistort
+- duplicate IMU stamps on a topic that gets the `t_ga` correction
+- corrected IMU values that are not finite
+
+The bag is streamed, so memory does not grow with its size.
+Rolling-shutter rows are not unwarped; only the frame stamp moves.
+More in [Round-trip validation](/guides/roundtrip/), section "Export a corrected dataset".
 
 ## `roundtrip`
 
-End-to-end validation in four steps:
+End-to-end check of a camera–IMU calibration on a ROS1 bag:
 
-1. Calibrate.
-2. Apply the calibration to its own bag.
-3. Recalibrate the corrected bag.
-4. Report PASS/FAIL.
+1. Calibrate the bag.
+2. Apply the calibration to the same bag.
+3. Calibrate the corrected bag.
+4. Compare the two results and report PASS or FAIL.
 
-It exits non-zero on FAIL, so it works in CI.
+On the corrected bag, IMU intrinsics must move to identity and biases to zero,
+while extrinsics and the stereo baseline must stay the same.
+A remaining `td` is reported as a warning only.
 
 ```bash
 mvis roundtrip -c cam_imu.yaml
 ```
 
-| Flag | Description |
-|---|---|
-| `-c`, `--config` | Cam-IMU config to validate |
-| `--out` | Report output path |
-| `--bag` | Override the input bag |
-| `--keep-corrected` | Keep the corrected bag (auto-deleted otherwise) |
-| `--keep-bias` | Pass through to `apply-calib` |
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | required | Camera–IMU config YAML for a ROS1 bag |
+| `--out` | `results/roundtrip/<name>` | Output folder: `forward/cam_imu.json`, `recal/cam_imu.json`, `report.txt` (readable), `report.json` |
+| `--bag` | from config | Round-trip this ROS1 bag instead of the config's input |
+| `--keep-corrected` | off | Keep the corrected bag; it is deleted by default |
+| `--keep-bias` | off | Pass `--keep-bias` to `apply-calib` |
 
+It exits `1` on FAIL, so it works as a CI gate.
 What PASS means: [Round-trip validation](/guides/roundtrip/).
-
-## `run`
-
-Runs a calibration and dispatches on the config type.
-You do not have to pick the subcommand yourself.
-
-```bash
-mvis run --config any_config.yaml
-```
-
-| Flag | Description |
-|---|---|
-| `--config`, `-c` | Any MVIS config |
-
-## `inspect`
-
-Reads a dataset's metadata and a short sample of each stream, never the whole
-recording, and reports what a calibration needs to know: the container format,
-which MVIS modes can read it, the camera streams (rate, resolution, encoding),
-the IMU streams (rate, units, stamp order) and the camera/IMU time overlap.
-Every finding has a stable id and a status `pass`, `warn` or `fail`. Run it
-before writing a config.
-
-```bash
-mvis inspect /path/to/dataset
-mvis inspect recording.bag --json --out inspect.json
-```
-
-| Flag | Description |
-|---|---|
-| `path` | A ROS1 bag, EuRoC `mav0` folder, ROS2 bag or image folder |
-| `--json` | Machine-readable output |
-| `--out` | Also write the JSON report to this file |
-
-`inspect`, `check` and `verdict` are deterministic and exit with `0` (ok),
-`1` (warnings) or `2` (failure), so they work in scripts and CI.
 
 ## `check`
 
-Lints the installation and a run config before you spend time on a solve.
+Check the installation and lint a config before a solve.
+The solver accepts configs leniently and only logs unknown keys; `check` is strict.
+Each finding has a stable `id` and a status `pass`, `warn` or `fail`.
 
 ```bash
-mvis check --env --smoke        # verify the install, then run a short synthetic camera solve
-mvis check -c config.yaml       # lint a config (and the extras it needs)
+mvis check                    # check the installation
+mvis check --env --smoke      # also run a short synthetic camera solve
+mvis check -c config.yaml     # lint a config
+mvis check -c config.yaml --env --json
 ```
 
-| Flag | Description |
-|---|---|
-| `-c`, `--config` | Run config YAML to lint |
-| `--env` | Verify the installation; with `-c`, also the extras that config needs |
-| `--smoke` | Also run a short synthetic camera solve (implies `--env`) |
-| `--json` | Machine-readable output |
-| `--out` | Also write the JSON findings to this file |
+| Flag | Default | Meaning |
+|---|---|---|
+| `-c`, `--config` | — | Run config YAML to lint |
+| `--env` | on when no `-c` | Check the installation; with `-c`, also the optional extras that config needs (AprilGrid, ArUco, ROS bags) |
+| `--smoke` | off | Also run a short synthetic camera solve. Implies `--env` |
+| `--json` | off | Print JSON `{status, findings}` |
+| `--out` | — | Also write the JSON findings to this file |
+
+## `inspect`
+
+Summarise a recording before you calibrate it.
+It reads only metadata and a short sample of each stream.
+It reports:
+
+- the container format and which modes can read it (`cam`, `cam-imu`)
+- camera streams: rate, resolution, encoding
+- IMU streams: rate, unit sanity, stamp order
+- the time overlap of cameras and IMUs
+
+```bash
+mvis inspect recording.bag
+mvis inspect dataset/mav0 --json
+```
+
+| Argument | Default | Meaning |
+|---|---|---|
+| `path` | required | ROS1 bag, ROS2 bag folder (or one `.db3` / `.mcap` file), EuRoC `mav0` folder or image folder |
+| `--json` | off | Machine-readable output |
+| `--out` | — | Also write the JSON report to this file |
+
+ROS1 bags, ROS2 bags and EuRoC folders can feed both modes; image folders feed camera-only.
+`apply-calib` and `roundtrip` need a ROS1 bag.
 
 ## `verdict`
 
-Grades a finished result GREEN, YELLOW or RED. A verdict is a list of checks
-(reprojection error, IMU residuals and similar), each with a stable id, the
-measured value, its threshold and a status; RED if any check fails, YELLOW if
-any warns, GREEN otherwise. With a config whose `reference:` block is set, the
-result is also compared with those reference values. The solver's own `ok` flag
-is never taken as evidence of a good fit.
+Grade a finished result.
+Each check has a stable `id`, the measured value, its threshold and a status.
+The grade is RED if any check fails, YELLOW if any warns, GREEN otherwise.
+The checks cover:
+
+- reprojection error: median, P95, RMS
+- physical plausibility: focal aspect ratio, principal point, finite distortion
+- data: corner observations per camera
+- camera–IMU solves: solver status, iterations, `td`, IMU fit, IMU scale
+- with `-c`: lever arm and stereo baseline against the config's `reference:` block
 
 ```bash
-mvis verdict results/run/calibration_result.yaml
-mvis verdict results/run/cam_imu.json -c cam_imu.yaml --independent-check roundtrip
+mvis verdict results/run/t265_cam_calib.yaml
+mvis verdict cam_imu.json -c cam_imu.yaml --independent-check roundtrip
 ```
 
-| Flag | Description |
-|---|---|
-| `result` | Camera-only result YAML or cam-IMU summary JSON |
-| `-c`, `--config` | Cam-IMU run config; its `reference:` block is compared |
-| `--independent-check` | Verification you already ran: `none` (default), `roundtrip`, `holdout`, `repeatability` or `cross-tool` |
-| `--json` | Machine-readable output |
-| `--out` | Also write the JSON verdict to this file |
+| Argument | Default | Meaning |
+|---|---|---|
+| `result` | required | Camera-only result YAML or camera–IMU summary JSON |
+| `-c`, `--config` | — | Camera–IMU config whose `reference:` block is compared |
+| `--independent-check` | `none` | Independent check you already ran: `none`, `roundtrip`, `holdout`, `repeatability`, `cross-tool`. Recorded in the verdict |
+| `--json` | off | Print JSON |
+| `--out` | — | Also write the JSON verdict to this file |
+
+`verdict` never takes a solver's `ok: true` as proof of a good fit; see [Evaluation & metrics](/reference/evaluation/).
 
 ## `datasets`
 
-Lists, downloads, verifies and converts the recordings in the
-[dataset catalog](/reference/datasets/). Downloads go to `$MVIS_DATASETS`
-(default `~/Datasets`); every example config refers to them as
-`${MVIS_DATASETS}/...`. The VI-Rig sets are gated: accept the terms on the Hub
-and log in (`huggingface-cli login`, or set `HF_TOKEN`) before downloading.
+The catalog of benchmark datasets on Hugging Face
+([calibench-vi/datasets](https://huggingface.co/datasets/calibench-vi/datasets)).
+Files go to `$MVIS_DATASETS`, by default a `Datasets` folder in your home directory.
+The shipped example configs refer to them as `${MVIS_DATASETS}/...`.
+
+The VI-Rig sets are gated: accept the terms on the Hub page, then set
+`HF_TOKEN` to a read token (or run `hf auth login`, after `pip install huggingface_hub`) before you download.
+They are CC BY-NC 4.0; commercial use on request.
+See [Datasets](/datasets/).
 
 ```bash
 mvis datasets list
 mvis datasets list --dataset mvis_4imus_3cams
 mvis datasets download --select mvis_4imus_3cams/april_01    # about 7 GB
-mvis datasets verify --suite camera-imu
+mvis datasets download --selection smoke
+mvis datasets verify --dataset mvis_4imus_3cams
 ```
 
-| Argument | Description |
+`mvis_4imus_3cams` is the catalog key of [VI-Rig 4 IMUs + 3 cams](/datasets/virig-4imus-3cams/).
+
+| Action | What it does |
 |---|---|
-| `action` | `list`, `download`, `verify`, `convert`, `upload` or `export-recipes` |
-| `--dataset` | One dataset key |
-| `--select` | Repeatable `DATASET[/SEQUENCE]` selection |
-| `--selection` | A built-in selection name (such as `smoke`) or a JSON file mapping dataset → sequences |
-| `--suite` | Restrict to one suite: `camera-only` or `camera-imu` |
-| `--mcap` | `convert`: also emit a ROS2/MCAP twin per produced bag |
-| `--dry-run` | `upload`: print the plan without pushing anything |
-| `--out` | `export-recipes`: output directory (default `recipes`) |
+| `list` | Print each dataset with its licence, and each sequence with its size and URL |
+| `download` | Download and checksum the chosen sequences |
+| `verify` | Check the local files' sizes and checksums |
+| `convert` | Convert a third-party dataset from its native format to ROS1 bags |
+| `export-recipes` | Write stand-alone conversion scripts for datasets that cannot be re-hosted |
+| `upload` | Maintainers only: push converted bags to the Hub |
 
-## `analyze`
+| Flag | Default | Meaning |
+|---|---|---|
+| `--dataset` | all | One dataset key, for example `mvis_4imus_3cams` |
+| `--select` | — | `DATASET` or `DATASET/SEQUENCE`; repeat it to pick several |
+| `--selection` | — | A built-in selection (`smoke`: one sequence from each of eight datasets, VI-Rig `april_01` first) or a JSON file `{dataset: [sequences]}` |
+| `--suite` | all | Only the sequences of one test suite: `camera-only` or `camera-imu` |
+| `--allow-unverified` | off | `download`: also fetch files the catalog has no checksum for |
+| `--mcap` | off | `convert`: also write a ROS2 MCAP copy of each bag |
+| `--out` | `recipes` | `export-recipes`: output folder |
+| `--dry-run` | off | `upload`: print the plan only |
 
-Analyse existing calibration results.
+## Environment variables
 
-```bash
-mvis analyze --results results/regression/dataset/run/
-```
+| Variable | Default | Meaning |
+|---|---|---|
+| `MVIS_DATASETS` | `Datasets` in your home directory | Where `mvis datasets` puts files; `${MVIS_DATASETS}` in configs expands to it |
+| `MVIS_BLAS_THREADS` | `1` | BLAS threads for the process. `0` keeps the library default. An exported `OPENBLAS_NUM_THREADS`, `OMP_NUM_THREADS` or `MKL_NUM_THREADS` is never overridden |
+| `MVIS_EIGEN_CACHE_CPU` | lowest allowed CPU | CPU whose cache sizes the linear algebra uses, so a solve does not depend on which core it starts on. `off` reads them wherever the first product runs |
 
-| Flag | Description |
-|---|---|
-| `--results`, `-r` | Results directory to analyse |
+The `mvis` command uses one BLAS thread because the solvers run many small matrix
+products in Python. Extra threads only spin, and results can change with the thread count.
+`import mvis` as a library leaves these settings alone.
 
-## Scripts
+## Scripts in the repository
 
-These are not subcommands, but they are part of the everyday surface:
+These ship in the source repository, not as subcommands:
 
-| Script | Purpose |
+| Script | What it does |
 |---|---|
 | `scripts/setup_env.sh` | One-step conda setup; see [Installation](/getting-started/installation/) |
 | `scripts/test.sh <tier>` | Run the tests by tier: `unit`, `solver`, `integration` or `full`; extra arguments go to pytest |

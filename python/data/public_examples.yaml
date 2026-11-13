@@ -30,7 +30,7 @@ examples:
       - [Format, "ROS1 bag"]
       - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on recording april_01: every camera and all four IMUs solved together."
-    dataset: {url: /reference/datasets/virig-4imus-3cams/, label: VI-Rig 4 IMUs + 3 cams dataset page}
+    dataset: {url: /datasets/virig-4imus-3cams/, label: VI-Rig 4 IMUs + 3 cams dataset page}
     eval: {slug: virig-4imus-3cams, label: All 10 recordings and three tools}
     data:
       - "Recording april_01, one of the 10 recordings of this rig. MVIS picks the 80 s window with the most motion."
@@ -72,7 +72,7 @@ examples:
       - [Format, "ROS1 bag"]
       - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on recording 4imus_4cams_01: all four cameras and all four IMUs solved together."
-    dataset: {url: /reference/datasets/virig-4imus-4cams/, label: VI-Rig 4 IMUs + 4 cams dataset page}
+    dataset: {url: /datasets/virig-4imus-4cams/, label: VI-Rig 4 IMUs + 4 cams dataset page}
     eval: {slug: virig-4imus-4cams, label: All 15 recordings and tools}
     data:
       - "Recording 4imus_4cams_01, one of the 15 recordings of this rig. MVIS picks the 80 s window with the most motion."
@@ -114,7 +114,7 @@ examples:
       - [Format, "ROS1 bag"]
       - [Licence, "CC BY-NC 4.0"]
     lead: "One MVIS camera + IMU run on recording 5imus_4cams_01: all four cameras and all five IMUs solved together."
-    dataset: {url: /reference/datasets/#hosted--vi-rig-captures, label: VI-Rig datasets}
+    dataset: {url: /datasets/virig-5imus-4cams/, label: VI-Rig 5 IMUs + 4 cams dataset page}
     eval: {slug: virig-5imus-4cams, label: All 7 recordings}
     data:
       - "Recording 5imus_4cams_01, one of the 7 recordings of this rig. It is about 59 s long, shorter than the 80 s window MVIS asks for, so the whole recording is used."

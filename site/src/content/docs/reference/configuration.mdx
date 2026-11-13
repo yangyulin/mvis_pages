@@ -5,189 +5,394 @@ pageType: reference
 wide: true
 ---
 
-Use this page to look up any key in an MVIS config file. MVIS is
-config-driven: one YAML file describes the board, the inputs and the solve.
-There are two config shapes:
+Use this page to look up any key in an MVIS config file.
+One YAML file describes the board, the inputs and the solve.
+There are two config types:
 
-- **Camera-only:** calibrates the cameras alone
-- **Camera–IMU:** adds an IMU (inertial measurement unit: gyroscope and
-  accelerometer) to a calibrated camera rig
+- **Camera-only** (`mode: cam`): calibrates the cameras alone.
+- **Camera–IMU** (`mode: cam-imu`): adds one or more IMUs (inertial measurement units:
+  gyroscope and accelerometer) to a camera rig.
 
-For the commands that read these files, see the
-[CLI reference](/reference/cli/).
+`mvis run` reads `mode:` to pick the pipeline; `mvis cam` and `mvis cam-imu` ignore it.
+For the commands, see the [CLI reference](/reference/cli/).
 
-:::note[Hand-written, and therefore able to drift]
-Generating this page from the config dataclasses is on the
-[roadmap](/about/roadmap/). Where this page disagrees with the shipped
-`examples/configs/`, the examples win.
+:::note[Checked against MVIS 0.1.0]
+We wrote this page by hand from the MVIS 0.1.0 config code.
+Run `mvis check -c config.yaml` to lint a file: the solver only logs an unknown key and goes on,
+`check` reports it.
+:::
+
+## Rules for every config
+
+- **Paths:** `${VAR}` expands to the environment variable and a leading `~` to your home folder.
+  `${MVIS_DATASETS}` defaults to a `Datasets` folder in your home directory.
+- **Units:** lengths in metres, times in seconds, angles in radians, unless a key says otherwise.
+- **Unknown keys:** logged as a warning and ignored.
+- **Aliases:** `target_hz` is read as `factor_hz`; `sigma_px` and `pixel_sigma` are read as each other;
+  `pin_tr: true` is read as `estimate_readout: false`.
+- **Camera models:** `radtan`, `equidistant`, `kb4`, `fov`, `double_sphere`, `eucm`, `ucm`,
+  `omni_radtan` (experimental). `fisheye` and `kannala_brandt` mean `kb4` ([why](/why/kb4/)).
+  See [Camera model](/concepts/camera-model/).
+
+## `board`
+
+The calibration target. Both config types use the same block.
+
+| Key | Default | For | Meaning |
+|---|---|---|---|
+| `board_type` | `chessboard` | all | `apriltag` (AprilGrid), `chessboard` or `aruco` |
+| `rows`, `cols` | `9`, `6` | all | Tag rows and columns; **inner corners** for a chessboard |
+| `tag_size` | `0.02` | apriltag | Tag edge length (m) |
+| `tag_spacing` | `0.005` | apriltag | Gap between tags. Below 1 it is a fraction of `tag_size` (Kalibr's convention); 1 or more is metres |
+| `tag_family` | `t36h11` | apriltag | AprilTag family |
+| `square_size` | `0.025` | chessboard | Square edge length (m) |
+| `marker_size` | `0.02` | aruco | Marker edge length (m) |
+| `marker_separation` | `0.005` | aruco | Gap between markers (m) |
+| `aruco_dict` | `DICT_6X6_250` | aruco | OpenCV dictionary name |
+| `heights_file` | none | camera–IMU | Start values for the board shape: one height per corner. The `<output>_board_shape.yaml` of an earlier camera–IMU run is a valid file. Camera-only runs do not read it |
+
+`board.detection` holds expert settings for the multi-scale AprilTag detector.
+The defaults suit most boards; leave it out unless detection misses tags.
+
+## `estimate`
+
+The `estimate:` block says what is solved and what is held fixed.
+Both config types read it.
+It wins over the older low-level keys it maps to (the parser warns when both are set).
+Leave a key out to keep the default.
+
+```yaml
+estimate:
+  camera:              # every camera; a camera entry can override with its own estimate:
+    intrinsics: true   # focal length and principal point
+    distortion: true   # distortion coefficients
+    tr: false          # rolling-shutter readout
+    td: true           # time offset
+    extrinsics: true   # camera pose in the rig
+  imu:                 # every IMU (camera–IMU only)
+    intrinsics: dw_da  # how much IMU intrinsics to solve
+    model: calyx       # which IMU model: kalibr | rpng | calyx
+    extrinsics: true   # auxiliary IMU pose in the base IMU frame
+    td: true           # auxiliary IMU time offset to the base IMU
+  board_points: false  # board shape: one height per corner
+```
+
+| Key | Default | Camera-only | Camera–IMU |
+|---|---|---|---|
+| `camera.intrinsics` | `true` | Solve the intrinsics | Refine the prior intrinsics; `false` pins them to `camera_input.path` |
+| `camera.distortion` | `true` | Not read: the solver always estimates distortion | Follows `camera.intrinsics` |
+| `camera.tr` | `false` | Not read: set `shutter_type: rolling` on the camera | Solve the readout of rolling-shutter cameras |
+| `camera.td` | camera-only `false`, camera–IMU `true` | Camera–camera time offsets (unsynchronised cameras) | Camera to base-IMU time offset |
+| `camera.extrinsics` | `true` | Not read: always estimated | Solve `T_CtoI` |
+| `imu.intrinsics` | `dw_da` | — | `pinned`, `dw_da` (scale and misalignment), `dw_da_r` (plus the gyro-to-accelerometer rotation), `full` (plus `Tg`); `true` = `full`, `false` = `pinned` |
+| `imu.model` | `calyx` | — | `kalibr`, `rpng` or `calyx`: a convention, see [IMU model](/concepts/imu-model/) |
+| `imu.extrinsics` | `true` | — | Solve each auxiliary IMU's pose in the base IMU frame |
+| `imu.td` | `true` | — | Solve each auxiliary IMU's time offset |
+| `board_points` | `false` | Solve one height per board corner | Same; one board only |
+
+A `false` on a camera–IMU key adds a very tight prior that holds the value at its start.
+Board heights carry a weak 3 mm prior (`solve.board_height_sigma` on camera–IMU).
+Their mean and the two tilts are held at zero, so the board pose keeps the plane.
+
+:::tip[VI-Rig: estimate the board shape]
+The VI-Rig AprilGrid is not flat. Set `estimate.board_points: true` in every VI-Rig
+config, camera-only and camera–IMU. Other boards keep the default unless you measured them
+non-flat. See [Board shape](/why/board-shape/).
 :::
 
 ## Camera-only config
 
-### `board`
+Two shapes are accepted. They mean the same thing.
 
-The calibration target. The "Required for" column says which board types need the key.
+| Flat shape | Sectioned shape |
+|---|---|
+| `cameras:` | `input.cameras:` |
+| — | `input.cache_dir:` |
+| `optimizer:` | `solve:` |
+| `output_file:` | `output.path:` |
+| `output_format:` | `output.format:` |
 
-| Key | Type | Required for | Description |
-|---|---|---|---|
-| `board_type` | `apriltag \| chessboard \| aruco` | all | Target family |
-| `rows`, `cols` | int | all | Tag rows/cols; **inner corners** for chessboard |
-| `tag_size` | float (m) | apriltag | Tag edge length |
-| `tag_spacing` | float | apriltag | Gap between tags as a fraction of `tag_size` |
-| `tag_family` | string | apriltag | e.g. `t36h11` |
-| `square_size` | float (m) | chessboard | Square edge length |
-| `marker_size` | float (m) | aruco | Marker edge length |
-| `marker_separation` | float (m) | aruco | Gap between markers |
-| `aruco_dict` | string | aruco | OpenCV dictionary name |
-| `heights_file` | path | optional | Start values for the board shape, one height per corner (a camera–IMU run's `<output>_board_shape.yaml`). Read by camera–IMU runs only; camera-only runs do not read it yet |
+`board:`, `estimate:`, `report:` and the [top-level keys](#top-level-keys) are the same in both.
+`mvis calibrate` reads only the flat shape.
 
 ### `cameras[]`
 
-One entry per camera in the rig.
+One entry per camera, under `cameras:` or `input.cameras:`.
 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `camera_id` | int | — | Index; `reference_camera` refers to it |
-| `name` | string | — | Label used in reports |
-| `source_type` | `images \| rosbag_topic \| ros2bag \| euroc \| timestamped_images \| video` | — | Input format |
-| `source_path` | path | — | Directory, bag, or EuRoC camera folder |
-| `topic` | string | — | Image topic — bag sources only |
-| `distortion_model` | `radtan \| kb4 \| equidistant \| double_sphere \| eucm \| ucm \| fov \| omni_radtan` | — | See [Camera model](/concepts/camera-model/). Fisheye: `kb4`, also selected by `fisheye` / `kannala_brandt` ([why](/why/kb4/)) |
-| `shutter_type` | `global \| rolling` | `global` | `rolling` enables readout calibration |
-| `factor_hz` | float | `0` | Subsample to this frame rate; `0` uses every frame |
+| Key | Default | Meaning |
+|---|---|---|
+| `camera_id` | `0` | Camera index; `reference_camera` refers to it |
+| `name` | empty | Label in reports |
+| `source_type` | `images` | `images`, `timestamped_images`, `rosbag_topic` (ROS1 bag), `ros2bag` or `euroc` |
+| `source_path` | empty | Image folder, ROS1 bag file, ROS2 bag folder (or one `.db3` / `.mcap` file) or EuRoC camera folder. For `timestamped_images`: `image_dir,timestamps.csv` |
+| `topic` | empty | Image topic; required for bag sources |
+| `distortion_model` | `radtan` | Camera model; models may differ between cameras of one rig |
+| `shutter_type` | `auto` | `global`, `rolling` or `auto` (treated as global). `rolling` estimates the readout |
+| `factor_hz` | `solve.factor_hz` | Frames per second used in the solve |
+| `initial_intrinsics` | none | Start values `[fx, fy, cx, cy]`, instead of the automatic first guess |
+| `initial_distortion` | none | Start values for the distortion coefficients |
+| `estimate` | none | Per-camera override of `estimate.camera` |
 
-Models may be **mixed across cameras** in one rig.
+Bag topics can be `sensor_msgs/Image` or PNG or JPEG `sensor_msgs/CompressedImage`.
+JPEG is lossy and can move corners, so MVIS warns once per topic.
+There is no video input: extract frames to an image folder first.
 
-### `optimizer`
+### `optimizer` / `solve`
 
-Settings for the joint solve. LM is the Levenberg–Marquardt least-squares
-solver.
+| Key | Default | Meaning |
+|---|---|---|
+| `max_iterations` | `200` | Levenberg–Marquardt (LM) iterations of the joint solve |
+| `max_init_frames` | `100` | Frames used for the first guess; `0` = no cap |
+| `init_frame_selection` | `uniform` | `uniform` (spaced in time) or `diverse` (spread over position, size and tilt) |
+| `factor_hz` | `5.0` | Frame rate for cameras without their own `factor_hz` |
+| `pixel_sigma` | `1.0` | Corner noise (px) |
+| `huber_threshold` | `1.345` | Huber robust-loss threshold |
+| `optimize_intrinsics` | `true` | Older form of `estimate.camera.intrinsics` |
+| `pnp_method` | `iterative` | First-guess pose solver: `iterative` or `ippe` (planar) |
+| `lm_lambda_lower`, `lm_lambda_upper` | `0`, `100` | LM damping bounds |
 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `max_iterations` | int | `15` | LM iterations for the joint solve |
-| `max_init_frames` | int | `100` | Cap on frames used for OpenCV init; `0` = no cap |
-| `pixel_sigma` | float | `1.0` | Observation noise, pixels |
-| `huber_threshold` | float | `1.345` | Huber robust-loss threshold |
+Four nested groups hold expert settings. Their defaults suit most rigs:
 
-### Top-level
+- **`frame_quality`:** detection gates, for example `min_tags_per_frame: 6`, `min_corner_views: 5`,
+  `max_pnp_reprojection_px: 10`.
+- **`trajectory_alignment`:** first guess of extrinsics and time offsets, for example `max_expected_dt_s: 0.5`.
+- **`outlier_rejection`:** the second pass, for example `enabled: true`, `threshold_px: 2.0`, `percentile: 99`.
+- **`guardrail`:** when to fall back to the first pass, for example `p95_regression_factor: 1.5`.
 
-Keys that sit at the top of the file, outside any section. Extrinsics are the
-relative poses between sensors; here, between the cameras.
+### Top-level keys
 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `corner_subsample` | `top_left \| two_diag \| all` | `top_left` | Corners kept per AprilGrid tag. `top_left` gives 3–5× speedup for under 0.1% quality drift; auto-falls back to `all` on sparse data |
-| `rerun_outliers` | bool | `true` | Outlier-driven second pass, with a pathology guardrail |
-| `optimize_time_offset` | bool | `false` | Camera–camera time offsets; multi-camera only |
-| `rerun_visualization` | bool | `true` | Launch the Rerun 3D viewer; suppressed in batch |
-| `reference_camera` | int | `0` | Camera the extrinsics are expressed against |
-| `output_file` | path | — | Result path |
-| `output_format` | `yaml \| json` | `yaml` | Result format |
-| `estimate.board_points` | bool | `false` | Solve one height per board corner, the board shape, in camera-only and camera–IMU runs ([why](/why/board-shape/)) |
+| Key | Default | Meaning |
+|---|---|---|
+| `mode` | `cam` | `cam` or `cam-imu`; read by `mvis run` |
+| `reference_camera` | `0` | Camera the extrinsics are expressed in |
+| `corner_subsample` | `two_anti` | Corners kept per AprilGrid tag. See below |
+| `optimize_time_offset` | `false` | Solve camera–camera time offsets; for unsynchronised cameras |
+| `rerun_outliers` | `true` | Run a second pass without outliers; it falls back to the first pass if the second one goes wrong |
+| `rerun_visualization` | `false` | Open the Rerun 3D viewer (needs the `viz` extra) |
+| `output_file` | `calibration_result.yaml` | Result path (flat shape) |
+| `output_format` | `yaml` | `yaml` or `json` (flat shape) |
+| `report.thumbnail_max_dim` | `320` | Size of detection thumbnails in the report (px) |
+
+`corner_subsample` values:
+
+- **`two_anti`** (camera-only default): two diagonal corners per tag. Faster than `all`, and in our runs
+  on VI-Rig and TUM-VI (MVIS 0.1.0) the principal point stayed within about 0.1 px of it.
+- **`two_diag`:** the other diagonal pair.
+- **`all`** (camera–IMU default): every corner.
+- **`top_left`, `top_right`, `bottom_left`, `bottom_right`** (or `tl`, `tr`, `bl`, `br`): one corner per tag.
+  Fastest, but in the same runs it moved `cx` and `cy` by up to about 0.8 px, and reprojection error does not show it.
+
+With few tags it falls back to `all`. The first guess always uses every corner.
+The sectioned shape also accepts `solve.corner_subsample`; the top-level key wins.
+
+### Example: VI-Rig cameras
+
+The three cameras of the [VI-Rig 4 IMUs + 3 cams](/datasets/virig-4imus-3cams/) set.
+
+```yaml title="virig_3cams_cam.yaml"
+mode: cam
+input:
+  cameras:
+    - camera_id: 0
+      name: Blackfly
+      source_type: rosbag_topic
+      source_path: ${MVIS_DATASETS}/mvis_4imus_3cams/virig_4imus_3cams_april_01.bag
+      topic: /blackfly/image_raw
+      distortion_model: radtan
+      shutter_type: global
+      factor_hz: 15.0
+    - camera_id: 1
+      name: T265-1
+      source_type: rosbag_topic
+      source_path: ${MVIS_DATASETS}/mvis_4imus_3cams/virig_4imus_3cams_april_01.bag
+      topic: /t265/fisheye1/image_raw
+      distortion_model: kb4
+      shutter_type: global
+      factor_hz: 15.0
+    - camera_id: 2
+      name: T265-2
+      source_type: rosbag_topic
+      source_path: ${MVIS_DATASETS}/mvis_4imus_3cams/virig_4imus_3cams_april_01.bag
+      topic: /t265/fisheye2/image_raw
+      distortion_model: kb4
+      shutter_type: global
+      factor_hz: 15.0
+board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.088, tag_spacing: 0.3, tag_family: t36h11}
+solve:
+  max_iterations: 15    # enough for this board; default 200
+output:
+  path: results/virig_3cams/calibration.yaml
+reference_camera: 0
+optimize_time_offset: true
+estimate:
+  board_points: true
+```
 
 ## Camera–IMU config
 
-This config has a different shape. Its top-level sections are:
+Top-level sections: `input`, `board`, `camera_input`, `solve`, `estimate`, `output` and
+the optional `reference`.
+Camera–IMU calibration is two steps:
 
-- `input`
-- `board`
-- `camera_input`
-- `solve`
-- `output`
+1. Calibrate the cameras ([camera-only config](#camera-only-config)).
+2. Give that result to `camera_input.path` and solve with the IMUs.
 
 ### `input`
 
-Where the IMU and camera data come from.
-
-| Key | Type | Description |
+| Key | Default | Meaning |
 |---|---|---|
-| `format` | `ros1 \| ros2 \| euroc` | Input format |
-| `path` | path | Bag file or EuRoC `mav0` directory |
-| `bags` | list of paths | **Batch mode** — calibrate many sequences from one config, each into `bag<NN>/cam_imu.json` |
-| `imu_topics` | list | IMU topics; the first is the base IMU |
-| `imus` | list of objects | Per-IMU options, e.g. `{gyro_only: true}` |
-| `window_mode` | `manual \| …` | `manual` honours the explicit `t0`/`window` below |
-| `t0` | float (s) | Window start |
-| `window` | float (s) | Window length |
-| `cache_dir` | path | Detection cache — reused across runs |
+| `format` | `ros1` | `ros1` (ROS1 bag), `ros2` (ROS2 bag folder, or one `.db3` / `.mcap` file) or `euroc` (EuRoC / ASL `mav0` folder) |
+| `path` | empty | ROS1 bag file, ROS2 bag folder or `.db3` / `.mcap` file, or `mav0` folder |
+| `bags` | empty | Several recordings: each is calibrated into its own `bag<NN>/cam_imu.json` next to `output.path`. Each inherits `format` |
+| `cam_topics` | from `camera_input.path` | Image topics, in camera order. Empty = the topics stored in the camera calibration |
+| `imu_topics` | `["/imu0"]` | IMU topics. The first is the **base IMU**; the rest are auxiliary IMUs |
+| `imus` | empty | Per-IMU options, in `imu_topics` order. `{gyro_only: true}` calibrates an auxiliary IMU from its gyroscope alone; not allowed on the base IMU |
+| `window_mode` | `motion` | `motion` picks the `segment_length` seconds with the most IMU motion; `manual` uses `t0` and `window` |
+| `segment_length` | `80.0` | Window length in `motion` mode (s). A shorter recording falls back to `manual` |
+| `t0` | `3.0` | Window start in `manual` mode (s from the start) |
+| `window` | `0.0` | Window length in `manual` mode (s); `0` = to the end |
+| `min_obs` | `4` | Fewest board corners for a frame to be kept |
+| `cache_dir` | none | Folder for the detection cache ([capture database](/reference/database/)); none = no cache |
+
+ROS1, ROS2 and EuRoC all feed camera–IMU runs. `apply-calib` and `roundtrip` read ROS1 bags only.
 
 ### `camera_input`
 
-Cam-IMU calibration is a **two-step** workflow:
+| Key | Default | Meaning |
+|---|---|---|
+| `path` | empty | Camera calibration: a `_calib.yaml` from `mvis cam`, or a Kalibr camchain |
+| `free_intrinsics` | `true` | Refine the camera intrinsics with the IMU. Older form of `estimate.camera.intrinsics` |
+| `estimate_readout` | `false` | Solve the rolling-shutter readout. Older form of `estimate.camera.tr` |
+| `rolling_mode` | `0` | Which row the frame stamp refers to: `0` top, `1` middle, `2` bottom |
+| `cameras` | empty | Per-camera overrides, in camera order. See below |
 
-1. Calibrate the cameras first.
-2. Feed that result in here.
-
-Intrinsics are each camera's own parameters, such as focal length and
-distortion.
-
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `path` | path | — | Camera calibration produced by `mvis calibrate` |
-| `free_intrinsics` | bool | `false` | Re-estimate intrinsics rather than pinning them |
-| `estimate_readout` | bool | `false` | Estimate rolling-shutter readout here |
+`camera_input.cameras[i]` accepts `free_intrinsics`, `estimate_readout`, `rolling_mode`,
+`factor_hz` (vision factors per second for that camera) and `vision_pose` (`imu` or `interp`).
+For cameras whose stamps are not on the sensor clock, `retime_sensor_clock: true`
+solves a per-frame capture offset first, and `retime_map` reuses the `<output>_sensor_clock.json`
+of an earlier run.
 
 ### `solve`
 
-Settings for the camera–IMU solve. Three terms first:
+Three terms first:
 
-- **`td`:** the camera–IMU time offset
-- **`t_ga`:** the time offset between the gyroscope and accelerometer channels
-  of one IMU
-- **Lever:** the lever arm, the position of the camera relative to the IMU
+- **`td`:** the camera–IMU time offset.
+- **`t_ga`:** the time offset between the gyroscope and accelerometer of one IMU ([why](/why/tga/)).
+- **State:** the IMU pose, velocity and biases at one instant; states are placed at `state_hz`.
 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `state_hz` | float | `30.0` | Rate of pose/velocity/bias state nodes. Matters on dynamic rigs. Reproj (reprojection error), lever, and `td` alias at low rates and plateau near 30 Hz. Flat on gentle sequences |
-| `max_iterations` | int | — | LM iterations |
-| `imu_intrinsics` | `dw_da \| …` | — | Which IMU intrinsics to solve |
-| `imu_intrinsics_model` | `kalibr \| rpng \| calyx` | — | Parameterisation. A convention, not a quality lever — all three recover identical extrinsics. See [IMU model](/concepts/imu-model/) |
-| `estimate_t_ga` | bool | `true` | Estimate the base IMU's internal gyro↔accel offset ([why](/why/tga/)) |
-| `sigma_t_ga` | float | `0.010` | Prior on `t_ga` (s), a weak 10 ms prior |
-| `board_height_sigma` | float | `0.003` | Prior on each board-corner height (m) when `estimate.board_points: true`. Camera-only runs use the same 3 mm default and do not expose it |
-| `corner_subsample` | `top_left \| two_diag \| all` | `top_left` | As above |
-| `sigma_td_prior` | float | — | Prior on the camera–IMU time offset; `0.0` disables |
-| `init_kwargs` | object | — | Initialiser options, e.g. `{keyframe_hz: 2.0, scale_rel_tol: 0.3}` |
+| Key | Default | Meaning |
+|---|---|---|
+| `state_hz` | `30.0` | Rate of the states (Hz); `0` = one per base-camera frame |
+| `factor_hz` | `10.0` | Vision factors (frames used) per second per camera |
+| `max_iterations` | `50` | LM iterations |
+| `sigma_px` | `1.0` | Corner noise (px) |
+| `huber_px` | `2.0` | Huber threshold (px); `0` turns the robust loss off |
+| `corner_subsample` | `all` | Corners kept per tag; values as in [camera-only](#top-level-keys) |
+| `vision_pose` | `imu` | How a frame's pose is found between two states: `imu` propagates the IMU samples to the capture time; `interp` interpolates between the two states |
+| `imu_intrinsics` | `dw_da` | Older form of `estimate.imu.intrinsics` |
+| `imu_intrinsics_model` | `calyx` | Older form of `estimate.imu.model` |
+| `estimate_t_ga` | `true` | Solve the base IMU's `t_ga` |
+| `sigma_t_ga` | `0.010` | Prior on `t_ga` (s) |
+| `estimate_readout` | `false` | Solve the rolling-shutter readout for every camera |
+| `board_height_sigma` | `0.003` | Prior on each board-corner height (m), with `estimate.board_points: true` |
+| `sigma_td_prior` | `0.0` | Prior that holds each camera's `td` near its start (s); `0` = off |
+| `pnp_method` | `iterative` | First-guess pose solver: `iterative` or `ippe` (planar) |
+| `rms_gate_px` | `0.0` | Mark the result `ok: false` when the final reprojection RMS is above this; `0` = off |
+| `init_kwargs` | `{}` | Options for the camera–IMU first guess, for example `keyframe_hz` (default `2.0`) and `scale_rel_tol` (default `0.10`) |
+
+IMU noise, as continuous-time densities:
+
+| Key | Default | Meaning |
+|---|---|---|
+| `sigma_g` | `0.01` | Gyroscope noise (rad/s/√Hz) |
+| `sigma_bg` | `0.001` | Gyroscope bias random walk (rad/s²/√Hz) |
+| `sigma_a` | `0.02` | Accelerometer noise (m/s²/√Hz) |
+| `sigma_ba` | `0.002` | Accelerometer bias random walk (m/s³/√Hz) |
+
+Set them from your IMU's measured noise densities (for example an Allan-variance fit),
+inflated two to three times. The values in a Kalibr `imu.yaml` are not drop-in values for these keys.
+
+Multi-IMU and expert keys:
+
+| Key | Default | Meaning |
+|---|---|---|
+| `aux_imu_stride` | `3` | One auxiliary-IMU factor per this many base-IMU state intervals. A larger stride means fewer factors and a faster solve; the auxiliary levers move a little with it |
+| `aux_imu_factor_hz` | `0.0` | Rate of auxiliary-IMU factors (Hz). Used only when `aux_imu_stride` is `0`; with both `0`, one factor per base interval |
+| `imu_min_rate_hz` | `200.0` | An IMU slower than this is upsampled before integration; `0` = off |
+| `imu_upsample_method` | `cubic` | `linear` or `cubic` |
+| `sigma_dw_da`, `sigma_tg`, `sigma_imu_R` | `0.1`, `0.05`, `0.1` | Weak priors on the free IMU intrinsics |
+| `sigma_v0`, `sigma_bg0`, `sigma_ba0` | `0.5`, `0.01`, `0.1` | Priors on the first state's velocity and biases |
+| `bound_intrinsics` | `false` | Keep free camera intrinsics in their valid range (for example `double_sphere` ξ in [−1, 1]) |
+| `max_interp_dt` | `0.3` | Frames between states further apart than this (s) are dropped |
+| `lm_lambda_lower`, `lm_lambda_upper` | `0`, `100` | LM damping bounds |
 
 ### `output`
 
-| Key | Type | Description |
+| Key | Default | Meaning |
 |---|---|---|
-| `path` | path | Result JSON |
+| `path` | `cam_imu_calib.json` | Summary JSON. The other files are named after it |
+| `calib_yaml` | `<path>_calib.yaml` | Full MVIS calibration, the input of `apply-calib` |
+| `kalibr_yaml` | `<path>_camchain-imucam.yaml` | Kalibr camchain-imucam export |
+| `report_html` | `<path>_report.html` | HTML report |
+| `report_txt` | none | Text report |
 
-## Worked example
+See [Result formats](/reference/result-formats/).
 
-A camera–IMU config for one TUM-VI calibration bag:
+### `reference`
 
-```yaml title="cam_imu_ds.yaml"
+Known values to compare against: CAD, factory or published numbers.
+The HTML report and `mvis verdict -c` read it. It is a consistency check, not ground truth.
+
+| Key | Meaning |
+|---|---|
+| `label` | Name shown in the report, for example `factory` |
+| `lever_mm` | Per camera (`cam0:` or `0:`): the camera position in the base IMU frame, `[x, y, z]` in mm |
+| `baseline_mm` | Stereo baseline between `cam0` and `cam1` in mm: a length or a 3-vector |
+
+### Example: VI-Rig cameras + 4 IMUs
+
+All three cameras and four IMUs of the
+[VI-Rig 4 IMUs + 3 cams](/datasets/virig-4imus-3cams/) set, with the camera result of the
+example above as the prior.
+
+```yaml title="virig_3cams_cam_imu.yaml"
+mode: cam-imu
 input:
   format: ros1
-  path: /data/tum_vi/raw/dataset-calib-imu1.bag
-  imu_topics: ["/imu0"]
-  window_mode: manual
-  t0: 3.0
-  window: 45.0
-  cache_dir: /tmp/mvis_tumvi_detcache
+  path: ${MVIS_DATASETS}/mvis_4imus_3cams/virig_4imus_3cams_april_01.bag
+  cam_topics:
+    - /blackfly/image_raw
+    - /t265/fisheye1/image_raw
+    - /t265/fisheye2/image_raw
+  imu_topics:
+    - /imu/data          # base IMU
+    - /gx3_25/data       # auxiliary IMUs
+    - /gx3_35/imu/data
+    - /t265/imu
+  window_mode: motion
+  segment_length: 80.0
+  cache_dir: results/virig_3cams/cache
 board: {board_type: apriltag, rows: 6, cols: 6, tag_size: 0.088, tag_spacing: 0.3, tag_family: t36h11}
 camera_input:
-  path: /tmp/tumvi_calib_ds_cam0.yaml
-  free_intrinsics: false
-  estimate_readout: false
+  path: results/virig_3cams/calibration.yaml
+  cameras:
+    - {}
+    - factor_hz: 4.0
+    - factor_hz: 4.0
 solve:
-  state_hz: 8.0
-  max_iterations: 40
-  imu_intrinsics: dw_da
-  corner_subsample: top_left
-  sigma_td_prior: 0.0
-  init_kwargs: {keyframe_hz: 2.0, scale_rel_tol: 0.3}
+  max_iterations: 40    # as in our VI-Rig runs; default 50
+estimate:
+  board_points: true
+  camera: {intrinsics: true, tr: false, td: true, extrinsics: true}
+  imu: {intrinsics: dw_da, model: calyx, extrinsics: true, td: true}
 output:
-  path: /tmp/tumvi_imu1_ds.json
+  path: results/virig_3cams/cam_imu.json
 ```
 
-More examples are under `examples/configs/` in the repository:
+More configs ship under `examples/configs/` in the
+[repository](https://github.com/openmvis/openmvis):
 
-- `tumvi_cam_imu/`
-- `tga_t265*/`
-- `looperrobotics/`
-- `gilabs/`
+- `tga_mvis/`: VI-Rig camera–IMU runs, one per base IMU
+- `tumvi_cam_imu/`: TUM-VI camera–IMU, one config per camera model (see its README)
+- `example_cam_run.yaml`, `example_estimate.yaml`: commented camera-only and camera–IMU templates
+- `recalib_example.yaml`: an `apply-calib` config

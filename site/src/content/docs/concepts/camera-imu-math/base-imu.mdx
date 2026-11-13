@@ -1,9 +1,202 @@
 ---
 title: Base IMU factor
-description: Base IMU factor with calibration.
+description: The base-IMU preintegration factor, with gyro and accelerometer intrinsics, biases and the gyro-to-accel time offset t_ga inside the residual.
 pageType: concept
 ---
 
-## Base IMU Factor with Calibration
+Use this page to see how MVIS turns the base IMU's raw readings into a factor
+between two trajectory states, with the IMU's own errors solved inside it.
 
-Coming soon — derivation and Jacobians for the base-IMU pre-integration factor with online intrinsic and extrinsic calibration.
+- **Base IMU:** the first IMU in the config. Its clock is the reference clock and
+  its pose is the trajectory.
+- **State:** the IMU pose, velocity and biases at one time $t_k$. States sit at
+  `solve.state_hz` (30 Hz by default) on the first camera's frames.
+- **Preintegration:** the IMU readings between two states, combined into one
+  relative rotation, velocity change and position change.
+
+Symbols follow [Notation & glossary](/concepts/notation/). The IMU conventions
+(`calyx`, `kalibr`, `rpng`) are on [IMU model](/concepts/imu-model/).
+
+## Corrected readings
+
+The gyroscope gives $\boldsymbol{\omega}_m$ and the accelerometer
+$\mathbf{a}_m$. MVIS corrects each reading before it integrates it:
+
+$$
+{}^{I}\mathbf{a} = {}^{I}_{a}\mathbf{R}\;\mathbf{D}_a\,\big(\mathbf{a}_m - \mathbf{b}_a\big)
+$$
+
+$$
+{}^{I}\boldsymbol{\omega} = {}^{I}_{w}\mathbf{R}\;\mathbf{D}_w\,\big(\boldsymbol{\omega}_m - \mathbf{b}_g - \mathbf{T}_g\,{}^{I}\mathbf{a}\big)
+$$
+
+- **$\mathbf{D}_w$, $\mathbf{D}_a$:** correction matrices. Their diagonal fixes
+  the scale of each axis; the rest fixes misalignment (axes not quite at right
+  angles). They multiply the raw reading, so a diagonal of 0.998 means the raw
+  axis read 0.2 % high.
+- **$\mathbf{T}_g$:** g-sensitivity, the part of the gyro reading caused by
+  linear acceleration.
+- **$\mathbf{b}_g$, $\mathbf{b}_a$:** the biases, solved at every state.
+- **${}^{I}_{w}\mathbf{R}$, ${}^{I}_{a}\mathbf{R}$:** the gyro and accelerometer
+  triad rotations into the IMU frame. Each convention frees at most one of them:
+
+| Convention | $\mathbf{D}_w$ | $\mathbf{D}_a$ | Free rotation | Intrinsic parameters |
+|---|---|---|---|---|
+| `calyx` (default) | full 3×3 (9) | upper-triangular (6) | none; folded into $\mathbf{D}_w$ | 9 + 6 + 9 ($\mathbf{T}_g$) = 24 |
+| `kalibr` | lower-triangular (6) | lower-triangular (6) | ${}^{I}_{w}\mathbf{R}$ (3) | 6 + 6 + 9 + 3 = 24 |
+| `rpng` | upper-triangular (6) | upper-triangular (6) | ${}^{I}_{a}\mathbf{R}$ (3) | 6 + 6 + 9 + 3 = 24 |
+
+All three give the solver one 24-value intrinsics variable $\mathbf{x}_{in}$.
+It starts at identity (no correction).
+
+An IMU slower than 200 Hz is first upsampled (cubic, the real samples kept)
+before integration (`solve.imu_min_rate_hz`).
+
+## Preintegration
+
+Between two states at $t_k$ and $t_{k+1}$ ($\Delta t = t_{k+1} - t_k$), the
+corrected readings give the motion in the frame of the first state:
+
+$$
+\Delta\mathbf{R}_{k} = {}^{I_k}_{I_{k+1}}\mathbf{R},
+\qquad
+\Delta\mathbf{v}_{k} = \int_{t_k}^{t_{k+1}} {}^{I_k}_{I_\tau}\mathbf{R}\;{}^{I}\mathbf{a}_\tau\,d\tau,
+\qquad
+\Delta\mathbf{p}_{k} = \int_{t_k}^{t_{k+1}}\!\!\int_{t_k}^{s} {}^{I_k}_{I_\tau}\mathbf{R}\;{}^{I}\mathbf{a}_\tau\,d\tau\,ds
+$$
+
+MVIS evaluates these with **ACI** (analytic combined IMU integration). Between two
+samples it takes the midpoint of the two corrected readings as constant and
+integrates the rotation and the rotated acceleration in closed form. The same
+pass gives:
+
+- the Jacobians of $\Delta\mathbf{R}$, $\Delta\mathbf{v}$, $\Delta\mathbf{p}$
+  with respect to the biases, the 24 intrinsics and `t_ga`;
+- the 15×15 covariance $\mathbf{P}_k$, from the noise densities (`solve.sigma_g`,
+  `sigma_a`) and the bias random-walk densities (`sigma_bg`, `sigma_ba`).
+
+The integration runs once, at the biases and intrinsics of the start point.
+Small changes after that are applied through the Jacobians. A detection gap is
+bridged by one factor over the whole gap.
+
+## The gyro-to-accel offset `t_ga`
+
+Many drivers publish gyro and accelerometer on one stamp, though the two were
+sampled at different instants. MVIS takes the stamp as gyro time. The
+accelerometer value that belongs to gyro time $t$ is the one stamped
+$t + t_{ga}$. Over one integration step from sample 0 to sample 1, to first order:
+
+$$
+\bar{\mathbf{a}}_m = \tfrac12\big(\mathbf{a}_{m,0} + \mathbf{a}_{m,1}\big) + t_{ga}\,\dot{\mathbf{a}}_m,
+\qquad
+\dot{\mathbf{a}}_m = \frac{\mathbf{a}_{m,1} - \mathbf{a}_{m,0}}{\delta t}
+$$
+
+- **One more Jacobian column:** $\partial\bar{\mathbf{a}}_m/\partial t_{ga} = \dot{\mathbf{a}}_m$,
+  carried through $\mathbf{D}_a$ and, through $\mathbf{T}_g$, into the gyro.
+- **Re-integration:** after the first two iterations, when `t_ga` has moved more
+  than 3 ms from the value the factors were integrated at, MVIS integrates that
+  IMU again with its accelerometer resampled at $t + t_{ga}$
+  (`solve.tga_relin_threshold_s`, default 0.003 s). The linear term then covers
+  only what is left.
+- **Prior:** a weak zero-mean prior, 10 ms (`solve.sigma_t_ga`).
+
+`estimate_t_ga` is on by default in camera–IMU runs. What the offset is and when
+it matters: [Why calibrate t_ga](/why/tga/).
+
+## The residual
+
+The factor links state $k$ (pose ${}^{G}_{I_k}\mathbf{T}$, velocity
+${}^{G}\mathbf{v}_{I_k}$, biases) to state $k+1$. It predicts the measured
+preintegration from the two states and compares.
+
+Write $\delta\boldsymbol{\eta}$ for the change since integration:
+$\delta\mathbf{b}_g$, $\delta\mathbf{b}_a$, $\delta\mathbf{x}_{in}$ and
+$\delta t_{ga}$. First-order corrections, built from the Jacobians above:
+
+$$
+\delta\boldsymbol\theta = \mathbf{J}_{R}\,\delta\boldsymbol\eta,
+\qquad
+\delta\mathbf{v} = \mathbf{J}_{v}\,\delta\boldsymbol\eta,
+\qquad
+\delta\mathbf{p} = \mathbf{J}_{p}\,\delta\boldsymbol\eta
+$$
+
+The 15 residual rows are:
+
+$$
+\mathbf{r}_\theta = \mathrm{Log}\!\Big(\Delta\mathbf{R}_k^\top\;{}^{G}_{I_k}\mathbf{R}^\top\,{}^{G}_{I_{k+1}}\mathbf{R}\;\mathrm{Exp}(\delta\boldsymbol\theta)^\top\Big)
+$$
+
+$$
+\mathbf{r}_p = {}^{G}_{I_k}\mathbf{R}^\top\Big({}^{G}\mathbf{p}_{I_{k+1}} - {}^{G}\mathbf{p}_{I_k} - {}^{G}\mathbf{v}_{I_k}\,\Delta t - \tfrac12\,{}^{G}\mathbf{g}\,\Delta t^2\Big) - \delta\mathbf{p} - \Delta\mathbf{p}_k
+$$
+
+$$
+\mathbf{r}_v = {}^{G}_{I_k}\mathbf{R}^\top\Big({}^{G}\mathbf{v}_{I_{k+1}} - {}^{G}\mathbf{v}_{I_k} - {}^{G}\mathbf{g}\,\Delta t\Big) - \delta\mathbf{v} - \Delta\mathbf{v}_k
+$$
+
+$$
+\mathbf{r}_{b} = \begin{bmatrix}\mathbf{b}_{g,k+1} - \mathbf{b}_{g,k}\\ \mathbf{b}_{a,k+1} - \mathbf{b}_{a,k}\end{bmatrix}
+$$
+
+The cost is $\|\mathbf{r}\|^2_{\mathbf{P}_k}$ with
+$\mathbf{r} = [\mathbf{r}_\theta;\ \mathbf{r}_p;\ \mathbf{r}_v;\ \mathbf{r}_b]$.
+
+- **Bias random walk:** $\mathbf{r}_b$ is the random-walk term. Biases may drift
+  between states, by as much as the random-walk densities allow. There is no
+  separate bias factor.
+- **No robust loss:** the IMU residual is plain least squares. Only the
+  reprojection factor uses Huber.
+- **The covariance follows the correction:** $\mathbf{P}_k$ is rotated by the
+  current $\delta\boldsymbol\theta$ before it weights the residual.
+
+## Jacobians
+
+Every block is analytic and checked against finite differences in the test
+suite.
+
+| Variable | Rows it touches | Comes from |
+|---|---|---|
+| pose $k$ | $\mathbf{r}_\theta$, $\mathbf{r}_p$, $\mathbf{r}_v$ | the predicted relative motion, rotated into frame $k$ |
+| pose $k+1$ | $\mathbf{r}_\theta$, $\mathbf{r}_p$ | the same, at the end point |
+| velocity $k$, $k+1$ | $\mathbf{r}_p$, $\mathbf{r}_v$ | ${}^{G}_{I_k}\mathbf{R}^\top$, times $\Delta t$ in $\mathbf{r}_p$ |
+| biases $k$ | all | the bias Jacobians of the integration; identity in $\mathbf{r}_b$ |
+| biases $k+1$ | $\mathbf{r}_b$ | identity |
+| intrinsics $\mathbf{x}_{in}$ | $\mathbf{r}_\theta$, $\mathbf{r}_p$, $\mathbf{r}_v$ | the intrinsic Jacobians of the integration |
+| `t_ga` | $\mathbf{r}_\theta$, $\mathbf{r}_p$, $\mathbf{r}_v$ | the `t_ga` column of the integration |
+
+## Which intrinsics are solved
+
+`estimate.imu.intrinsics` frees blocks of $\mathbf{x}_{in}$. A pinned block gets a
+very tight prior at its start value; a freed block gets a weak one, so a direction
+the motion does not excite stays near its start instead of drifting.
+
+| Setting | Free | Weak prior on the free terms |
+|---|---|---|
+| `pinned` | nothing | — |
+| `dw_da` (default) | $\mathbf{D}_w$, $\mathbf{D}_a$ | 0.1 (`solve.sigma_dw_da`) |
+| `dw_da_r` | as `dw_da`, plus the free rotation (`kalibr`, `rpng`; same as `dw_da` under `calyx`, which has no separate rotation) | 0.1 (`solve.sigma_imu_R`) |
+| `full` | as `dw_da_r`, plus $\mathbf{T}_g$ | 0.05 (`solve.sigma_tg`) |
+
+## The same model inside the reprojection factor
+
+The reprojection factor integrates the same corrected readings from an anchor
+state to each corner's capture time
+([Camera–IMU calibration math](/concepts/camera-imu-math/#where-was-the-imu-at-that-time)).
+So $\mathbf{D}_w$, $\mathbf{D}_a$, the biases and `t_ga` are fitted by both
+factors, with one consistent model.
+
+## What this means for your recording
+
+- **Rotate about all three axes.** Each column of $\mathbf{D}_w$ needs rotation
+  about its axis.
+- **Point every axis at gravity at some time.** Gravity is the largest specific
+  force you have. Tilting the rig through many orientations separates
+  $\mathbf{D}_a$ from $\mathbf{b}_a$.
+- **Change the acceleration briskly.** `t_ga` appears only through
+  $\dot{\mathbf{a}}_m$; smooth, steady motion leaves it loose.
+- **Leave $\mathbf{T}_g$ pinned** unless the motion has strong linear acceleration
+  while it rotates. Hand-held motion rarely does.
+
+More: [Observability](/concepts/observability/) and [Degeneracy](/concepts/degeneracy/).

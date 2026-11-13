@@ -1,116 +1,176 @@
 ---
 title: Quickstart
-description: Calibrate a camera from a folder of images with one config file and one command.
+description: Download one VI-Rig recording, calibrate a camera with mvis cam, calibrate three cameras and four IMUs with mvis cam-imu, and read the reports.
 pageType: tutorial
 ---
 
-Use this page to run your first calibration. The whole loop is three steps:
+import { Image } from 'astro:assets';
+import viRig from '../../../assets/vi_rig.jpg';
 
-1. Write one YAML config file.
-2. Run one command.
-3. Read the HTML report.
-
-Everything else in these docs is a variation on this loop.
+Use this page to run a first calibration end to end on one of our recordings.
+You download one bag, solve one camera, then solve three cameras with four
+IMUs, and read the reports.
 
 You need:
 
-- **MVIS installed:** see [Installation](/getting-started/installation/)
-  (Linux or macOS, Python 3.11 or 3.12)
-- **Images of an AprilGrid board:** a printed grid of AprilTag markers (square
-  codes the software finds in each image)
+- **MVIS installed from source,** with the `apriltag` and `ros1` extras. Run
+  every command below from the root of the `openmvis` checkout. See
+  [Installation](/getting-started/installation/).
+- **About 7 GB of free disk** for the recording.
+- **A Hugging Face account.** The VI-Rig data is gated: you accept its terms
+  once on the Hub.
 
-## 1. Write the config
+## 1. Get the recording
 
-Save this as `config.yaml`. Point `source_path` at your images:
+We use the first recording of [VI-Rig — 4 IMUs + 3 cameras](/datasets/virig-4imus-3cams/),
+a rig we built for calibration research. It has a FLIR Blackfly camera, an
+Intel RealSense T265 fisheye pair and four IMUs, all recorded in front of a 6 × 6
+AprilGrid.
 
-```yaml title="config.yaml"
+<Image src={viRig} alt="The VI-Rig: several cameras and IMUs on one rigid frame" width="320" />
+
+1. **Accept the terms** on
+   [calibench-vi/datasets](https://huggingface.co/datasets/calibench-vi/datasets).
+2. **Give MVIS your token:** set `HF_TOKEN` to a read token from your
+   Hugging Face settings. Or `pip install huggingface_hub` and run
+   `hf auth login`; MVIS reads the token file it writes.
+3. **Download** recording `april_01`:
+
+   ```bash
+   mvis datasets list --dataset mvis_4imus_3cams
+   mvis datasets download --select mvis_4imus_3cams/april_01
+   ```
+
+- **Where it goes:** `$MVIS_DATASETS/mvis_4imus_3cams/virig_4imus_3cams_april_01.bag`.
+  `MVIS_DATASETS` defaults to `~/Datasets`. Configs refer to it as
+  `${MVIS_DATASETS}`.
+- **Checked:** the download is verified against the checksum in the catalog.
+- **Licence:** CC BY-NC 4.0, non-commercial; commercial licences on request.
+  If you publish with it, cite the MVIS paper; see
+  [Contributors & citation](/about/contributors/#citing-mvis).
+
+`mvis inspect <bag>` prints the topics, rates and duration of a recording.
+
+## 2. Calibrate one camera
+
+Save this as `quickstart/blackfly_cam.yaml` inside the checkout:
+
+```yaml title="quickstart/blackfly_cam.yaml"
+mode: cam
+input:
+  cameras:
+    - camera_id: 0
+      name: Blackfly
+      source_type: rosbag_topic
+      source_path: ${MVIS_DATASETS}/mvis_4imus_3cams/virig_4imus_3cams_april_01.bag
+      topic: /blackfly/image_raw
+      distortion_model: radtan
+      shutter_type: global
 board:
-  board_type: apriltag          # or chessboard
+  board_type: apriltag
   rows: 6
   cols: 6
-  tag_size: 0.088               # metres
-  tag_spacing: 0.3              # gap as a fraction of tag_size
+  tag_size: 0.088          # metres, measured on the printed board
+  tag_spacing: 0.3         # gap between tags, as a fraction of tag_size
   tag_family: t36h11
-
-cameras:
-  - camera_id: 0
-    source_type: images         # or rosbag_topic, euroc, ros2bag
-    source_path: /path/to/images
-    distortion_model: radtan    # or kb4 (fisheye), equidistant, double_sphere, eucm, fov
-    shutter_type: global        # rolling enables readout calibration
-
-optimizer:
+solve:
   max_iterations: 15
   pixel_sigma: 1.0
   huber_threshold: 1.345
-
-output_file: calibration_result.yaml
+estimate:
+  board_points: true       # solve the board shape too
+output:
+  path: results/quickstart/blackfly.yaml
+  format: yaml
 ```
 
-:::caution[Measure the printed board]
-`tag_size` is in metres. It must match the board you actually printed.
-Measure a tag with calipers; do not trust the generator.
-It sets the scale of every distance MVIS reports.
-:::
+- **`distortion_model: radtan`:** the Blackfly has a standard lens. For a
+  fisheye lens, use `kb4`. [Camera model](/concepts/camera-model/) helps you
+  choose.
+- **`tag_size`:** sets the scale of every distance MVIS reports. On your own
+  board, measure a printed tag; see [Set up the board](/guides/board-setup/).
+- **`estimate.board_points`:** our board is not flat, so we solve its shape.
+  [Why](/why/board-shape/).
 
-## 2. Run it
+Check the config, then solve:
 
 ```bash
-mvis calibrate --config config.yaml
+mvis check -c quickstart/blackfly_cam.yaml
+mvis cam -c quickstart/blackfly_cam.yaml -o results/quickstart/blackfly
 ```
 
-The pipeline runs seven stages, and prints progress as it goes:
-
-1. Detection
-2. Quality gating
-3. Per-camera init
-4. Per-camera refinement
-5. Alignment
-6. Joint optimisation
-7. An outlier-driven rerun
-
-## 3. Read the result
-
-MVIS writes two YAML files, on purpose:
+On our Linux test machine this took about 7 minutes, mostly board detection.
+The run folder `results/quickstart/blackfly` then holds:
 
 | File | Use |
 |---|---|
-| `*_calib.yaml` | The calibration itself — deploy this |
-| `*_full.yaml` | Adds board poses, so a run can be replayed |
+| `quickstart_blackfly_cam.html` | The report, one self-contained file |
+| `quickstart_blackfly_cam_calib.yaml` | The calibration. Deploy this, or feed it to `mvis cam-imu` |
+| `quickstart_blackfly_cam_full.yaml` | The calibration plus board poses, to replay the run |
 
-It also writes a **self-contained HTML report**. It is one file you can send to
-someone. It holds:
+The file names are `<config folder>_<config name>`. MVIS also copies the
+result to `output.path`.
 
-- **Intrinsics and distortion tables:** the lens and sensor parameters of each camera
-- **Extrinsics with a 3D plot:** where each camera sits
-- **Reprojection error per frame and per tag:** how far, in pixels, the model's
-  corners fall from the detected ones
-- **Corner heatmaps:** the mean error at each corner of the board
-- **Motion-excitation grades:** whether the recording moved enough to pin down
-  each parameter
-- **Detection statistics**
+## 3. Calibrate cameras and IMUs
 
-Open the report. Check the **motion-excitation grade** first, not the
-reprojection error. A calibration can fit its observations tightly and still
-have parameters that the recording never constrained.
+The repository ships a camera–IMU config for this recording. Run it as it is:
 
-## 4. Try a better model
-
-`radtan` is a safe default, but not the best fit for every lens. For a fisheye
-(very wide-angle) lens, start with `kb4`:
-
-```yaml title="config.yaml"
-    distortion_model: kb4
+```bash
+mvis cam-imu -c examples/configs/tga_mvis/tga_mti_01.yaml
 ```
 
-Eight models are available, and they are not interchangeable.
-[Camera model](/concepts/camera-model/) says which to pick and how to tell when
-one has diverged.
+- **Sensors:** all three cameras and all four IMUs. The Xsens MTi-100
+  (`/imu/data`) is the base IMU; the others are solved relative to it.
+- **Camera starting point:** `camera_input.path` reads
+  `examples/configs/tga_mvis/mvis_4imus_3cams_calib.yaml`, the median of ten
+  camera-only solves per camera on this dataset. The lenses are held fixed
+  (`estimate.camera.intrinsics: false`). To use your own camera result,
+  point `camera_input.path` at its `_calib.yaml`.
+- **Solved:** camera–IMU extrinsics and time offsets, IMU-to-IMU extrinsics
+  and time offsets, the IMU intrinsics `Dw` and `Da` in the `calyx`
+  convention, the biases, and each IMU's gyro–accel offset `t_ga`.
+- **Window:** `window_mode: motion` picks the 80 s with the most motion.
+- **Time:** about 13 minutes on our Linux test machine.
+
+It writes next to `output.path` (`results/tga_mvis/mti_01/`):
+
+| File | Use |
+|---|---|
+| `cam_imu.json` | The full result |
+| `cam_imu_calib.yaml` | The calibration to deploy, or to pass to `mvis apply-calib` |
+| `cam_imu_camchain-imucam.yaml` | The same result as a Kalibr camchain |
+| `cam_imu_report.html` | The report |
+
+## 4. Read the reports
+
+Open the HTML files in a browser.
+
+- **Camera report:** expand *Calibration Data Quality* and read the
+  motion-excitation assessment first, not the reprojection error. A fit can be tight while the recording never pinned a
+  parameter down. Then check the error per frame and the corner heatmaps for a
+  pattern.
+- **Camera–IMU report:** start with the summary grades, then the 3D rig view:
+  each camera and IMU should sit where it sits on the real rig. Then read each
+  camera's lever arm and `td`, and each IMU's intrinsics.
+- **A grade for both:** `mvis verdict` reads a result and prints GREEN, YELLOW
+  or RED with the reasons:
+
+```bash
+mvis verdict results/quickstart/blackfly.yaml
+mvis verdict results/tga_mvis/mti_01/cam_imu.json
+```
+
+GREEN means every check passed; it does not mean the recording pinned every
+parameter. [Round-trip validation](/guides/roundtrip/) is the stronger test.
+
+The [Examples](/benchmark/examples/virig-4imus-3cams/) page shows our run of
+this dataset, and its [results page](/benchmark/results/virig-4imus-3cams/)
+compares it with Kalibr and Basalt.
 
 ## Next
 
-- **Multiple cameras** → add more entries to `cameras:`;
-  [Multi-IMU calibration](/guides/multi-sensor-rigs/).
-- **Add an IMU** → [Camera–IMU calibration](/guides/camera-imu-calibration/).
-- **Every config key** → [Configuration](/reference/configuration/).
-- **A real run start to finish** → [Examples](/benchmark/examples/).
+- **Your own rig:** follow the guides from
+  [Set up the board](/guides/board-setup/) to
+  [Round-trip validation](/guides/roundtrip/).
+- **Second reference dataset:** TUM-VI, on [Examples](/benchmark/examples/tum-vi/).
+- **Every config key:** [Configuration](/reference/configuration/).

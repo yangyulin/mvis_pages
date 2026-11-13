@@ -5,68 +5,75 @@ pageType: reference
 wide: true
 ---
 
-Use this page to see where MVIS sits next to Kalibr and Basalt, the toolboxes
-most people already use. Kalibr is mature and widely validated. MVIS is not
-trying to displace it on the single-IMU case it does well.
+Use this page to see where MVIS sits next to Kalibr and Basalt, the two
+open-source camera–IMU toolboxes most people use. Kalibr is mature and widely
+validated, and MVIS does not aim to replace it where it works well.
 
-An IMU (inertial measurement unit) is the sensor with a gyroscope and an
-accelerometer.
-
-Checked against MVIS 0.1.0 and the benchmark batch 2026-11-10a.
+- **Checked against:** MVIS 0.1.0 and our benchmark runs of 10 November 2026
+  ([Methodology](/benchmark/methodology/)).
+- **The numbers:** per-dataset results of all three tools are on the
+  [Leaderboard](/benchmark/results/).
 
 ## Feature matrix
 
 | Capability | MVIS | Kalibr | Basalt |
 |---|---|---|---|
 | Camera intrinsics + distortion | ✅ | ✅ | ✅ |
-| Distortion models | radtan, kb4, equidistant, FOV, DS, EUCM, UCM, omni_radtan (experimental) | radtan, equidistant, FOV, omni, omni-radtan, DS, EUCM | radtan, KB4, DS, EUCM |
-| Different models in one rig | ✅ | ✅ one model per camera | ✅ one type per camera |
+| Distortion models | radtan, kb4, equidistant, FOV, DS, EUCM, UCM, omni_radtan (experimental) | radtan, equidistant, FOV, omni, omni-radtan, DS, EUCM | radtan, KB4, DS, EUCM, UCM |
+| Different models in one rig | ✅ | ✅ | ✅ |
 | Camera–IMU extrinsics + time offset | ✅ | ✅ | ✅ |
 | Multiple IMUs in one solve | ✅ | ✅ | ✖ one IMU per run |
-| **Per-IMU gyro-only mode** | ✅ | ✖ | ✖ |
+| **Gyro-only mode per auxiliary IMU** | ✅ | ✖ | ✖ |
 | IMU intrinsics (scale, misalignment) | ✅ — 3 conventions (`kalibr`, `rpng`, `calyx`) | ✅ | ✅ scale + misalignment |
 | G-sensitivity `Tg` | ✅ | ✅ | ✖ |
 | **[Gyro↔accel offset `t_ga`](/why/tga/)** | ✅ on by default | ✖ | ✖ |
 | **[Board shape (one height per corner)](/why/board-shape/)** | ✅ `estimate.board_points` | ✖ flat board | ✖ flat board |
 | [KB4-type polynomial past 90°](/why/kb4/) | ✅ `kb4`, what `fisheye` means | ✖ pinhole-equi needs rays in front of the camera | ✅ KB4 |
 | Rolling-shutter readout | ✅ in camera and camera–IMU solves | camera-only, separate tool | ✖ |
+| **Global + rolling shutter + IMUs in one solve** | ✅ readout per camera | ✖ | ✖ |
 | **Corrected-dataset export** | ✅ `apply-calib` | ✖ | ✖ |
+| **[Digital-twin simulation](/guides/simulation/)** | ✅ `mvis.simulation` | ✖ | ✖ |
 | **Round-trip PASS/FAIL validation** | ✅ `roundtrip` | ✖ | ✖ |
 | **Batch sweep over a dataset family** | ✅ `input.bags` | ✖ | ✖ |
 | **Dataset download + check** | ✅ `mvis datasets` | ✖ | ✖ |
 | Trajectory model | discrete factor graph | continuous-time B-spline | continuous-time B-spline |
 | Boards | AprilGrid, chessboard, ArUco | AprilGrid, chessboard, circles | AprilGrid |
 | Input | ROS1/ROS2 bag, EuRoC, image folders | ROS bag | ROS bag, EuRoC |
-| **Runs without ROS** | ✅ pure Python | ✖ | ✖ |
+| **Runs without ROS** | ✅ pure Python | ✖ | ✅ C++ build, no ROS |
 | Platforms | Linux, macOS (Python 3.11–3.12) | Linux (ROS 1, or Docker) | Linux, macOS |
 | Kalibr interop | ✅ read + write camchain, read AprilGrid targets | native | ✖ |
 | Licence | GPL-3.0-only, commercial licence on request | BSD-3-Clause | BSD-3-Clause |
 
-## What is actually different
+## What is different
 
-- **No ROS.** MVIS is pure Python via `pip`, on Linux and macOS.
-  Bags are read with `rosbags`. If you calibrate outside a ROS environment,
-  this is the whole story.
+- **No ROS, no C++ build.** MVIS installs with `pip` and reads ROS1 and ROS2
+  bags itself. Kalibr needs a ROS workspace; Basalt needs a C++ build.
+  [Requirements](/getting-started/requirements/).
 - **More than one IMU, each with its own mode.** MVIS puts every IMU in one
-  graph, and each IMU can run gyro-only when its accelerometer is unreliable.
+  graph, and each auxiliary IMU (every IMU but the base) can run gyro-only
+  when its accelerometer is unreliable.
   Kalibr also solves several IMUs in one run. Basalt takes one IMU per run, so
   a four-IMU rig is calibrated IMU by IMU and composed.
 - **It fits the gyro–accel offset.** `t_ga` is the time offset between the
-  gyroscope and accelerometer channels. It is on by default in camera–IMU runs.
-  Kalibr and Basalt have one IMU clock.
-  On the same bags their `td` differs from MVIS by about 2.9–3.2 ms on Looper
-  Insight 9 and 1.9–2.0 ms on the T265 (first camera); an injection sweep predicts 3.0–3.2 and
-  1.6–1.7 ms of that from the offset alone. Whose `td` is closer to the truth is
-  not yet tested. [Details](/why/tga/).
+  gyroscope and accelerometer channels of one IMU. It is on by default in
+  camera–IMU runs. Kalibr and Basalt give an IMU one clock.
+  - **On two real IMUs** (the Looper Insight 9 and the T265) MVIS measures a
+    `t_ga` of about −5 to −6 ms.
+  - **There, Kalibr's and Basalt's camera time offset `td`** differs from MVIS
+    by about 1.6–3.2 ms. A sweep in which we delay only the accel predicts most of
+    that gap from `t_ga` alone.
+  - **Not yet tested:** which `td` is closer to the truth. [Details](/why/tga/).
 - **It can solve the board shape.** With `estimate.board_points: true` MVIS
   solves one height per corner. Kalibr and Basalt take the board as flat. On
   our VI-Rig mount a flat solve shifts the focal length, gyro scale and lever.
   [Details](/why/board-shape/).
 - **Rolling shutter in the camera–IMU solve.** MVIS solves the readout time
   together with the IMU. Kalibr's rolling-shutter tool is camera-only.
-- **Validation is a command, not a habit.** `mvis roundtrip` gives a
-  PASS/FAIL. A PASS requires IMU intrinsics to collapse *and* geometry to
-  hold. Nothing comparable ships with the others.
-- **Discrete-time.** MVIS places state nodes at `state_hz`. Kalibr and Basalt
-  fit a B-spline (a smooth continuous-time curve). The trade-off is in
-  [Continuous-time refinement](/concepts/continuous-time/).
+- **Validation is a command.** `mvis roundtrip` applies the calibration to
+  its own recording, calibrates again and prints PASS or FAIL. A PASS needs
+  the IMU intrinsics to come back as identity *and* the geometry to stay put.
+  Neither Kalibr nor Basalt ships a check like it.
+  [Round-trip validation](/guides/roundtrip/).
+- **Discrete-time.** MVIS places pose, velocity and bias states at a fixed
+  rate (`state_hz`, 30 Hz by default). Kalibr and Basalt fit a B-spline, a
+  smooth curve in continuous time.

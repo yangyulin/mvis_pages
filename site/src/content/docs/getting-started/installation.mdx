@@ -1,110 +1,97 @@
 ---
 title: Installation
-description: Install MVIS from the OpenMVIS repository — one-step conda setup or pip into an existing environment.
+description: Install MVIS from source with pip or the conda setup script, pick the extras, and verify the install with mvis check.
 pageType: guide
 ---
 
-Use this page to install MVIS and check that it works.
+Use this page to install MVIS and check that it works. Check
+[Requirements](/getting-started/requirements/) first: Linux or macOS,
+Python 3.11 or 3.12.
 
-- **Pure Python:** the package is `pymvis`, the command is `mvis`
-- **Platforms:** Linux and macOS (x86-64 / arm64), Python 3.11 or 3.12
-- **No ROS:** there is no ROS dependency
-- **Nothing to compile**
+## 1. Install from source
 
-The code lives at
-[github.com/openmvis/openmvis](https://github.com/openmvis/openmvis).
-Version 0.1.0 is the first release; it is not on PyPI yet, so install from
-the clone:
+MVIS 0.1.0 is not on PyPI yet. Install it from the code repository into a
+fresh virtual environment:
 
 ```bash
 git clone https://github.com/openmvis/openmvis && cd openmvis
+python3.12 -m venv .venv && source .venv/bin/activate   # or python3.11
+pip install -e ".[apriltag,aruco,ros1,dev]"
 ```
 
-:::note[Why no Windows, and why Python 3.11–3.12]
-GTSAM publishes no Windows wheels, and the `numpy<2` pin (see below) has no
-wheel for Python 3.13. Windows users can run MVIS under WSL.
-:::
+- **Python 3.11 or 3.12:** with Python 3.13 the install stops, because MVIS
+  requires a version below 3.13.
 
-## One-step setup (recommended)
+- **`-e`:** an editable install. Edits to the checkout take effect without a
+  reinstall.
+- **Keep the checkout:** the [Quickstart](/getting-started/quickstart/) runs
+  example configs from it.
+
+### With conda
+
+The repository also ships a setup script. It creates a conda environment
+named `mvis` with Python 3.11, installs MVIS with the `apriltag`, `aruco`,
+`ros1`, `viz` and `dev` extras, adds `ffmpeg` for the simulator videos, runs
+`mvis check --env --smoke` and then the unit tests:
 
 ```bash
 bash scripts/setup_env.sh
 conda activate mvis
 ```
 
-The script does three things:
+### From PyPI, after the release
 
-1. Creates the `mvis` conda environment.
-2. Installs every dependency and the package in editable mode.
-3. Runs the test suite, so you know the install works before you point it at data.
-
-## Manual install
+With the v0.1.0 release on PyPI, the package installs without a clone:
 
 Into any Python 3.11 or 3.12 environment:
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e .
+pip install pymvis                       # core only
+pip install "pymvis[apriltag,ros1]"      # AprilGrid boards + ROS1/ROS2 bags
 ```
 
-Optional extras add the detector backends (the code that finds the board in
-each image), input formats and tools. Install the ones you need:
+The package is `pymvis`; the import and the command are `mvis`.
 
-```bash
-pip install -e ".[apriltag]"    # AprilGrid boards (aprilgrid package)
-pip install -e ".[aruco]"       # ArUco boards (opencv-contrib)
-pip install -e ".[ros1]"        # ROS1 bags, read with rosbags (no ROS needed)
-pip install -e ".[mcap]"        # MCAP episodes
-pip install -e ".[viz]"         # Rerun 3D viewer
-pip install -e ".[dev]"         # pytest
-```
+## 2. Pick the extras
 
-Several at once: `pip install -e ".[apriltag,aruco,ros1,dev]"`.
+The core install solves camera and camera–IMU calibrations and writes the
+reports. Extras add board detectors, bag readers and tools:
 
-Once `pymvis` is on PyPI the same extras work as `pip install "pymvis[apriltag,ros1]"`.
+| Extra | Installs | Needed for |
+|---|---|---|
+| `apriltag` | `aprilgrid` | AprilGrid boards |
+| `aruco` | `opencv-contrib-python` (< 4.12) | ArUco boards |
+| `ros1` | `rosbags` (≥ 0.11.6) | ROS1 and ROS2 bags, read in pure Python with no ROS install |
+| `mcap` | `mcap`, `mcap-protobuf-support`, PyAV | Converting MCAP recordings |
+| `viz` | `rerun-sdk` | The Rerun 3D viewer (`rerun_visualization: true`) |
+| `dev` | `pytest`, `pytest-cov`, `pytest-timeout` | Running the test suite |
 
-## Reading bags
+- **`aruco` and OpenCV:** `opencv-contrib-python` and `opencv-python` both
+  provide `cv2`, and the one installed last wins. If `cv2` misbehaves, install
+  into a clean environment or uninstall `opencv-python` first.
 
-We read ROS bags through [`rosbags`](https://pypi.org/project/rosbags/), the
-`[ros1]` extra. It is pure Python and needs no ROS installation, so you can
-calibrate a ROS1 or ROS2 bag on a machine that has never had ROS on it.
-
-:::caution[GTSAM needs NumPy 1.x]
-The package pins NumPy below 2, so a plain install is safe. Only override the pin
-if you know GTSAM has a NumPy 2 build:
-
-```bash
-pip install "numpy<2"
-```
-
-GTSAM 4.2 from pip is built against the NumPy 1.x ABI (the binary interface between compiled libraries).
-With NumPy 2 installed, constructing `gtsam.Pose3(Rot3, np.array)` gives a **segfault**.
-That is not an exception you can catch: the program crashes.
+:::caution[Keep NumPy below 2]
+GTSAM 4.2 from pip is built against NumPy 1.x. With NumPy 2 it crashes with a
+segmentation fault, which Python cannot catch. MVIS pins `numpy<2` and
+`opencv-python<4.12` for this reason. Do not upgrade NumPy in the same
+environment.
 :::
 
-## Check the install
+## 3. Check the install
 
 ```bash
-mvis check --env --smoke   # verifies the install, then runs a short synthetic solve
-mvis --help
+mvis check --env --smoke
 ```
 
-You should see eleven subcommands:
+- **`--env`:** checks Python, NumPy, GTSAM, OpenCV, each installed extra, and
+  the `mvis` command. Each line reads PASS, WARN or FAIL.
+- **`--smoke`:** also runs a short synthetic camera solve.
+- **With a config:** `mvis check --env -c config.yaml` also checks the extras
+  that config needs.
 
-- `calibrate`
-- `cam`
-- `cam-imu`
-- `apply-calib`
-- `roundtrip`
-- `run`
-- `inspect`
-- `check`
-- `verdict`
-- `datasets`
-- `analyze`
-
-The [CLI reference](/reference/cli/) documents each one.
+`mvis --help` lists every subcommand. The [CLI reference](/reference/cli/)
+documents each one.
 
 ## Next
 
-Calibrate something in [Quickstart](/getting-started/quickstart/).
+Run your first calibration in the [Quickstart](/getting-started/quickstart/).
