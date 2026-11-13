@@ -26,6 +26,6 @@ artifacts:
   report_html: ""
   raw_yaml: ""
 submitted:
-  by: Open MVIS team
+  by: OpenMVIS team
   date: "2026-04-20"
   hardware: Intel i9-13900K, 64 GB RAM, no GPU

@@ -84,7 +84,7 @@ export default defineConfig({
 
   integrations: [
     starlight({
-      title: 'Open MVIS',
+      title: 'OpenMVIS',
       description:
         'The benchmark for multi-visual-inertial sensor calibration — multi-IMU, multi-camera, with leaderboard.',
       logo: { src: './src/assets/logo-placeholder.svg' },

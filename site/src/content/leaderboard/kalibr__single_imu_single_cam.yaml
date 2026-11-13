@@ -26,6 +26,6 @@ artifacts:
   report_html: ""
   raw_yaml: ""
 submitted:
-  by: Open MVIS team (reference baseline)
+  by: OpenMVIS team (reference baseline)
   date: "2026-04-20"
   hardware: as reported by Kalibr paper

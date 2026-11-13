@@ -13,7 +13,7 @@
  "image": {
   "src": "/media/hero/vi_rig.jpg",
   "alt": "The VI-Rig: a Blackfly camera, a RealSense T265 and four IMUs on one plate",
-  "credit": "Photo: Open MVIS"
+  "credit": "Photo: OpenMVIS"
  },
  "links": {
   "dataset": "/datasets/virig-4imus-3cams/",

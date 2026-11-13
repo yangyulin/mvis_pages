@@ -1,6 +1,6 @@
-# Open MVIS — Project Site & Benchmark
+# OpenMVIS — Project Site & Benchmark
 
-Source for the [Open MVIS](https://openmvis.github.io) website: documentation
+Source for the [OpenMVIS](https://openmvis.github.io) website: documentation
 for the multi-visual-inertial sensor calibration toolbox, the open MVIS
 datasets, and the public **calibration leaderboard**.
 
@@ -8,7 +8,7 @@ The site is built with [Astro 6](https://astro.build) and the
 [Starlight](https://starlight.astro.build) docs theme. Static HTML is served
 by GitHub Pages from `docs/`.
 
-> **Vision.** Open MVIS aims to become the de-facto public benchmark for
+> **Vision.** OpenMVIS aims to become the de-facto public benchmark for
 > camera and visual-inertial sensor calibration over the next 10–20 years —
 > the role KITTI plays for driving and Papers with Code plays for ML. See
 > [`doc/PLAN.md`](doc/PLAN.md) for the roadmap and [`doc/DESIGN.md`](doc/DESIGN.md)
