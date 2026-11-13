@@ -126,3 +126,14 @@ def test_imu_and_timing_explain_their_terms():
            "cams": [{"name": "cam0", "td_ms": 2.0}]}
     assert "<code>t_ga</code>, the time offset between the gyroscope and accelerometer channels: −1.00 ± 0.50 ms." in imu_section([{"label": "A", "run": run}])
     assert timing_section([{"label": "A", "run": run}]).startswith("<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.</p>")
+    rs = timing_section([{"label": "A", "run": run, "readout_ms": [31.0]}])
+    assert "first image row" in rs and "td + readout / 2" in rs
+
+
+def test_rolling_shutter_td_tile_names_the_row_and_gives_mid_frame():
+    from mvis_site.markup import td_label, tiles
+    assert td_label(2.0) == ("cam0 td", "")
+    assert td_label(-20.93, 31.05) == ("cam0 td, first row", "−5.40 ms at mid-frame")
+    run = {"cams": [{"name": "cam0", "td_ms": -20.93, "p_CinI_mm": [1.0, 2.0, 2.0], "reproj": 0.2}], "reproj_median_px": 0.2}
+    html = tiles(run, 31.05)
+    assert "cam0 td, first row" in html and "at mid-frame" in html
