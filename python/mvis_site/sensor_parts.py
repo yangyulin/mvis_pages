@@ -107,8 +107,13 @@ def imu_section(vs) -> str:
     return each({"variants": vs}, one)
 
 
+RS_TD_NOTE = (" For a rolling-shutter camera td is the time of the first image row; the middle row is td + readout / 2, "
+              "which is what a global-shutter calibration reports.")
+
+
 def timing_section(vs) -> str:
-    return '<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.</p>' + each({"variants": vs}, lambda v, i: f'<div class=chart>{timing_svg(v["run"])}</div>')
+    rs = any(abs(x) > 0.01 for v in vs for x in v.get("readout_ms", []))
+    return f'<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.{RS_TD_NOTE if rs else ""}</p>' + each({"variants": vs}, lambda v, i: f'<div class=chart>{timing_svg(v["run"])}</div>')
 
 
 BOARD_SHAPE_LEAD = ("The calibration board isn't perfectly flat, so this solve estimated the height of every corner off the "
@@ -189,7 +194,7 @@ def _dataset_rows(p: dict, data_url: str) -> str:
 
 def glance(demo: str, vs: list) -> str:
     """The demo beside each run's value tiles."""
-    return f'<div class=band>{demo}{each({"variants": vs}, lambda v, i: tiles(v["run"]))}</div>'
+    return f'<div class=band>{demo}{each({"variants": vs}, lambda v, i: tiles(v["run"], v["readout_ms"][0]))}</div>'
 
 
 def process_section(note: str, vs: list) -> str:

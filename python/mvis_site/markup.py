@@ -258,14 +258,24 @@ def reproj(r) -> tuple[str, float]:
     return ("median", med) if med is not None else ("RMS", r["reproj_rms_px"])
 
 
-def tiles(r) -> str:
+def td_label(td_ms: float, readout_ms: float = 0.0) -> tuple[str, str]:
+    """(label, note) for cam0's td: a rolling-shutter camera's td is the time of its first image row, so its
+    mid-frame value (td + readout / 2, the one a global-shutter calibration reports) goes beside it."""
+    if abs(readout_ms) <= 0.01:
+        return "cam0 td", ""
+    return "cam0 td, first row", f"{num(td_ms + readout_ms / 2, 2, True)} ms at mid-frame"
+
+
+def tiles(r, readout_ms: float = 0.0) -> str:
     kind, value = reproj(r)
     rep = (f"Reprojection {kind}", value)
     c0 = r["cams"][0]
     base = baseline_mm(r["cams"])
     b = f'<b>{num(base,1)}<small> mm</small></b>' if base is not None else "<b>–</b>"
+    label, note = td_label(c0["td_ms"], readout_ms)
+    note = f'<small class=tile-note>{note}</small>' if note else ""
     return (f'<div class=tiles><div><span>{rep[0]}</span><b>{num(rep[1],2)}<small> px</small></b></div><div><span>cam0–cam1 baseline</span>{b}</div>'
-            f'<div><span>cam0 td</span><b>{num(c0["td_ms"],2,True)}<small> ms</small></b></div><div><span>cam0 lever arm</span><b>{num(float(np.linalg.norm(c0["p_CinI_mm"])),1)}<small> mm</small></b></div></div>')
+            f'<div><span>{label}</span><b>{num(c0["td_ms"],2,True)}<small> ms</small></b>{note}</div><div><span>cam0 lever arm</span><b>{num(float(np.linalg.norm(c0["p_CinI_mm"])),1)}<small> mm</small></b></div></div>')
 
 
 def each(d, fn) -> str:
