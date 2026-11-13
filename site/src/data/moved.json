@@ -31,5 +31,6 @@
  "/sensors/hp-reverb-g2/": "/devices/hp-reverb-g2/",
  "/sensors/samsung-odyssey-plus/": "/devices/samsung-odyssey-plus/",
  "/benchmark/tga/": "/why/tga/",
- "/guides/corrected-datasets/": "/guides/roundtrip/"
+ "/guides/corrected-datasets/": "/guides/roundtrip/",
+ "/about/comparison/": "/getting-started/comparison/"
 }

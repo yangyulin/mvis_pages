@@ -124,6 +124,7 @@ export default defineConfig({
           label: 'Getting started',
           items: [
             { label: 'Overview', link: '/getting-started/overview/' },
+            { label: 'Comparison vs Kalibr / Basalt', link: '/getting-started/comparison/' },
             { label: 'Requirements', link: '/getting-started/requirements/' },
             { label: 'Installation', link: '/getting-started/installation/' },
             { label: 'Quickstart', link: '/getting-started/quickstart/' },
@@ -232,7 +233,6 @@ export default defineConfig({
           collapsed: true,
           items: [
             { label: 'Contributors & citation', link: '/about/contributors/' },
-            { label: 'Comparison vs Kalibr / Basalt', link: '/about/comparison/' },
             { label: 'FAQ & troubleshooting', link: '/about/faq/' },
             { label: 'Changelog', link: '/about/changelog/' },
             { label: 'Roadmap', link: '/about/roadmap/' },
