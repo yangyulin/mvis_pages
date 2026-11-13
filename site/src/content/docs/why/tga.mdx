@@ -25,7 +25,7 @@ export const tga15 = (fam) => ev4.families.find((f) => f.id === fam).sensors.fin
 export const band = (i) => `${(bands.delay_ms[i] < 0 ? '−' : '') + Math.abs(bands.delay_ms[i]).toFixed(1)} ms at ${bands.bands_hz[i][0]}–${bands.bands_hz[i][1]} Hz`;
 
 Use this page to see what a camera–IMU calibration does when the IMU's gyroscope and accelerometer are not in
-step. Data: the Looper and the Intel T265 of [VI-Rig](/reference/datasets/virig-4imus-4cams/), with the
+step. Data: the Looper and the Intel T265 of [VI-Rig](/datasets/virig-4imus-4cams/), with the
 swept recordings on the Hub, [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets).
 
 **The answer first:**
@@ -93,7 +93,7 @@ How to turn it on: [Estimate `t_ga`](/guides/camera-imu-calibration/#awkward-imu
 
 ## 4. On the running example, only the T265 IMU has a large t_ga
 
-The guides use the VI-Rig recording [virig-4imus-4cams](/reference/datasets/virig-4imus-4cams/). It has four IMUs on
+The guides use the VI-Rig recording [virig-4imus-4cams](/datasets/virig-4imus-4cams/). It has four IMUs on
 one rig, so it shows $t_{ga}$ on four devices at once.
 
 - **One run, recording 01:** MVIS solved all four cameras and all four IMUs together, with $t_{ga}$ on, as in

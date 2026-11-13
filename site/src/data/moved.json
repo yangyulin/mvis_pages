@@ -32,5 +32,9 @@
  "/sensors/samsung-odyssey-plus/": "/devices/samsung-odyssey-plus/",
  "/benchmark/tga/": "/why/tga/",
  "/guides/corrected-datasets/": "/guides/roundtrip/",
- "/about/comparison/": "/getting-started/comparison/"
+ "/about/comparison/": "/getting-started/comparison/",
+ "/reference/datasets/": "/datasets/",
+ "/reference/datasets/virig-4imus-3cams/": "/datasets/virig-4imus-3cams/",
+ "/reference/datasets/virig-4imus-4cams/": "/datasets/virig-4imus-4cams/",
+ "/concepts/continuous-time/": "/concepts/calibration-graph/"
 }

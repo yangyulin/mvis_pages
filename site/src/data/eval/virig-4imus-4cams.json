@@ -15,7 +15,7 @@
   "credit": "MVIS solve view, from the homepage"
  },
  "links": {
-  "dataset": "/reference/datasets/virig-4imus-4cams/",
+  "dataset": "/datasets/virig-4imus-4cams/",
   "sensor": "/devices/intel-t265/",
   "hub": "https://huggingface.co/datasets/calibench-vi/datasets/tree/main/virig-4imus-4cams"
  },
