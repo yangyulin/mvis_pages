@@ -568,7 +568,7 @@ sensors:
     key: insta360-one-rs-1inch-360
     title: Insta360 ONE RS 1-Inch 360 Edition
     description: Consumer 360° camera with two back-to-back rolling-shutter fisheye lenses and a 1 kHz IMU, calibrated with MVIS on the Hilti-Trimble SLAM Challenge 2026 calibration recordings.
-    lead: Consumer 360° camera from Insta360 with two 1-inch sensors behind back-to-back fisheye lenses of about 200° each and a built-in IMU at 1 kHz. It is the camera of the Hilti-Trimble SLAM Challenge 2026 dataset. Each lens is solved with the IMU from the organisers' own calibration recording, with the rolling-shutter readout estimated. The first tab puts the two solves together as one rig.
+    lead: Consumer 360° camera from Insta360 with two 1-inch sensors behind back-to-back fisheye lenses of about 200° each and a built-in IMU at 1 kHz. It is the camera of the Hilti-Trimble SLAM Challenge 2026 dataset. Each lens is solved with the IMU from the organisers' own calibration recording, using only the part where the camera turns about all three axes, with the rolling-shutter readout and the shape of the calibration board estimated. The first tab puts the two solves together as one rig.
     chips: [360° camera, Rolling shutter, 2 × 200° fisheye, 1 kHz IMU, CC BY-NC-SA data]
     card: {name: "ONE RS 1-Inch 360", maker: Insta360, tags: [Rolling shutter, 2 cameras, 1 kHz IMU], sensors: "2 back-to-back rolling-shutter fisheye + IMU @ 1 kHz", format: "ROS 2 bag", shows: "A 360° camera: two 200° lenses and the IMU, readout estimated"}
     source: https://github.com/Hilti-Research/hilti-trimble-slam-challenge-2026/blob/main/docs/sensors.md
@@ -580,7 +580,7 @@ sensors:
       - [Image sensors, "2 × 1-inch CMOS", Maker]
       - [Lenses, "Leica Super-Summicron-A, f/2.2, 6.52 mm (35 mm equivalent); about 200° each, back to back", Dataset]
       - [Shutter, "Rolling; the two shutters are synchronised", Dataset]
-      - [Readout time, "31.05 ms, top to bottom, in the organisers' SLAM settings; 31.0 ms (front) and 31.2 ms (back) solved here", Dataset]
+      - [Readout time, "31.05 ms, top to bottom, in the organisers' SLAM settings; 31.1 ms (front) and 31.4 ms (back) solved here", Dataset]
       - [Images in the recordings, "2 × 1472×1440 at 30 Hz, JPEG", Measured]
       - [IMU, "6-axis, 1 kHz, read from the video metadata", Measured]
       - [Maker video modes, "Up to 6K 360° video (5888×2944 at 30 fps)", Maker]
@@ -592,10 +592,11 @@ sensors:
       - [Licence, CC BY-NC-SA 3.0]
       - [Hosted, "Not hosted here; download from the challenge dataset"]
     data_link: {url: "https://huggingface.co/datasets/Hilti-Research/hilti-trimble-slam-challenge-2026/tree/main/camera_calibration", label: "Hilti-Trimble SLAM Challenge 2026: camera_calibration"}
-    method: "Each lens alone with the IMU, then both placed in the one IMU frame. Camera intrinsics (Kannala–Brandt kb4) start from a single-camera solve of the camera-pair recording and stay free; rolling-shutter readout, camera time offset, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. IMU noise measured on the camera-pair recording, where the camera stands still, and widened about 2.8×. Solved 2026-11-12."
+    method: "Each lens alone with the IMU, then both placed in the one IMU frame. Only the well-excited part of each recording is used: the camera turns about all three axes from 130 s (front) and 100 s (back), and the last 10 s, where it is put down, are left out; 92 s and 97 s. Camera intrinsics (enhanced unified model, EUCM, as in the organisers' calibration) start from a single-camera solve and stay free; the shape of the 7×12 board, rolling-shutter readout, camera time offset, IMU scale and misalignment and the gyro-to-accel offset t_ga are estimated. IMU noise measured on the camera-pair recording, where the camera stands still, and widened about 2.8×. Solved 2026-11-12."
     limits:
       - "The tab with both lenses is put together from two solves, not one joint solve: each lens is placed in the IMU frame by its own recording. Its IMU values and its calibration-process view are those of the front-lens recording."
-      - "So the distance between the lenses, about 26 mm, comes from two camera-to-IMU results, not from a direct solve of the pair. The organisers' Kalibr calibration gives about 40 mm, and the difference isn't explained yet. The lenses face opposite ways and rarely see the board together."
+      - "The distance between the lenses, 36.2 mm here, comes from two camera-to-IMU results, not from one joint solve. It agrees with a direct estimate from the camera-pair recording without the IMU (36–37 mm) and with four 60 s windows (34.6–38.0 mm). The organisers' Kalibr chain gives 40.1 mm. Using the whole recordings, including the first 100–130 s where the camera turns about one axis only, gives about 34 mm; that difference isn't fully explained."
+      - "The 7×12 calibration board isn't flat: it bows about 12 mm across its 2.2 m width, the same in both recordings. Treating it as flat moves each lens by up to 10 mm, so the board shape is estimated here; see Board shape."
       - "The organisers publish a Kalibr calibration (EUCM model, IMU intrinsics fixed). It isn't an independent reference: it comes from the same recordings."
       - "The board reaches about 95° from the lens axis, so the outermost part of each 200° image is extrapolated."
       - "The images are JPEG-compressed, which can shift detected corners slightly."
