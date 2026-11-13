@@ -33,7 +33,7 @@ sensors:
       - [Board, "AprilGrid 6×6, tag 88 mm, spacing 0.3, t36h11"]
       - [Configs and results, "__HUB:community/intel-t265/__"]
     folder: virig-4imus-3cams/
-    method: "Fisheye stereo plus the T265's own IMU, camera intrinsics free, t_ga estimated, and the shape of the calibration board estimated, since the VI-Rig board isn't perfectly flat (about 4.5 mm peak to peak; see Board shape). Solved 2026-11-12."
+    method: "Fisheye stereo plus the T265's own IMU, camera intrinsics free, t_ga estimated, and the shape of the calibration board estimated, since the VI-Rig board isn't perfectly flat: about 4.5 mm peak to peak in this August 2021 recording (see Board shape); later recordings of the same board design, from October 2021, show the same saddle at 10–11 mm. Solved 2026-11-12."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
       - The T265 gyro-to-accel offset isn't a pure time shift. We measured about −6.8 ms at 2–4 Hz and −1.2 ms at 30–40 Hz, so a single t_ga is a compromise that depends on the motion.
