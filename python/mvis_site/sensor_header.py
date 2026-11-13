@@ -9,7 +9,7 @@ import re
 import numpy as np
 
 from .geometry import baseline_mm
-from .markup import MAP_STAGE, e, each, fov_pair, num, proc_html
+from .markup import MAP_STAGE, e, each, fov_pair, num, proc_html, td_label
 from .sensor_parts import map_panel
 from .sensor_rig import rig_drawing, rig_table
 
@@ -236,5 +236,8 @@ def header_parts(slug: str, p: dict, vs: list, parts: dict) -> dict:
                     '<h3 class=rig-h>To scale, from above and the front</h3>' + each({"variants": vs}, lambda x, i: rig_drawing(x) + rig_table(x))
                     + '<p class=rig-note>Solved by MVIS. Lever arms (camera–IMU position offsets) are in the IMU frame. Rotation is log(R), camera in the IMU frame.</p>')
     parts["detail"] = (fold("lens", "Lens", "Calibrated field of view", parts["lens"]) + fold("imu", "IMU", f'Gyro–accel time offset t_ga {num(r0.get("t_ga_ms"), 2, True)} ms', parts["imu"])
-                       + fold("timing", "Timing", f'cam0 td {num(r0["cams"][0]["td_ms"], 2, True)} ms', parts["timing"]) + fold("full-results", "Full results", "Every solved parameter", parts["results"]))
+                       + fold("timing", "Timing", f'{td_label(r0["cams"][0]["td_ms"], vs[0]["readout_ms"][0])[0]} {num(r0["cams"][0]["td_ms"], 2, True)} ms', parts["timing"])
+                       + (fold("board-shape", "Board shape", f'peak to peak {shaped[0]["board_shape"]["p2p_mm"]:.1f} mm', parts["board_shape"])
+                          if (shaped := [x for x in vs if x.get("board_shape")]) and parts.get("board_shape") else "")
+                       + fold("full-results", "Full results", "Every solved parameter", parts["results"]))
     return parts

@@ -145,6 +145,61 @@ def board_svg(b, tags: dict) -> str:
             f'<figcaption>AprilGrid {rows} × {cols}, {w:.0f} × {h:.0f} mm. Standard pattern, to scale</figcaption></figure>')
 
 
+SHAPE_NEG, SHAPE_MID, SHAPE_POS = (33, 102, 172), (240, 239, 236), (178, 24, 43)   # diverging: blue, neutral, red
+
+
+def _shape_colour(t: float) -> str:
+    """t in [-1, 1] to a diverging colour, neutral at 0."""
+    a, b = (SHAPE_MID, SHAPE_POS) if t >= 0 else (SHAPE_MID, SHAPE_NEG)
+    k = min(abs(t), 1.0)
+    return "#%02x%02x%02x" % tuple(round(x + (y - x) * k) for x, y in zip(a, b))
+
+
+def board_shape_svg(b: dict, shape: dict) -> str:
+    """Estimated height of every AprilGrid corner off the flat board, at its place on the board, to scale.
+
+    b: the board (rows, cols, tag_mm, spacing). shape: read_board_shape() of a run. Corners follow MVIS's order: tag
+    r * cols + c centred at (c, r) * (tag + gap) with r up, corners bottom-left, bottom-right, top-right, top-left.
+    Colour is symmetric about the flat plane; corners no frame saw are hollow and left out of the scale."""
+    rows, cols, tag = b["rows"], b["cols"], b["tag_mm"]
+    step = tag * (1 + b["spacing"])
+    half = tag / 2
+    h = [x * 1e3 for x in shape["heights_m"]]
+    n = shape["n_obs"]
+    if len(h) != 4 * rows * cols:
+        raise ValueError(f"{len(h)} board heights for a {rows}x{cols} AprilGrid")
+    seen = [x for x, k in zip(h, n) if k > 0] or h
+    lim = max(max(abs(x) for x in seen), 1e-3)
+    w, d = (cols - 1) * step + tag, (rows - 1) * step + tag
+    rad = tag * 0.11
+    dots = []
+    for r in range(rows):
+        for c in range(cols):
+            cx, cy = c * step + half, (rows - 1 - r) * step + half              # SVG y down: row 0 at the bottom
+            for k, (ox, oy) in enumerate(((-1, 1), (1, 1), (1, -1), (-1, -1))):
+                i = (r * cols + c) * 4 + k
+                x, y = cx + ox * half, cy + oy * half
+                if n[i] > 0:
+                    dots.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rad:.1f}" fill="{_shape_colour(h[i] / lim)}"><title>{h[i]:+.2f} mm</title></circle>')
+                else:
+                    dots.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rad:.1f}" fill="none" stroke="#999" stroke-width="{rad / 4:.1f}"><title>not seen</title></circle>')
+    m = step
+    bar_w = w * 0.6
+    fs = w * 0.03                                   # legend text scales with the board, not the tag pitch
+    stops = "".join(f'<stop offset="{k / 10:.1f}" stop-color="{_shape_colour(k / 5 - 1)}"/>' for k in range(11))
+    bar = (f'<defs><linearGradient id="bsg">{stops}</linearGradient></defs>'
+           f'<rect x="{(w - bar_w) / 2:.1f}" y="{d + m * 0.55:.1f}" width="{bar_w:.1f}" height="{fs * 0.8:.1f}" fill="url(#bsg)"/>'
+           f'<text x="{(w - bar_w) / 2:.1f}" y="{d + m * 0.55 + fs * 2.0:.1f}" text-anchor="middle" font-size="{fs:.1f}" fill="currentColor">{-lim:+.1f} mm</text>'
+           f'<text x="{w / 2:.1f}" y="{d + m * 0.55 + fs * 2.0:.1f}" text-anchor="middle" font-size="{fs:.1f}" fill="currentColor">flat</text>'
+           f'<text x="{(w + bar_w) / 2:.1f}" y="{d + m * 0.55 + fs * 2.0:.1f}" text-anchor="middle" font-size="{fs:.1f}" fill="currentColor">{lim:+.1f} mm</text>')
+    return (f'<figure class=board><svg viewBox="{-m * 0.6:.1f} {-m * 0.6:.1f} {w + m * 1.2:.1f} {d + m * 2.1:.1f}" role="img" '
+            f'aria-label="Board shape, AprilGrid {rows} by {cols}: heights off the flat board">'
+            f'<rect x="{-m * 0.3:.1f}" y="{-m * 0.3:.1f}" width="{w + m * 0.6:.1f}" height="{d + m * 0.6:.1f}" fill="none" stroke="currentColor" stroke-opacity="0.35"/>'
+            + "".join(dots) + bar + '</svg>'
+            f'<figcaption>Height of each corner off the flat board: peak to peak {shape["p2p_mm"]:.1f} mm, rms '
+            f'{shape["rms_mm"]:.1f} mm. Hover a corner for its value.</figcaption></figure>')
+
+
 def imu_bars(r) -> str:
     rows = []
     for label, vals in (("Gyro scale", r.get("Dw_diag")), ("Accel scale", r.get("Da_diag"))):
@@ -203,14 +258,24 @@ def reproj(r) -> tuple[str, float]:
     return ("median", med) if med is not None else ("RMS", r["reproj_rms_px"])
 
 
-def tiles(r) -> str:
+def td_label(td_ms: float, readout_ms: float = 0.0) -> tuple[str, str]:
+    """(label, note) for cam0's td: a rolling-shutter camera's td is the time of its first image row, so its
+    mid-frame value (td + readout / 2, the one a global-shutter calibration reports) goes beside it."""
+    if abs(readout_ms) <= 0.01:
+        return "cam0 td", ""
+    return "cam0 td, first row", f"{num(td_ms + readout_ms / 2, 2, True)} ms at mid-frame"
+
+
+def tiles(r, readout_ms: float = 0.0) -> str:
     kind, value = reproj(r)
     rep = (f"Reprojection {kind}", value)
     c0 = r["cams"][0]
     base = baseline_mm(r["cams"])
     b = f'<b>{num(base,1)}<small> mm</small></b>' if base is not None else "<b>–</b>"
+    label, note = td_label(c0["td_ms"], readout_ms)
+    note = f'<small class=tile-note>{note}</small>' if note else ""
     return (f'<div class=tiles><div><span>{rep[0]}</span><b>{num(rep[1],2)}<small> px</small></b></div><div><span>cam0–cam1 baseline</span>{b}</div>'
-            f'<div><span>cam0 td</span><b>{num(c0["td_ms"],2,True)}<small> ms</small></b></div><div><span>cam0 lever arm</span><b>{num(float(np.linalg.norm(c0["p_CinI_mm"])),1)}<small> mm</small></b></div></div>')
+            f'<div><span>{label}</span><b>{num(c0["td_ms"],2,True)}<small> ms</small></b>{note}</div><div><span>cam0 lever arm</span><b>{num(float(np.linalg.norm(c0["p_CinI_mm"])),1)}<small> mm</small></b></div></div>')
 
 
 def each(d, fn) -> str:

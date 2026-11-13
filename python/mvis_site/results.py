@@ -151,6 +151,21 @@ def refuse_frames(key: str, variants: list, require_process: bool = True) -> Non
             raise RuntimeError(f"{key}: process figure missing or holds camera frames")
 
 
+def read_board_shape(run_dir: Path) -> dict | None:
+    """The board shape a cam-IMU run estimated (`estimate.board_points`): MVIS writes it beside the result as
+    `cam_imu_board_shape.yaml` (per-corner heights in m, in the board's point order, and per-corner observation
+    counts). None when the run assumed a flat board."""
+    f = Path(run_dir) / "cam_imu_board_shape.yaml"
+    if not f.exists():
+        return None
+    bs = yaml.safe_load(f.read_text())["board_shape"]
+    h = np.asarray(bs["heights_m"], float)
+    n = np.asarray(bs.get("n_obs") or [1] * len(h), int)
+    seen = n > 0 if (n > 0).any() else np.ones(len(h), bool)
+    return {"heights_m": h.tolist(), "n_obs": n.tolist(), "p2p_mm": float(np.ptp(h[seen]) * 1e3),
+            "rms_mm": float(np.std(h[seen]) * 1e3)}
+
+
 def load_variant(v: dict, roots: dict) -> dict:
     d = expand_root(v["run"], roots)
     run = json.loads((d / "cam_imu.json").read_text())
@@ -181,14 +196,17 @@ def load_variant(v: dict, roots: dict) -> dict:
             run["cams"].append({**pair, "name": c["name"], "p_CinI_mm": c["p_CinI_mm"], "rotvec": c["rotvec"]})
             uvs.append(corner_uv(root / c["pair"] / "cam_imu_report.html")[c["index"]])
             sizes.append(sizes[0])
-            readout.append(0.0)
+            pcal = root / c["pair"] / "cam_imu_calib.yaml"  # the pair's own readout, when it solved one
+            pcams = yaml.safe_load(pcal.read_text())["cameras"] if pcal.exists() else []
+            readout.append(pcams[c["index"]].get("rolling_shutter_readout", 0.0) * 1000 if c["index"] < len(pcams) else 0.0)
     proc = extract_process(d / "cam_imu_report.html") if v.get("report") else None
+    shape = read_board_shape(d)
     views = read_views(d) if v.get("report") else None
     fov = [fov_deg(c["intr"], s, u) for c, s, u in zip(run["cams"], sizes, uvs)]
     if v.get("fov_past_fit"):  # the rules let this value through, but it conflicts with a published figure
         fov = [{**f, "h": None, "v": None, "h_ext": True, "v_ext": True} for f in fov]
     return {"label": v["label"], "run": run, "ref": ref, "sizes": sizes, "readout_ms": readout, "process": proc,
-            "views": views, "fov": fov}
+            "views": views, "fov": fov, "board_shape": shape}
 
 
 def load_series(cfg: dict, roots: dict) -> dict | None:

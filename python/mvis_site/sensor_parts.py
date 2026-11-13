@@ -4,8 +4,8 @@ from __future__ import annotations
 import re
 
 from .geometry import baseline_mm
-from .markup import (MAP_STAGE, PARAMS, board_svg, e, each, fov_text, imu_bars, lens_svg, num, proc_html, series_tables, tiles, timing_svg,
-                     vec)
+from .markup import (MAP_STAGE, PARAMS, board_shape_svg, board_svg, e, each, fov_text, imu_bars, lens_svg, num, proc_html, series_tables,
+                     tiles, timing_svg, vec)
 from .sensor_rig import drawn_fov
 
 PARTS = [("Demo and values", "glance"), ("Calibration process", "process"), ("Sensor calibration map", "map"), ("Hardware", "hardware"),
@@ -107,8 +107,26 @@ def imu_section(vs) -> str:
     return each({"variants": vs}, one)
 
 
+RS_TD_NOTE = (" For a rolling-shutter camera td is the time of the first image row; the middle row is td + readout / 2, "
+              "which is what a global-shutter calibration reports.")
+
+
 def timing_section(vs) -> str:
-    return '<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.</p>' + each({"variants": vs}, lambda v, i: f'<div class=chart>{timing_svg(v["run"])}</div>')
+    rs = any(abs(x) > 0.01 for v in vs for x in v.get("readout_ms", []))
+    return f'<p>The time offsets, to scale. td is the camera–IMU time offset, with t_imu = t_cam + td.{RS_TD_NOTE if rs else ""}</p>' + each({"variants": vs}, lambda v, i: f'<div class=chart>{timing_svg(v["run"])}</div>')
+
+
+BOARD_SHAPE_LEAD = ("The calibration board isn't perfectly flat, so this solve estimated the height of every corner off the "
+                    "flat board along with the calibration. The board's mean plane and tilt belong to its pose, so a flat "
+                    "board shows only noise here.")
+
+
+def board_shape_section(vs, board: dict) -> str:
+    """The estimated board shape of each run that has one; "" when no run estimated it."""
+    if not any(v.get("board_shape") for v in vs):
+        return ""
+    return f'<p>{BOARD_SHAPE_LEAD}</p>' + each({"variants": vs}, lambda v, i: board_shape_svg(board, v["board_shape"]) if v.get("board_shape")
+                                                 else "<p>This solve assumed a flat board.</p>")
 
 
 def source_note(p: dict) -> str:
@@ -176,7 +194,7 @@ def _dataset_rows(p: dict, data_url: str) -> str:
 
 def glance(demo: str, vs: list) -> str:
     """The demo beside each run's value tiles."""
-    return f'<div class=band>{demo}{each({"variants": vs}, lambda v, i: tiles(v["run"]))}</div>'
+    return f'<div class=band>{demo}{each({"variants": vs}, lambda v, i: tiles(v["run"], v["readout_ms"][0]))}</div>'
 
 
 def process_section(note: str, vs: list) -> str:
@@ -216,7 +234,8 @@ def parts_for(key: str, p: dict, s: dict, vs: list, series, data_url: str, media
     run = [p["method"]]
     if p.get("sha"):
         run.append(f'sha256 of the recording: <code>{p["sha"]}</code>')
-    return {
+    shape = board_shape_section(vs, s["board"])   # only pages whose runs estimated the board shape get the key
+    return ({"board_shape": shape} if shape else {}) | {
         "lead": (f'<figure class=sensorimg><img src="{media_url}/{e(p["image"]["file"])}" alt="{e(p["image"]["alt"])}" loading=lazy><figcaption>{e(p["image"]["caption"])}</figcaption></figure>' if p.get("image") else "") + f'<p class=lead>{e(p["lead"])}</p><div class=chips>' + "".join(f"<span class=chip>{e(c)}</span>" for c in p["chips"]) + "</div>" + run_tabs(vs),
         "glance": glance(demo, vs),
         "process": process_section("Camera images are left out to keep the page small.", vs),
