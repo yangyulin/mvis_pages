@@ -77,8 +77,8 @@ sensors:
       - [Format, ROS1 bag]
       - [Board, "Chessboard shown on a screen, 10×7 squares (9×6 inner corners), 75 mm squares as measured by the recorder"]
       - [Exposure, "Fixed, about 2 ms on all three cameras; no auto exposure"]
-      - [Licence, "CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
-      - [Hosted, "Not hosted by us. Public on the Hugging Face Hub as nerako/mvis-d455-d456-chessboard, take D455_01"]
+      - [Data, "__HUB:community/realsense-d455/data/__. Everything except the chessboard is blurred. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
+      - [Configs and results, "__HUB:community/realsense-d455/__"]
     method: "Left infrared, right infrared and RGB cameras with the IMU in one solve, all three treated as global shutter. Pinhole camera with radial-tangential distortion, seeded from three single-camera solves of the same recording and left free; camera time offsets, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. The board is kept rigid. IMU noise is the MVIS default, since no measured values exist for this unit. Solved 2026-11-13."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
@@ -125,8 +125,8 @@ sensors:
       - [Format, ROS1 bag]
       - [Board, "Chessboard shown on a screen, 10×7 squares (9×6 inner corners), 75 mm squares as measured by the recorder"]
       - [Exposure, "Fixed, about 2 ms on all three cameras; no auto exposure"]
-      - [Licence, "CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
-      - [Hosted, "Not hosted by us. Public on the Hugging Face Hub as nerako/mvis-d455-d456-chessboard, take D456_02"]
+      - [Data, "__HUB:community/realsense-d456/data/__. Everything except the chessboard is blurred. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
+      - [Configs and results, "__HUB:community/realsense-d456/__"]
     method: "Left infrared, right infrared and RGB cameras with the IMU in one solve, all three treated as global shutter. Pinhole camera with radial-tangential distortion, seeded from three single-camera solves of the same recording and left free; camera time offsets, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. The board is kept rigid. IMU noise is the MVIS default, since no measured values exist for this unit. Solved 2026-11-13."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
