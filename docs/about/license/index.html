@@ -103,7 +103,7 @@ datasets. Each part has its own licence.</p>
 
 
 
-<table><thead><tr><th>Part</th><th>Licence</th></tr></thead><tbody><tr><td>MVIS toolbox</td><td>GPL-3.0-only, or a commercial licence</td></tr><tr><td>Calibration results you compute</td><td>yours; results on a dataset follow that dataset’s licence</td></tr><tr><td>This site</td><td>code GPL-3.0-only; text and figures CC BY 4.0, except third-party clips, product photos and the replay pack</td></tr><tr><td>VI-Rig datasets (ours)</td><td>CC BY-NC 4.0, gated; commercial licence on request</td></tr><tr><td>Converted third-party datasets</td><td>CC BY 4.0</td></tr><tr><td>Third-party software</td><td>its own licence</td></tr></tbody></table>
+<table><thead><tr><th>Part</th><th>Licence</th></tr></thead><tbody><tr><td>MVIS toolbox</td><td>GPL-3.0-only, or a commercial licence</td></tr><tr><td>Calibration results</td><td>yours on your own recordings; CC BY 4.0 on our datasets, commercial use included</td></tr><tr><td>This site</td><td>code GPL-3.0-only; text and figures CC BY 4.0, except third-party clips, product photos and the replay pack</td></tr><tr><td>VI-Rig datasets (ours)</td><td>CC BY-NC 4.0, gated; commercial licence on request</td></tr><tr><td>Converted third-party datasets</td><td>CC BY 4.0</td></tr><tr><td>Third-party software</td><td>its own licence</td></tr></tbody></table>
 <div class="sl-heading-wrapper level-h2"><h2 id="mvis-toolbox">MVIS toolbox</h2><a class="sl-anchor-link" href="#mvis-toolbox"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “MVIS toolbox”</span></a></div>
 <p>MVIS is dual-licensed. The copyright holder is named in the header of each
 source file.</p>
@@ -124,9 +124,12 @@ Write to <a href="mailto:licensing@openmvis.com">licensing@openmvis.com</a>.</li
 (intrinsics, extrinsics, time offsets, residuals, plots, reports) are yours.
 You may publish them anywhere, including on commercial product pages, without
 a commercial licence.</li>
-<li><strong>Our datasets:</strong> results computed on a dataset follow that dataset’s licence.
-Results on the CC BY-NC 4.0 VI-Rig data may not be used commercially without a
-dataset licence.</li>
+<li><strong>Our datasets:</strong> results computed on the VI-Rig, Looper and GiLabs recordings
+(parameters, metrics, plots, reports) are CC BY 4.0, commercial use included.
+Only the recordings stay non-commercial. Our published results are in
+<a href="https://huggingface.co/datasets/calibench-vi/results"><code dir="auto">calibench-vi/results</code></a>.</li>
+<li><strong>Third-party datasets:</strong> results you compute are yours; results that the
+owner publishes, such as UZH-FPV’s own Kalibr files, keep the owner’s licence.</li>
 </ul>
 <div class="sl-heading-wrapper level-h3"><h3 id="contributing-code">Contributing code</h3><a class="sl-anchor-link" href="#contributing-code"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Contributing code”</span></a></div>
 <p>Pull requests come with a contributor licence agreement, stated in
@@ -176,7 +179,7 @@ separate licence: write to <a href="mailto:licensing@openmvis.com">licensing@ope
 <li><strong>Partner recordings:</strong> <code dir="auto">looper-insight9</code> and <code dir="auto">gilabs-examples</code> have the same
 CC BY-NC 4.0 terms, with the partner’s approval. Anyone, a company included,
 may run a calibration tool on the non-commercial datasets to produce results
-for the benchmark, and publish those results with attribution.</li>
+for the benchmark. The results are CC BY 4.0 (see Calibration results above).</li>
 <li><strong>Converted third-party sets:</strong> the calibration recordings under <code dir="auto">converted/</code>
 (Monado SLAM datasets MIC, MGC and MOC, and the TUM-VIE frame cameras) stay
 under their original <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>,

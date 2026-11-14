@@ -10,7 +10,7 @@ datasets. Each part has its own licence.
 | Part | Licence |
 |---|---|
 | MVIS toolbox | GPL-3.0-only, or a commercial licence |
-| Calibration results you compute | yours; results on a dataset follow that dataset's licence |
+| Calibration results | yours on your own recordings; CC BY 4.0 on our datasets, commercial use included |
 | This site | code GPL-3.0-only; text and figures CC BY 4.0, except third-party clips, product photos and the replay pack |
 | VI-Rig datasets (ours) | CC BY-NC 4.0, gated; commercial licence on request |
 | Converted third-party datasets | CC BY 4.0 |
@@ -38,9 +38,12 @@ The GPL covers the MVIS code, not what it computes.
   (intrinsics, extrinsics, time offsets, residuals, plots, reports) are yours.
   You may publish them anywhere, including on commercial product pages, without
   a commercial licence.
-- **Our datasets:** results computed on a dataset follow that dataset's licence.
-  Results on the CC BY-NC 4.0 VI-Rig data may not be used commercially without a
-  dataset licence.
+- **Our datasets:** results computed on the VI-Rig, Looper and GiLabs recordings
+  (parameters, metrics, plots, reports) are CC BY 4.0, commercial use included.
+  Only the recordings stay non-commercial. Our published results are in
+  [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
+- **Third-party datasets:** results you compute are yours; results that the
+  owner publishes, such as UZH-FPV's own Kalibr files, keep the owner's licence.
 
 ### Contributing code
 
@@ -95,7 +98,7 @@ organisation on Hugging Face. The licence is set per dataset; see
 - **Partner recordings:** `looper-insight9` and `gilabs-examples` have the same
   CC BY-NC 4.0 terms, with the partner's approval. Anyone, a company included,
   may run a calibration tool on the non-commercial datasets to produce results
-  for the benchmark, and publish those results with attribution.
+  for the benchmark. The results are CC BY 4.0 (see Calibration results above).
 - **Converted third-party sets:** the calibration recordings under `converted/`
   (Monado SLAM datasets MIC, MGC and MOC, and the TUM-VIE frame cameras) stay
   under their original [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),

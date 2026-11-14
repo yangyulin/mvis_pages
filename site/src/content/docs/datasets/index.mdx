@@ -16,8 +16,8 @@ This page lists every dataset we use to test and benchmark MVIS, where to get it
 - **Where the data lives:** the [`calibench-vi/datasets`](https://huggingface.co/datasets/calibench-vi/datasets)
   repository on Hugging Face. Calibench is the name of our calibration benchmark.
 - **What it hosts:** our own VI-Rig recordings, two partner recordings, third-party sets whose licence allows
-  us to share them again (CC BY 4.0), and result files for some sets (`tum-fisheye/results/`, `uzh-fpv/results/`,
-  `virig-5imus-4cams/results/`).
+  us to share them again (CC BY 4.0). Our calibration results are in a separate repository,
+  [`calibench-vi/results`](https://huggingface.co/datasets/calibench-vi/results).
 - **What it does not host:** all other third-party sets. For those, a download recipe fetches the files from the
   original site.
 - **Results:** the reference results for each set are on the [leaderboard](/benchmark/results/) and in
@@ -102,7 +102,7 @@ These sets come from other groups. Each keeps its own licence and citation; plea
 | Monado SLAM, MOC (Samsung Odyssey+) | 2 fisheye + 1 kHz IMU | CC BY 4.0 | hosted: [`converted/monado_moc`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted/monado_moc) · key `monado_moc` | [Collabora](https://huggingface.co/datasets/collabora/monado-slam-datasets) | [device](/devices/samsung-odyssey-plus/) |
 | TUM-VIE, frame cameras | stereo 1024² + BMI160 IMU | CC BY 4.0 | hosted: [`converted/tum_event`](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/converted/tum_event) · key `tum_event` | [TUM](https://cvg.cit.tum.de/data/datasets/visual-inertial-event-dataset) | – |
 | UZH-FPV | DAVIS346 + IMU; Snapdragon stereo + IMU | CC BY-NC-SA 3.0 | keys `uzh_fpv_davis`, `uzh_fpv_snapdragon` | [UZH](https://fpv.ifi.uzh.ch/) | [results](/benchmark/results/uzh-fpv/) · [example](/benchmark/examples/uzh-fpv/) |
-| TUM-Fisheye (Double Sphere) | 1 camera, 5 fisheye lenses | none stated | recipe · key `tum_fisheye` | [TUM](https://cvg.cit.tum.de/research/vslam/double-sphere) | [Why kb4](/why/kb4/) · [MVIS results on the Hub](https://huggingface.co/datasets/calibench-vi/datasets/tree/main/tum-fisheye/results/2026-11-04) |
+| TUM-Fisheye (Double Sphere) | 1 camera, 5 fisheye lenses | none stated | recipe · key `tum_fisheye` | [TUM](https://cvg.cit.tum.de/research/vslam/double-sphere) | [Why kb4](/why/kb4/) · [MVIS results on the Hub](https://huggingface.co/datasets/calibench-vi/results/tree/main/runs/tum-fisheye/2026-11-04) |
 | TUM RGB-D | Kinect and Xtion RGB + IR cameras | CC BY 4.0 | recipe · key `tum_rgbd_bag` | [TUM](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) | – |
 | PennCOSYVIO | GoPro, Tango and VI-Sensor cameras + IMUs | citation only | recipe · key `penncosyvio` | [Penn](https://daniilidis-group.github.io/penncosyvio/) | – |
 | Urban fisheye (ImprovedOcamCalib) | fisheye and GoPro stills | GPL v2 | recipe · key `fisheye_dataset` | [GitHub](https://github.com/urbste/ImprovedOcamCalib) | – |
