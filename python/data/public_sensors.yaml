@@ -242,7 +242,7 @@ sensors:
     title: ALG AVS111C-Y stereo module
     description: GMSL2 global-shutter stereo module from ALG Tech with a 6-axis IMU, calibrated with MVIS as stereo + IMU.
     lead: GMSL2 stereo camera module from Shenzhen Aili-Light Technology (ALG Tech, 艾利光), with two global-shutter cameras 50 mm apart and a 6-axis IMU. Three recordings, each solved as stereo + IMU; this page shows the longest. The recordings match ALG's AVS111C-Y; the exact model isn't confirmed by the maker.
-    chips: [Stereo, Global shutter, 200 Hz IMU, GMSL2]
+    chips: [Stereo, Global shutter, 200 Hz IMU, GMSL2, CC BY-NC 4.0]
     card: {name: "AVS111C-Y stereo", maker: ALG Tech, tags: [Global shutter, 2 cameras, 200 Hz IMU], sensors: "Stereo global-shutter + IMU @ 200 Hz", format: "ROS2 bag → EuRoC mav0", shows: "A stereo + IMU solve on a ChArUco board, repeated on three recordings"}
     demo: {from: "alg-avs111c_small", note: "The 3D scene MVIS recovered from the 08:41:48 recording, the one solved on this page."}
     source: https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html
@@ -261,7 +261,7 @@ sensors:
       - [Recordings, "3 recordings of 112, 144 and 148 s. Shown: the 148 s one, cam0 4,433 frames, cam1 4,432, IMU 29,516 samples"]
       - [Format, "ROS2 bag with compressed images, converted to EuRoC layout"]
       - [Board, "ChArUco 14×9 squares, 40 mm squares, 30 mm markers"]
-      - [Data, "__HUB:community/alg-avs111c/data/__. The 148 s recording shown here, normal frames, with the IMU already corrected for the accel 4× and gyro 2× scale. The recording belongs to ALG Tech, which hasn't granted a licence yet; it is here so this page can be reproduced"]
+      - [Data, "__HUB:community/alg-avs111c/data/__. The 148 s recording shown here, normal frames, with the IMU already corrected for the accel 4× and gyro 2× scale. Recorded by ALG Tech and hosted with their permission. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
       - [Configs and results, "__HUB:community/alg-avs111c/__"]
     method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga estimated, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-11."
     limits:
@@ -278,7 +278,7 @@ sensors:
         - {item: Phone, v: "+86 755 2721 8150", url: "tel:+8675527218150"}
       links: {product: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html", product_label: "Closest model: AVS111C-Y"}
       image: {kind: photo, file: alg-avs111c.png, alt: "ALG AVS111C-Y stereo camera module", credit: "Photo: ALG Tech, AVS111C-Y product page. Closest published model; exact model not confirmed", url: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html"}
-      foot: "Values measured in the 148 s recording · Maker values from the AVS111C-Y product page, read 2026-11-06"
+      foot: "Values measured in the 148 s recording · Maker values from the AVS111C-Y product page, read 2026-11-06 · CC BY-NC 4.0"
       key_specs:
         cameras: {v: "2 × 1280×800"}
         shutter: {v: Global, tag: maker, src: "https://www.aili-light.com/machine-vision-stereo-camera/AVS111C-X-machine-vision-stereo-camera.html"}
@@ -292,7 +292,7 @@ sensors:
     title: ALG AVS115D-Y stereo module
     description: GMSL2 rolling-shutter stereo module from ALG Tech with a 6-axis IMU, calibrated with MVIS as stereo + IMU with the rolling-shutter readout estimated.
     lead: GMSL2 stereo camera module from Shenzhen Aili-Light Technology (ALG Tech, 艾利光), with two 1920×1920 rolling-shutter cameras 65 mm apart and a 6-axis IMU. One hand-held recording in front of a ChArUco board, solved as stereo + IMU with each camera's readout time estimated.
-    chips: [Stereo, Rolling shutter, 200 Hz IMU, GMSL2]
+    chips: [Stereo, Rolling shutter, 200 Hz IMU, GMSL2, CC BY-NC 4.0]
     card: {name: "AVS115D-Y stereo", maker: ALG Tech, tags: [Rolling shutter, 2 cameras, 200 Hz IMU], sensors: "Stereo rolling-shutter + IMU @ 200 Hz", format: "ROS2 bag → EuRoC mav0", shows: "A stereo + IMU solve with the rolling-shutter readout estimated"}
     demo: {from: "alg-avs115d_small", note: "The 3D scene MVIS recovered from this recording."}
     source: https://docs.alg-tech.com/en/camera-products/stereo-cameras/avs115d-y-stereo-camera
@@ -311,7 +311,7 @@ sensors:
       - [Recording, "1 recording, 163 s, hand-held. cam0 4,900 frames, cam1 4,899, IMU 32,664 samples"]
       - [Format, "ROS2 bag with compressed images, converted to EuRoC layout"]
       - [Board, "ChArUco 14×9 squares, 40 mm squares, 30 mm markers"]
-      - [Data, "__HUB:community/alg-avs115d/data/__. Every frame, normal frames, with the IMU already corrected for the accel 4× and gyro 2× scale; the blurred pairs left out of this solve are listed next to it. The recording belongs to ALG Tech, which hasn't granted a licence yet; it is here so this page can be reproduced"]
+      - [Data, "__HUB:community/alg-avs115d/data/__. Every frame, normal frames, with the IMU already corrected for the accel 4× and gyro 2× scale; the blurred pairs left out of this solve are listed next to it. Recorded by ALG Tech and hosted with their permission. CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
       - [Configs and results, "__HUB:community/alg-avs115d/__"]
     method: "Both cameras and the IMU, rolling shutter with each camera's readout time estimated, Kannala–Brandt (kb4) lenses with intrinsics free, IMU noise set about 5× tighter than MVIS's default to match this unit, t_ga estimated. Some frames were blurred by fast motion; stereo pairs whose board edges were more than 1.5× wider than the median were left out (17 % of the pairs). The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Solved 2026-11-14."
     limits:
@@ -326,7 +326,7 @@ sensors:
         - {item: Phone, v: "+86 755 2721 8150", url: "tel:+8675527218150"}
       links: {product: "https://docs.alg-tech.com/en/camera-products/stereo-cameras/avs115d-y-stereo-camera", product_label: "ALG AVS115D-Y product page"}
       image: {kind: photo, file: alg-avs115d.jpg, alt: "ALG AVS115D-Y stereo camera module", credit: "Photo: ALG Tech, AVS115D-Y product page", url: "https://docs.alg-tech.com/en/camera-products/stereo-cameras/avs115d-y-stereo-camera"}
-      foot: "Values measured in the 163 s recording · Maker values from the AVS115D-Y product page, read 2026-11-14"
+      foot: "Values measured in the 163 s recording · Maker values from the AVS115D-Y product page, read 2026-11-14 · CC BY-NC 4.0"
       key_specs:
         cameras: {v: "2 × 1920×1920"}
         shutter: {v: Rolling, tag: maker, src: "https://docs.alg-tech.com/en/camera-products/stereo-cameras/avs115d-y-stereo-camera"}
