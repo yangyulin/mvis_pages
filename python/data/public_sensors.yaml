@@ -82,7 +82,7 @@ sensors:
     method: "Left infrared, right infrared and RGB cameras with the IMU in one solve, all three treated as global shutter. Pinhole camera with radial-tangential distortion, seeded from three single-camera solves of the same recording and left free; camera time offsets, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. The board is kept rigid. IMU noise is the MVIS default, since no measured values exist for this unit. Solved 2026-11-13."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
-      - "The square size is the recorder's own measurement of a board shown on a screen. It scales every baseline and lever arm; the solved stereo baseline comes out about 0.7 % under the 95 mm the maker lists, which a square of about 75.5 mm would explain. Not confirmed."
+      - "The square size, 75 mm, is the recorder's measurement of the board shown on a screen, and it scales every baseline and lever arm. The solved stereo baseline is about 0.7 % under the 95 mm the maker lists."
       - "The infrared images are the camera's own rectified output, so their distortion is close to zero by construction and the values describe that output, not the bare lens."
       - "The recorder turned the camera's IMU correction off, so the IMU scale and bias values are those of the raw sensor. The accelerometer was resampled onto the gyro's time stamps before the solve."
     header:
@@ -130,7 +130,7 @@ sensors:
     method: "Left infrared, right infrared and RGB cameras with the IMU in one solve, all three treated as global shutter. Pinhole camera with radial-tangential distortion, seeded from three single-camera solves of the same recording and left free; camera time offsets, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. The board is kept rigid. IMU noise is the MVIS default, since no measured values exist for this unit. Solved 2026-11-13."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
-      - "The square size is the recorder's own measurement of a board shown on a screen. It scales every baseline and lever arm; the solved stereo baseline comes out about 0.7 % under the 95 mm the maker lists, which a square of about 75.5 mm would explain. Not confirmed."
+      - "The square size, 75 mm, is the recorder's measurement of the board shown on a screen, and it scales every baseline and lever arm. The solved stereo baseline is about 0.7 % under the 95 mm the maker lists."
       - "The infrared images are the camera's own rectified output, so their distortion is close to zero by construction and the values describe that output, not the bare lens."
       - "The recorder turned the camera's IMU correction off, so the IMU scale and bias values are those of the raw sensor. The accelerometer was resampled onto the gyro's time stamps before the solve."
     header:
