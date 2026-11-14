@@ -225,6 +225,7 @@ export default defineConfig({
           collapsed: true,
           items: [
             { label: 'Contributors & citation', link: '/about/contributors/' },
+            { label: 'Acknowledgements', link: '/about/acknowledgements/' },
             { label: 'FAQ & troubleshooting', link: '/about/faq/' },
             { label: 'Changelog', link: '/about/changelog/' },
             { label: 'Roadmap', link: '/about/roadmap/' },
