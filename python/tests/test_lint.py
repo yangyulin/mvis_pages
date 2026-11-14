@@ -85,7 +85,8 @@ def test_committed_public_text_names_no_take_id():
     # take ids are the first hex digits of a device id; clip and file names must not carry one either
     text = (DATA / "public_sensors.yaml").read_text(encoding="utf-8")
     ids = re.findall(r"(?<![0-9A-Za-z])(?=[0-9a-f]*[a-f])(?=[0-9a-f]*[0-9])[0-9a-f]{4,6}(?![0-9A-Za-z])", L.strip_urls(text))
-    assert ids == []
+    models = {"d455", "d456"}      # RealSense product names that happen to read as hex
+    assert [i for i in ids if i not in models] == []
 
 
 def test_committed_public_text_names_no_recording_path():
