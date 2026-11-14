@@ -284,7 +284,7 @@ def test_device_wiki_moved_from_sensors_in_one_hop():
     from mvis_site import REPO
     moved = json.loads((REPO / "site/src/data/moved.json").read_text(encoding="utf-8"))
     nav = json.loads((REPO / "site/src/data/sensor-nav.json").read_text(encoding="utf-8"))
-    new_since_move = {"cyperstereo", "insta360-one-rs-1inch-360", "realsense-d455", "realsense-d456"}   # first published under /devices/, so never had a /sensors/ address
+    new_since_move = {"cyperstereo", "insta360-one-rs-1inch-360", "realsense-d455", "realsense-d456", "alg-avs115d"}   # first published under /devices/, so never had a /sensors/ address
     slugs = [n["link"].removeprefix("/devices/").strip("/") for n in nav]
     slugs = [s for s in slugs if s not in new_since_move]
     assert all(n["link"].startswith("/devices/") for n in nav)

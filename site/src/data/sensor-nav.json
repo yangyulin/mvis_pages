@@ -30,6 +30,11 @@
   "group": "Tracking modules"
  },
  {
+  "label": "ALG AVS115D-Y stereo module",
+  "link": "/devices/alg-avs115d/",
+  "group": "Tracking modules"
+ },
+ {
   "label": "CyperStereo four-camera module",
   "link": "/devices/cyperstereo/",
   "group": "Tracking modules"
