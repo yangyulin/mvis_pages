@@ -65,8 +65,7 @@ def test_unknown_shutter_is_left_out_of_the_tags(pub):
 # Live without a demo or hosted data, at the user's request (alg-avs111c 2026-11-06; cyperstereo 2026-11-11, which has a demo since): no permission to host the bag.
 # insta360-one-rs-1inch-360 (2026-11-12): third-party recordings under CC BY-NC-SA, linked at their source and not re-hosted; no demo clip yet.
 NO_DEMO_NOT_HOSTED = ("alg-avs111c", "cyperstereo", "insta360-one-rs-1inch-360")
-# realsense-d455 / realsense-d456 (2026-11-13): third-party recordings on the Hub with no licence stated, named at their source and not re-hosted.
-NOT_HOSTED = NO_DEMO_NOT_HOSTED + ("realsense-d455", "realsense-d456")
+NOT_HOSTED = NO_DEMO_NOT_HOSTED
 
 
 def test_every_page_has_a_cited_photo_a_short_type_and_a_demo(pub):
@@ -99,7 +98,7 @@ def test_every_sensor_page_links_to_its_hosted_data(pub):
             assert "Not hosted" in html and "__" not in html, slug
             continue
         assert f"calibench-vi/community/tree/main/{slug}/" in html and "__" not in html, slug
-        if slug not in ("dibuli-prism-a4l", "hampo", "xq20"):
+        if slug not in ("dibuli-prism-a4l", "hampo", "xq20", "realsense-d455", "realsense-d456"):
             assert "calibench-vi/datasets/tree/main/" in html, slug
 
 
