@@ -261,8 +261,8 @@ sensors:
       - [Recordings, "3 recordings of 112, 144 and 148 s. Shown: the 148 s one, cam0 4,433 frames, cam1 4,432, IMU 29,516 samples"]
       - [Format, "ROS2 bag with compressed images, converted to EuRoC layout"]
       - [Board, "ChArUco 14×9 squares, 40 mm squares, 30 mm markers"]
-      - [Licence, None]
-      - [Hosted, Not hosted]
+      - [Data, "__HUB:community/alg-avs111c/data/__. The 148 s recording shown here, normal frames, with the IMU already corrected for the accel 4× and gyro 2× scale. The recording belongs to ALG Tech, which hasn't granted a licence yet; it is here so this page can be reproduced"]
+      - [Configs and results, "__HUB:community/alg-avs111c/__"]
     method: "Both cameras and the IMU, global shutter, default IMU noise, t_ga estimated, camera intrinsics free. The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Batch of 2026-11-11."
     limits:
       - No independent reference, so these values show what MVIS solved, not how close they are to the truth.
@@ -305,14 +305,14 @@ sensors:
       - [Cameras, "2 × 1920×1920, 30 Hz with no dropped frames in this recording; left and right stamps 5 µs apart (median)", Measured]
       - [Image sensor, "1/2.7-inch CMOS, 2.0 µm pixels, rolling shutter", Maker]
       - [Lens, "1.90 mm, 119° × 119°", Maker]
-      - [IMU, "6-axis, up to 6400 Hz on the sheet; 200 Hz in this recording", Maker]
+      - [IMU, "TDK ICM-45686 (named by ALG), 6-axis, up to 6400 Hz on the sheet; 200 Hz in this recording", Maker]
       - [Link and power, "GMSL2, power over coax, 9 to 12 V, 2.3 W", Maker]
     dataset:
       - [Recording, "1 recording, 163 s, hand-held. cam0 4,900 frames, cam1 4,899, IMU 32,664 samples"]
       - [Format, "ROS2 bag with compressed images, converted to EuRoC layout"]
       - [Board, "ChArUco 14×9 squares, 40 mm squares, 30 mm markers"]
-      - [Licence, None]
-      - [Hosted, Not hosted]
+      - [Data, "__HUB:community/alg-avs115d/data/__. Every frame, normal frames, with the IMU already corrected for the accel 4× and gyro 2× scale; the blurred pairs left out of this solve are listed next to it. The recording belongs to ALG Tech, which hasn't granted a licence yet; it is here so this page can be reproduced"]
+      - [Configs and results, "__HUB:community/alg-avs115d/__"]
     method: "Both cameras and the IMU, rolling shutter with each camera's readout time estimated, Kannala–Brandt (kb4) lenses with intrinsics free, IMU noise set about 5× tighter than MVIS's default to match this unit, t_ga estimated. Some frames were blurred by fast motion; stereo pairs whose board edges were more than 1.5× wider than the median were left out (17 % of the pairs). The IMU stored accel 4× and gyro 2× too small; both were scaled before solving. Solved 2026-11-14."
     limits:
       - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
@@ -332,7 +332,7 @@ sensors:
         shutter: {v: Rolling, tag: maker, src: "https://docs.alg-tech.com/en/camera-products/stereo-cameras/avs115d-y-stereo-camera"}
         fov: {auto: fov, also: {v: "119° × 119°", tag: maker, src: "https://docs.alg-tech.com/en/camera-products/stereo-cameras/avs115d-y-stereo-camera"}}
         baseline: {auto: baseline}
-        imu: {v: "6-axis, 200 Hz here"}
+        imu: {v: "ICM-45686, 200 Hz here"}
         output: {v: "GMSL2, ROS2 bag"}
   cyperstereo:
     group: cameras
