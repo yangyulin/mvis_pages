@@ -171,6 +171,9 @@ def load_variant(v: dict, roots: dict) -> dict:
     run = json.loads((d / "cam_imu.json").read_text())
     cal = yaml.safe_load((d / "cam_imu_calib.yaml").read_text())["cameras"]
     sizes = [c["image_size"] for c in cal]
+    for c, cc in zip(run["cams"], cal):  # pinhole + radtan needs its own field-of-view and lens-curve reading
+        if str(cc.get("model", "")).endswith("radtan"):
+            c["model"] = "radtan"
     rd = expand_root(v["readout_run"], roots) if v.get("readout_run") else d
     rcal = yaml.safe_load((rd / "cam_imu_calib.yaml").read_text())["cameras"]
     readout = [c.get("rolling_shutter_readout", 0.0) * 1000 for c in rcal]
@@ -202,7 +205,7 @@ def load_variant(v: dict, roots: dict) -> dict:
     proc = extract_process(d / "cam_imu_report.html") if v.get("report") else None
     shape = read_board_shape(d)
     views = read_views(d) if v.get("report") else None
-    fov = [fov_deg(c["intr"], s, u) for c, s, u in zip(run["cams"], sizes, uvs)]
+    fov = [fov_deg(c["intr"], s, u, c.get("model")) for c, s, u in zip(run["cams"], sizes, uvs)]
     if v.get("fov_past_fit"):  # the rules let this value through, but it conflicts with a published figure
         fov = [{**f, "h": None, "v": None, "h_ext": True, "v_ext": True} for f in fov]
     return {"label": v["label"], "run": run, "ref": ref, "sizes": sizes, "readout_ms": readout, "process": proc,

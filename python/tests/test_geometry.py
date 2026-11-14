@@ -120,3 +120,22 @@ def test_lens_radius_both_models():
 def test_baseline():
     cams = [{"p_CinI_mm": [0, 0, 0]}, {"p_CinI_mm": [3, 4, 0]}]
     assert g.baseline_mm(cams) == 5.0 and g.baseline_mm(cams[:1]) is None
+
+
+def test_fov_reads_radtan_as_a_pinhole():
+    # 848 x 480 at f = 424: the image edge is 45 degrees off the axis, so 90 degrees across; the fisheye reading gives 115
+    intr = [424, 424, 424, 240, 0, 0, 0, 0]
+    fov = g.fov_deg(intr, (848, 480), np.zeros((0, 2)), "radtan")
+    assert abs(fov["h"] - 90) < 1e-6 and abs(fov["v"] - 2 * math.degrees(math.atan(240 / 424))) < 1e-6
+    assert g.fov_deg(intr, (848, 480), np.zeros((0, 2)))["h"] > 110
+
+
+def test_radtan_radius_inverts_with_distortion_and_stops_at_its_turn():
+    k = [-0.05, 0.04, 0.001, 0.001]
+    rd = g._radtan_radius(0.6, k)
+    assert abs(g.theta_from_radius(rd, k, g._radtan_radius, g.RADTAN_TOP) - 0.6) < 1e-9
+    assert g.lens_radius(0.6, k, "radtan") == rd
+    barrel = [-0.3, 0, 0, 0]                      # r (1 - 0.3 r^2) turns at r = 1.054, about 46.5 degrees
+    turn = g.turn_angle(barrel, g._radtan_radius, g.RADTAN_TOP)
+    assert abs(math.degrees(turn) - 46.5) < 0.2
+    assert g.fov_deg([300, 300, 424, 240, *barrel], (848, 480), np.zeros((0, 2)), "radtan")["h"] is None

@@ -51,6 +51,101 @@ sensors:
         baseline: {auto: baseline}
         imu: {v: "BMI055, gyro 200 Hz, accel 62.5 Hz"}
         output: {v: USB 3, tag: maker, src: "https://www.intel.com/content/www/us/en/products/sku/192742/intel-realsense-tracking-camera-t265/specifications.html"}
+  realsense-d455:
+    group: cameras
+    key: realsense-d455
+    title: RealSense D455
+    description: Depth camera with a global-shutter infrared stereo pair, a global-shutter RGB camera and a 6-axis IMU, calibrated with MVIS as three cameras + IMU on one chessboard recording.
+    lead: Depth camera from RealSense with a 95 mm global-shutter infrared stereo pair, a global-shutter RGB camera and a 6-axis IMU. One hand-held recording in front of a chessboard on a screen, solved as left infrared + right infrared + RGB + IMU.
+    chips: [Global shutter, 3 cameras, 400 Hz IMU, CC BY-NC 4.0]
+    demo: {from: "realsense-d455_small", note: "The 3D scene MVIS recovered from this recording."}
+    card: {name: "D455", maker: RealSense, tags: [Global shutter, 3 cameras, 400 Hz IMU], sensors: "IR stereo + RGB, all global shutter + IMU @ 400 Hz", format: "ROS bag", shows: "Three global-shutter cameras and an IMU solved together from a chessboard on a screen"}
+    source: https://www.realsenseai.com/products/real-sense-depth-camera-d455f/
+    source_label: RealSense D455 page
+    checked: 2026-11-13
+    company: {name: RealSense, url: "https://www.realsenseai.com/"}
+    hardware:
+      - [Maker, "RealSense (formerly Intel RealSense)", Maker]
+      - [Camera module, "RealSense Module D450 with the Vision Processor D4", Maker]
+      - [Shutter, "Global, on the infrared pair and the RGB camera", Maker]
+      - [Infrared pair, "87° × 58° depth field of view, 95 mm baseline; recorded here at 848×480, 30 Hz, both images on one stamp", Maker]
+      - [RGB camera, "1 MP, 90° × 65°, up to 1280×800 at 30 fps; recorded here at 848×480, about 33 Hz (30 requested)", Maker]
+      - [IMU, "Bosch BMI055 (maker); gyro 400 Hz, accelerometer about 250 Hz in this recording", Measured]
+      - [Link, "USB-C; 124 × 29 × 26 mm", Maker]
+    dataset:
+      - [Recording, "1 recording, 90 s, hand-held. About 2,700 frames per infrared camera, 2,985 RGB frames, 36,417 IMU samples"]
+      - [Format, ROS1 bag]
+      - [Board, "Chessboard shown on a screen, 10×7 squares (9×6 inner corners), 75 mm squares as measured by the recorder"]
+      - [Exposure, "Fixed, about 2 ms on all three cameras; no auto exposure"]
+      - [Licence, "CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
+      - [Hosted, "Not hosted by us. Public on the Hugging Face Hub as nerako/mvis-d455-d456-chessboard, take D455_01"]
+    method: "Left infrared, right infrared and RGB cameras with the IMU in one solve, all three treated as global shutter. Pinhole camera with radial-tangential distortion, seeded from three single-camera solves of the same recording and left free; camera time offsets, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. The board is kept rigid. IMU noise is the MVIS default, since no measured values exist for this unit. Solved 2026-11-13."
+    limits:
+      - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+      - "The square size, 75 mm, is the recorder's measurement of the board shown on a screen, and it scales every baseline and lever arm. The solved stereo baseline is about 0.7 % under the 95 mm the maker lists."
+      - "The infrared images are the camera's own rectified output, so their distortion is close to zero by construction and the values describe that output, not the bare lens."
+      - "The recorder turned the camera's IMU correction off, so the IMU scale and bias values are those of the raw sensor. The accelerometer was resampled onto the gyro's time stamps before the solve."
+    header:
+      type: "Depth camera: global-shutter infrared stereo and RGB with a 6-axis IMU"
+      maker: {name: RealSense, url: "https://www.realsenseai.com/products/real-sense-depth-camera-d455f/"}
+      links: {product: "https://www.realsenseai.com/products/real-sense-depth-camera-d455f/", product_label: "RealSense product page", more: [{label: SDK, url: "https://github.com/realsenseai/librealsense"}]}
+      image: {kind: photo, file: realsense-d455.jpg, alt: "RealSense D455 depth camera, front view", credit: "Photo: RealSense, D455 product page", url: "https://www.realsenseai.com/products/real-sense-depth-camera-d455f/"}
+      foot: "Maker values checked 2026-11-13 · 1 recording, 90 s · CC BY-NC 4.0"
+      key_specs:
+        cameras: {v: "848 × 480 here: IR stereo + RGB", tag: measured}
+        shutter: {v: Global, tag: maker, src: "https://www.realsenseai.com/products/real-sense-depth-camera-d455f/"}
+        fov: {auto: fov, also: {v: "87° × 58° depth, 90° × 65° RGB", tag: maker, src: "https://www.realsenseai.com/products/real-sense-depth-camera-d455f/"}}
+        baseline: {auto: baseline}
+        imu: {v: "BMI055, gyro 400 Hz, accel 250 Hz"}
+        output: {v: "USB-C, ROS bag", tag: maker, src: "https://www.realsenseai.com/products/real-sense-depth-camera-d455f/"}
+  realsense-d456:
+    group: cameras
+    key: realsense-d456
+    title: RealSense D456
+    description: Depth camera with a global-shutter infrared stereo pair, a global-shutter RGB camera and a 6-axis IMU, calibrated with MVIS as three cameras + IMU on one chessboard recording.
+    lead: Depth camera from RealSense with a 95 mm global-shutter infrared stereo pair, a global-shutter RGB camera and a 6-axis IMU in an IP65 enclosure, built on the same D450 camera module as the D455. One hand-held recording in front of a chessboard on a screen, solved as left infrared + right infrared + RGB + IMU.
+    chips: [Global shutter, 3 cameras, 400 Hz IMU, IP65, CC BY-NC 4.0]
+    demo: {from: "realsense-d456_small", note: "The 3D scene MVIS recovered from this recording."}
+    card: {name: "D456", maker: RealSense, tags: [Global shutter, 3 cameras, 400 Hz IMU], sensors: "IR stereo + RGB, all global shutter + IMU @ 400 Hz", format: "ROS bag", shows: "The IP65 version of the D455: three global-shutter cameras and an IMU solved together"}
+    source: https://www.realsenseai.com/products/d456-usb/
+    source_label: RealSense D456 page
+    checked: 2026-11-13
+    company: {name: RealSense, url: "https://www.realsenseai.com/"}
+    hardware:
+      - [Maker, "RealSense (formerly Intel RealSense)", Maker]
+      - [Camera module, "RealSense Module D450 with the Vision Processor D4", Maker]
+      - [Shutter, "Global, on the infrared pair and the RGB camera", Maker]
+      - [Infrared pair, "87° × 58° depth field of view, 95 mm baseline; recorded here at 848×480, 30 Hz, both images on one stamp", Maker]
+      - [RGB camera, "1 MP, 90° × 65°, up to 1280×800 at 30 fps; recorded here at 848×480, 30 Hz", Maker]
+      - [IMU, "6-axis; gyro 400 Hz, accelerometer about 200 Hz in this recording", Measured]
+      - [Enclosure, "IP65: dust-tight and protected against water jets", Maker]
+      - [Link, "USB-C; 124 × 29 × 26 mm", Maker]
+    dataset:
+      - [Recording, "1 recording, 90 s, hand-held. 2,700 frames per infrared camera, 2,699 RGB frames, 36,471 IMU samples"]
+      - [Format, ROS1 bag]
+      - [Board, "Chessboard shown on a screen, 10×7 squares (9×6 inner corners), 75 mm squares as measured by the recorder"]
+      - [Exposure, "Fixed, about 2 ms on all three cameras; no auto exposure"]
+      - [Licence, "CC BY-NC 4.0, for the data, clip and figures; commercial use by request"]
+      - [Hosted, "Not hosted by us. Public on the Hugging Face Hub as nerako/mvis-d455-d456-chessboard, take D456_02"]
+    method: "Left infrared, right infrared and RGB cameras with the IMU in one solve, all three treated as global shutter. Pinhole camera with radial-tangential distortion, seeded from three single-camera solves of the same recording and left free; camera time offsets, IMU scale and misalignment and the gyro-to-accel offset t_ga estimated. The board is kept rigid. IMU noise is the MVIS default, since no measured values exist for this unit. Solved 2026-11-13."
+    limits:
+      - One recording, with no independent reference on this page. These values show what MVIS solved, not how close they are to the truth.
+      - "The square size, 75 mm, is the recorder's measurement of the board shown on a screen, and it scales every baseline and lever arm. The solved stereo baseline is about 0.7 % under the 95 mm the maker lists."
+      - "The infrared images are the camera's own rectified output, so their distortion is close to zero by construction and the values describe that output, not the bare lens."
+      - "The recorder turned the camera's IMU correction off, so the IMU scale and bias values are those of the raw sensor. The accelerometer was resampled onto the gyro's time stamps before the solve."
+    header:
+      type: "Depth camera: global-shutter infrared stereo and RGB with a 6-axis IMU"
+      maker: {name: RealSense, url: "https://www.realsenseai.com/products/d456-usb/"}
+      links: {product: "https://www.realsenseai.com/products/d456-usb/", product_label: "RealSense product page", more: [{label: SDK, url: "https://github.com/realsenseai/librealsense"}]}
+      image: {kind: photo, file: realsense-d456.jpg, alt: "RealSense D456 depth camera with water splashing over it", credit: "Photo: RealSense, D456 product page", url: "https://www.realsenseai.com/products/d456-usb/"}
+      foot: "Maker values checked 2026-11-13 · 1 recording, 90 s · CC BY-NC 4.0"
+      key_specs:
+        cameras: {v: "848 × 480 here: IR stereo + RGB", tag: measured}
+        shutter: {v: Global, tag: maker, src: "https://www.realsenseai.com/products/d456-usb/"}
+        fov: {auto: fov, also: {v: "87° × 58° depth, 90° × 65° RGB", tag: maker, src: "https://www.realsenseai.com/products/d456-usb/"}}
+        baseline: {auto: baseline}
+        imu: {v: "6-axis, gyro 400 Hz, accel 200 Hz"}
+        output: {v: "USB-C, ROS bag", tag: maker, src: "https://www.realsenseai.com/products/d456-usb/"}
   looper-insight9:
     group: cameras
     title: LooperRobotics Insight 9

@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 import make_fixtures as F
+from mvis_site import geometry as G
 from mvis_site import results as R
 
 
@@ -101,6 +102,19 @@ def test_load_variant_without_report_has_no_process_or_corners(tmp_path):
     F.write_run(tmp_path / "r", report=False)
     v = R.load_variant({"label": "a", "run": str(tmp_path / "r")}, {})
     assert v["process"] is None and all(f["reach"] is None for f in v["fov"])
+
+
+def test_load_variant_marks_radtan_cameras_and_reads_their_fov_as_a_pinhole(tmp_path):
+    d = F.write_run(tmp_path / "r", report=False)
+    cal = yaml.safe_load((d / "cam_imu_calib.yaml").read_text())
+    cal["cameras"][0]["model"] = "pinhole_radtan"
+    (d / "cam_imu_calib.yaml").write_text(yaml.safe_dump(cal))
+    v = R.load_variant({"label": "a", "run": str(d)}, {})
+    c0, c1 = v["run"]["cams"]
+    assert c0["model"] == "radtan" and "model" not in c1
+    none = np.zeros((0, 2))
+    assert v["fov"][0] == G.fov_deg(c0["intr"], F.SIZE, none, "radtan") != G.fov_deg(c0["intr"], F.SIZE, none)
+    assert v["fov"][1] == G.fov_deg(c1["intr"], F.SIZE, none)
 
 
 def test_load_variant_reads_readout_from_its_own_run(tmp_path):

@@ -5,6 +5,16 @@
   "group": "Tracking modules"
  },
  {
+  "label": "RealSense D455",
+  "link": "/devices/realsense-d455/",
+  "group": "Tracking modules"
+ },
+ {
+  "label": "RealSense D456",
+  "link": "/devices/realsense-d456/",
+  "group": "Tracking modules"
+ },
+ {
   "label": "LooperRobotics Insight 9",
   "link": "/devices/looper-insight9/",
   "group": "Tracking modules"
