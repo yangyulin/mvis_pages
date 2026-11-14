@@ -41,27 +41,36 @@ def _radius(th: float, k) -> float:
     return th * (1 + t2 * (k[0] + t2 * (k[1] + t2 * (k[2] + t2 * k[3]))))
 
 
-def turn_angle(k) -> float:
+RADTAN_TOP = math.radians(89)  # a pinhole image never reaches 90 degrees from the axis
+
+
+def _radtan_radius(th: float, k) -> float:
+    """Image radius / f at ray angle th for pinhole + radial-tangential (k1, k2, p1, p2): the radial part only."""
+    r2 = math.tan(th) ** 2
+    return math.tan(th) * (1 + r2 * (k[0] + r2 * k[1]))
+
+
+def turn_angle(k, radius=_radius, top: float = math.pi) -> float:
     """Angle (rad) where the fitted curve stops rising; the fit means nothing past it."""
     prev = 0.0
     for i in range(1, 1001):
-        t = i * math.pi / 1000
-        r = _radius(t, k)
+        t = i * top / 1000
+        r = radius(t, k)
         if r < prev:
-            return (i - 1) * math.pi / 1000
+            return (i - 1) * top / 1000
         prev = r
-    return math.pi
+    return top
 
 
-def theta_from_radius(rd: float, k) -> float | None:
-    """Invert rd = th (1 + k1 th^2 + ...) by bisection; None if the fit never reaches rd."""
-    hi = turn_angle(k)
-    if _radius(hi, k) < rd:
+def theta_from_radius(rd: float, k, radius=_radius, top: float = math.pi) -> float | None:
+    """Invert rd = radius(th) (default th (1 + k1 th^2 + ...)) by bisection; None if the fit never reaches rd."""
+    hi = turn_angle(k, radius, top)
+    if radius(hi, k) < rd:
         return None
     lo = 0.0
     for _ in range(60):
         mid = (lo + hi) / 2
-        if _radius(mid, k) < rd:
+        if radius(mid, k) < rd:
             lo = mid
         else:
             hi = mid
@@ -77,17 +86,21 @@ def eucm_theta(mr: float, a: float, b: float) -> float | None:
     return math.atan2(mr, (1 - b * a * a * r2) / (a * math.sqrt(disc) + 1 - a))
 
 
-def fov_deg(intr, size, uv) -> dict:
+def fov_deg(intr, size, uv, model: str | None = None) -> dict:
     """Field of view from the calibration: the fit read at the image edges, through the principal point.
 
     An axis is None when a side lies past the fit's turn, or past 90 degrees when the corners never got there.
     h_ext / v_ext mark an axis with a side past the corners' reach (always, without corner data).
+    model "radtan" reads the four coefficients as pinhole + radial-tangential; otherwise as the fisheye polynomial.
     """
     fx, fy, cx, cy, *k = intr
     w, h = size
     if len(k) == 2:
         ang = lambda rd: eucm_theta(rd, *k)
         turn = math.pi
+    elif model == "radtan":
+        ang = lambda rd: theta_from_radius(rd, k, _radtan_radius, RADTAN_TOP)
+        turn = turn_angle(k, _radtan_radius, RADTAN_TOP)
     else:
         ang = lambda rd: theta_from_radius(rd, k)
         turn = turn_angle(k)
@@ -109,7 +122,9 @@ def fov_deg(intr, size, uv) -> dict:
     return {"h": fh, "v": fv, "h_ext": he, "v_ext": ve, "reach": None if reach is None else math.degrees(reach), "turn": math.degrees(turn)}
 
 
-def lens_radius(th: float, k) -> float:
+def lens_radius(th: float, k, model: str | None = None) -> float:
+    if model == "radtan":
+        return _radtan_radius(th, k)
     if len(k) == 2:
         a, b = k
         x, z = math.sin(th), math.cos(th)

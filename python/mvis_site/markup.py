@@ -57,7 +57,7 @@ def lens_svg(v) -> str:
         k = c["intr"][4:]
         pts = []
         for t in range(0, 91, 3):
-            r = lens_radius(math.radians(t), k)
+            r = lens_radius(math.radians(t), k, c.get("model"))
             if 0 <= r <= r_max:
                 pts.append(f"{x(t):.1f},{y(r):.1f}")
         parts.append(f'<polyline class="c{i}" points="{" ".join(pts)}"/>')
